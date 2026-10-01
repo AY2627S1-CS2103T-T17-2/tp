@@ -21,11 +21,11 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 * Role: Project Advisor
 
-### Jane Doe
+### Kong Qi Yuan
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/qiyuannn.png" width="200px">
 
-[[github](http://github.com/johndoe)]
+[[github](http://github.com/qiyuannn)]
 [[portfolio](team/johndoe.md)]
 
 * Role: Team Lead
