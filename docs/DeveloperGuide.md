@@ -270,71 +270,205 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
-* prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+* High-school or club track-and-field coaches who manage large student-athlete rosters.
+* Coaches who need to maintain athletes' contact details and age categories on their own computer.
+* Keyboard-proficient users who type quickly, prefer typing to mouse interactions, and are comfortable learning short text commands.
+* Individual users who need a desktop application that works without an account or internet connection.
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
+**Value proposition**: TrackFlow helps a coach maintain and retrieve an organized athlete roster through short keyboard commands, reducing the effort of navigating forms and keeping contact information available between training sessions.
 
+**Requirements scope**: This appendix records the intended product requirements, including features beyond the minimum viable product (MVP). It is not a statement that all features are implemented. The MVP comprises adding, listing, and permanently deleting athletes, automatic local persistence, and clear command feedback. An athlete's required MVP fields are name, age category, phone number, and email address.
+
+The longer-term scope includes roster editing and searching, event organization, guardian links, athlete logs, and recovery tools. Cloud synchronization and multi-user access were considered but are excluded from the selected single-user, local product. A coach operates their own roster; athletes and guardians are records, not application users.
 
 ### User stories
 
-Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
+Priorities: `* * *` = high (essential to the core workflow), `* *` = medium (useful enhancements), `*` = low (optional future capabilities). **MVP** identifies the initial scope; **Future** retains a requirement beyond that scope without committing it to a semester release; **Excluded** records a considered idea outside the selected product. Priority does not imply implementation status.
 
-| Priority | As a …                                    | I want to …                 | So that I can…                                                        |
-|----------|--------------------------------------------|------------------------------|------------------------------------------------------------------------|
-| `* * *`  | new user                                   | see usage instructions       | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person             |                                                                        |
-| `* * *`  | user                                       | delete a person              | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name        | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name         | locate a person easily                                                 |
+| ID | Priority | Scope | As a ... | I want to ... | So that I can ... |
+|----|----------|-------|----------|---------------|------------------|
+| US01 | `* * *` | MVP | coach | add an athlete's name, age category, phone number, and email | maintain the essential information needed to contact and organize athletes |
+| US02 | `* * *` | MVP | coach | view all athletes alphabetically with their details and current indexes | locate an athlete and select the correct record |
+| US03 | `* * *` | MVP | coach | permanently delete one selected athlete | remove a record I no longer need |
+| US04 | `* * *` | MVP | returning coach | recover saved roster changes when I reopen TrackFlow | continue work without re-entering athletes |
+| US05 | `* * *` | MVP | coach | receive clear success messages and actionable errors | know whether a command worked and correct mistakes |
+| US06 | `* * *` | MVP | coach | have exact duplicate records rejected while allowing names and family contact details to be shared | avoid redundant entries without excluding different athletes |
+| US07 | `* * *` | MVP | coach | keep my previous roster unchanged when a change cannot be saved | avoid believing an unsaved update is permanent |
+| US08 | `* * *` | MVP | coach | have unreadable saved data preserved separately when loading fails | retain the possibility of recovering it while starting a new roster |
+| US09 | `* *` | Future | coach | edit an athlete's details directly | correct information without deleting and re-entering the record |
+| US10 | `* *` | Future | coach | find athletes by name | locate records without scanning the full roster |
+| US11 | `* *` | Future | coach | filter athletes by age category | review athletes in a competition category |
+| US12 | `* *` | Future | coach | assign event-specialization tags to athletes | identify athletes who train for particular events |
+| US13 | `* *` | Future | new coach using TrackFlow | view built-in command help | learn or recall how to operate the application |
+| US14 | `* *` | Future | frequent user | recall previously entered commands | reduce repeated typing |
+| US15 | `* *` | Future | coach | archive and restore athlete records | keep departed athletes' information without including them in the active roster |
+| US16 | `* *` | Future | coach | record guardians and link them to athletes | find the appropriate family contact when needed |
+| US17 | `* *` | Future | coach | organize athletes into relay squads and event groups | review who belongs to each team or event |
+| US18 | `* *` | Future | coach | record and review personal bests by event | track an athlete's performance progress |
+| US19 | `* *` | Future | coach | record and review relevant medical notes | consult recorded considerations when planning training |
+| US20 | `* *` | Future | coach | record and review competition eligibility | identify athletes recorded as eligible for an event |
+| US21 | `* *` | Future | coach | record and review participation logs | track athletes' involvement in training or competitions |
+| US22 | `* *` | Future | coach | undo and redo roster changes | recover from accidental changes or reapply them |
+| US23 | `*` | Future | coach | import and export roster records in bulk | transfer my own records without entering each one manually |
+| US24 | `*` | Future | coach | store names with characters beyond the MVP's supported set | preserve athletes' preferred name spellings |
+| US25 | `*` | Future | coach | store multiple phone numbers and phone extensions | retain alternative ways of contacting an athlete |
+| US26 | `*` | Future | coach | check whether an email address can receive mail | distinguish a structurally valid address from a reachable one |
+| US27 | `*` | Future | keyboard-oriented coach | close TrackFlow with a text command | finish a session from the command box |
+| US28 | `*` | Excluded | coach using several computers | synchronize my roster through cloud storage | access the same changes on different devices |
+| US29 | `*` | Excluded | coach working with other coaches | share and collaboratively edit a roster | coordinate updates with colleagues |
 
-*{More to be added}*
+Email reachability checking (US26) is a considered optional enhancement, not part of the MVP's structural email validation. Its design must preserve offline access to the roster and must not require a TrackFlow-operated remote server.
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
+For every use case below, the **system** is TrackFlow and the **primary actor** is the coach. **MSS** means main success scenario. These use cases describe required behavior, not verified implementation. All are within the MVP; future requirements remain recorded in the user stories.
 
-**Use case: Delete a person**
+#### UC01: Register an athlete
+
+**Related stories**: US01, US02, US05, US06, US07.<br>
+**Precondition**: TrackFlow is open.<br>
+**Success postcondition**: One complete athlete record is saved and displayed in the roster.
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1. The coach requests to view the roster.
+2. TrackFlow displays the roster with current indexes, or indicates that it is empty.
+3. The coach submits the new athlete's name, age category, phone number, and email address.
+4. TrackFlow validates the input, checks for an exact duplicate, and saves the new record.
+5. TrackFlow refreshes the alphabetical roster and displays the added athlete's details.
 
-    Use case ends.
+Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 3a. A required field is missing, repeated, or invalid, or an unsupported parameter is supplied.
+  * 3a1. TrackFlow shows the applicable error and retains the entered command for correction. The roster is unchanged.
+  * Use case resumes at step 3.
+* 4a. All four normalized fields match an existing athlete.
+  * 4a1. TrackFlow reports the duplicate and leaves the roster unchanged. A shared name, phone number, or email alone is not sufficient to reject a record.
+  * Use case resumes at step 3.
+* 4b. The change cannot be saved.
+  * 4b1. TrackFlow reports the save failure. No athlete is added, and the previous roster remains visible.
+  * Use case ends.
 
-  Use case ends.
+#### UC02: Remove an athlete
 
-* 3a. The given index is invalid.
+**Related stories**: US02, US03, US05, US07.<br>
+**Precondition**: TrackFlow is open.<br>
+**Success postcondition**: Exactly the selected athlete is permanently removed from the saved roster.
 
-    * 3a1. AddressBook shows an error message.
+**MSS**
 
-      Use case resumes at step 2.
+1. The coach requests to list athletes.
+2. TrackFlow displays the alphabetical roster and current indexes.
+3. The coach checks the athlete's details and requests deletion using the athlete's displayed index.
+4. TrackFlow saves the deletion, refreshes and renumbers the roster, and displays the deleted athlete's details.
 
-*{More to be added}*
+Use case ends. The MVP has no deletion confirmation, archive, or undo operation.
+
+**Extensions**
+
+* 2a. The roster is empty.
+  * 2a1. TrackFlow reports that the roster is empty.
+  * Use case ends.
+* 3a. The index is missing, malformed, or does not identify an athlete in the current list, or extra arguments are supplied.
+  * 3a1. TrackFlow explains the error and leaves the roster unchanged.
+  * Use case resumes at step 3.
+* 4a. The deletion cannot be saved.
+  * 4a1. TrackFlow reports the failure and retains the athlete in the roster.
+  * Use case ends.
+
+#### UC03: Correct an athlete's details in the MVP
+
+**Related stories**: US01, US02, US03, US05.<br>
+**Precondition**: TrackFlow is open and the athlete is in the roster.<br>
+**Success postcondition**: The incorrect record is replaced by a saved record containing the corrected details.
+
+**MSS**
+
+1. The coach requests to list athletes.
+2. TrackFlow displays the roster with details and current indexes.
+3. The coach notes the details to retain and removes the incorrect record using UC02.
+4. The coach registers the athlete with corrected details using UC01.
+5. TrackFlow displays the saved replacement in the roster.
+
+Use case ends. Direct editing (US09) is a future enhancement.
+
+**Extensions**
+
+* 3a. Deletion fails.
+  * 3a1. TrackFlow retains the original record and reports the error as described in UC02.
+  * Use case ends.
+* 4a. Adding the corrected record fails.
+  * 4a1. TrackFlow reports the error as described in UC01. The earlier successful deletion remains in effect; these are two separate operations.
+  * The coach may correct the input and resume at step 4. If the coach stops, the deleted record remains absent.
+
+#### UC04: Continue working with a saved roster
+
+**Related stories**: US04, US07, US08.<br>
+**Precondition**: TrackFlow is open and a roster change has been saved successfully.<br>
+**Success postcondition**: On reopening, the coach sees the saved roster, including successful additions and deletions.
+
+**MSS**
+
+1. The coach closes TrackFlow.
+2. The coach launches TrackFlow again.
+3. TrackFlow loads the saved roster and displays the number of athletes loaded.
+4. The coach requests to list athletes.
+5. TrackFlow displays the saved athletes with their current indexes.
+
+Use case ends.
+
+**Extensions**
+
+* 3a. No saved roster exists, as on first use.
+  * 3a1. TrackFlow starts with an empty roster and explains that no saved roster was found.
+  * Use case resumes at step 4.
+* 3b. The saved roster cannot be recovered.
+  * 3b1. TrackFlow explains the loading failure and starts with an empty roster while preserving the unrecovered data.
+  * 3b2. Subsequent successful changes create a new active roster without replacing the preserved data. TrackFlow does not claim the old records were restored; the preserved copy remains until the coach removes it outside TrackFlow.
+  * Use case resumes at step 4.
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+These are product requirements and acceptance targets, not claims about the current build. Platform, packaging, storage, and display requirements reflect the relevant [course product constraints](https://nus-cs2103-ay2627-s1.github.io/website/admin/tp-constraints.html).
 
-*{More to be added}*
+| ID | Requirement |
+|----|-------------|
+| NFR01 | TrackFlow shall run on Windows, Linux, and macOS with Java 25 installed, without requiring another Java version. |
+| NFR02 | TrackFlow shall be distributed as a single JAR that runs without an installer or separately installed application dependencies other than Java 25. |
+| NFR03 | Core roster operations and local persistence shall work without internet access, an account, or a TrackFlow-operated remote server. |
+| NFR04 | TrackFlow shall support one coach using a local roster. Shared accounts, simultaneous editing, and another user's access to the data file during normal operation are outside its scope. |
+| NFR05 | Roster data shall use locally stored, human-editable text files rather than a database management system. Valid manual edits made while TrackFlow is closed shall be loaded on the next launch. |
+| NFR06 | Adding, listing, and deleting athletes shall be possible entirely by keyboard. Successful commands shall clear and refocus the command box; failed commands shall retain their text for correction. |
+| NFR07 | Success and failure shall be communicated in text, without relying on color alone. Validation failures shall identify the input problem and shall not change the roster. |
+| NFR08 | A change shall be reported as successful only after it has been saved. A save failure shall leave the observable roster unchanged. Successfully saved changes shall survive normal closure and reopening. |
+| NFR09 | A loading failure shall not silently overwrite unrecovered data. That data shall remain separately preserved even if the coach makes changes to the new empty roster. |
+| NFR10 | As a performance target, with 1,000 athlete records on a computer with a dual-core processor, 8 GB RAM, and local SSD storage, at least 95 of 100 consecutive add, list, or delete commands shall update the display within two seconds of submission, with persistence included for changes. |
+| NFR11 | At 1920 × 1080 or higher with 100% and 125% display scaling, the interface shall avoid clipping essential controls and feedback. At 1280 × 720 or higher with 150% scaling, all functions shall remain accessible, including through scrolling or resizing where necessary. |
+| NFR12 | For identical input and roster state, validation shall report the same first error. Listing shall use a stable ordering by normalized name, age category, normalized phone, and normalized email, in that order. |
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+| Term | Definition |
+|------|------------|
+| Active roster | The athlete records currently maintained and displayed by the coach, excluding any separately preserved unrecovered data and, if archiving is introduced, archived records. |
+| Age category | A coach-assigned competition grouping: Under 14, Under 16, Under 18, Under 20, or Open. The MVP stores the category, not an exact age or date of birth, and does not verify competition eligibility. |
+| Athlete | A student-athlete whose contact and age-category information is recorded in TrackFlow. An athlete does not log in to the application. |
+| Archive / restore | A future capability to remove a record from the active roster while retaining it, and later return it to the active roster. This differs from permanent deletion. |
+| CLI / GUI | Command-line interface / graphical user interface. TrackFlow accepts typed commands in a graphical window and uses that window to display records and feedback. |
+| Displayed index | An athlete's positive, one-based position in the current displayed list. It is not a permanent identifier and may change after roster updates. |
+| Duplicate athlete record | A record whose normalized name, age category, phone, and email all equal those of another record. A shared name or contact detail alone does not make records duplicates. |
+| Eligibility | Whether an athlete meets the recorded participation conditions for a competition or event. Eligibility logs are a future feature, distinct from assigning an age category. |
+| Event specialization | An athletics discipline, such as sprinting or long jump, associated with an athlete through a future tagging feature. |
+| Guardian | A parent or other responsible adult whose future contact record may be linked to one or more athletes. |
+| Local persistence | Automatically saving roster changes on the coach's computer and loading them in a later application session. |
+| MVP | Minimum viable product: the initial complete add, list, delete, and save/reload workflow with validation and command feedback. |
+| Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone comparisons ignore permitted formatting characters and use the digits. Display formatting may be retained. |
+| Participation log | A future record of an athlete's involvement in training or competition. |
+| Personal best | An athlete's best recorded result for a particular event, intended for a future performance log. |
+| Relay squad / event group | A future grouping of athletes for a relay team or a particular athletics event. |
+| Unrecovered data | Previously saved roster data that TrackFlow could not load and preserves separately for possible recovery. Preserving it does not mean that its records have been restored. |
 
 --------------------------------------------------------------------------------------------------------------------
 
