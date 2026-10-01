@@ -27,14 +27,13 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 * Role: Team Lead
 * Responsibilities: UI
 
-### Johnny Doe
+### Chetan
 
 <img src="images/chetangent.png" width="200px">
 
-[[(https://github.com/chetangent)](team/johndoe.md)]
-
-* Role: Developer
-* Responsibilities: Data
+[[github](http://github.com/chetangent)]
+* Role: Team lead
+* Responsibilities: Responsible for overall project coordination.
 
 ### Austin Chia
 
