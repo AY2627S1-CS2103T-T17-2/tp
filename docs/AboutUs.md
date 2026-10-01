@@ -17,6 +17,9 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 [[github](https://github.com/ken2k7)]
 
+* Role: Code Quality
+* Responsibilities: Looks after code quality, ensures adherence to coding standards, etc.
+
 ### Kong Qi Yuan
 
 <img src="images/qiyuannn.png" width="200px">
@@ -24,8 +27,8 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](http://github.com/qiyuannn)]
 [[portfolio](team/johndoe.md)]
 
-* Role: Team Lead
-* Responsibilities: UI
+* Role: Testing
+* Responsibilities: Ensures the testing of the project is done properly and on time.
 
 ### Chetan
 
@@ -41,8 +44,8 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 [[github](https://github.com/austin-chia)]
 
-* Role: Developer
-* Responsibilities: Dev Ops + Threading
+* Role: Documentation
+* Responsibilities: Decides how documentation work is divided and ensures that project documents use the correct format and remain consistent.
 
 ### Antony Dennis Chakola
 
@@ -51,5 +54,5 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](https://github.com/antonydchakola-hub)]
 [[portfolio](team/johndoe.md)]
 
-* Role: Developer
-* Responsibilities: UI
+* Role: Deliverables and deadlines expert
+* Responsibilities: Ensures project deliverables are done on time and in the right format.
