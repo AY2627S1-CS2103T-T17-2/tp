@@ -11,12 +11,12 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
-### John Doe
+### Antony Dennis Chakola
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/antonydchakola-hub.png" width="200px">
 
-[[homepage](http://www.comp.nus.edu.sg/~damithch)]
-[[github](https://github.com/johndoe)]
+[[homepage](https://ay2627s1-cs2103t-t17-2.github.io/tp/)]
+[[github](https://github.com/antonydchakola-hub)]
 [[portfolio](team/johndoe.md)]
 
 * Role: Project Advisor
