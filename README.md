@@ -2,14 +2,22 @@
 
 ![Ui](docs/images/Ui.png)
 
+# TrackFlow
 
-* This is **a sample project for Software Engineering (SE) students**.<br>
-  Example usages:
-  * as a starting point of a course project (as opposed to writing everything from scratch)
-  * as a case study
-* The project simulates an ongoing software project for a desktop application (called _AddressBook_) used for managing contact details.
-  * It is **written in an object-oriented programming (OOP) style** and provides a **reasonably well-written** codebase of about 6 KLoC. It is **larger** than what students typically write in beginner-level software-engineering modules, without being overwhelming.
-  * It comes with a **reasonable level of user and developer documentation**.
-* It is named `AddressBook Level 3` (`AB3` for short) because it was initially created as a part of a series of `AddressBook` projects (`Level 1`, `Level 2`, `Level 3` ...).
-* For the detailed documentation of this project, see the **[Address Book Product Website](https://se-education.org/addressbook-level3)**.
-* This project is a **part of the se-education.org** initiative. If you would like to contribute code to this project, see [se-education.org](https://se-education.org/#contributing-to-se-edu) for more info.
+**TrackFlow** is a lightning-fast, keyboard-driven roster and contact manager designed specifically for **track and field head and assistant coaches**. It eliminates spreadsheet clutter and chaotic team chat apps by consolidating student-athlete event groups, parent emergency details, relay teams, and performance milestones into split-second CLI commands.
+
+While it has a Graphical User Interface (GUI), most user interactions occur using a Command Line Interface (CLI). It is strictly optimized for touch-typist coaches working at a desk between practices and meets who strongly prefer rapid, keyboard-driven text entry over navigating nested GUI drop-downs and bloated sports-management web platforms.
+
+### Key Features
+* **Event Discipline Tagging**: Instantly group athletes by event specialization (e.g., `find t/Sprints`, `find t/HighJump`) to generate target lists for practice updates.
+* **Guardian & Emergency Contact Linking**: Map student-athlete cards directly to parent/guardian profiles, enabling single-command lookups of emergency numbers during road meets.
+* **Relay Squads & Event Grouping**: Easily organize athletes into designated relay squads (e.g., `group g/4x100mA c/1,4,7,12`), track specific relay legs, and log alternate runners.
+* **Personal Best (PB) & Status Logs**: Attach quick, appendable text logs directly to contact profiles for at-a-glance reviews of performance milestones and medical flags during meet sign-ups.
+
+### Documentation
+For detailed instructions on how to use and develop this application, refer to our project website:
+* **[User Guide](https://ay2627s1-cs2103t-t17-2.github.io/tp/UserGuide.html)**
+* **[Developer Guide](https://ay2627s1-cs2103t-t17-2.github.io/tp/DeveloperGuide.html)**
+
+### Acknowledgments
+* This project is based on the AddressBook-Level3 project created by the [SE-EDU initiative](https://se-education.org).
