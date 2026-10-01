@@ -52,5 +52,5 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](https://github.com/antonydchakola-hub)]
 [[portfolio](team/johndoe.md)]
 
-* Role: Developer
-* Responsibilities: UI
+* Role: Deliverables and deadlines expert
+* Responsibilities: Ensures project deliverables are done on time and in the right format.
