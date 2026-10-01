@@ -15,7 +15,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 <img src="images/ken2k7.png" width="200px">
 
-[[github](https://github.com/johndoe)]
+[[github](https://github.com/ken2k7)]
 
 ### Jane Doe
 
