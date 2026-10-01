@@ -309,15 +309,28 @@ Priorities: `* * *` = high (essential to the core workflow), `* *` = medium (use
 | US20 | `* *` | Future | coach | record and review competition eligibility | identify athletes recorded as eligible for an event |
 | US21 | `* *` | Future | coach | record and review participation logs | track athletes' involvement in training or competitions |
 | US22 | `* *` | Future | coach | undo and redo roster changes | recover from accidental changes or reapply them |
-| US23 | `*` | Future | coach | import and export roster records in bulk | transfer my own records without entering each one manually |
-| US24 | `*` | Future | coach | store names with characters beyond the MVP's supported set | preserve athletes' preferred name spellings |
-| US25 | `*` | Future | coach | store multiple phone numbers and phone extensions | retain alternative ways of contacting an athlete |
-| US26 | `*` | Future | coach | check whether an email address can receive mail | distinguish a structurally valid address from a reachable one |
-| US27 | `*` | Future | keyboard-oriented coach | close TrackFlow with a text command | finish a session from the command box |
-| US28 | `*` | Excluded | coach using several computers | synchronize my roster through cloud storage | access the same changes on different devices |
-| US29 | `*` | Excluded | coach working with other coaches | share and collaboratively edit a roster | coordinate updates with colleagues |
+| US23 | `* *` | Future | coach | view an athlete's contact details, event tags, guardian links, and status notes together | prepare for a meet without searching through separate records |
+| US24 | `* *` | Future | coach | remove an event-specialization tag from an athlete | keep the athlete's recorded specializations current |
+| US25 | `* *` | Future | coach | view all event-specialization tags currently used in the roster | review which disciplines the team covers |
+| US26 | `* *` | Future | coach | view the contact information of athletes in an event group | communicate practice or meet updates to that group |
+| US27 | `* *` | Future | coach | link multiple guardians to one athlete | retain alternative contacts when a guardian is unavailable |
+| US28 | `* *` | Future | coach managing siblings | link one guardian record to multiple athletes | update shared contact details only once |
+| US29 | `* *` | Future | coach organizing travel | identify athletes without a guardian phone number | collect missing emergency contact information before departure |
+| US30 | `* *` | Future | coach | remove an outdated guardian link from an athlete | keep the athlete's recorded contacts current |
+| US31 | `* *` | Future | relay coach | assign athletes to specific relay legs | make the running order clear |
+| US32 | `* *` | Future | relay coach | designate alternate runners for a relay squad | record replacements before a meet |
+| US33 | `* *` | Future | relay coach | replace the athlete assigned to a specific relay leg | adjust a lineup quickly when availability changes |
+| US34 | `* *` | Future | coach | view an athlete's relay-squad and event-group memberships | review the athlete's assignments before making changes |
+| US35 | `* *` | Future | coach | correct an inaccurate personal-best or status log entry | keep the athlete's recorded history reliable |
+| US36 | `*` | Future | coach | import and export roster records in bulk | transfer my own records without entering each one manually |
+| US37 | `*` | Future | coach | store names with characters beyond the MVP's supported set | preserve athletes' preferred name spellings |
+| US38 | `*` | Future | coach | store multiple phone numbers and phone extensions | retain alternative ways of contacting an athlete |
+| US39 | `*` | Future | coach | check whether an email address can receive mail | distinguish a structurally valid address from a reachable one |
+| US40 | `*` | Future | keyboard-oriented coach | close TrackFlow with a text command | finish a session from the command box |
+| US41 | `*` | Excluded | coach using several computers | synchronize my roster through cloud storage | access the same changes on different devices |
+| US42 | `*` | Excluded | coach working with other coaches | share and collaboratively edit a roster | coordinate updates with colleagues |
 
-Email reachability checking (US26) is a considered optional enhancement, not part of the MVP's structural email validation. Its design must preserve offline access to the roster and must not require a TrackFlow-operated remote server.
+Email reachability checking (US39) is a considered optional enhancement, not part of the MVP's structural email validation. Its design must preserve offline access to the roster and must not require a TrackFlow-operated remote server.
 
 ### Use cases
 
