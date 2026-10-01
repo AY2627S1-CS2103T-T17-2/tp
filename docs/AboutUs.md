@@ -11,15 +11,11 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
-### John Doe
+### Kenil
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/ken2k7.png" width="200px">
 
-[[homepage](https://ay2627s1-cs2103t-t17-2.github.io/tp/)]
 [[github](https://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
-
-* Role: Project Advisor
 
 ### Jane Doe
 
