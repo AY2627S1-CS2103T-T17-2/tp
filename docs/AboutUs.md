@@ -24,8 +24,8 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](http://github.com/qiyuannn)]
 [[portfolio](team/johndoe.md)]
 
-* Role: Team Lead
-* Responsibilities: UI
+* Role: Testing
+* Responsibilities: Ensures the testing of the project is done properly and on time.
 
 ### Johnny Doe
 
