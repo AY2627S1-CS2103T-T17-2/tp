@@ -17,11 +17,11 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 [[github](https://github.com/ken2k7)]
 
-### Jane Doe
+### Kong Qi Yuan
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/qiyuannn.png" width="200px">
 
-[[github](http://github.com/johndoe)]
+[[github](http://github.com/qiyuannn)]
 [[portfolio](team/johndoe.md)]
 
 * Role: Team Lead
@@ -29,9 +29,9 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ### Johnny Doe
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/chetangent.png" width="200px">
 
-[[github](http://github.com/johndoe)] [[portfolio](team/johndoe.md)]
+[[(https://github.com/chetangent)](team/johndoe.md)]
 
 * Role: Developer
 * Responsibilities: Data
