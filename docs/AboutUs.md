@@ -42,8 +42,8 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 [[github](https://github.com/austin-chia)]
 
-* Role: Developer
-* Responsibilities: Dev Ops + Threading
+* Role: Documentation
+* Responsibilities: Decides how documentation work is divided and ensures that project documents use the correct format and remain consistent.
 
 ### Antony Dennis Chakola
 
