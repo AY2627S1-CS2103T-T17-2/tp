@@ -13,6 +13,7 @@ public class ListCommand extends Command {
     public static final String COMMAND_WORD = "list";
 
     public static final String MESSAGE_USAGE = "The list command does not accept parameters. Format: list";
+    public static final String MESSAGE_SUCCESS_SINGLE_ATHLETE = "Displaying 1 athlete.";
     public static final String MESSAGE_SUCCESS = "Displaying %1$d athletes.";
     public static final String MESSAGE_EMPTY_ROSTER = "The athlete roster is empty.";
 
@@ -23,7 +24,9 @@ public class ListCommand extends Command {
         int athleteCount = model.getFilteredPersonList().size();
         String feedbackToUser = athleteCount == 0
                 ? MESSAGE_EMPTY_ROSTER
-                : String.format(MESSAGE_SUCCESS, athleteCount);
+                : athleteCount == 1
+                        ? MESSAGE_SUCCESS_SINGLE_ATHLETE
+                        : String.format(MESSAGE_SUCCESS, athleteCount);
         return new CommandResult(feedbackToUser);
     }
 }

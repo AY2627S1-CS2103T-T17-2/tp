@@ -116,8 +116,8 @@ Shows the complete athlete roster.
 
 Format: `list`
 
-The command does not accept parameters. A non-empty roster displays `Displaying COUNT athletes.`. An empty roster
-displays `The athlete roster is empty.`.
+The command does not accept parameters. A roster with one athlete displays `Displaying 1 athlete.`; a larger roster
+displays `Displaying COUNT athletes.`. An empty roster displays `The athlete roster is empty.`.
 
 ### Editing a person: `edit`
 

@@ -81,8 +81,7 @@ public class LogicManagerTest {
     public void execute_mixedCaseListWithAthlete_returnsAthleteCount() throws Exception {
         logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com");
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
-        String expectedMessage = String.format(ListCommand.MESSAGE_SUCCESS, 1);
-        assertCommandSuccess("LiSt", expectedMessage, expectedModel);
+        assertCommandSuccess("LiSt", ListCommand.MESSAGE_SUCCESS_SINGLE_ATHLETE, expectedModel);
     }
 
     @Test

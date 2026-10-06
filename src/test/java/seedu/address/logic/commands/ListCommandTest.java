@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.testutil.AddressBookBuilder;
 
 /**
  * Contains integration tests (interaction with the Model) and unit tests for ListCommand.
@@ -45,5 +46,15 @@ public class ListCommandTest {
         Model emptyModel = new ModelManager();
         Model expectedEmptyModel = new ModelManager();
         assertCommandSuccess(new ListCommand(), emptyModel, ListCommand.MESSAGE_EMPTY_ROSTER, expectedEmptyModel);
+    }
+
+    @Test
+    public void execute_oneAthlete_showsSingularMessage() {
+        Model singleAthleteModel = new ModelManager(
+                new AddressBookBuilder().withPerson(getTypicalAddressBook().getPersonList().getFirst()).build(),
+                new UserPrefs());
+        Model expectedSingleAthleteModel = new ModelManager(singleAthleteModel.getAddressBook(), new UserPrefs());
+        assertCommandSuccess(new ListCommand(), singleAthleteModel, ListCommand.MESSAGE_SUCCESS_SINGLE_ATHLETE,
+                expectedSingleAthleteModel);
     }
 }
