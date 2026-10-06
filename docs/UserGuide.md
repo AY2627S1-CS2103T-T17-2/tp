@@ -204,7 +204,7 @@ Format: `delete INDEX`
 * Deletes the athlete at the specified `INDEX`.
 * The index refers to the index number shown in the displayed athlete list.
 * The index **must be a positive integer** 1, 2, 3, ...
-* On success, the deleted athlete's details are shown, e.g. `Athlete deleted: Avery Tan; Age category: U18; Phone: 91234567; Email: avery@example.com`.
+* On success, the deleted athlete's details are shown, e.g. `Athlete deleted: Avery Tan; Age category: Under 18; Phone: 91234567; Email: avery@example.com`.
 
 Examples:
 * `list` followed by `delete 2` deletes the 2nd athlete in the roster.
