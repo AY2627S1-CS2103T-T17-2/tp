@@ -159,6 +159,25 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Age-category filtering
+
+`AddressBookParser` dispatches `filter` to `FilterCommandParser`. The parser requires exactly one lowercase `a/`
+prefix and no preamble, rejects duplicates, and reuses `ParserUtil.parseAgeCategory` for the same canonical categories
+and normalization as `add`. Unsupported trailing arguments fail category validation.
+
+`FilterCommand` installs an `AgeCategoryPredicate` through `Model.updateFilteredPersonList`. The predicate compares
+`Person.getAgeCategory()` with the normalized category. Replacing the predicate searches the full underlying roster,
+preserves its order, and does not mutate records. Feedback distinguishes zero, one, and multiple matches.
+The filter is a view state and is not persisted across restarts.
+
+The existing `DeleteCommand` resolves indexes against `Model.getFilteredPersonList()`, so it already targets the
+correct displayed athlete and keeps the predicate active. No delete implementation changes are needed for filtering.
+`ListAthleteCommand` restores `PREDICATE_SHOW_ALL_PERSONS`; `find` and `filter` replace one another.
+
+`FilterCommandParserTest` covers categories and invalid syntax, `AgeCategoryPredicateTest` covers exact category
+matching, and `FilterCommandTest` covers routing, feedback, unchanged records, replacing searches, invalid input,
+compatibility with existing deletion, and `list` restoration.
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
@@ -277,9 +296,21 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Value proposition**: TrackFlow helps a coach maintain and retrieve an organized athlete roster through short keyboard commands, reducing the effort of navigating forms and keeping contact information available between training sessions.
 
-**Requirements scope**: This appendix records the intended product requirements, including features beyond the minimum viable product (MVP). It is not a statement that all features are implemented. The MVP comprises adding, listing, and permanently deleting athletes, automatic local persistence, and clear command feedback. An athlete's required MVP fields are name, age category, phone number, and email address.
+**Requirements scope**: This appendix records the intended product requirements, including features beyond the minimum viable product (MVP). It is not a statement that all features are implemented. The MVP comprises adding, listing, filtering by age category, and permanently deleting athletes, automatic local persistence, and clear command feedback. An athlete's required MVP fields are name, age category, phone number, and email address.
 
 The longer-term scope includes roster editing and searching, event organization, guardian links, athlete logs, and recovery tools. Cloud synchronization and multi-user access were considered but are excluded from the selected single-user, local product. A coach operates their own roster; athletes and guardians are records, not application users.
+
+### MVP feature responsibilities
+
+Age-category filtering (US11) is a **must-have**, promoted from the future/nice-to-have scope. Replace the proposed
+standalone persistence assignment with age-category filtering: category validation, match counts, empty-result
+feedback, compatibility with displayed indexes, restoring the roster with `list`, tests, and user-guide examples.
+Delete implementation remains the delete feature owner's responsibility.
+
+Automatic local persistence remains required application behavior (US04, US07, US08), with shared integration
+responsibility rather than a standalone individual's new feature assignment. AB3 already provides basic persistence,
+name search, editing, help, and command parsing. The parsing owner's assignment is **improving parsing and validation
+to meet TrackFlow rules**, including required fields, supported categories, duplicate parameters, and actionable errors.
 
 ### User stories
 
@@ -297,7 +328,7 @@ Priorities: `* * *` = high (essential to the core workflow), `* *` = medium (use
 | US08 | `* * *` | MVP | coach | have unreadable saved data preserved separately when loading fails | retain the possibility of recovering it while starting a new roster |
 | US09 | `* *` | Future | coach | edit an athlete's details directly | correct information without deleting and re-entering the record |
 | US10 | `* *` | Future | coach | find athletes by name | locate records without scanning the full roster |
-| US11 | `* *` | Future | coach | filter athletes by age category | review athletes in a competition category |
+| US11 | `* * *` | MVP | coach | filter athletes by age category | review athletes in a competition category |
 | US12 | `* *` | Future | coach | assign event-specialization tags to athletes | identify athletes who train for particular events |
 | US13 | `* *` | Future | new coach using TrackFlow | view built-in command help | learn or recall how to operate the application |
 | US14 | `* *` | Future | frequent user | recall previously entered commands | reduce repeated typing |
@@ -442,6 +473,25 @@ Use case ends.
   * 3b2. Subsequent successful changes create a new active roster without replacing the preserved data. TrackFlow does not claim the old records were restored; the preserved copy remains until the coach removes it outside TrackFlow.
   * Use case resumes at step 4.
 
+#### UC05: Filter athletes by age category
+
+**Related stories**: US02, US03, US05, US11.<br>
+**Precondition**: TrackFlow is open.<br>
+**Success postcondition**: Only matching athletes are displayed; stored records are unchanged.
+
+**MSS**
+
+1. The coach enters `filter a/AGE_CATEGORY` with one supported category.
+2. TrackFlow searches the full roster and displays matching athletes with current indexes and the match count.
+3. The coach enters `list` to restore the complete roster, or uses the displayed indexes with existing commands.
+
+**Extensions**
+
+* **1a.** The category is missing, invalid, repeated, or accompanied by extra arguments.
+  TrackFlow reports the error and retains the previous display and roster.
+* **2a.** No athletes match, including when the roster is empty.
+  TrackFlow displays an empty list and an explicit zero-match message. `list` remains available.
+
 ### Non-Functional Requirements
 
 These are product requirements and acceptance targets, not claims about the current build. Platform, packaging, storage, and display requirements reflect the relevant [course product constraints](https://nus-cs2103-ay2627-s1.github.io/website/admin/tp-constraints.html).
@@ -529,6 +579,22 @@ testers are expected to do more *exploratory* testing.
       Expected: Similar to previous.
 
 1. _{ more test cases … }_
+
+### Filtering by age category
+
+1. In a disposable test roster, add an `Open` athlete followed by two distinct `Under 14` athletes.
+2. Run `filter a/under   14`. Expect two juniors in roster order, numbered 1 and 2, and
+   `Displaying 2 athletes in age category Under 14.`
+3. Run `delete 3`. Expect an invalid-index error and no changes, even though the full roster has three athletes.
+4. Run `delete 1`. Expect the first junior to be deleted, the other displayed as index 1, and the Open athlete retained.
+   Run `list` to verify both remaining records. These steps test compatibility with the existing delete command.
+5. Run `filter a/Under 20`. Expect an empty display and
+   `No athletes found in age category Under 20 (0 matches).` Run `list` to restore both records.
+6. Run `filter a/Open`. Expect one match and `Displaying 1 athlete in age category Open.`
+7. Try `filter`, `filter a/Under 15`, `filter a/`, and `filter a/Open a/Under 14`. Expect errors and the previous
+   display unchanged.
+8. Run `find` with the junior's name, then `filter a/Open`. Expect the Open athlete, proving the full roster is searched.
+9. Restart TrackFlow. Expect the full remaining roster; filtering has not removed or changed any saved records.
 
 ### Saving data
 
