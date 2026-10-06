@@ -29,7 +29,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
 
-   * `list` : Lists all contacts.
+   * `list` : Lists all athletes.
 
    * `add n/John Doe a/Open p/98765432 e/johnd@example.com` : Adds an athlete named `John Doe` with age category `Open`.
 
@@ -61,8 +61,12 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
-  For example, `help 123` is interpreted as `help`.
+* Command words are case-insensitive. For example, `LIST`, `List`, and `list` invoke the same command.
+
+* The `list` command does not accept parameters. Other commands without parameters retain their existing behavior.
+
+* Submitting an empty command displays `No command entered. Type a command and try again.`. An unrecognized command
+  displays `Unknown command: COMMAND.`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
@@ -102,13 +106,18 @@ Successful output:
 
 A duplicate produces `This athlete already exists in the roster: Avery Tan.` Failed validation leaves the command text available for correction.
 
-This Basic Add version retains lowercase commands and prefixes, the existing command error handling, and insertion-order display. Alphabetical sorting and rollback after a save failure are deferred; a save failure can leave a change visible in memory without retaining it on disk.
+This Basic Add version retains lowercase parameter prefixes and insertion-order display. Command words are
+case-insensitive. Alphabetical sorting and rollback after a save failure are deferred; a save failure can leave a
+change visible in memory without retaining it on disk.
 
-### Listing all persons: `list`
+### Listing all athletes: `list`
 
-Shows a list of all persons in the address book.
+Shows the complete athlete roster.
 
 Format: `list`
+
+The command does not accept parameters. A non-empty roster displays `Displaying COUNT athletes.`. An empty roster
+displays `The athlete roster is empty.`.
 
 ### Editing a person: `edit`
 
