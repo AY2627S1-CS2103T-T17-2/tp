@@ -14,9 +14,9 @@ import seedu.address.model.UserPrefs;
 import seedu.address.testutil.AddressBookBuilder;
 
 /**
- * Contains integration tests (interaction with the Model) and unit tests for ListCommand.
+ * Contains integration tests (interaction with the Model) and unit tests for ListAthleteCommand.
  */
-public class ListCommandTest {
+public class ListAthleteCommandTest {
 
     private Model model;
     private Model expectedModel;
@@ -29,23 +29,25 @@ public class ListCommandTest {
 
     @Test
     public void execute_listIsNotFiltered_showsSameList() {
-        String expectedMessage = String.format(ListCommand.MESSAGE_SUCCESS, model.getFilteredPersonList().size());
-        assertCommandSuccess(new ListCommand(), model, expectedMessage, expectedModel);
+        String expectedMessage = String.format(ListAthleteCommand.MESSAGE_SUCCESS,
+                model.getFilteredPersonList().size());
+        assertCommandSuccess(new ListAthleteCommand(), model, expectedMessage, expectedModel);
     }
 
     @Test
     public void execute_listIsFiltered_showsEverything() {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
-        String expectedMessage = String.format(ListCommand.MESSAGE_SUCCESS,
+        String expectedMessage = String.format(ListAthleteCommand.MESSAGE_SUCCESS,
                 expectedModel.getFilteredPersonList().size());
-        assertCommandSuccess(new ListCommand(), model, expectedMessage, expectedModel);
+        assertCommandSuccess(new ListAthleteCommand(), model, expectedMessage, expectedModel);
     }
 
     @Test
     public void execute_emptyRoster_showsEmptyRosterMessage() {
         Model emptyModel = new ModelManager();
         Model expectedEmptyModel = new ModelManager();
-        assertCommandSuccess(new ListCommand(), emptyModel, ListCommand.MESSAGE_EMPTY_ROSTER, expectedEmptyModel);
+        assertCommandSuccess(new ListAthleteCommand(), emptyModel, ListAthleteCommand.MESSAGE_EMPTY_ROSTER,
+                expectedEmptyModel);
     }
 
     @Test
@@ -54,7 +56,7 @@ public class ListCommandTest {
                 new AddressBookBuilder().withPerson(getTypicalAddressBook().getPersonList().getFirst()).build(),
                 new UserPrefs());
         Model expectedSingleAthleteModel = new ModelManager(singleAthleteModel.getAddressBook(), new UserPrefs());
-        assertCommandSuccess(new ListCommand(), singleAthleteModel, ListCommand.MESSAGE_SUCCESS_SINGLE_ATHLETE,
-                expectedSingleAthleteModel);
+        assertCommandSuccess(new ListAthleteCommand(), singleAthleteModel,
+                ListAthleteCommand.MESSAGE_SUCCESS_SINGLE_ATHLETE, expectedSingleAthleteModel);
     }
 }

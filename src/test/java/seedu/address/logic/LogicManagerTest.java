@@ -21,7 +21,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
-import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.ListAthleteCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
@@ -73,20 +73,20 @@ public class LogicManagerTest {
 
     @Test
     public void execute_validCommand_success() throws Exception {
-        String listCommand = ListCommand.COMMAND_WORD;
-        assertCommandSuccess(listCommand, ListCommand.MESSAGE_EMPTY_ROSTER, model);
+        String listCommand = ListAthleteCommand.COMMAND_WORD;
+        assertCommandSuccess(listCommand, ListAthleteCommand.MESSAGE_EMPTY_ROSTER, model);
     }
 
     @Test
     public void execute_mixedCaseListWithAthlete_returnsAthleteCount() throws Exception {
         logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com");
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
-        assertCommandSuccess("LiSt", ListCommand.MESSAGE_SUCCESS_SINGLE_ATHLETE, expectedModel);
+        assertCommandSuccess("LiSt", ListAthleteCommand.MESSAGE_SUCCESS_SINGLE_ATHLETE, expectedModel);
     }
 
     @Test
     public void execute_listWithArguments_throwsParseException() {
-        assertParseException("list 1", ListCommand.MESSAGE_USAGE);
+        assertParseException("list 1", ListAthleteCommand.MESSAGE_USAGE);
     }
 
     @Test

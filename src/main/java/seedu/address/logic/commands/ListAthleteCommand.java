@@ -8,7 +8,7 @@ import seedu.address.model.Model;
 /**
  * Lists all athletes in the roster to the user.
  */
-public class ListCommand extends Command {
+public class ListAthleteCommand extends Command {
 
     public static final String COMMAND_WORD = "list";
 
