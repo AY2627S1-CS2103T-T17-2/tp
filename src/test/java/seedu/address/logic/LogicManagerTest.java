@@ -1,6 +1,7 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static seedu.address.logic.Messages.MESSAGE_EMPTY_COMMAND;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
@@ -56,7 +57,12 @@ public class LogicManagerTest {
     @Test
     public void execute_invalidCommandFormat_throwsParseException() {
         String invalidCommand = "uicfhmowqewca";
-        assertParseException(invalidCommand, MESSAGE_UNKNOWN_COMMAND);
+        assertParseException(invalidCommand, String.format(MESSAGE_UNKNOWN_COMMAND, invalidCommand));
+    }
+
+    @Test
+    public void execute_emptyCommand_throwsParseException() {
+        assertParseException("", MESSAGE_EMPTY_COMMAND);
     }
 
     @Test
@@ -68,7 +74,19 @@ public class LogicManagerTest {
     @Test
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListAthleteCommand.COMMAND_WORD;
-        assertCommandSuccess(listCommand, ListAthleteCommand.MESSAGE_SUCCESS, model);
+        assertCommandSuccess(listCommand, ListAthleteCommand.MESSAGE_EMPTY_ROSTER, model);
+    }
+
+    @Test
+    public void execute_mixedCaseListWithAthlete_returnsAthleteCount() throws Exception {
+        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com");
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        assertCommandSuccess("LiSt", ListAthleteCommand.MESSAGE_SUCCESS_SINGLE_ATHLETE, expectedModel);
+    }
+
+    @Test
+    public void execute_listWithArguments_throwsParseException() {
+        assertParseException("list 1", ListAthleteCommand.MESSAGE_USAGE);
     }
 
     @Test
