@@ -29,7 +29,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
 
-   * `list` : Lists all contacts.
+   * `list` : Lists all athletes.
 
    * `add n/John Doe a/Open p/98765432 e/johnd@example.com` : Adds an athlete named `John Doe` with age category `Open`.
 
@@ -104,31 +104,31 @@ A duplicate produces `This athlete already exists in the roster: Avery Tan.` Fai
 
 This Basic Add version retains lowercase commands and prefixes, the existing command error handling, and insertion-order display. Alphabetical sorting and rollback after a save failure are deferred; a save failure can leave a change visible in memory without retaining it on disk.
 
-### Listing all persons: `list`
+### Listing all athletes: `list`
 
-Shows a list of all persons in the address book.
+Shows a list of all athletes in the address book.
 
 Format: `list`
 
-### Editing a person: `edit`
+### Editing a athlete: `edit`
 
-Edits an existing person in the address book.
+Edits an existing athlete in the address book.
 
 Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]... `
 
-* Edits the person at the specified `INDEX`. The index refers to the index number shown in the displayed person list. The index **must be a positive integer** 1, 2, 3, ...
+* Edits the athlete at the specified `INDEX`. The index refers to the index number shown in the displayed athlete list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
-* When editing tags, all of the person's existing tags are removed; adding tags is not cumulative.
-* To remove all of a person's tags, enter `t/` without a tag after it.
+* When editing tags, all of the athlete's existing tags are removed; adding tags is not cumulative.
+* To remove all of a athlete's tags, enter `t/` without a tag after it.
 
 Examples:
-*  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
-*  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+*  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st athlete to be `91234567` and `johndoe@example.com` respectively.
+*  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd athlete to be `Betsy Crower` and clears all existing tags.
 
-### Locating persons by name: `find`
+### Locating athletes by name: `find`
 
-Finds persons whose names contain any of the given keywords.
+Finds athletes whose names contain any of the given keywords.
 
 Format: `find KEYWORD [MORE_KEYWORDS]`
 
@@ -136,26 +136,26 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
 * The search considers only names.
 * Only full words match; for example, `Han` does not match `Hans`.
-* Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
+* Athletes matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
 
 Examples:
 * `find John` returns `john` and `John Doe`
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
-### Deleting a person: `delete`
+### Deleting a athlete: `delete`
 
-Deletes the specified person from the address book.
+Deletes the specified athlete from the address book.
 
 Format: `delete INDEX`
 
-* Deletes the person at the specified `INDEX`.
-* The index refers to the index number shown in the displayed person list.
+* Deletes the athlete at the specified `INDEX`.
+* The index refers to the index number shown in the displayed athlete list.
 * The index **must be a positive integer** 1, 2, 3, ...
 
 Examples:
-* `list` followed by `delete 2` deletes the 2nd person in the address book.
-* `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
+* `list` followed by `delete 2` deletes the 2nd athlete in the address book.
+* `find Betsy` followed by `delete 1` deletes the 1st athlete in the results of the `find` command.
 
 ### Clearing all entries: `clear`
 
