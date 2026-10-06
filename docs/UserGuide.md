@@ -36,6 +36,8 @@ Interface (GUI).
 
    * `add n/John Doe a/Open p/98765432 e/johnd@example.com` : Adds an athlete named `John Doe` with age category `Open`.
 
+   * `filter a/Under 14` : Shows athletes in that age category. Use `list` to show everyone again.
+
    * `delete 3` : Deletes the 3rd athlete shown in the current list.
 
    * `clear` : Deletes all athletes.
@@ -108,7 +110,7 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL`
 * Phones retain the existing rule: digits only, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
 * Emails retain the existing email validation rules.
 * A duplicate is rejected only when normalized name, age category, phone, and email all match. Name comparisons ignore case and repeated spaces; email comparisons ignore case. Shared names or family contact details alone are allowed.
-* Add does not accept addresses, tags, or remarks. Existing `edit` and `remark` commands can add those details afterward. **`a/` means age category for `add`, but address for `edit`.** Editing or adding a remark preserves the athlete's age category; category editing is not available yet.
+* Add does not accept addresses, tags, or remarks. Existing `edit` and `remark` commands can add those details afterward. **`a/` means age category for `add` and `filter`, but address for `edit`.** Editing or adding a remark preserves the athlete's age category; category editing is not available yet.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
   existing address, tags, and remarks.
 
@@ -133,7 +135,7 @@ Shows the complete athlete roster.
 
 Format: `list`
 
-The command also restores the complete roster after a `find` command. It does not accept parameters.
+The command also restores the complete roster after a `find` or `filter` command. It does not accept parameters.
 
 * An empty roster displays `The athlete roster is empty.`
 * A roster with one athlete displays `Displaying 1 athlete.`
@@ -145,6 +147,40 @@ Examples:
 
 * `list`
 * `LiSt` (command words are case-insensitive)
+
+### Filtering athletes by age category: `filter`
+
+Shows athletes whose recorded age category matches the requested category.
+
+Format: `filter a/AGE_CATEGORY`
+
+* Supply exactly one `a/` parameter. Accepted categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`.
+* Category values ignore case and repeated spaces: `filter a/under   14` is equivalent to `filter a/Under 14`.
+  The prefix must be lowercase `a/`.
+* Matching uses the recorded category, not an exact age or eligibility calculation. `Under 16` does not include
+  athletes recorded as `Under 14`.
+* Each `filter` searches the entire roster and replaces any previous `find` or `filter`. Likewise, `find` replaces
+  the age filter. Matching athletes retain their roster order and receive indexes starting from 1.
+* Filtering does not change or delete athlete records. Use `list` to show everyone again, including after no matches.
+  The filter is not saved between application sessions.
+* Missing `a/` shows command usage. An empty or unsupported category (for example, `filter a/Under 15`) shows
+  `Age category must be Under 14, Under 16, Under 18, Under 20, or Open.` Repeated `a/` parameters and extra
+  arguments are rejected. An invalid filter leaves the previous display and roster unchanged.
+
+Feedback examples:
+
+* Two matches: `Displaying 2 athletes in age category Under 14.`
+* One match: `Displaying 1 athlete in age category Under 14.`
+* No matches (including an empty roster): `No athletes found in age category Under 14 (0 matches).`
+  The displayed list is empty; this is a successful search, not an error.
+
+Example workflow:
+
+1. `filter a/Under 14` displays only athletes recorded as `Under 14`.
+2. Check the displayed names and indexes. The existing `delete 1` command permanently removes the first displayed
+   athlete. The age filter stays active and the remaining results are renumbered. An index outside the displayed
+   list is rejected even if it exists in the full roster.
+3. `list` restores all remaining athletes.
 
 ### Editing an athlete: `edit`
 
@@ -268,6 +304,7 @@ Action     | Format, Examples
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List**   | `list`
 **Remark** | `remark INDEX r/[REMARK]`<br> e.g., `remark 1 r/100m personal best: 12.34s`
