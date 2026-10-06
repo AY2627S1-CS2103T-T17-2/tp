@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import seedu.address.model.person.Address;
+import seedu.address.model.person.AgeCategory;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
@@ -24,6 +25,7 @@ public class PersonBuilder {
     public static final String DEFAULT_REMARK = "She likes aardvarks.";
 
     private Name name;
+    private AgeCategory ageCategory = new AgeCategory("Open");
     private Phone phone;
     private Email email;
     private Address address;
@@ -47,6 +49,7 @@ public class PersonBuilder {
      */
     public PersonBuilder(Person personToCopy) {
         name = personToCopy.getName();
+        ageCategory = personToCopy.getAgeCategory();
         phone = personToCopy.getPhone();
         email = personToCopy.getEmail();
         address = personToCopy.getAddress();
@@ -102,8 +105,16 @@ public class PersonBuilder {
         return this;
     }
 
+    /**
+     * Sets the athlete's age category.
+     */
+    public PersonBuilder withAgeCategory(String category) {
+        ageCategory = new AgeCategory(category);
+        return this;
+    }
+
     public Person build() {
-        return new Person(name, phone, email, address, remark, tags);
+        return new Person(name, ageCategory, phone, email, address, remark, tags);
     }
 
 }

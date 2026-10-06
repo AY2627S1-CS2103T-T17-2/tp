@@ -13,9 +13,12 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
+import seedu.address.model.person.AgeCategory;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
+import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.testutil.PersonBuilder;
 
 public class JsonAdaptedPersonTest {
     private static final String INVALID_NAME = "R@chel";
@@ -37,6 +40,29 @@ public class JsonAdaptedPersonTest {
     public void toModelType_validPersonDetails_returnsPerson() throws Exception {
         JsonAdaptedPerson person = new JsonAdaptedPerson(BENSON);
         assertEquals(BENSON, person.toModelType());
+    }
+
+    @Test
+    public void toModelType_legacyCategory_defaultsToOpen() throws Exception {
+        JsonAdaptedPerson legacy = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                VALID_ADDRESS, VALID_REMARK, VALID_TAGS);
+        assertEquals(BENSON, legacy.toModelType());
+        assertEquals(new AgeCategory("Open"), legacy.toModelType().getAgeCategory());
+    }
+
+    @Test
+    public void toModelType_explicitCategoryAndEmptyAddress_roundTrip() throws Exception {
+        Person athlete = new PersonBuilder(BENSON).withAgeCategory("Under 16").withAddress("").build();
+        assertEquals(athlete, new JsonAdaptedPerson(athlete).toModelType());
+    }
+
+    @Test
+    public void toModelType_invalidCategory_throwsIllegalValueException() {
+        for (String category : new String[] {"", "Under 15"}) {
+            JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                    VALID_ADDRESS, VALID_REMARK, VALID_TAGS, category);
+            assertThrows(IllegalValueException.class, AgeCategory.MESSAGE_CONSTRAINTS, person::toModelType);
+        }
     }
 
     @Test

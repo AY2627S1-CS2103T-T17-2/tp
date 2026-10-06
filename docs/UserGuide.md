@@ -31,7 +31,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
    * `list` : Lists all contacts.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
+   * `add n/John Doe a/Open p/98765432 e/johnd@example.com` : Adds an athlete named `John Doe` with age category `Open`.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
@@ -76,20 +76,33 @@ Shows a message explaining how to access the help page.
 Format: `help`
 
 
-### Adding a person: `add`
+### Adding an athlete: `add`
 
-Adds a person to the address book.
+Adds an athlete with a name, age category, phone number, and email address.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... `
+Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL`
 
-<box type="tip" seamless>
-
-**Tip:** A person can have any number of tags, including zero.
-</box>
+* All four fields are required and may appear in any order. Each parameter may appear only once.
+* Age category must be `Under 14`, `Under 16`, `Under 18`, `Under 20`, or `Open`. Category input ignores case and normalizes repeated spaces.
+* Names retain the existing rule: nonblank alphanumeric characters and spaces only.
+* Phones retain the existing rule: digits only, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
+* Emails retain the existing email validation rules.
+* A duplicate is rejected only when normalized name, age category, phone, and email all match. Name comparisons ignore case and repeated spaces; email comparisons ignore case. Shared names or family contact details alone are allowed.
+* Add does not accept addresses, tags, or remarks. Existing `edit` and `remark` commands can add those details afterward. **`a/` means age category for `add`, but address for `edit`.** Editing or adding a remark preserves the athlete's age category; category editing is not available yet.
+* Athletes are saved automatically. Older saved contacts without an age category load as `Open`, retaining their existing address, tags, and remarks.
 
 Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+
+* `add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com`
+* `add e/jordan.lee@example.com p/92345678 a/open n/Jordan Lee`
+
+Successful output:
+
+`New athlete added: Avery Tan; Age category: Under 14; Phone: 91234567; Email: avery.tan@example.com`
+
+A duplicate produces `This athlete already exists in the roster: Avery Tan.` Failed validation leaves the command text available for correction.
+
+This Basic Add version retains lowercase commands and prefixes, the existing command error handling, and insertion-order display. Alphabetical sorting and rollback after a save failure are deferred; a save failure can leave a change visible in memory without retaining it on disk.
 
 ### Listing all persons: `list`
 
@@ -195,7 +208,7 @@ _Details coming soon ..._
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
