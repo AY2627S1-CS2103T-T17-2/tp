@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
@@ -32,8 +33,8 @@ public class DeleteCommandTest {
         Person personToDelete = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_PERSON);
 
-        String expectedMessage = String.format(DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
-                Messages.format(personToDelete));
+        String expectedMessage = String.format(DeleteCommand.MESSAGE_DELETE_ATHLETE_SUCCESS,
+                Messages.formatAthlete(personToDelete));
 
         ModelManager expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.deletePerson(personToDelete);
@@ -50,14 +51,36 @@ public class DeleteCommandTest {
     }
 
     @Test
+    public void execute_validIndex_successMessageUsesAthleteDetails() throws Exception {
+        Person athleteToDelete = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_PERSON);
+
+        String feedback = deleteCommand.execute(model).getFeedbackToUser();
+
+        // The confirmation should use athlete details, not the legacy contact fields.
+        assertTrue(feedback.startsWith("Athlete deleted:"));
+        assertTrue(feedback.contains("Age category:"));
+        assertFalse(feedback.contains("Address:"));
+        assertFalse(feedback.contains("Tags:"));
+        assertEquals(String.format(DeleteCommand.MESSAGE_DELETE_ATHLETE_SUCCESS,
+                Messages.formatAthlete(athleteToDelete)), feedback);
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_PERSON);
+        assertThrows(NullPointerException.class, () -> deleteCommand.execute(null));
+    }
+
+    @Test
     public void execute_validIndexFilteredList_success() {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
 
         Person personToDelete = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_PERSON);
 
-        String expectedMessage = String.format(DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
-                Messages.format(personToDelete));
+        String expectedMessage = String.format(DeleteCommand.MESSAGE_DELETE_ATHLETE_SUCCESS,
+                Messages.formatAthlete(personToDelete));
 
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.deletePerson(personToDelete);
