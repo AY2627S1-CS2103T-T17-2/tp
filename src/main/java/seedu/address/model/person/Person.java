@@ -18,6 +18,7 @@ public class Person {
 
     // Identity fields
     private final Name name;
+    private final AgeCategory ageCategory;
     private final Phone phone;
     private final Email email;
 
@@ -30,7 +31,16 @@ public class Person {
      * Every field must be present and not null.
      */
     public Person(Name name, Phone phone, Email email, Address address, Remark remark, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, remark, tags);
+        this(name, new AgeCategory("Open"), phone, email, address, remark, tags);
+    }
+
+    /**
+     * Constructs a person with an explicit age category and existing optional data.
+     */
+    public Person(Name name, AgeCategory ageCategory, Phone phone, Email email,
+            Address address, Remark remark, Set<Tag> tags) {
+        requireAllNonNull(name, ageCategory, phone, email, address, remark, tags);
+        this.ageCategory = ageCategory;
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -41,6 +51,10 @@ public class Person {
 
     public Name getName() {
         return name;
+    }
+
+    public AgeCategory getAgeCategory() {
+        return ageCategory;
     }
 
     public Phone getPhone() {
@@ -68,7 +82,7 @@ public class Person {
     }
 
     /**
-     * Returns true if both persons have the same name.
+     * Returns true if all four normalized athlete fields match.
      * This defines a weaker notion of equality between two persons.
      */
     public boolean isSamePerson(Person otherPerson) {
@@ -77,7 +91,14 @@ public class Person {
         }
 
         return otherPerson != null
-                && otherPerson.getName().equals(getName());
+                && normalizeName(name).equalsIgnoreCase(normalizeName(otherPerson.name))
+                && ageCategory.equals(otherPerson.ageCategory)
+                && phone.value.replaceAll("\\D", "").equals(otherPerson.phone.value.replaceAll("\\D", ""))
+                && email.value.trim().equalsIgnoreCase(otherPerson.email.value.trim());
+    }
+
+    private static String normalizeName(Name name) {
+        return name.fullName.trim().replaceAll("\\s+", " ");
     }
 
     /**
@@ -96,6 +117,7 @@ public class Person {
         }
 
         return name.equals(otherPerson.name)
+                && ageCategory.equals(otherPerson.ageCategory)
                 && phone.equals(otherPerson.phone)
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
@@ -105,13 +127,14 @@ public class Person {
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags);
+        return Objects.hash(name, ageCategory, phone, email, address, tags);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("name", name)
+                .add("ageCategory", ageCategory)
                 .add("phone", phone)
                 .add("email", email)
                 .add("address", address)

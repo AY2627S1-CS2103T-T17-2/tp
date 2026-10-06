@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /**
- * Represents a Person's address in the address book.
+ * Represents an optional address. An empty value denotes no recorded address.
  * Guarantees: immutable; is valid as declared in {@link #isValidAddress(String)}
  */
 public class Address {
@@ -13,7 +13,7 @@ public class Address {
 
     /*
      * The first character of the address must not be a whitespace,
-     * otherwise " " (a blank string) becomes a valid input.
+     * otherwise whitespace-only input becomes a valid address.
      */
     public static final String VALIDATION_REGEX = "[^\\s].*";
 
@@ -34,7 +34,7 @@ public class Address {
      * Returns true if a given string is a valid address.
      */
     public static boolean isValidAddress(String test) {
-        return test.matches(VALIDATION_REGEX);
+        return test.isEmpty() || test.matches(VALIDATION_REGEX);
     }
 
     @Override

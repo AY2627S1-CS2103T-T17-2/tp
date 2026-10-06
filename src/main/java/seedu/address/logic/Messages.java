@@ -34,6 +34,14 @@ public class Messages {
     /**
      * Formats the {@code person} for display to the user.
      */
+    public static String formatAthlete(Person person) {
+        return person.getName() + "; Age category: " + person.getAgeCategory()
+                + "; Phone: " + person.getPhone() + "; Email: " + person.getEmail();
+    }
+
+    /**
+     * Formats all existing contact fields for legacy commands.
+     */
     public static String format(Person person) {
         final StringBuilder builder = new StringBuilder();
         builder.append(person.getName())

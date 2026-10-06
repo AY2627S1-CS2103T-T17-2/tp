@@ -35,6 +35,8 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label phone;
     @FXML
+    private Label ageCategory;
+    @FXML
     private Label address;
     @FXML
     private Label email;
@@ -51,8 +53,11 @@ public class PersonCard extends UiPart<Region> {
         this.person = person;
         id.setText(displayedIndex + ". ");
         name.setText(person.getName().fullName);
+        ageCategory.setText("Age category: " + person.getAgeCategory().value);
         phone.setText(person.getPhone().value);
         address.setText(person.getAddress().value);
+        address.setVisible(!person.getAddress().value.isEmpty());
+        address.setManaged(address.isVisible());
         email.setText(person.getEmail().value);
         remark.setText(person.getRemark().value);
         person.getTags().stream()
