@@ -62,7 +62,7 @@
         "glossary": "Glossary",
         "appendix-instructions-for-manual-testing": "Appendix: Instructions for manual testing",
         "launch-and-shutdown": "Launch and shutdown",
-        "deleting-a-person": "Deleting a person",
+        "deleting-an-athlete": "Deleting an athlete",
         "saving-data": "Saving data"
       },
       "headingKeywords": {}
@@ -112,10 +112,10 @@
         "features": "Features",
         "viewing-help-help": "Viewing help: help",
         "adding-an-athlete-add": "Adding an athlete: add",
-        "listing-all-persons-list": "Listing all persons: list",
-        "editing-a-person-edit": "Editing a person: edit",
-        "locating-persons-by-name-find": "Locating persons by name: find",
-        "deleting-a-person-delete": "Deleting a person: delete",
+        "listing-all-athletes-list": "Listing all athletes: list",
+        "editing-a-athlete-edit": "Editing a athlete: edit",
+        "locating-athletes-by-name-find": "Locating athletes by name: find",
+        "deleting-a-athlete-delete": "Deleting a athlete: delete",
         "clearing-all-entries-clear": "Clearing all entries: clear",
         "exiting-the-program-exit": "Exiting the program: exit",
         "saving-the-data": "Saving the data",
