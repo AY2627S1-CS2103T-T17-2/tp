@@ -178,7 +178,49 @@
 
 /* ---------- Result display ---------- */
 
+.result-banner {
+    -fx-background-color: -tf-line-strong, -tf-panel;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 9, 8;
+    -fx-padding: 1 1 1 12;
+}
+
+.result-banner.result-success {
+    -fx-background-color: rgba(46, 211, 160, 0.45), -tf-panel;
+}
+
+.result-banner.result-error {
+    -fx-background-color: rgba(255, 107, 107, 0.55), -tf-panel;
+}
+
+.result-icon {
+    -fx-min-width: 20;
+    -fx-pref-width: 20;
+    -fx-max-width: 20;
+    -fx-min-height: 20;
+    -fx-pref-height: 20;
+    -fx-max-height: 20;
+    -fx-background-radius: 10;
+}
+
+.result-success .result-icon {
+    -fx-background-color: -tf-success;
+}
+
+.result-error .result-icon {
+    -fx-background-color: -tf-error;
+}
+
+.result-icon-glyph {
+    -fx-fill: transparent;
+    -fx-stroke: -tf-bg;
+    -fx-stroke-width: 2.2;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+}
+
 .result-display,
+.result-display:focused,
 .result-display .scroll-pane,
 .result-display .scroll-pane > .viewport {
     -fx-background-color: transparent;
@@ -194,14 +236,8 @@
 }
 
 #resultDisplay .content {
-    -fx-background-color: -tf-line-strong, -tf-panel;
-    -fx-background-insets: 0, 1;
-    -fx-background-radius: 9, 8;
-    -fx-padding: 6 8 6 8;
-}
-
-#resultDisplay:focused .content {
-    -fx-background-color: -tf-muted, -tf-panel;
+    -fx-background-color: transparent;
+    -fx-padding: 6 6 6 2;
 }
 
 /* ---------- Athlete list ---------- */
