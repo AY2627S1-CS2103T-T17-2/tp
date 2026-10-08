@@ -52,6 +52,7 @@
         "common-classes": "Common classes",
         "implementation": "Implementation",
         "age-category-filtering": "Age-category filtering",
+        "multi-field-sorting": "Multi-field sorting",
         "proposed-undo-redo-feature": "[Proposed] Undo/redo feature",
         "proposed-data-archiving": "[Proposed] Data archiving",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
@@ -66,6 +67,7 @@
         "launch-and-shutdown": "Launch and shutdown",
         "deleting-an-athlete": "Deleting an athlete",
         "filtering-by-age-category": "Filtering by age category",
+        "sorting-the-displayed-roster": "Sorting the displayed roster",
         "saving-data": "Saving data"
       },
       "headingKeywords": {}
@@ -121,6 +123,7 @@
         "editing-an-athlete-edit": "Editing an athlete: edit",
         "adding-or-removing-an-athlete-remark-remark": "Adding or removing an athlete remark: remark",
         "finding-athletes-across-all-fields-find": "Finding athletes across all fields: find",
+        "sorting-the-displayed-athletes-sort": "Sorting the displayed athletes: sort",
         "deleting-an-athlete-delete": "Deleting an athlete: delete",
         "clearing-all-entries-clear": "Clearing all entries: clear",
         "exiting-the-program-exit": "Exiting the program: exit",
