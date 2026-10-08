@@ -16,7 +16,6 @@ public class AutocompleteEngine {
             "exit",
             "filter a/",
             "find ",
-            "sort",
             "help",
             "list",
             "remark r/"
