@@ -162,9 +162,32 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Command parsing and validation
+
+`AddressBookParser` treats command words without considering letter case and routes commands with parameters to their
+dedicated parsers. `ArgumentTokenizer` recognizes supported parameter prefixes without considering letter case while
+storing them under their canonical prefix. `ParserUtil.verifyNoUnknownPrefixes` rejects unsupported parameter-like
+tokens before values are parsed, producing a command-specific error instead of allowing one field to absorb an
+unknown parameter.
+
+Commands that take no arguments (`clear`, `help`, and `exit`) reject extra text. `remark` requires exactly one `r/`
+prefix. Index parsing accepts arbitrarily long positive digit sequences and safely maps values beyond the in-memory
+index range to an out-of-range displayed index, avoiding numeric-overflow errors.
+
+### Broad and field-scoped finding
+
+`FindCommandParser` supports unprefixed broad keywords and the field prefixes `n/`, `a/`, `p/`, `e/`, `addr/`, and
+`r/`. It rejects empty, repeated, and unknown field parameters. `PersonContainsKeywordsPredicate` stores broad keywords
+separately from field-specific criteria. Broad keywords search the combined athlete text, while a prefixed value is
+tested only against its selected field. The criteria use case-insensitive partial matching and OR semantics.
+This allows `find n/und` to match a name such as `Underwood` without matching athletes merely because their age
+category starts with `Under`.
+
 ### Age-category filtering
 
-`AddressBookParser` dispatches `filter` to `FilterCommandParser`. The parser requires exactly one lowercase `a/` prefix and no preamble, rejects duplicates, and reuses `ParserUtil.parseAgeCategory` for the same canonical categories and normalization as `add`. Unsupported trailing arguments fail category validation.
+`AddressBookParser` dispatches `filter` to `FilterCommandParser`. The parser requires exactly one case-insensitive `a/`
+prefix and no preamble, rejects duplicates and unknown prefixes, and reuses `ParserUtil.parseAgeCategory` for the same
+canonical categories and normalization as `add`. Unsupported trailing text fails category validation.
 
 `FilterCommand` installs an `AgeCategoryPredicate` through `Model.updateFilteredPersonList`. The predicate compares `Person.getAgeCategory()` with the normalized category. Replacing the predicate searches the full underlying roster, preserves its order, and does not mutate records. Feedback distinguishes zero, one, and multiple matches. The filter is a view state and is not persisted across restarts.
 

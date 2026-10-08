@@ -49,9 +49,11 @@ public class EditCommandParserTest {
 
     @Test
     public void parse_invalidPreamble_failure() {
-        for (String preamble : List.of("-5", "0", "abc", "2147483648", "1 some random string", "1 i/string")) {
+        for (String preamble : List.of("-5", "0", "abc", "1 some random string")) {
             assertParseFailure(parser, preamble + NAME_DESC_AMY, MESSAGE_INVALID_FORMAT);
         }
+        assertParseFailure(parser, "1 i/string" + NAME_DESC_AMY,
+                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "i/", EditCommand.MESSAGE_USAGE));
     }
 
     @Test
@@ -149,9 +151,10 @@ public class EditCommandParserTest {
     @Test
     public void parse_unsupportedFields_failure() {
         for (String unsupported : List.of("r/", "r/fast runner")) {
-            assertParseFailure(parser, "1 " + unsupported, MESSAGE_INVALID_FORMAT);
-            assertParseFailure(parser, "1 n/Amy " + unsupported, MESSAGE_INVALID_FORMAT);
-            assertParseFailure(parser, "1 " + unsupported + " a/Open", MESSAGE_INVALID_FORMAT);
+            String expected = String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "r/", EditCommand.MESSAGE_USAGE);
+            assertParseFailure(parser, "1 " + unsupported, expected);
+            assertParseFailure(parser, "1 n/Amy " + unsupported, expected);
+            assertParseFailure(parser, "1 " + unsupported + " a/Open", expected);
         }
     }
 }

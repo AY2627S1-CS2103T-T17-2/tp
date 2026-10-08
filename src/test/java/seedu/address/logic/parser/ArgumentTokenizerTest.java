@@ -80,6 +80,14 @@ public class ArgumentTokenizerTest {
     }
 
     @Test
+    public void tokenize_mixedCasePrefix_recognizedAsCanonicalPrefix() {
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(" P/91234567", pSlash);
+
+        assertPreambleEmpty(argMultimap);
+        assertArgumentPresent(argMultimap, pSlash, "91234567");
+    }
+
+    @Test
     public void tokenize_multipleArguments() {
         // Only two arguments are present
         String argsString = "SomePreambleString -t dashT-Value p/pSlash value";

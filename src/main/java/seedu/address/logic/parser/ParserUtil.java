@@ -2,12 +2,17 @@ package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
+import seedu.address.logic.Messages;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.AgeCategory;
@@ -22,6 +27,12 @@ import seedu.address.model.tag.Tag;
 public class ParserUtil {
 
     public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
+    /**
+     * Matches the CLI's reserved parameter-prefix shapes: a single letter followed by {@code /}, or {@code addr/}.
+     * Longer words followed by a slash are treated as field content, such as {@code Mon/Tue} in a remark.
+     */
+    private static final Pattern PARAMETER_PREFIX_PATTERN =
+            Pattern.compile("(?<!\\S)((?i:addr/)|[A-Za-z]/)");
 
     /**
      * Parses an age category using its canonical display form.
@@ -44,7 +55,32 @@ public class ParserUtil {
         if (!StringUtil.isNonZeroUnsignedInteger(trimmedIndex)) {
             throw new ParseException(MESSAGE_INVALID_INDEX);
         }
-        return Index.fromOneBased(Integer.parseInt(trimmedIndex));
+        BigInteger parsedIndex = new BigInteger(trimmedIndex);
+        BigInteger maximumIndex = BigInteger.valueOf(Integer.MAX_VALUE);
+        int boundedIndex = parsedIndex.min(maximumIndex).intValue();
+        return Index.fromOneBased(boundedIndex);
+    }
+
+    /**
+     * Rejects the first parameter-like prefix that is not supported by the command.
+     */
+    public static void verifyNoUnknownPrefixes(String arguments, String commandUsage,
+            Prefix... allowedPrefixes) throws ParseException {
+        requireNonNull(arguments);
+        requireNonNull(commandUsage);
+        Set<String> allowed = new HashSet<>();
+        for (Prefix prefix : allowedPrefixes) {
+            allowed.add(prefix.getPrefix().toLowerCase(Locale.ROOT));
+        }
+
+        Matcher matcher = PARAMETER_PREFIX_PATTERN.matcher(arguments);
+        while (matcher.find()) {
+            String suppliedPrefix = matcher.group(1);
+            if (!allowed.contains(suppliedPrefix.toLowerCase(Locale.ROOT))) {
+                throw new ParseException(String.format(Messages.MESSAGE_UNKNOWN_PARAMETER,
+                        suppliedPrefix, commandUsage));
+            }
+        }
     }
 
     /**

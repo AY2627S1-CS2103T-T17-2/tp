@@ -32,6 +32,8 @@ public class AddCommandParserTest {
         assertParseSuccess(parser, validArgs, new AddCommand(expected));
         assertParseSuccess(parser, "  e/avery.tan@example.com p/91234567 a/under   14 n/Avery Tan  ",
                 new AddCommand(expected));
+        assertParseSuccess(parser, "  E/avery.tan@example.com P/91234567 A/under 14 N/Avery Tan  ",
+                new AddCommand(expected));
     }
 
     @Test
@@ -57,6 +59,22 @@ public class AddCommandParserTest {
             assertParseFailure(parser, validArgs.replace(field, ""), expected);
         }
         assertParseFailure(parser, "unexpected" + validArgs, expected);
+    }
+
+    @Test
+    public void parse_unknownParameter_failure() {
+        assertParseFailure(parser, validArgs + " x/value",
+                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "x/", AddCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_slashInFreeText_success() {
+        Person expected = new PersonBuilder().withName("Avery Tan").withAgeCategory("Under 14")
+                .withPhone("91234567").withEmail("avery.tan@example.com")
+                .withAddress("Level Two/Three").withRemark("Available Mon/Tue").withTags().build();
+
+        assertParseSuccess(parser, validArgs + " addr/Level Two/Three r/Available Mon/Tue",
+                new AddCommand(expected));
     }
 
     @Test

@@ -19,21 +19,27 @@ public class FilterCommandParserTest {
             assertParseSuccess(parser, " a/" + category, new FilterCommand(new AgeCategory(category)));
         }
         assertParseSuccess(parser, "  a/uNdEr   14  ", new FilterCommand(new AgeCategory("Under 14")));
+        assertParseSuccess(parser, "  A/OPEN  ", new FilterCommand(new AgeCategory("Open")));
     }
 
     @Test
     public void parse_missingPrefixOrUnexpectedPreamble_failure() {
-        for (String input : new String[] {"", "  ", " Under 14", " A/Under 14", " extra a/Open", " n/Amy a/Open"}) {
+        for (String input : new String[] {"", "  ", " Under 14", " extra a/Open"}) {
             assertParseFailure(parser, input,
                     String.format(MESSAGE_INVALID_COMMAND_FORMAT, FilterCommand.MESSAGE_USAGE));
         }
+        assertParseFailure(parser, " n/Amy a/Open",
+                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "n/", FilterCommand.MESSAGE_USAGE));
     }
 
     @Test
     public void parse_invalidCategoryOrExtraArguments_failure() {
-        for (String input : new String[] {"", "Under 15", "14", "Under", "Open extra", "Open n/Amy", "Open t/sprint",
-            "Open x/other", "Under 14, Under 16"}) {
+        for (String input : new String[] {"", "Under 15", "14", "Under", "Open extra", "Under 14, Under 16"}) {
             assertParseFailure(parser, " a/" + input, AgeCategory.MESSAGE_CONSTRAINTS);
+        }
+        for (String prefix : new String[] {"n/", "t/", "x/"}) {
+            assertParseFailure(parser, " a/Open " + prefix + "other",
+                    String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, prefix, FilterCommand.MESSAGE_USAGE));
         }
     }
 
