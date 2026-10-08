@@ -7,13 +7,14 @@ import static seedu.address.logic.commands.CommandTestUtil.DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.logic.commands.CommandTestUtil.showPersonAtIndex;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,8 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.person.AgeCategory;
+import seedu.address.model.person.AgeCategoryPredicate;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
@@ -37,11 +40,14 @@ public class EditCommandTest {
 
     @Test
     public void execute_allFieldsSpecifiedUnfilteredList_success() {
-        Person editedPerson = new PersonBuilder().build();
+        Person editedPerson = new PersonBuilder(model.getFilteredPersonList().get(0))
+                .withName(VALID_NAME_BOB).withAgeCategory("Under 16")
+                .withPhone(VALID_PHONE_BOB).withEmail("bob@example.com").build();
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(editedPerson).build();
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
 
-        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
+        String expectedMessage = String.format(
+                EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson));
 
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
@@ -55,14 +61,14 @@ public class EditCommandTest {
         Person lastPerson = model.getFilteredPersonList().get(indexLastPerson.getZeroBased());
 
         PersonBuilder personInList = new PersonBuilder(lastPerson);
-        Person editedPerson = personInList.withName(VALID_NAME_BOB).withPhone(VALID_PHONE_BOB)
-                .withTags(VALID_TAG_HUSBAND).build();
+        Person editedPerson = personInList.withName(VALID_NAME_BOB).withPhone(VALID_PHONE_BOB).build();
 
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB)
-                .withPhone(VALID_PHONE_BOB).withTags(VALID_TAG_HUSBAND).build();
+                .withPhone(VALID_PHONE_BOB).build();
         EditCommand editCommand = new EditCommand(indexLastPerson, descriptor);
 
-        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
+        String expectedMessage = String.format(
+                EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson));
 
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(lastPerson, editedPerson);
@@ -75,7 +81,8 @@ public class EditCommandTest {
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, new EditPersonDescriptor());
         Person editedPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
 
-        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
+        String expectedMessage = String.format(
+                EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson));
 
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
 
@@ -91,7 +98,8 @@ public class EditCommandTest {
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON,
                 new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).build());
 
-        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
+        String expectedMessage = String.format(
+                EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson));
 
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
@@ -144,6 +152,80 @@ public class EditCommandTest {
                 new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).build());
 
         assertCommandFailure(editCommand, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+    }
+
+    @Test
+    public void execute_tagsOnly_replacesAndClearsWhilePreservingOtherDetails() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        new EditCommand(INDEX_FIRST_PERSON, new EditPersonDescriptorBuilder()
+                .withTags("sprinter", "relay").build()).execute(model);
+        Person edited = model.getFilteredPersonList().get(0);
+        assertEquals(new PersonBuilder(original).withTags("sprinter", "relay").build(), edited);
+        assertEquals(original.getRemark(), edited.getRemark());
+        new EditCommand(INDEX_FIRST_PERSON, new EditPersonDescriptorBuilder().withTags().build()).execute(model);
+        Person cleared = model.getFilteredPersonList().get(0);
+        assertEquals(new PersonBuilder(original).withTags().build(), cleared);
+        assertEquals(original.getRemark(), cleared.getRemark());
+    }
+
+    @Test
+    public void execute_addressOnly_preservesOtherDetails() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withAddress("456 Main Street").build()).execute(model);
+        Person edited = model.getFilteredPersonList().get(0);
+        assertEquals(new PersonBuilder(original).withAddress("456 Main Street").build(), edited);
+        assertEquals(original.getRemark(), edited.getRemark());
+    }
+
+    @Test
+    public void execute_ageCategoryOnly_preservesOtherDetails() throws Exception {
+        Person original = new PersonBuilder().withAddress("123 Main Street")
+                .withTags("sprinter").withRemark("Personal best: 12.34s").build();
+        model.addPerson(original);
+        Index index = Index.fromOneBased(model.getFilteredPersonList().size());
+        EditCommand command = new EditCommand(index,
+                new EditPersonDescriptorBuilder().withAgeCategory("Under 14").build());
+        command.execute(model);
+        Person edited = model.getFilteredPersonList().get(index.getZeroBased());
+        assertEquals(new PersonBuilder(original).withAgeCategory("Under 14").build(), edited);
+        // Person.equals does not compare remarks, so check it explicitly.
+        assertEquals(original.getRemark(), edited.getRemark());
+    }
+
+    @Test
+    public void execute_ageFilteredList_usesDisplayedIndexAndShowsAll() throws Exception {
+        Person original = new PersonBuilder().withAgeCategory("Under 14").build();
+        model.addPerson(original);
+        model.updateFilteredPersonList(new AgeCategoryPredicate(new AgeCategory("Under 14")));
+        assertEquals(List.of(original), model.getFilteredPersonList());
+        new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withAgeCategory("Under 16").build()).execute(model);
+        assertEquals(model.getAddressBook().getPersonList(), model.getFilteredPersonList());
+        assertTrue(model.getFilteredPersonList().contains(
+                new PersonBuilder(original).withAgeCategory("Under 16").build()));
+    }
+
+    @Test
+    public void execute_ageChangeCreatesNormalizedDuplicate_failure() {
+        Person first = new PersonBuilder().withAgeCategory("Under 14").withTags("sprinter").build();
+        Person second = new PersonBuilder(first).withName("AMY   BEE")
+                .withEmail("AMY@gmail.com").withAgeCategory("Under 16").withRemark("Keep me").build();
+        model.addPerson(first);
+        model.addPerson(second);
+        model.updateFilteredPersonList(new AgeCategoryPredicate(new AgeCategory("Under 16")));
+        EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withAgeCategory("Under 14").build());
+        assertCommandFailure(command, model, EditCommand.MESSAGE_DUPLICATE_PERSON);
+        assertEquals(second.getRemark(), model.getFilteredPersonList().get(0).getRemark());
+    }
+
+    @Test
+    public void execute_sameValues_success() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        new EditCommand(INDEX_FIRST_PERSON, new EditPersonDescriptorBuilder(original).build()).execute(model);
+        assertEquals(original, model.getFilteredPersonList().get(0));
+        assertEquals(original.getRemark(), model.getFilteredPersonList().get(0).getRemark());
     }
 
     @Test

@@ -90,16 +90,18 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_addAthlete_persistsAndPreservesCategory() throws Exception {
+    public void execute_editAthlete_persistsCategoryAndPreservesOtherDetails() throws Exception {
         String command = "add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com";
         assertEquals("New athlete added: Avery Tan; Age category: Under 14; Phone: 91234567; "
                 + "Email: avery.tan@example.com", logic.execute(command).getFeedbackToUser());
-        logic.execute("edit 1 a/Training centre p/92345678");
+        logic.execute("edit 1 a/Under 16 addr/Training centre p/92345678 t/sprinter t/relay");
         logic.execute("remark 1 r/Sprints");
         Person athlete = model.getFilteredPersonList().get(0);
-        assertEquals(new AgeCategory("Under 14"), athlete.getAgeCategory());
+        assertEquals(new AgeCategory("Under 16"), athlete.getAgeCategory());
         assertEquals("Sprints", athlete.getRemark().value);
         assertEquals("Training centre", athlete.getAddress().value);
+        assertEquals(2, athlete.getTags().size());
+        assertEquals("92345678", athlete.getPhone().value);
         JsonAddressBookStorage reloadedStorage =
                 new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
         Model reloaded = new ModelManager(reloadedStorage.readAddressBook().orElseThrow(), new UserPrefs());
