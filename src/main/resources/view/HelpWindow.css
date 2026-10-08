@@ -1,19 +1,65 @@
-#copyButton, #helpMessage {
-    -fx-text-fill: white;
+.root {
+    -fx-font-family: "System";
+    -fx-font-size: 14px;
+    -fx-background-color: #20242b;
 }
 
-#copyButton {
-    -fx-background-color: dimgray;
+.scroll-pane, .scroll-pane > .viewport {
+    -fx-background-color: #20242b;
 }
 
-#copyButton:hover {
-    -fx-background-color: gray;
+.scroll-pane {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
 }
 
-#copyButton:armed {
-    -fx-background-color: darkgray;
+.help-content {
+    -fx-padding: 28;
 }
 
-#helpMessageContainer {
-    -fx-background-color: derive(#1d1d1d, 20%);
+.label {
+    -fx-text-fill: #e8edf3;
+}
+
+.help-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.help-subtitle, .command-description {
+    -fx-text-fill: #c1cad6;
+    -fx-line-spacing: 3;
+}
+
+.help-notes {
+    -fx-background-color: #2a3441;
+    -fx-background-radius: 8;
+    -fx-padding: 16;
+}
+
+.command-card {
+    -fx-background-color: #2b3039;
+    -fx-background-radius: 8;
+    -fx-border-color: #3c4552;
+    -fx-border-radius: 8;
+    -fx-padding: 18;
+}
+
+.command-heading {
+    -fx-font-size: 21px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #93c5fd;
+}
+
+.field-heading {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #c1cad6;
+}
+
+.command-code {
+    -fx-font-family: "monospace";
+    -fx-background-color: #20242b;
+    -fx-background-radius: 4;
+    -fx-padding: 9 12;
 }
