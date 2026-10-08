@@ -48,10 +48,41 @@
 
 /* ---------- Window chrome ---------- */
 
-.menu-bar {
+.top-bar {
     -fx-background-color: -tf-line, -tf-chrome;
     -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0 16 1 0;
+}
+
+.menu-bar {
+    -fx-background-color: transparent;
     -fx-padding: 2 8 2 8;
+}
+
+.brand-lane {
+    -fx-fill: transparent;
+    -fx-stroke: -tf-accent;
+    -fx-stroke-width: 1.75;
+    -fx-stroke-line-cap: round;
+}
+
+.brand-lane-mid {
+    -fx-opacity: 0.55;
+}
+
+.brand-lane-inner {
+    -fx-opacity: 0.3;
+}
+
+.brand-label {
+    -fx-font-family: "Plus Jakarta Sans";
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: -tf-text;
+}
+
+.brand-label-accent {
+    -fx-text-fill: -tf-accent;
 }
 
 .menu-bar .menu {
