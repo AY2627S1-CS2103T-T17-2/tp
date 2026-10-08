@@ -36,7 +36,7 @@ Interface (GUI).
 
    * `add n/John Doe a/Open p/98765432 e/johnd@example.com` : Adds an athlete named `John Doe` with age category `Open`.
 
-   * `filter a/Under 14` : Shows athletes in that age category. Use `list` to show everyone again.
+   * `filter a/Under 14`: Shows athletes in that age category. Use `list` to show everyone again.
 
    * `delete 3` : Deletes the 3rd athlete shown in the current list.
 
@@ -150,37 +150,28 @@ Examples:
 
 ### Filtering athletes by age category: `filter`
 
-Shows athletes whose recorded age category matches the requested category.
+Use `filter` to show athletes whose recorded age category matches the category you specify.
 
 Format: `filter a/AGE_CATEGORY`
 
 * Supply exactly one `a/` parameter. Accepted categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`.
-* Category values ignore case and repeated spaces: `filter a/under   14` is equivalent to `filter a/Under 14`.
-  The prefix must be lowercase `a/`.
-* Matching uses the recorded category, not an exact age or eligibility calculation. `Under 16` does not include
-  athletes recorded as `Under 14`.
-* Each `filter` searches the entire roster and replaces any previous `find` or `filter`. Likewise, `find` replaces
-  the age filter. Matching athletes retain their roster order and receive indexes starting from 1.
-* Filtering does not change or delete athlete records. Use `list` to show everyone again, including after no matches.
-  The filter is not saved between application sessions.
-* Missing `a/` shows command usage. An empty or unsupported category (for example, `filter a/Under 15`) shows
-  `Age category must be Under 14, Under 16, Under 18, Under 20, or Open.` Repeated `a/` parameters and extra
-  arguments are rejected. An invalid filter leaves the previous display and roster unchanged.
+* Category values ignore case and repeated spaces: `filter a/under   14` is equivalent to `filter a/Under 14`. The prefix must be lowercase `a/`.
+* Matching uses the recorded category, not an exact age or eligibility calculation. `Under 16` does not include athletes recorded as `Under 14`.
+* Each `filter` searches the entire roster and replaces any previous `find` or `filter`. Likewise, `find` replaces the age filter. Matching athletes retain their roster order and receive indexes starting from 1.
+* Filtering does not change or delete athlete records. Use `list` to show everyone again, including after no matches. TrackFlow does not save the filter between application sessions.
+* Missing `a/` shows command usage. An empty or unsupported category (for example, `filter a/Under 15`) shows `Age category must be Under 14, Under 16, Under 18, Under 20, or Open.` Repeated `a/` parameters and extra arguments are rejected. An invalid filter leaves the previous display and roster unchanged.
 
 Feedback examples:
 
 * Two matches: `Displaying 2 athletes in age category Under 14.`
 * One match: `Displaying 1 athlete in age category Under 14.`
-* No matches (including an empty roster): `No athletes found in age category Under 14 (0 matches).`
-  The displayed list is empty; this is a successful search, not an error.
+* No matches (including an empty roster): `No athletes found in age category Under 14 (0 matches).` The displayed list is empty; this is a successful search, not an error.
 
-Example workflow:
+To filter the roster and return to the complete list, follow these steps:
 
-1. `filter a/Under 14` displays only athletes recorded as `Under 14`.
-2. Check the displayed names and indexes. The existing `delete 1` command permanently removes the first displayed
-   athlete. The age filter stays active and the remaining results are renumbered. An index outside the displayed
-   list is rejected even if it exists in the full roster.
-3. `list` restores all remaining athletes.
+1. Run `filter a/Under 14`. TrackFlow displays only athletes recorded as `Under 14`.
+1. Review the displayed athletes. If you use an indexed command, use the indexes in this filtered list. An index outside the displayed list is invalid even if it exists in the full roster.
+1. Run `list` to display the complete roster again.
 
 ### Editing an athlete: `edit`
 

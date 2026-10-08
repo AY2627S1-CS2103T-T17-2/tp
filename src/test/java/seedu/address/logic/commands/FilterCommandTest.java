@@ -44,34 +44,63 @@ public class FilterCommandTest {
     }
 
     @Test
-    public void execute_noMatchesAndEmptyRoster_clearDisplay() throws Exception {
+    public void execute_emptyRoster_displaysNoMatches() throws Exception {
         assertEquals("No athletes found in age category Open (0 matches).",
                 parser.parseCommand("filter a/Open").execute(model).getFeedbackToUser());
+        assertTrue(model.getFilteredPersonList().isEmpty());
+    }
+
+    @Test
+    public void execute_noMatches_clearsDisplay() throws Exception {
         populateRoster();
         assertEquals("No athletes found in age category Under 20 (0 matches).",
                 parser.parseCommand("filter a/Under 20").execute(model).getFeedbackToUser());
         assertTrue(model.getFilteredPersonList().isEmpty());
-        assertEquals(3, model.getAddressBook().getPersonList().size());
+        assertEquals(List.of(open, junior, otherJunior), model.getAddressBook().getPersonList());
     }
 
     @Test
-    public void execute_replacesPreviousFilterOrFind_listRestoresEveryone() throws Exception {
+    public void execute_previousNameSearch_replacesSearch() throws Exception {
         populateRoster();
         parser.parseCommand("find Alex").execute(model);
+
         parser.parseCommand("filter a/Under 14").execute(model);
+
         assertEquals(List.of(junior, otherJunior), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_previousCategoryFilter_replacesFilter() throws Exception {
+        populateRoster();
+        parser.parseCommand("filter a/Under 14").execute(model);
+
         assertEquals("Displaying 1 athlete in age category Open.",
                 parser.parseCommand("filter a/Open").execute(model).getFeedbackToUser());
         assertEquals(List.of(open), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_findAfterFilter_replacesFilter() throws Exception {
+        populateRoster();
+        parser.parseCommand("filter a/Open").execute(model);
+
         parser.parseCommand("find Beth").execute(model);
+
         assertEquals(List.of(junior), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_listAfterEmptyFilter_restoresRoster() throws Exception {
+        populateRoster();
         parser.parseCommand("filter a/Under 20").execute(model);
+
         parser.parseCommand("list").execute(model);
+
         assertEquals(List.of(open, junior, otherJunior), model.getFilteredPersonList());
     }
 
     @Test
-    public void execute_existingDeleteUsesFilteredIndexAndRetainsFilter() throws Exception {
+    public void execute_deleteAfterFilter_usesDisplayedIndexAndRetainsFilter() throws Exception {
         populateRoster();
         parser.parseCommand("filter a/Under 14").execute(model);
         parser.parseCommand("delete 1").execute(model);
@@ -95,14 +124,23 @@ public class FilterCommandTest {
     }
 
     @Test
-    public void equals_comparesCategory() {
+    public void equals() {
         FilterCommand command = new FilterCommand(new AgeCategory("Under 14"));
         assertTrue(command.equals(command));
         assertEquals(command, new FilterCommand(new AgeCategory("under 14")));
         assertFalse(command.equals(new FilterCommand(new AgeCategory("Open"))));
         assertFalse(command.equals(null));
         assertFalse(command.equals("Under 14"));
+    }
+
+    @Test
+    public void constructor_nullCategory_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new FilterCommand(null));
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        FilterCommand command = new FilterCommand(new AgeCategory("Under 14"));
         assertThrows(NullPointerException.class, () -> command.execute(null));
     }
 }
