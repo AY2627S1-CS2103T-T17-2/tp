@@ -162,7 +162,7 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
-### Command Autocomplete
+### Command autocomplete
 
 The command autocomplete feature is facilitated by `CommandBox` and `AutocompleteEngine`.
 It provides real-time dropdown suggestions for commands based on the user's input, and an intelligent prefix insertion mechanism to guide the user in completing complex commands.
@@ -171,7 +171,7 @@ It provides real-time dropdown suggestions for commands based on the user's inpu
 
 * `AutocompleteEngine` stores a predefined list of command templates (e.g., `"add n/ a/ p/ e/ addr/"`).
 * `CommandBox` listens to changes in the `TextField`'s `textProperty`. For every keystroke, it asks the `AutocompleteEngine` for matching suggestions and displays them using a JavaFX `Popup` containing a `ListView`.
-* **Selection:** When the user selects a suggestion (via Mouse Click, `Tab`, or `Enter`), the `CommandBox` inserts the command word (e.g., `add `) and calls `AutocompleteEngine#getNextPrefix` to determine the first required prefix, appending it automatically.
+* **Selection:** When the user selects a suggestion (via Mouse Click, `Tab`, or `Enter`), the `CommandBox` inserts the command word (e.g., `add `) leaving space for the user to insert an index if required.
 * **Incremental Prefix Insertion:** If the user presses `Tab` while the suggestion dropdown is closed, `CommandBox` uses `AutocompleteEngine#getNextPrefix` to scan the current input and append the next missing prefix based on the command's template. This allows the user to construct the command sequentially by pressing `Tab` after entering each parameter's data.
 
 #### Design Considerations

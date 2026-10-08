@@ -81,7 +81,10 @@ public class PersonListPanel extends UiPart<Region> {
             }
         }
     }
-
+    /**
+     * Adds the person to the known persons map if they haven't been seen before.
+     * Uses weak references to allow deleted athletes to be garbage collected.
+     */
     private boolean addToKnownPersonsIfNew(Person person) {
         int hash = System.identityHashCode(person);
         List<WeakReference<Person>> bucket = knownPersons.computeIfAbsent(hash, k -> new ArrayList<>());
