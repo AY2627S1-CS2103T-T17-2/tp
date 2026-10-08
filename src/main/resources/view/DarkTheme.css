@@ -303,7 +303,17 @@
 
 #cardPane {
     -fx-background-color: transparent;
-    -fx-border-width: 0;
+    /* Reserves room for the new-athlete stripe so that rows never shift when it appears. */
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 3;
+}
+
+#personListView .list-cell:new-athlete {
+    -fx-background-color: -tf-line, #231e22;
+}
+
+#personListView .list-cell:new-athlete #cardPane {
+    -fx-border-color: transparent transparent transparent -tf-accent;
 }
 
 .cell_index {

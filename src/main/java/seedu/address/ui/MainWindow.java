@@ -182,6 +182,7 @@ public class MainWindow extends UiPart<Stage> {
         try {
             CommandResult commandResult = logic.execute(commandText);
             logger.info("Result: " + commandResult.getFeedbackToUser());
+            personListPanel.highlightNewlyAddedPerson();
             resultDisplay.showSuccess(commandResult.getFeedbackToUser());
             statusBarFooter.showSaved();
 
@@ -196,6 +197,7 @@ public class MainWindow extends UiPart<Stage> {
             return commandResult;
         } catch (CommandException | ParseException e) {
             logger.info("An error occurred while executing command: " + commandText);
+            personListPanel.highlightNewlyAddedPerson();
             resultDisplay.showError(e.getMessage());
             if (e.getCause() instanceof IOException) {
                 statusBarFooter.showNotSaved();
