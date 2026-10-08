@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.DESC_BOB;
@@ -9,10 +10,15 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_EMAIL_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
+import seedu.address.model.person.Address;
 import seedu.address.model.person.AgeCategory;
+import seedu.address.model.tag.Tag;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 
 public class EditPersonDescriptorTest {
@@ -64,13 +70,42 @@ public class EditPersonDescriptorTest {
     }
 
     @Test
+    public void addressOnly_countsAsEditAndIsCopied() {
+        EditPersonDescriptor descriptor = new EditPersonDescriptor();
+        descriptor.setAddress(new Address("123 Main Street"));
+        assertTrue(descriptor.isAnyFieldEdited());
+        EditPersonDescriptor copy = new EditPersonDescriptor(descriptor);
+        descriptor.setAddress(new Address("456 Main Street"));
+        assertEquals(new Address("123 Main Street"), copy.getAddress().orElseThrow());
+        assertFalse(descriptor.equals(copy));
+    }
+
+    @Test
+    public void tags_defensiveCopyAndEmptyReplacement() {
+        Set<Tag> tags = new HashSet<>(Set.of(new Tag("sprinter")));
+        EditPersonDescriptor descriptor = new EditPersonDescriptor();
+        descriptor.setTags(tags);
+        EditPersonDescriptor copy = new EditPersonDescriptor(descriptor);
+        tags.clear();
+        assertEquals(Set.of(new Tag("sprinter")), descriptor.getTags().orElseThrow());
+        assertThrows(UnsupportedOperationException.class, descriptor.getTags().orElseThrow()::clear);
+        descriptor.setTags(Set.of());
+        assertTrue(descriptor.isAnyFieldEdited());
+        assertEquals(Set.of(), descriptor.getTags().orElseThrow());
+        assertEquals(Set.of(new Tag("sprinter")), copy.getTags().orElseThrow());
+        assertFalse(descriptor.equals(copy));
+    }
+
+    @Test
     public void toStringMethod() {
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
         String expected = EditPersonDescriptor.class.getCanonicalName() + "{name="
                 + editPersonDescriptor.getName().orElse(null) + ", phone="
                 + editPersonDescriptor.getPhone().orElse(null) + ", email="
                 + editPersonDescriptor.getEmail().orElse(null) + ", ageCategory="
-                + editPersonDescriptor.getAgeCategory().orElse(null) + "}";
+                + editPersonDescriptor.getAgeCategory().orElse(null) + ", address="
+                + editPersonDescriptor.getAddress().orElse(null) + ", tags="
+                + editPersonDescriptor.getTags().orElse(null) + "}";
         assertEquals(expected, editPersonDescriptor.toString());
     }
 }

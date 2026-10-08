@@ -1,15 +1,20 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.CollectionUtil;
@@ -17,11 +22,13 @@ import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
+import seedu.address.model.person.Address;
 import seedu.address.model.person.AgeCategory;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.tag.Tag;
 
 /**
  * Edits the details of an existing athlete in the roster.
@@ -37,7 +44,9 @@ public class EditCommand extends Command {
             + "[" + PREFIX_NAME + "NAME] "
             + "[" + PREFIX_AGE_CATEGORY + "AGE_CATEGORY] "
             + "[" + PREFIX_PHONE + "PHONE] "
-            + "[" + PREFIX_EMAIL + "EMAIL]\n"
+            + "[" + PREFIX_EMAIL + "EMAIL] "
+            + "[" + PREFIX_ADDRESS + "ADDRESS] "
+            + "[" + PREFIX_TAG + "TAG]...\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_PHONE + "91234567 "
             + PREFIX_EMAIL + "johndoe@example.com";
@@ -94,8 +103,12 @@ public class EditCommand extends Command {
         Email updatedEmail = editPersonDescriptor.getEmail().orElse(personToEdit.getEmail());
         AgeCategory updatedAgeCategory = editPersonDescriptor.getAgeCategory().orElse(personToEdit.getAgeCategory());
 
+        Address updatedAddress = editPersonDescriptor.getAddress().orElse(personToEdit.getAddress());
+
+        Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
+
         return new Person(updatedName, updatedAgeCategory, updatedPhone, updatedEmail,
-                personToEdit.getAddress(), personToEdit.getRemark(), personToEdit.getTags());
+                updatedAddress, personToEdit.getRemark(), updatedTags);
     }
 
     @Override
@@ -122,7 +135,7 @@ public class EditCommand extends Command {
     }
 
     /**
-     * Stores the details to edit the person with. Each non-empty field value will replace the
+     * Stores the details to edit the person with. Each provided field value will replace the
      * corresponding field value of the person.
      */
     public static class EditPersonDescriptor {
@@ -130,6 +143,8 @@ public class EditCommand extends Command {
         private Phone phone;
         private Email email;
         private AgeCategory ageCategory;
+        private Address address;
+        private Set<Tag> tags;
 
         public EditPersonDescriptor() {}
 
@@ -141,13 +156,15 @@ public class EditCommand extends Command {
             setPhone(toCopy.phone);
             setEmail(toCopy.email);
             setAgeCategory(toCopy.ageCategory);
+            setAddress(toCopy.address);
+            setTags(toCopy.tags);
         }
 
         /**
          * Returns true if at least one field is edited.
          */
         public boolean isAnyFieldEdited() {
-            return CollectionUtil.isAnyNonNull(name, phone, email, ageCategory);
+            return CollectionUtil.isAnyNonNull(name, phone, email, ageCategory, address, tags);
         }
 
         public void setName(Name name) {
@@ -182,6 +199,28 @@ public class EditCommand extends Command {
             return Optional.ofNullable(ageCategory);
         }
 
+        public void setAddress(Address address) {
+            this.address = address;
+        }
+
+        public Optional<Address> getAddress() {
+            return Optional.ofNullable(address);
+        }
+
+        /**
+         * Sets the replacement tags using a defensive copy. Null means tags are not edited.
+         */
+        public void setTags(Set<Tag> tags) {
+            this.tags = tags == null ? null : new HashSet<>(tags);
+        }
+
+        /**
+         * Returns an unmodifiable replacement tag set, or empty if tags are not edited.
+         */
+        public Optional<Set<Tag>> getTags() {
+            return tags == null ? Optional.empty() : Optional.of(Collections.unmodifiableSet(tags));
+        }
+
         @Override
         public boolean equals(Object other) {
             if (other == this) {
@@ -196,7 +235,9 @@ public class EditCommand extends Command {
             return Objects.equals(name, otherEditPersonDescriptor.name)
                     && Objects.equals(phone, otherEditPersonDescriptor.phone)
                     && Objects.equals(email, otherEditPersonDescriptor.email)
-                    && Objects.equals(ageCategory, otherEditPersonDescriptor.ageCategory);
+                    && Objects.equals(ageCategory, otherEditPersonDescriptor.ageCategory)
+                    && Objects.equals(address, otherEditPersonDescriptor.address)
+                    && Objects.equals(tags, otherEditPersonDescriptor.tags);
         }
 
         @Override
@@ -206,6 +247,8 @@ public class EditCommand extends Command {
                     .add("phone", phone)
                     .add("email", email)
                     .add("ageCategory", ageCategory)
+                    .add("address", address)
+                    .add("tags", tags)
                     .toString();
         }
     }

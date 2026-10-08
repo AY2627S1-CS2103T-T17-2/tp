@@ -155,6 +155,30 @@ public class EditCommandTest {
     }
 
     @Test
+    public void execute_tagsOnly_replacesAndClearsWhilePreservingOtherDetails() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        new EditCommand(INDEX_FIRST_PERSON, new EditPersonDescriptorBuilder()
+                .withTags("sprinter", "relay").build()).execute(model);
+        Person edited = model.getFilteredPersonList().get(0);
+        assertEquals(new PersonBuilder(original).withTags("sprinter", "relay").build(), edited);
+        assertEquals(original.getRemark(), edited.getRemark());
+        new EditCommand(INDEX_FIRST_PERSON, new EditPersonDescriptorBuilder().withTags().build()).execute(model);
+        Person cleared = model.getFilteredPersonList().get(0);
+        assertEquals(new PersonBuilder(original).withTags().build(), cleared);
+        assertEquals(original.getRemark(), cleared.getRemark());
+    }
+
+    @Test
+    public void execute_addressOnly_preservesOtherDetails() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withAddress("456 Main Street").build()).execute(model);
+        Person edited = model.getFilteredPersonList().get(0);
+        assertEquals(new PersonBuilder(original).withAddress("456 Main Street").build(), edited);
+        assertEquals(original.getRemark(), edited.getRemark());
+    }
+
+    @Test
     public void execute_ageCategoryOnly_preservesOtherDetails() throws Exception {
         Person original = new PersonBuilder().withAddress("123 Main Street")
                 .withTags("sprinter").withRemark("Personal best: 12.34s").build();

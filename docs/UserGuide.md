@@ -110,7 +110,7 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL`
 * Phones retain the existing rule: digits only, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
 * Emails retain the existing email validation rules.
 * A duplicate is rejected only when normalized name, age category, phone, and email all match. Name comparisons ignore case and repeated spaces; email comparisons ignore case. Shared names or family contact details alone are allowed.
-* Add does not accept addresses, tags, or remarks. `edit` updates the four athlete fields, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Existing stored addresses and tags are retained but cannot be edited through these commands.
+* Add does not accept addresses, tags, or remarks. `edit` updates athlete details and addresses, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses. Use `t/` with `edit` to replace or clear tags.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
   existing address, tags, and remarks.
 
@@ -177,18 +177,23 @@ To filter the roster and return to the complete list, follow these steps:
 
 Edits an existing athlete in the roster.
 
-Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL]`
+Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [t/TAG]...`
 
 * Edits the athlete at the specified `INDEX`. The index refers to the index number shown in the displayed athlete list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
-* Omitted fields retain their current values. Stored addresses, tags, and remarks are preserved.
+* Omitted fields retain their current values. Stored remarks are preserved.
 * `a/` now means age category, replacing the old address syntax. Supported categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`; case and extra whitespace are normalized.
-* Repeated field prefixes, empty or invalid values, and `t/` or `r/` parameters are rejected.
+* Use `addr/ADDRESS` to edit the address. An empty or whitespace-only address is rejected.
+* Repeated single-valued field prefixes, empty or invalid values, and `r/` parameters are rejected.
+* Tags can be repeated: `t/sprinter t/relay` replaces all existing tags. Omit `t/` to retain tags, or use a single empty `t/` to clear them. Duplicate tags collapse into one; an empty tag mixed with other tags is rejected.
 * Edits that create a duplicate athlete are rejected using the same normalized four-field comparison as `add`.
 * A successful edit displays the full roster again; failed edits leave the roster and displayed list unchanged.
 
 Examples:
+*  `edit 1 t/sprinter t/relay` Replaces the 1st athlete's tags.
+*  `edit 1 t/` Clears the 1st athlete's tags.
+*  `edit 1 addr/123 Main Street` Updates the 1st athlete's address.
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st athlete to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower a/Under 16` Edits the name and age category of the 2nd athlete, retaining their other details.
 
@@ -298,7 +303,7 @@ Action     | Format, Examples
 **Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS] [t/TAG]...`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List**   | `list`

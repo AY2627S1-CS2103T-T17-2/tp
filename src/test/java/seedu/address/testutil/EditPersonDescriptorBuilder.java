@@ -1,11 +1,13 @@
 package seedu.address.testutil;
 
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
+import seedu.address.model.person.Address;
 import seedu.address.model.person.AgeCategory;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.util.SampleDataUtil;
 
 /**
  * A utility class to help with building EditPersonDescriptor objects.
@@ -31,6 +33,8 @@ public class EditPersonDescriptorBuilder {
         descriptor.setPhone(person.getPhone());
         descriptor.setEmail(person.getEmail());
         descriptor.setAgeCategory(person.getAgeCategory());
+        descriptor.setAddress(person.getAddress());
+        descriptor.setTags(person.getTags());
     }
 
     /**
@@ -62,6 +66,22 @@ public class EditPersonDescriptorBuilder {
      */
     public EditPersonDescriptorBuilder withAgeCategory(String ageCategory) {
         descriptor.setAgeCategory(new AgeCategory(ageCategory));
+        return this;
+    }
+
+    /**
+     * Sets the athlete's address in the descriptor.
+     */
+    public EditPersonDescriptorBuilder withAddress(String address) {
+        descriptor.setAddress(new Address(address));
+        return this;
+    }
+
+    /**
+     * Sets the replacement tags in the descriptor.
+     */
+    public EditPersonDescriptorBuilder withTags(String... tags) {
+        descriptor.setTags(SampleDataUtil.getTagSet(tags));
         return this;
     }
 

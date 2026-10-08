@@ -10,6 +10,7 @@ import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_EMAIL_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_AMY;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
@@ -24,10 +25,12 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.EditCommand;
+import seedu.address.model.person.Address;
 import seedu.address.model.person.AgeCategory;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Phone;
+import seedu.address.model.tag.Tag;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 
 public class EditCommandParserTest {
@@ -99,7 +102,7 @@ public class EditCommandParserTest {
 
     @Test
     public void parse_repeatedFields_failure() {
-        for (Prefix prefix : List.of(PREFIX_NAME, PREFIX_AGE_CATEGORY, PREFIX_PHONE, PREFIX_EMAIL)) {
+        for (Prefix prefix : List.of(PREFIX_NAME, PREFIX_AGE_CATEGORY, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS)) {
             assertParseFailure(parser, "1 " + prefix + " " + prefix + "invalid",
                     Messages.getErrorMessageForDuplicatePrefixes(prefix));
         }
@@ -109,8 +112,43 @@ public class EditCommandParserTest {
     }
 
     @Test
+    public void parse_addressOnlyAndCombinedWithAge_success() {
+        assertParseSuccess(parser, "1 addr/  123 Main Street  ", new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withAddress("123 Main Street").build()));
+        for (String input : List.of("1 a/Under 16 addr/123 Main Street", "1 addr/123 Main Street a/Under 16")) {
+            assertParseSuccess(parser, input, new EditCommand(INDEX_FIRST_PERSON,
+                    new EditPersonDescriptorBuilder().withAddress("123 Main Street")
+                            .withAgeCategory("Under 16").build()));
+        }
+    }
+
+    @Test
+    public void parse_blankAddress_failure() {
+        assertParseFailure(parser, "1 addr/", Address.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "1 addr/   a/Open", Address.MESSAGE_CONSTRAINTS);
+    }
+
+    @Test
+    public void parse_tags_replacesOrClears() {
+        assertParseSuccess(parser, "1 t/sprinter t/relay t/sprinter", new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withTags("sprinter", "relay").build()));
+        assertParseSuccess(parser, "1 t/", new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withTags().build()));
+        assertParseSuccess(parser, "1 t/   a/Under 16 addr/123 Main Street", new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withTags().withAgeCategory("Under 16")
+                        .withAddress("123 Main Street").build()));
+    }
+
+    @Test
+    public void parse_invalidOrMixedEmptyTags_failure() {
+        for (String input : List.of("1 t/sprinter*", "1 t/ t/relay", "1 t/relay t/", "1 t/ t/")) {
+            assertParseFailure(parser, input, Tag.MESSAGE_CONSTRAINTS);
+        }
+    }
+
+    @Test
     public void parse_unsupportedFields_failure() {
-        for (String unsupported : List.of("t/", "t/friend", "r/", "r/fast runner")) {
+        for (String unsupported : List.of("r/", "r/fast runner")) {
             assertParseFailure(parser, "1 " + unsupported, MESSAGE_INVALID_FORMAT);
             assertParseFailure(parser, "1 n/Amy " + unsupported, MESSAGE_INVALID_FORMAT);
             assertParseFailure(parser, "1 " + unsupported + " a/Open", MESSAGE_INVALID_FORMAT);
