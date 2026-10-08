@@ -1,10 +1,10 @@
 package seedu.address.ui;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javafx.application.Platform;
@@ -33,7 +33,7 @@ public class PersonListPanel extends UiPart<Region> {
     private ListView<Person> personListView;
 
     /** Every athlete object that has been shown in the list, compared by identity. */
-    private final Set<Person> knownPersons = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final Map<Integer, List<WeakReference<Person>>> knownPersons = new HashMap<>();
 
     /** Athletes that first appeared in the list since the last command finished. */
     private final List<Person> newPersons = new ArrayList<>();
@@ -51,7 +51,9 @@ public class PersonListPanel extends UiPart<Region> {
         super(FXML);
         personListView.setItems(personList);
         personListView.setCellFactory(listView -> new PersonListViewCell());
-        knownPersons.addAll(personList);
+        for (Person person : personList) {
+            addToKnownPersonsIfNew(person);
+        }
         personList.addListener(this::recordListChange);
     }
 
@@ -59,17 +61,38 @@ public class PersonListPanel extends UiPart<Region> {
      * Records athletes that appear in the list for the first time, and athletes that are removed from it.
      */
     private void recordListChange(ListChangeListener.Change<? extends Person> change) {
+        // Clean up dead references to prevent memory leaks
+        knownPersons.values().removeIf(bucket -> {
+            bucket.removeIf(ref -> ref.get() == null);
+            return bucket.isEmpty();
+        });
+
         while (change.next()) {
             if (change.wasPermutated() || change.wasUpdated()) {
                 continue;
             }
             removedPersons.addAll(change.getRemoved());
             if (change.wasAdded()) {
-                change.getAddedSubList().stream()
-                        .filter(knownPersons::add)
-                        .forEach(newPersons::add);
+                for (Person person : change.getAddedSubList()) {
+                    if (addToKnownPersonsIfNew(person)) {
+                        newPersons.add(person);
+                    }
+                }
             }
         }
+    }
+
+    private boolean addToKnownPersonsIfNew(Person person) {
+        int hash = System.identityHashCode(person);
+        List<WeakReference<Person>> bucket = knownPersons.computeIfAbsent(hash, k -> new ArrayList<>());
+
+        for (WeakReference<Person> ref : bucket) {
+            if (ref.get() == person) {
+                return false;
+            }
+        }
+        bucket.add(new WeakReference<>(person));
+        return true;
     }
 
     /**

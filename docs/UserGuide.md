@@ -78,6 +78,16 @@ Interface (GUI).
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
 
+### Command Autocomplete
+
+TrackFlow provides an autocomplete feature to speed up typing and ensure correct command formats.
+
+* As you type in the command box, a dropdown menu will appear with suggested commands and their required prefixes.
+* Use the **Up** and **Down** arrow keys to navigate the list of suggestions.
+* Press **Tab** or **Enter**, or **Click** on a suggestion, to select it. This will insert the command word and the first prefix into the command box.
+* After you type the data for a parameter, press **Tab** again to automatically insert the next prefix in the sequence. You can keep pressing **Tab** to cycle through all the core prefixes for the command.
+* **Note:** For commands like `add` and `edit`, the autocomplete guides you through the main fields up to the address (`addr/`). If you wish to add optional tags (`t/`) or remarks (`r/`), you can simply type those prefixes manually.
+
 ### Command feedback and errors
 
 After a successful command, TrackFlow displays a confirmation message and clears the command box. If parsing,

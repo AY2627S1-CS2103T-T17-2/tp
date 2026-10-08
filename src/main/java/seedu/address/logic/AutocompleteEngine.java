@@ -12,7 +12,7 @@ public class AutocompleteEngine {
             "add n/ a/ p/ e/ addr/",
             "clear",
             "delete ",
-            "edit ",
+            "edit n/ a/ p/ e/ addr/",
             "exit",
             "filter a/",
             "find ",
