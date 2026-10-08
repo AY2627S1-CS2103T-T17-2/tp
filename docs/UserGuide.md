@@ -34,7 +34,7 @@ Interface (GUI).
 
    * `list` : Lists all athletes.
 
-   * `add n/John Doe a/Open p/98765432 e/johnd@example.com` : Adds an athlete named `John Doe` with age category `Open`.
+   * `add n/John Doe a/Open p/98765432 e/johnd@example.com addr/123 Main Street` : Adds an athlete named `John Doe` with age category `Open`.
 
    * `filter a/Under 14`: Shows athletes in that age category. Use `list` to show everyone again.
 
@@ -60,10 +60,10 @@ Interface (GUI).
   For example, in `add n/NAME`, replace `NAME` with a value such as `John Doe`.
 
 * Items in square brackets are optional.<br>
-  For example, `n/NAME [t/TAG]` can be used as `n/John Doe t/friend` or as `n/John Doe`.
+  For example, `edit INDEX [n/NAME]` can be used as `edit 1 n/John Doe` or as part of an edit with other fields.
 
 * Items followed by `...` can appear zero or more times.<br>
-  For example, `[t/TAG]... ` may be omitted, or written as `t/friend` or `t/friend t/family`.
+  For example, `find KEYWORD [MORE_KEYWORDS]...` can include `Avery` or `Avery Tan`.
 
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
@@ -101,30 +101,26 @@ Format: `help`
 
 ### Adding an athlete: `add`
 
-Adds an athlete with a name, age category, phone number, and email address, plus optional address, remark, and tags.
+Adds an athlete with a name, age category, phone number, email address, and address.
 
-Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL [addr/ADDRESS] [r/REMARK] [t/TAG]...`
+Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS`
 
-* Name, age category, phone, and email are required. Address, remark, and tags are optional.
-* Fields may appear in any order. Each parameter may appear only once, except `t/`, which can be repeated
-  to add multiple tags. Repeated identical tags are stored once.
+* All five fields are required.
+* Fields may appear in any order. Each parameter may appear only once.
 * Age category must be `Under 14`, `Under 16`, `Under 18`, `Under 20`, or `Open`. Category input ignores case and normalizes repeated spaces.
 * Names retain the existing rule: nonblank alphanumeric characters and spaces only.
 * Phones retain the existing rule: digits only, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
 * Emails retain the existing email validation rules.
-* A duplicate is rejected only when normalized name, age category, phone, and email all match. Name comparisons ignore case and repeated spaces; email comparisons ignore case. Shared names or family contact details alone are allowed.
-* Use `addr/ADDRESS` for a nonblank address, `r/REMARK` for a remark, and one `t/TAG` per tag.
-  Tags must be nonblank and alphanumeric. Omitted address and remark default to empty; omitted tags default to none.
-  An empty `r/` is accepted. **`a/` means age category for `add`, `edit`, and `filter`.**
-  Use `edit` to update athlete details, addresses, or tags, and `remark` to update remarks.
+* Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
+* Use `addr/ADDRESS` to supply the required nonblank address.
+* Add does not accept tags or remarks. `edit` updates athlete details and addresses, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
-  existing address, tags, and remarks.
+  existing address, tags, and remarks. Saved rosters are checked using the same duplicate rule on loading.
 
 Examples:
 
-* `add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com`
-* `add e/jordan.lee@example.com p/92345678 a/open n/Jordan Lee`
-* `add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street r/Prefers morning training t/sprints t/relay`
+* `add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street`
+* `add e/jordan.lee@example.com p/92345678 a/open n/Jordan Lee addr/123 Main Street`
 
 Successful output:
 
@@ -184,22 +180,19 @@ To filter the roster and return to the complete list, follow these steps:
 
 Edits an existing athlete in the roster.
 
-Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [t/TAG]...`
+Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]`
 
 * Edits the athlete at the specified `INDEX`. The index refers to the index number shown in the displayed athlete list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
-* Omitted fields retain their current values. Stored remarks are preserved.
+* Omitted fields retain their current values. Stored tags and remarks are preserved.
 * `a/` now means age category, replacing the old address syntax. Supported categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`; case and extra whitespace are normalized.
 * Use `addr/ADDRESS` to edit the address. An empty or whitespace-only address is rejected.
-* Repeated single-valued field prefixes, empty or invalid values, and `r/` parameters are rejected.
-* Tags can be repeated: `t/sprinter t/relay` replaces all existing tags. Omit `t/` to retain tags, or use a single empty `t/` to clear them. Duplicate tags collapse into one; an empty tag mixed with other tags is rejected.
-* Edits that create a duplicate athlete are rejected using the same normalized four-field comparison as `add`.
+* Repeated field prefixes, empty or invalid values, and `t/` or `r/` parameters are rejected.
+* Edits that create a duplicate athlete are rejected using the same normalized name and contact comparison as `add`.
 * A successful edit displays the full roster again; failed edits leave the roster and displayed list unchanged.
 
 Examples:
-*  `edit 1 t/sprinter t/relay` Replaces the 1st athlete's tags.
-*  `edit 1 t/` Clears the 1st athlete's tags.
 *  `edit 1 addr/123 Main Street` Updates the 1st athlete's address.
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st athlete to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower a/Under 16` Edits the name and age category of the 2nd athlete, retaining their other details.
@@ -363,10 +356,10 @@ previous TrackFlow home folder.
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL [addr/ADDRESS] [r/REMARK] [t/TAG]...` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com`
+**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com addr/123 Main Street`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS] [t/TAG]...`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find avery 9123 under`
 **List**   | `list`

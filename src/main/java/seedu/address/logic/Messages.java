@@ -1,5 +1,6 @@
 package seedu.address.logic;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +19,20 @@ public class Messages {
     public static final String MESSAGE_INVALID_PERSON_DISPLAYED_INDEX = "The athlete index provided is invalid.";
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
+
+    public static final String MESSAGE_POSSIBLE_DUPLICATE =
+            "\nWarning: possible duplicate. Phone or email matches another athlete: %1$s. Please review the records.";
+
+    /**
+     * Warns about shared contacts with differently named athletes without blocking the change.
+     */
+    public static String getPossibleDuplicateWarning(Person person, Collection<Person> otherPersons) {
+        String matches = otherPersons.stream()
+                .filter(other -> !person.isSamePerson(other) && person.hasSameContactDetails(other))
+                .map(other -> other.getName().toString())
+                .collect(Collectors.joining(", "));
+        return matches.isEmpty() ? "" : String.format(MESSAGE_POSSIBLE_DUPLICATE, matches);
+    }
 
     /**
      * Returns an error message indicating the duplicate prefixes.

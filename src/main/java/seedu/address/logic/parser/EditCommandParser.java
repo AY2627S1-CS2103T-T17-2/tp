@@ -10,9 +10,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
-import java.util.List;
-import java.util.Set;
-
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
@@ -42,7 +39,7 @@ public class EditCommandParser implements Parser<EditCommand> {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE), pe);
         }
 
-        if (argMultimap.getValue(PREFIX_REMARK).isPresent()) {
+        if (argMultimap.getValue(PREFIX_TAG).isPresent() || argMultimap.getValue(PREFIX_REMARK).isPresent()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE));
         }
 
@@ -67,12 +64,6 @@ public class EditCommandParser implements Parser<EditCommand> {
 
         if (argMultimap.getValue(PREFIX_ADDRESS).isPresent()) {
             editPersonDescriptor.setAddress(ParserUtil.parseAddress(argMultimap.getValue(PREFIX_ADDRESS).get()));
-        }
-
-        List<String> tags = argMultimap.getAllValues(PREFIX_TAG);
-        if (!tags.isEmpty()) {
-            editPersonDescriptor.setTags(tags.size() == 1 && tags.get(0).isEmpty()
-                    ? Set.of() : ParserUtil.parseTags(tags));
         }
 
         if (!editPersonDescriptor.isAnyFieldEdited()) {
