@@ -11,8 +11,8 @@ While it has a Graphical User Interface (GUI), most user interactions occur usin
 ### Key Features
 
 * **Age-category filtering**: Use `filter a/Under 14` to display matching athletes and their count; `list` restores the full roster.
-* **Flexible athlete search**: Search partial values across names, age categories, contact details, addresses, remarks,
-  and tags (e.g., `find ave`, `find 9123`, or `find sprint`).
+* **Flexible athlete search**: Search partial values across supported athlete fields, or use a field prefix to narrow the
+  search (e.g., `find ave`, `find n/avery`, or `find r/injured`).
 * **Multi-field sorting**: Sort the displayed roster by name, age category, phone, email, or address in ascending or
   descending order.
 * **Guardian & Emergency Contact Linking**: Map student-athlete cards directly to parent/guardian profiles, enabling single-command lookups of emergency numbers during road meets.

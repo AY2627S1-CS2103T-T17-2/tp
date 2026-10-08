@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_EMPTY_COMMAND;
+import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 
 import java.util.Locale;
@@ -60,12 +61,13 @@ public class AddressBookParser {
             case AddCommand.COMMAND_WORD -> new AddCommandParser().parse(arguments);
             case EditCommand.COMMAND_WORD -> new EditCommandParser().parse(arguments);
             case DeleteCommand.COMMAND_WORD -> new DeleteCommandParser().parse(arguments);
-            case ClearCommand.COMMAND_WORD -> new ClearCommand();
+            case ClearCommand.COMMAND_WORD -> parseNoArguments(arguments, new ClearCommand(),
+                    ClearCommand.MESSAGE_USAGE);
             case FilterCommand.COMMAND_WORD -> new FilterCommandParser().parse(arguments);
             case FindCommand.COMMAND_WORD -> new FindCommandParser().parse(arguments);
             case ListAthleteCommand.COMMAND_WORD -> new ListAthleteCommandParser().parse(arguments);
-            case ExitCommand.COMMAND_WORD -> new ExitCommand();
-            case HelpCommand.COMMAND_WORD -> new HelpCommand();
+            case ExitCommand.COMMAND_WORD -> parseNoArguments(arguments, new ExitCommand(), ExitCommand.MESSAGE_USAGE);
+            case HelpCommand.COMMAND_WORD -> parseNoArguments(arguments, new HelpCommand(), HelpCommand.MESSAGE_USAGE);
             case RemarkCommand.COMMAND_WORD -> new RemarkCommandParser().parse(arguments);
             case SortCommand.COMMAND_WORD -> new SortCommandParser().parse(arguments);
             default -> {
@@ -73,6 +75,14 @@ public class AddressBookParser {
                 throw new ParseException(String.format(MESSAGE_UNKNOWN_COMMAND, commandWord));
             }
         };
+    }
+
+    private static Command parseNoArguments(String arguments, Command command, String messageUsage)
+            throws ParseException {
+        if (!arguments.trim().isEmpty()) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, messageUsage));
+        }
+        return command;
     }
 
 }

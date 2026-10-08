@@ -37,8 +37,10 @@ public class StringUtilTest {
         assertFalse(StringUtil.isNonZeroUnsignedInteger(" 10 ")); // Leading/trailing spaces
         assertFalse(StringUtil.isNonZeroUnsignedInteger("1 0")); // Spaces in the middle
 
-        // EP: number larger than Integer.MAX_VALUE
-        assertFalse(StringUtil.isNonZeroUnsignedInteger(Long.toString(Integer.MAX_VALUE + 1)));
+        // EP: number larger than Integer.MAX_VALUE remains a syntactically valid positive integer
+        assertTrue(StringUtil.isNonZeroUnsignedInteger(Long.toString((long) Integer.MAX_VALUE + 1)));
+        assertTrue(StringUtil.isNonZeroUnsignedInteger("999999999999999999999999999999999999"));
+        assertFalse(StringUtil.isNonZeroUnsignedInteger("000"));
 
         // EP: valid numbers, should return true
         assertTrue(StringUtil.isNonZeroUnsignedInteger("1")); // Boundary value

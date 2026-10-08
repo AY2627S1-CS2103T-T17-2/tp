@@ -19,6 +19,8 @@ public class Messages {
     public static final String MESSAGE_INVALID_PERSON_DISPLAYED_INDEX = "The athlete index provided is invalid.";
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
+    public static final String MESSAGE_UNKNOWN_PARAMETER =
+            "%1$s is not valid for this command.\n%2$s";
 
     public static final String MESSAGE_POSSIBLE_DUPLICATE =
             "\nWarning: possible duplicate. Phone or email matches another athlete: %1$s. Please review the records.";

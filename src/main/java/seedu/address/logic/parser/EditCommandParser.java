@@ -7,8 +7,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.EditCommand;
@@ -27,9 +25,11 @@ public class EditCommandParser implements Parser<EditCommand> {
      */
     public EditCommand parse(String args) throws ParseException {
         requireNonNull(args);
+        ParserUtil.verifyNoUnknownPrefixes(args, EditCommand.MESSAGE_USAGE,
+                PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_AGE_CATEGORY, PREFIX_ADDRESS);
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_AGE_CATEGORY,
-                        PREFIX_ADDRESS, PREFIX_TAG, PREFIX_REMARK);
+                        PREFIX_ADDRESS);
 
         Index index;
 
@@ -37,10 +37,6 @@ public class EditCommandParser implements Parser<EditCommand> {
             index = ParserUtil.parseIndex(argMultimap.getPreamble());
         } catch (ParseException pe) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE), pe);
-        }
-
-        if (argMultimap.getValue(PREFIX_TAG).isPresent() || argMultimap.getValue(PREFIX_REMARK).isPresent()) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE));
         }
 
         argMultimap.verifyNoDuplicatePrefixesFor(

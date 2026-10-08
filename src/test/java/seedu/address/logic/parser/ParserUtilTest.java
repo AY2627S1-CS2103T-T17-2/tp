@@ -2,7 +2,6 @@ package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static seedu.address.logic.parser.ParserUtil.MESSAGE_INVALID_INDEX;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
@@ -11,6 +10,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
@@ -40,9 +40,9 @@ public class ParserUtilTest {
     }
 
     @Test
-    public void parseIndex_outOfRangeInput_throwsParseException() {
-        assertThrows(ParseException.class, MESSAGE_INVALID_INDEX, ()
-            -> ParserUtil.parseIndex(Long.toString(Integer.MAX_VALUE + 1)));
+    public void parseIndex_outOfRangeInput_returnsMaximumRepresentableIndex() throws Exception {
+        assertEquals(Index.fromOneBased(Integer.MAX_VALUE),
+                ParserUtil.parseIndex("999999999999999999999999999999999999"));
     }
 
     @Test
@@ -52,6 +52,7 @@ public class ParserUtilTest {
 
         // Leading and trailing whitespaces
         assertEquals(INDEX_FIRST_PERSON, ParserUtil.parseIndex("  1  "));
+        assertEquals(INDEX_FIRST_PERSON, ParserUtil.parseIndex("0001"));
     }
 
     @Test

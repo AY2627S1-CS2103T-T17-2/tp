@@ -28,6 +28,7 @@ public class HelpCommand extends Command {
                     "list: Shows all athletes and removes any active filter.\nExample: list",
                     FindCommand.MESSAGE_USAGE,
                     FilterCommand.MESSAGE_USAGE,
+                    SortCommand.MESSAGE_USAGE,
                     RemarkCommand.MESSAGE_USAGE + "\nTo remove a remark: remark 1 r/",
                     "clear: Removes all athletes from the roster.\nExample: clear",
                     MESSAGE_USAGE,

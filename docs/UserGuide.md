@@ -68,10 +68,10 @@ Interface (GUI).
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Command words are case-insensitive. For example, `LIST`, `List`, and `list` invoke the same command. Parameter
-  prefixes remain lowercase and case-sensitive; for example, use `n/NAME`, not `N/NAME`.
+* Command words and parameter prefixes are case-insensitive. For example, `LIST`, `List`, and `list` invoke the same
+  command, while `n/Avery` and `N/Avery` supply the same name parameter.
 
-* The `list` command does not accept parameters. Extra text supplied to `help`, `clear`, or `exit` is currently ignored.
+* The `list`, `help`, `clear`, and `exit` commands do not accept parameters.
 
 * Leading and trailing whitespace around a command is ignored.
 
@@ -99,6 +99,8 @@ so that it can be corrected.
   example, `enrol n/Avery` displays `Unknown command: enrol.`
 * Validation errors explain the accepted format or constraint. The roster is not changed when parsing or validation
   fails.
+* A parameter-like prefix that is not supported by a command is rejected explicitly instead of being treated as part
+  of another value.
 
 ### Viewing help: `help`
 
@@ -137,9 +139,8 @@ Successful output:
 
 A duplicate produces `This athlete already exists in the roster: Avery Tan.` Failed validation leaves the command text available for correction.
 
-This Basic Add version retains lowercase parameter prefixes. Command words are case-insensitive. Use `sort` to change
-the displayed order. Rollback after a save failure is deferred; a save failure can leave a change visible in memory
-without retaining it on disk.
+Command words and parameter prefixes are case-insensitive. Use `sort` to change the displayed order. Rollback after a
+save failure is deferred; a save failure can leave a change visible in memory without retaining it on disk.
 
 ### Listing all athletes: `list`
 
@@ -167,7 +168,7 @@ Use `filter` to show athletes whose recorded age category matches the category y
 Format: `filter a/AGE_CATEGORY`
 
 * Supply exactly one `a/` parameter. Accepted categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`.
-* Category values ignore case and repeated spaces: `filter a/under   14` is equivalent to `filter a/Under 14`. The prefix must be lowercase `a/`.
+* Category values ignore case and repeated spaces: `filter a/under   14` is equivalent to `filter A/Under 14`.
 * Matching uses the recorded category, not an exact age or eligibility calculation. `Under 16` does not include athletes recorded as `Under 14`.
 * Each `filter` searches the entire roster and replaces any previous `find` or `filter`. Likewise, `find` replaces the age filter. Matching athletes retain their roster order and receive indexes starting from 1.
 * Filtering does not change or delete athlete records. Use `list` to show everyone again, including after no matches. TrackFlow does not save the filter between application sessions.
@@ -213,6 +214,7 @@ Replaces the remark of an athlete in the currently displayed list.
 Format: `remark INDEX r/[REMARK]`
 
 * `INDEX` refers to the index number shown in the displayed athlete list and must be a positive integer.
+* Exactly one `r/` prefix is required. The prefix is case-insensitive.
 * A new remark replaces the existing remark; remarks are not appended.
 * Use an empty remark, such as `remark 1 r/`, to remove the athlete's existing remark.
 * Updating a remark preserves the athlete's age category and other details.
@@ -222,17 +224,20 @@ Examples:
 * `remark 1 r/100m personal best: 12.34s`
 * `remark 2 r/` removes the 2nd athlete's remark.
 
-### Finding athletes across all fields: `find`
+### Finding athletes across all or selected fields: `find`
 
-Finds athletes when any recorded field contains any of the given keywords.
+Finds athletes using broad keywords, field-specific values, or both.
 
-Format: `find KEYWORD [MORE_KEYWORDS]`
+Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK]`
 
-* Searchable fields are name, age category, phone, email, address, remark, and tags.
-* Matching is case-insensitive and accepts partial values. For example, `find ave` matches `Avery Tan`, and
-  `find 9123` matches a phone number such as `91234567`.
+* Searchable fields are name, age category, phone, email, address, and remark.
+* Matching is case-insensitive and accepts partial values.
 * Each space-separated value is a keyword. An athlete is returned when at least one keyword occurs in at least one
-  searchable field (an `OR` search).
+  searchable field (an `OR` search). This broad form remains useful when the field is unknown.
+* Prefix a value to restrict it to one field: `n/` name, `a/` age category, `p/` phone, `e/` email, `addr/` address,
+  or `r/` remark. For example, `find n/und` searches names without matching every `Under` age category.
+* Broad and field-specific criteria can be combined. An athlete is returned when any broad keyword or field-specific
+  value matches. Each field prefix may appear at most once and cannot have an empty value.
 * Keyword order does not matter. Duplicate matching fields do not cause an athlete to appear more than once.
 * Each `find` searches the entire roster and replaces any previous `find` or `filter`. Matching athletes retain their
   roster order and receive indexes starting from 1. Use `list` to restore the complete roster.
@@ -248,10 +253,14 @@ Examples:
 
 * `find ave` searches partial names and can return `Avery Tan`.
 * `find under` searches age categories such as `Under 14` and `Under 16`.
+* `find n/und` searches only names, so an athlete named `Underwood` can be found without matching age categories.
+* `find a/under 16` searches only age categories.
 * `find 9123` searches partial phone numbers.
+* `find p/9123` searches only phone numbers.
 * `find tan@exam` searches partial email addresses.
-* `find sprint` searches addresses, remarks, and tags as well as the other fields.
+* `find r/injured` searches only remarks.
 * `find avery 9123 under` returns athletes matching any of the three keywords.
+* `find n/avery r/relay` returns athletes whose name contains `avery` or whose remark contains `relay`.
 
 ### Sorting the displayed athletes: `sort`
 
@@ -316,11 +325,15 @@ Deletes all athletes from the roster.
 
 Format: `clear`
 
+The command does not accept parameters.
+
 ### Exiting the program: `exit`
 
 Exits the program.
 
 Format: `exit`
+
+The command does not accept parameters.
 
 ### Saving the data
 
@@ -370,7 +383,7 @@ Action     | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`
-**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find avery 9123 under`
+**Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK]`<br> e.g., `find n/avery r/relay`
 **List**   | `list`
 **Remark** | `remark INDEX r/[REMARK]`<br> e.g., `remark 1 r/100m personal best: 12.34s`
 **Sort**   | `sort FIELD [ORDER]`<br> e.g., `sort age desc`

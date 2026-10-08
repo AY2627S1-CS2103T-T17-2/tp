@@ -18,6 +18,7 @@ public class FilterCommandParser implements Parser<FilterCommand> {
      */
     @Override
     public FilterCommand parse(String args) throws ParseException {
+        ParserUtil.verifyNoUnknownPrefixes(args, FilterCommand.MESSAGE_USAGE, PREFIX_AGE_CATEGORY);
         ArgumentMultimap arguments = ArgumentTokenizer.tokenize(args, PREFIX_AGE_CATEGORY);
         if (arguments.getValue(PREFIX_AGE_CATEGORY).isEmpty() || !arguments.getPreamble().isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, FilterCommand.MESSAGE_USAGE));

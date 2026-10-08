@@ -21,7 +21,13 @@ public class RemarkCommandParser implements Parser<RemarkCommand> {
      */
     public RemarkCommand parse(String args) throws ParseException {
         requireNonNull(args);
+        ParserUtil.verifyNoUnknownPrefixes(args, RemarkCommand.MESSAGE_USAGE, PREFIX_REMARK);
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_REMARK);
+
+        if (argMultimap.getValue(PREFIX_REMARK).isEmpty()) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE));
+        }
+        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_REMARK);
 
         Index index;
         try {
@@ -30,7 +36,7 @@ public class RemarkCommandParser implements Parser<RemarkCommand> {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE), pe);
         }
 
-        String remark = argMultimap.getValue(PREFIX_REMARK).orElse("");
+        String remark = argMultimap.getValue(PREFIX_REMARK).get();
 
         return new RemarkCommand(index, new Remark(remark));
     }

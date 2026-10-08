@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.model.person.PersonContainsKeywordsPredicate.SearchField;
 import seedu.address.testutil.PersonBuilder;
 
 public class PersonContainsKeywordsPredicateTest {
@@ -45,9 +47,7 @@ public class PersonContainsKeywordsPredicateTest {
                 "2345", // phone
                 "tan@exam", // email
                 "stad", // address
-                "personal", // remark
-                "print", // tag
-                "ela"); // another tag
+                "personal"); // remark
 
         for (String keyword : partialMatches) {
             PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of(keyword));
@@ -58,7 +58,7 @@ public class PersonContainsKeywordsPredicateTest {
     @Test
     public void test_keywordUsesDifferentCase_returnsTrue() {
         assertTrue(new PersonContainsKeywordsPredicate(List.of("AVERY")).test(ATHLETE));
-        assertTrue(new PersonContainsKeywordsPredicate(List.of("sPrInTs")).test(ATHLETE));
+        assertTrue(new PersonContainsKeywordsPredicate(List.of("PeRsOnAl")).test(ATHLETE));
     }
 
     @Test
@@ -69,10 +69,47 @@ public class PersonContainsKeywordsPredicateTest {
     }
 
     @Test
+    public void test_nameScopedKeyword_doesNotMatchAgeCategory() {
+        PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.NAME, List.of("under")));
+        Person namedUnderwood = new PersonBuilder(ATHLETE)
+                .withName("Underwood Tan")
+                .withAgeCategory("Open")
+                .build();
+
+        assertFalse(predicate.test(ATHLETE));
+        assertTrue(predicate.test(namedUnderwood));
+    }
+
+    @Test
+    public void test_scopedKeywordsMatchOnlyTheirFields() {
+        Map<SearchField, String> matchingValues = Map.of(
+                SearchField.NAME, "avery",
+                SearchField.AGE_CATEGORY, "under",
+                SearchField.PHONE, "2345",
+                SearchField.EMAIL, "tan@exam",
+                SearchField.ADDRESS, "stad",
+                SearchField.REMARK, "personal");
+
+        matchingValues.forEach((field, keyword) -> assertTrue(
+                new PersonContainsKeywordsPredicate(List.of(), Map.of(field, List.of(keyword))).test(ATHLETE),
+                "Expected scoped match for " + field));
+    }
+
+    @Test
+    public void test_scopedKeywordInWrongField_returnsFalse() {
+        assertFalse(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.NAME, List.of("9123"))).test(ATHLETE));
+        assertFalse(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("avery"))).test(ATHLETE));
+    }
+
+    @Test
     public void test_noKeywordMatches_returnsFalse() {
         assertFalse(new PersonContainsKeywordsPredicate(List.of()).test(ATHLETE));
         assertFalse(new PersonContainsKeywordsPredicate(List.of("   ")).test(ATHLETE));
         assertFalse(new PersonContainsKeywordsPredicate(List.of("swimming", "9999")).test(ATHLETE));
+        assertFalse(new PersonContainsKeywordsPredicate(List.of("sprints", "relay")).test(ATHLETE));
     }
 
     @Test
@@ -80,7 +117,8 @@ public class PersonContainsKeywordsPredicateTest {
         List<String> keywords = List.of("keyword1", "keyword2");
         PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(keywords);
 
-        String expected = PersonContainsKeywordsPredicate.class.getCanonicalName() + "{keywords=" + keywords + "}";
+        String expected = PersonContainsKeywordsPredicate.class.getCanonicalName()
+                + "{keywords=" + keywords + ", fieldKeywords={}}";
         assertEquals(expected, predicate.toString());
     }
 }

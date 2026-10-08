@@ -22,6 +22,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListAthleteCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -73,6 +74,12 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_veryLargeDeleteIndex_throwsCommandException() {
+        String deleteCommand = "delete 999999999999999999999999999999999999";
+        assertCommandException(deleteCommand, MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+    }
+
+    @Test
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListAthleteCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListAthleteCommand.MESSAGE_EMPTY_ROSTER, model);
@@ -88,6 +95,31 @@ public class LogicManagerTest {
     @Test
     public void execute_listWithArguments_throwsParseException() {
         assertParseException("list 1", ListAthleteCommand.MESSAGE_USAGE);
+    }
+
+    @Test
+    public void execute_invalidCommand_preservesCurrentDisplayAndSavedRoster() throws Exception {
+        logic.execute("add n/Avery Tan a/Under 16 p/91234567 e/avery@example.com addr/123 Main Street");
+        logic.execute("add n/Underwood Lim a/Open p/92345678 e/underwood@example.com addr/456 Main Street");
+        logic.execute("find n/und");
+        List<Person> displayedBeforeFailure = List.copyOf(model.getFilteredPersonList());
+        Path savedPath = temporaryFolder.resolve("addressBook.json");
+        String savedDataBeforeFailure = Files.readString(savedPath);
+
+        for (String invalidCommand : List.of("remark 1", "find n/", "clear extra", "help extra", "exit extra")) {
+            assertThrows(ParseException.class, () -> logic.execute(invalidCommand));
+            assertEquals(displayedBeforeFailure, model.getFilteredPersonList());
+            assertEquals(savedDataBeforeFailure, Files.readString(savedPath));
+        }
+    }
+
+    @Test
+    public void execute_nameScopedFind_doesNotMatchAgeCategory() throws Exception {
+        logic.execute("add n/Avery Tan a/Under 16 p/91234567 e/avery@example.com addr/123 Main Street");
+        logic.execute("add n/Underwood Lim a/Open p/92345678 e/underwood@example.com addr/456 Main Street");
+
+        assertEquals(FindCommand.MESSAGE_SUCCESS_SINGLE, logic.execute("find n/und").getFeedbackToUser());
+        assertEquals(List.of("Underwood Lim"), getDisplayedNames(model));
     }
 
     @Test
