@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
@@ -43,6 +44,21 @@ public class PersonListPanel extends UiPart<Region> {
             } else {
                 setGraphic(new PersonCard(person, getIndex() + 1).getRoot());
             }
+        }
+
+        /**
+         * Measures the card at the width the cell is given, so that wrapped text gets exactly the height it needs.
+         * By default, a cell measures its graphic at the graphic's preferred width instead, which leaves empty
+         * space below cards whose text would wrap at that (narrower) width.
+         */
+        @Override
+        protected double computePrefHeight(double width) {
+            Node graphic = getGraphic();
+            if (graphic == null || width < 0) {
+                return super.computePrefHeight(width);
+            }
+            double graphicWidth = width - snappedLeftInset() - snappedRightInset();
+            return graphic.prefHeight(graphicWidth) + snappedTopInset() + snappedBottomInset();
         }
     }
 

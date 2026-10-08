@@ -306,6 +306,17 @@
     -fx-border-width: 0;
 }
 
+.cell_index {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12px;
+    -fx-text-fill: -tf-dim;
+    -fx-padding: 2 0 0 0;
+}
+
+#personListView .list-cell .cell_index {
+    -fx-text-fill: -tf-dim;
+}
+
 .cell_big_label {
     -fx-font-family: "Plus Jakarta Sans SemiBold";
     -fx-font-size: 14px;
@@ -319,6 +330,37 @@
 
 #personListView .list-cell .cell_small_label {
     -fx-text-fill: -tf-muted;
+}
+
+.cell_detail {
+    -fx-font-family: "Plus Jakarta Sans";
+    -fx-font-size: 12px;
+    -fx-fill: -tf-muted;
+}
+
+.cell_detail.cell_phone {
+    -fx-font-family: "Monospaced";
+}
+
+.cell_detail.cell_separator {
+    -fx-fill: -tf-dim;
+}
+
+#personListView .list-cell .cell_remark {
+    -fx-text-fill: -tf-dim;
+}
+
+.age-pill {
+    -fx-font-family: "Plus Jakarta Sans SemiBold";
+    -fx-font-size: 11px;
+    -fx-background-color: #562c27, #2c2023;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 999, 999;
+    -fx-padding: 3 10 3 10;
+}
+
+#personListView .list-cell .age-pill {
+    -fx-text-fill: -tf-accent-soft;
 }
 
 #tags {
