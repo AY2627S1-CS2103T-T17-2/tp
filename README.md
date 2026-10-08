@@ -24,3 +24,4 @@ For detailed instructions on how to use and develop this application, refer to o
 
 ### Acknowledgments
 * This project is based on the AddressBook-Level3 project created by the [SE-EDU initiative](https://se-education.org).
+* The UI uses the [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) font by Tokotype, licensed under the [SIL Open Font License 1.1](src/main/resources/fonts/OFL.txt).
