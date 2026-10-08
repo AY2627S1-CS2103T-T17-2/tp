@@ -99,17 +99,22 @@ Format: `help`
 
 ### Adding an athlete: `add`
 
-Adds an athlete with a name, age category, phone number, and email address.
+Adds an athlete with a name, age category, phone number, and email address, plus optional address, remark, and tags.
 
-Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL`
+Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL [addr/ADDRESS] [r/REMARK] [t/TAG]...`
 
-* All four fields are required and may appear in any order. Each parameter may appear only once.
+* Name, age category, phone, and email are required. Address, remark, and tags are optional.
+* Fields may appear in any order. Each parameter may appear only once, except `t/`, which can be repeated
+  to add multiple tags. Repeated identical tags are stored once.
 * Age category must be `Under 14`, `Under 16`, `Under 18`, `Under 20`, or `Open`. Category input ignores case and normalizes repeated spaces.
 * Names retain the existing rule: nonblank alphanumeric characters and spaces only.
 * Phones retain the existing rule: digits only, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
 * Emails retain the existing email validation rules.
 * A duplicate is rejected only when normalized name, age category, phone, and email all match. Name comparisons ignore case and repeated spaces; email comparisons ignore case. Shared names or family contact details alone are allowed.
-* Add does not accept addresses, tags, or remarks. `edit` updates athlete details and addresses, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses. Use `t/` with `edit` to replace or clear tags.
+* Use `addr/ADDRESS` for a nonblank address, `r/REMARK` for a remark, and one `t/TAG` per tag.
+  Tags must be nonblank and alphanumeric. Omitted address and remark default to empty; omitted tags default to none.
+  An empty `r/` is accepted. **`a/` means age category for `add`, `edit`, and `filter`.**
+  Use `edit` to update athlete details, addresses, or tags, and `remark` to update remarks.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
   existing address, tags, and remarks.
 
@@ -117,6 +122,7 @@ Examples:
 
 * `add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com`
 * `add e/jordan.lee@example.com p/92345678 a/open n/Jordan Lee`
+* `add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street r/Prefers morning training t/sprints t/relay`
 
 Successful output:
 
@@ -313,7 +319,7 @@ previous TrackFlow home folder.
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com`
+**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL [addr/ADDRESS] [r/REMARK] [t/TAG]...` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS] [t/TAG]...`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`

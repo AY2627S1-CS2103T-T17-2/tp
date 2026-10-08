@@ -141,6 +141,23 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_addAthleteWithAllFields_survivesReload() throws Exception {
+        logic.execute("add n/Avery Tan a/Under 16 p/91234567 e/avery.tan@example.com"
+                + " addr/123 Main Street r/Prefers morning training t/sprints t/relay t/sprints");
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
+        Model reloaded = new ModelManager(storage.readAddressBook().orElseThrow(), new UserPrefs());
+        Person athlete = reloaded.getFilteredPersonList().get(0);
+        assertEquals(1, reloaded.getFilteredPersonList().size());
+        assertEquals("Avery Tan", athlete.getName().fullName);
+        assertEquals("Under 16", athlete.getAgeCategory().value);
+        assertEquals("91234567", athlete.getPhone().value);
+        assertEquals("avery.tan@example.com", athlete.getEmail().value);
+        assertEquals("123 Main Street", athlete.getAddress().value);
+        assertEquals("Prefers morning training", athlete.getRemark().value);
+        assertEquals(new PersonBuilder().withTags("sprints", "relay").build().getTags(), athlete.getTags());
+    }
+
+    @Test
     public void execute_invalidAdd_preservesRosterAndSavedFile() throws Exception {
         String validCommand = "add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com";
         logic.execute(validCommand);
@@ -151,7 +168,8 @@ public class LogicManagerTest {
             validCommand.replace("Under 14", "Under 15"),
             validCommand.replace("91234567", "+65 9123 4567"),
             validCommand.replace("avery.tan@example.com", "invalid"),
-            validCommand + " n/Other Athlete", validCommand + " t/sprints", validCommand + " r/note"};
+            validCommand + " n/Other Athlete", validCommand + " t/invalid-tag", validCommand + " r/note r/other",
+            validCommand + " addr/"};
         for (String invalidCommand : invalidCommands) {
             assertThrows(ParseException.class, () -> logic.execute(invalidCommand));
             assertEquals(expectedModel, model);
