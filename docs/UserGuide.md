@@ -91,9 +91,8 @@ so that it can be corrected.
 
 ### Viewing help: `help`
 
-Shows a message explaining how to access the help page.
-
-![help message](images/helpMessage.png)
+Opens a resizable, scrollable help window listing every supported command, its purpose,
+parameters, and examples. You can also open it using the Help menu or `F1`.
 
 Format: `help`
 
