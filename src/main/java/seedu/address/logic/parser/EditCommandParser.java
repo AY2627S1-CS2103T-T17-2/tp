@@ -7,10 +7,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
-
-import java.util.List;
-import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.EditCommand;
@@ -30,10 +26,10 @@ public class EditCommandParser implements Parser<EditCommand> {
     public EditCommand parse(String args) throws ParseException {
         requireNonNull(args);
         ParserUtil.verifyNoUnknownPrefixes(args, EditCommand.MESSAGE_USAGE,
-                PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_AGE_CATEGORY, PREFIX_ADDRESS, PREFIX_TAG);
+                PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_AGE_CATEGORY, PREFIX_ADDRESS);
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_AGE_CATEGORY,
-                        PREFIX_ADDRESS, PREFIX_TAG);
+                        PREFIX_ADDRESS);
 
         Index index;
 
@@ -64,12 +60,6 @@ public class EditCommandParser implements Parser<EditCommand> {
 
         if (argMultimap.getValue(PREFIX_ADDRESS).isPresent()) {
             editPersonDescriptor.setAddress(ParserUtil.parseAddress(argMultimap.getValue(PREFIX_ADDRESS).get()));
-        }
-
-        List<String> tags = argMultimap.getAllValues(PREFIX_TAG);
-        if (!tags.isEmpty()) {
-            editPersonDescriptor.setTags(tags.size() == 1 && tags.get(0).isEmpty()
-                    ? Set.of() : ParserUtil.parseTags(tags));
         }
 
         if (!editPersonDescriptor.isAnyFieldEdited()) {

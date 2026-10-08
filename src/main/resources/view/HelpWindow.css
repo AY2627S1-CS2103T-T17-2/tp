@@ -1,11 +1,37 @@
+@font-face {
+    src: url("../fonts/PlusJakartaSans-Regular.ttf");
+}
+
+@font-face {
+    src: url("../fonts/PlusJakartaSans-SemiBold.ttf");
+}
+
+@font-face {
+    src: url("../fonts/PlusJakartaSans-Bold.ttf");
+}
+
 .root {
-    -fx-font-family: "System";
+    -tf-bg: #0e1116;
+    -tf-panel: #151a21;
+    -tf-line: #232a34;
+    -tf-line-strong: #2e3643;
+    -tf-text: #e8ecf1;
+    -tf-muted: #8a94a3;
+    -tf-dim: #5d6675;
+    -tf-accent: #ff5a36;
+    -tf-accent-soft: #ff8b70;
+
+    -fx-font-family: "Plus Jakarta Sans";
     -fx-font-size: 14px;
-    -fx-background-color: #20242b;
+    -fx-background-color: -tf-bg;
+}
+
+.text {
+    -fx-font-smoothing-type: lcd;
 }
 
 .scroll-pane, .scroll-pane > .viewport {
-    -fx-background-color: #20242b;
+    -fx-background-color: -tf-bg;
 }
 
 .scroll-pane {
@@ -18,48 +44,88 @@
 }
 
 .label {
-    -fx-text-fill: #e8edf3;
+    -fx-text-fill: -tf-text;
 }
 
 .help-title {
-    -fx-font-size: 28px;
+    -fx-font-size: 26px;
     -fx-font-weight: bold;
 }
 
 .help-subtitle, .command-description {
-    -fx-text-fill: #c1cad6;
+    -fx-text-fill: -tf-muted;
     -fx-line-spacing: 3;
 }
 
 .help-notes {
-    -fx-background-color: #2a3441;
-    -fx-background-radius: 8;
+    -fx-background-color: -tf-line, -tf-panel;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 10, 9;
     -fx-padding: 16;
 }
 
 .command-card {
-    -fx-background-color: #2b3039;
-    -fx-background-radius: 8;
-    -fx-border-color: #3c4552;
-    -fx-border-radius: 8;
+    -fx-background-color: -tf-line, -tf-panel;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 10, 9;
     -fx-padding: 18;
 }
 
 .command-heading {
-    -fx-font-size: 21px;
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-text-fill: #93c5fd;
+    -fx-text-fill: -tf-accent-soft;
 }
 
 .field-heading {
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #c1cad6;
+    -fx-font-family: "Plus Jakarta Sans SemiBold";
+    -fx-font-size: 11px;
+    -fx-text-fill: -tf-dim;
 }
 
 .command-code {
-    -fx-font-family: "monospace";
-    -fx-background-color: #20242b;
-    -fx-background-radius: 4;
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 13px;
+    -fx-text-fill: -tf-text;
+    -fx-background-color: -tf-line, -tf-bg;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 6, 5;
     -fx-padding: 9 12;
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .track,
+.scroll-bar .track-background {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -tf-line-strong;
+    -fx-background-insets: 2;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .thumb:hover,
+.scroll-bar .thumb:pressed {
+    -fx-background-color: -tf-dim;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+.scroll-bar:vertical {
+    -fx-pref-width: 10;
 }

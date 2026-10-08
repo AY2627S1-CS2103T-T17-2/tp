@@ -6,7 +6,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.Collections;
@@ -45,8 +44,7 @@ public class EditCommand extends Command {
             + "[" + PREFIX_AGE_CATEGORY + "AGE_CATEGORY] "
             + "[" + PREFIX_PHONE + "PHONE] "
             + "[" + PREFIX_EMAIL + "EMAIL] "
-            + "[" + PREFIX_ADDRESS + "ADDRESS] "
-            + "[" + PREFIX_TAG + "TAG]...\n"
+            + "[" + PREFIX_ADDRESS + "ADDRESS]\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_PHONE + "91234567 "
             + PREFIX_EMAIL + "johndoe@example.com";
@@ -82,13 +80,17 @@ public class EditCommand extends Command {
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
-        if (!personToEdit.isSamePerson(editedPerson) && model.hasPerson(editedPerson)) {
+        List<Person> otherPersons = model.getAddressBook().getPersonList().stream()
+                .filter(person -> person != personToEdit).toList();
+        if (otherPersons.stream().anyMatch(editedPerson::isSamePerson)) {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
 
+        String warning = Messages.getPossibleDuplicateWarning(editedPerson, otherPersons);
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-        return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson)));
+        return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS,
+                Messages.formatAthlete(editedPerson)) + warning);
     }
 
     /**

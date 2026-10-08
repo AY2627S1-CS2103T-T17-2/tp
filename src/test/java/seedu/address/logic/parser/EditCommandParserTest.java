@@ -30,7 +30,6 @@ import seedu.address.model.person.AgeCategory;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Phone;
-import seedu.address.model.tag.Tag;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 
 public class EditCommandParserTest {
@@ -131,27 +130,12 @@ public class EditCommandParserTest {
     }
 
     @Test
-    public void parse_tags_replacesOrClears() {
-        assertParseSuccess(parser, "1 t/sprinter t/relay t/sprinter", new EditCommand(INDEX_FIRST_PERSON,
-                new EditPersonDescriptorBuilder().withTags("sprinter", "relay").build()));
-        assertParseSuccess(parser, "1 t/", new EditCommand(INDEX_FIRST_PERSON,
-                new EditPersonDescriptorBuilder().withTags().build()));
-        assertParseSuccess(parser, "1 t/   a/Under 16 addr/123 Main Street", new EditCommand(INDEX_FIRST_PERSON,
-                new EditPersonDescriptorBuilder().withTags().withAgeCategory("Under 16")
-                        .withAddress("123 Main Street").build()));
-    }
-
-    @Test
-    public void parse_invalidOrMixedEmptyTags_failure() {
-        for (String input : List.of("1 t/sprinter*", "1 t/ t/relay", "1 t/relay t/", "1 t/ t/")) {
-            assertParseFailure(parser, input, Tag.MESSAGE_CONSTRAINTS);
-        }
-    }
-
-    @Test
     public void parse_unsupportedFields_failure() {
-        for (String unsupported : List.of("r/", "r/fast runner")) {
-            String expected = String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "r/", EditCommand.MESSAGE_USAGE);
+        for (String unsupported : List.of("r/", "r/fast runner", "t/", "t/sprinter",
+                "t/sprinter t/relay", "t/invalid*")) {
+            String suppliedPrefix = unsupported.substring(0, 2);
+            String expected = String.format(Messages.MESSAGE_UNKNOWN_PARAMETER,
+                    suppliedPrefix, EditCommand.MESSAGE_USAGE);
             assertParseFailure(parser, "1 " + unsupported, expected);
             assertParseFailure(parser, "1 n/Amy " + unsupported, expected);
             assertParseFailure(parser, "1 " + unsupported + " a/Open", expected);

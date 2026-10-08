@@ -5,8 +5,9 @@ import java.util.Comparator;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
 import seedu.address.model.person.Person;
 
 /**
@@ -27,19 +28,19 @@ public class PersonCard extends UiPart<Region> {
     public final Person person;
 
     @FXML
-    private HBox cardPane;
+    private GridPane cardPane;
     @FXML
     private Label name;
     @FXML
     private Label id;
     @FXML
-    private Label phone;
+    private Text phone;
     @FXML
     private Label ageCategory;
     @FXML
     private Label address;
     @FXML
-    private Label email;
+    private Text email;
     @FXML
     private Label remark;
     @FXML
@@ -51,17 +52,26 @@ public class PersonCard extends UiPart<Region> {
     public PersonCard(Person person, int displayedIndex) {
         super(FXML);
         this.person = person;
-        id.setText(displayedIndex + ". ");
+        id.setText(String.format("%02d", displayedIndex));
         name.setText(person.getName().fullName);
-        ageCategory.setText("Age category: " + person.getAgeCategory().value);
+        ageCategory.setText(person.getAgeCategory().value);
         phone.setText(person.getPhone().value);
-        address.setText(person.getAddress().value);
-        address.setVisible(!person.getAddress().value.isEmpty());
-        address.setManaged(address.isVisible());
         email.setText(person.getEmail().value);
-        remark.setText(person.getRemark().value);
+        showIfNotEmpty(address, person.getAddress().value);
+        showIfNotEmpty(remark, person.getRemark().value);
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
+        tags.setVisible(!tags.getChildren().isEmpty());
+        tags.setManaged(tags.isVisible());
+    }
+
+    /**
+     * Shows {@code text} in {@code label}, hiding the label entirely when {@code text} is empty.
+     */
+    private static void showIfNotEmpty(Label label, String text) {
+        label.setText(text);
+        label.setVisible(!text.isEmpty());
+        label.setManaged(label.isVisible());
     }
 }

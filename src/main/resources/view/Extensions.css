@@ -1,20 +1,24 @@
 
 .error {
-    -fx-text-fill: #d06651 !important; /* The error class should always override the default text-fill style */
+    -fx-text-fill: #ff6b6b !important; /* The error class should always override the default text-fill style */
 }
 
-.list-cell:empty {
-    /* Empty cells will not have alternating colours */
-    -fx-background: #383838;
+#commandTextField.error {
+    -fx-background-color: #ff6b6b, #151a21;
+    -fx-background-insets: 0, 1.5;
 }
 
-.tag-selector {
-    -fx-border-width: 1;
-    -fx-border-color: white;
-    -fx-border-radius: 3;
-    -fx-background-radius: 3;
+#commandTextField.error:focused {
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 107, 0.30), 10, 0.15, 0, 0);
+}
+
+.tooltip {
+    -fx-background-color: #2e3643, #1c232d;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 6, 5;
+    -fx-padding: 5 9 5 9;
 }
 
 .tooltip-text {
-    -fx-text-fill: white;
+    -fx-text-fill: #e8ecf1;
 }
