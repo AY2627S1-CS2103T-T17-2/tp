@@ -23,6 +23,9 @@ import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListAthleteCommand;
 import seedu.address.logic.commands.RemarkCommand;
+import seedu.address.logic.commands.SortCommand;
+import seedu.address.logic.commands.SortCommand.SortField;
+import seedu.address.logic.commands.SortCommand.SortOrder;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.PersonContainsKeywordsPredicate;
@@ -101,6 +104,11 @@ public class AddressBookParserTest {
         RemarkCommand command = (RemarkCommand) parser.parseCommand(RemarkCommand.COMMAND_WORD + " "
                 + INDEX_FIRST_PERSON.getOneBased() + " " + PREFIX_REMARK + remark.value);
         assertEquals(new RemarkCommand(INDEX_FIRST_PERSON, remark), command);
+    }
+
+    @Test
+    public void parseCommand_sort() throws Exception {
+        assertEquals(new SortCommand(SortField.AGE, SortOrder.DESCENDING), parser.parseCommand("SoRt age desc"));
     }
 
     @Test

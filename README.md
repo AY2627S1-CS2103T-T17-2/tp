@@ -13,6 +13,8 @@ While it has a Graphical User Interface (GUI), most user interactions occur usin
 * **Age-category filtering**: Use `filter a/Under 14` to display matching athletes and their count; `list` restores the full roster.
 * **Flexible athlete search**: Search partial values across names, age categories, contact details, addresses, remarks,
   and tags (e.g., `find ave`, `find 9123`, or `find sprint`).
+* **Multi-field sorting**: Sort the displayed roster by name, age category, phone, email, or address in ascending or
+  descending order.
 * **Guardian & Emergency Contact Linking**: Map student-athlete cards directly to parent/guardian profiles, enabling single-command lookups of emergency numbers during road meets.
 * **Relay Squads & Event Grouping**: Easily organize athletes into designated relay squads (e.g., `group g/4x100mA c/1,4,7,12`), track specific relay legs, and log alternate runners.
 * **Personal Best (PB) & Status Logs**: Attach quick, appendable text logs directly to contact profiles for at-a-glance reviews of performance milestones and medical flags during meet sign-ups.
