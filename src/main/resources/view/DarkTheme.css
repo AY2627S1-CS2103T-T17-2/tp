@@ -279,7 +279,6 @@
 
 .scroll-bar {
     -fx-background-color: transparent;
-    -fx-padding: 2;
 }
 
 .scroll-bar .track,
@@ -289,6 +288,7 @@
 
 .scroll-bar .thumb {
     -fx-background-color: -tf-line-strong;
+    -fx-background-insets: 2;
     -fx-background-radius: 4;
 }
 
@@ -310,11 +310,11 @@
 }
 
 .scroll-bar:vertical {
-    -fx-pref-width: 8;
+    -fx-pref-width: 10;
 }
 
 .scroll-bar:horizontal {
-    -fx-pref-height: 8;
+    -fx-pref-height: 10;
 }
 
 /* ---------- Buttons and dialogs ---------- */
