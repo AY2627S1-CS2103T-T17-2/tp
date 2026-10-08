@@ -17,7 +17,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 [[github](https://github.com/ken2k7)]
 
-* Role: Code Quality 
+* Role: Code Quality
 * Responsibilities: Looks after code quality, ensures adherence to coding standards, etc.
 
 ### Kong Qi Yuan

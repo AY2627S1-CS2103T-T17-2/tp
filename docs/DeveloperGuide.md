@@ -125,7 +125,10 @@ How the parsing works:
 The `Model` component,
 
 * stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
-* stores the `Person` objects selected by the current filter, such as search results, in a separate _filtered_ list. It exposes this list as an unmodifiable `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when the list changes.
+* stores the `Person` objects selected by the current filter, such as search results, in a `FilteredList`, and wraps
+  that view in a `SortedList` for display ordering. It exposes the sorted view as an unmodifiable
+  `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when filtering, sorting, or roster
+  data changes.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
@@ -168,6 +171,21 @@ This section describes some noteworthy details on how certain features are imple
 The existing `DeleteCommand` resolves indexes against `Model.getFilteredPersonList()`, so it already targets the correct displayed athlete and keeps the predicate active. No delete implementation changes are needed for filtering. `ListAthleteCommand` restores `PREDICATE_SHOW_ALL_PERSONS`; `find` and `filter` replace one another.
 
 `FilterCommandParserTest` covers categories and invalid syntax, `AgeCategoryPredicateTest` covers exact category matching, and `FilterCommandTest` covers routing, feedback, unchanged records, replacing searches, invalid input, compatibility with existing deletion, and `list` restoration.
+
+### Multi-field sorting
+
+`AddressBookParser` dispatches `sort` to `SortCommandParser`. The parser requires one supported field and accepts one
+optional order, defaulting to ascending. It accepts short (`asc`, `desc`) and long (`ascending`, `descending`) order
+names without considering letter case, while rejecting missing fields, unsupported values, and extra arguments.
+
+`ModelManager` wraps its existing `FilteredList<Person>` in a `SortedList<Person>`. `SortCommand` installs the selected
+comparator through `Model.updateSortedPersonList`, changing only the displayed view rather than the underlying
+`AddressBook` order. Consequently, sorting composes with `find`, `filter`, and `list`, and indexed commands continue to
+resolve athletes against exactly what the user sees. The comparator is session-only and is not persisted.
+
+Text fields are compared without considering letter case. Phone numbers are converted to arbitrary-precision numeric
+values for comparison, avoiding overflow and lexicographic ordering errors. Age categories use the competition order
+`Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
 
 ### \[Proposed\] Undo/redo feature
 
@@ -304,7 +322,7 @@ Priorities: `* * *` = high (essential to the core workflow), `* *` = medium (use
 | ID | Priority | Scope | As a ... | I want to ... | So that I can ... |
 |----|----------|-------|----------|---------------|------------------|
 | US01 | `* * *` | MVP | coach | add an athlete's name, age category, phone number, and email | maintain the essential information needed to contact and organize athletes |
-| US02 | `* * *` | MVP | coach | view all athletes alphabetically with their details and current indexes | locate an athlete and select the correct record |
+| US02 | `* * *` | MVP | coach | view all athletes and sort them by useful fields and directions | locate athletes and select the correct displayed record |
 | US03 | `* * *` | MVP | coach | permanently delete one selected athlete | remove a record I no longer need |
 | US04 | `* * *` | MVP | returning coach | recover saved roster changes when I reopen TrackFlow | continue work without re-entering athletes |
 | US05 | `* * *` | MVP | coach | receive clear success messages and actionable errors | know whether a command worked and correct mistakes |
@@ -579,6 +597,24 @@ Use a separate test roster for this procedure. The deletion steps test compatibi
 1. Run `find` with the remaining `Under 14` athlete's name. Expect that athlete in the results.
 1. Run `filter a/Open`. Expect the `Open` athlete, confirming that filtering searches the full roster.
 1. Restart TrackFlow. Expect both remaining athletes. The filter is not saved between sessions.
+
+### Sorting the displayed roster
+
+Use a test roster containing athletes from several age categories with names, phones, emails, and addresses that are
+not already in sorted order.
+
+1. Run `sort name`. Expect case-insensitive alphabetical name order and the ascending success message.
+1. Run `sort name desc`. Expect the reverse name order.
+1. Run `sort age`. Expect `Under 14`, `Under 16`, `Under 18`, `Under 20`, then `Open`.
+1. Run `sort age descending`. Expect the reverse category order.
+1. Repeat with `phone`, `email`, and `address`. Verify numeric phone ordering and that empty addresses come first only
+   in ascending order.
+1. Run `find` or `filter`, then sort the results. Expect only the matching athletes, in the selected order.
+1. Run `list`. Expect the full roster while retaining the selected order.
+1. Run `delete 1` on a sorted list. Expect the athlete visibly shown at index 1 to be deleted.
+1. Try `sort`, `sort height`, `sort name upwards`, and `sort name asc extra`. Expect actionable errors and no display
+   change.
+1. Restart TrackFlow. Expect the original saved roster order because sorting is not persisted.
 
 ### Saving data
 

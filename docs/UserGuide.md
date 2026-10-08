@@ -38,6 +38,8 @@ Interface (GUI).
 
    * `filter a/Under 14`: Shows athletes in that age category. Use `list` to show everyone again.
 
+   * `sort name`: Sorts the displayed athletes by name in ascending order.
+
    * `delete 3` : Deletes the 3rd athlete shown in the current list.
 
    * `clear` : Deletes all athletes.
@@ -124,9 +126,9 @@ Successful output:
 
 A duplicate produces `This athlete already exists in the roster: Avery Tan.` Failed validation leaves the command text available for correction.
 
-This Basic Add version retains lowercase parameter prefixes and insertion-order display. Command words are
-case-insensitive. Alphabetical sorting and rollback after a save failure are deferred; a save failure can leave a
-change visible in memory without retaining it on disk.
+This Basic Add version retains lowercase parameter prefixes. Command words are case-insensitive. Use `sort` to change
+the displayed order. Rollback after a save failure is deferred; a save failure can leave a change visible in memory
+without retaining it on disk.
 
 ### Listing all athletes: `list`
 
@@ -243,6 +245,48 @@ Examples:
 * `find sprint` searches addresses, remarks, and tags as well as the other fields.
 * `find avery 9123 under` returns athletes matching any of the three keywords.
 
+### Sorting the displayed athletes: `sort`
+
+Sorts the currently displayed athlete list by a selected field.
+
+Format: `sort FIELD [ORDER]`
+
+Available fields:
+
+* `name` sorts names alphabetically without considering letter case.
+* `age` sorts competition categories in this order: `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
+* `phone` sorts phone numbers numerically rather than alphabetically.
+* `email` sorts email addresses alphabetically without considering letter case.
+* `address` sorts addresses alphabetically without considering letter case. Empty addresses appear first in ascending
+  order and last in descending order.
+
+Available orders are `asc` or `ascending`, and `desc` or `descending`. If `ORDER` is omitted, ascending order is used.
+Field and order names are case-insensitive.
+
+Sorting changes only the displayed order; it does not rewrite the saved roster order. The selected ordering remains
+active for the rest of the application session, including after `find`, `filter`, `list`, and roster-changing commands
+such as `add`, `edit`, `remark`, and `delete`. New or edited athletes automatically move to the correct position in the
+displayed list. A later `sort` command replaces the selected ordering. Indexed commands such as `edit`, `remark`, and
+`delete` use the indexes shown in the sorted list.
+
+Examples:
+
+* `sort name` sorts names in ascending order.
+* `sort name desc` sorts names in descending order.
+* `sort age ascending` places `Under 14` before the older categories and `Open`.
+* `sort age desc` reverses the category order.
+* `sort phone` sorts by numeric phone value.
+
+Successful output follows this format:
+`Sorted the displayed athlete list by FIELD in ORDER order.`
+
+Invalid sort commands leave the displayed list unchanged. Examples of errors include:
+
+* `sort` or `sort name asc extra`: displays the accepted command format because a field is missing or there are too
+  many arguments.
+* `sort height`: displays `Unknown sort field: height. Available fields: name, age, phone, email, address.`
+* `sort name upwards`: displays `Unknown sort order: upwards. Use asc, ascending, desc, or descending.`
+
 ### Deleting an athlete: `delete`
 
 Deletes the specified athlete from the roster.
@@ -321,5 +365,6 @@ Action     | Format, Examples
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find avery 9123 under`
 **List**   | `list`
 **Remark** | `remark INDEX r/[REMARK]`<br> e.g., `remark 1 r/100m personal best: 12.34s`
+**Sort**   | `sort FIELD [ORDER]`<br> e.g., `sort age desc`
 **Help**   | `help`
 **Exit**   | `exit`

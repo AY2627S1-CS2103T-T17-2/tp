@@ -8,6 +8,7 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -71,6 +72,20 @@ public class ModelManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void updateSortedPersonList_nullComparator_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.updateSortedPersonList(null));
+    }
+
+    @Test
+    public void updateSortedPersonList_validComparator_sortsDisplayedList() {
+        modelManager = new ModelManager(
+                new AddressBookBuilder().withPerson(BENSON).withPerson(ALICE).build(), new UserPrefs());
+        modelManager.updateSortedPersonList(
+                Comparator.comparing(person -> person.getName().fullName, String.CASE_INSENSITIVE_ORDER));
+        assertEquals(List.of(ALICE, BENSON), modelManager.getFilteredPersonList());
     }
 
     @Test
