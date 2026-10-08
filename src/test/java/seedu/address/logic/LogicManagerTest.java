@@ -80,7 +80,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_mixedCaseListWithAthlete_returnsAthleteCount() throws Exception {
-        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com");
+        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street");
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         assertCommandSuccess("LiSt", ListAthleteCommand.MESSAGE_SUCCESS_SINGLE_ATHLETE, expectedModel);
     }
@@ -92,16 +92,16 @@ public class LogicManagerTest {
 
     @Test
     public void execute_editAthlete_persistsCategoryAndPreservesOtherDetails() throws Exception {
-        String command = "add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com";
+        String command = "add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street";
         assertEquals("New athlete added: Avery Tan; Age category: Under 14; Phone: 91234567; "
                 + "Email: avery.tan@example.com", logic.execute(command).getFeedbackToUser());
-        logic.execute("edit 1 a/Under 16 addr/Training centre p/92345678 t/sprinter t/relay");
+        logic.execute("edit 1 a/Under 16 addr/Training centre p/92345678");
         logic.execute("remark 1 r/Sprints");
         Person athlete = model.getFilteredPersonList().get(0);
         assertEquals(new AgeCategory("Under 16"), athlete.getAgeCategory());
         assertEquals("Sprints", athlete.getRemark().value);
         assertEquals("Training centre", athlete.getAddress().value);
-        assertEquals(2, athlete.getTags().size());
+        assertEquals(0, athlete.getTags().size());
         assertEquals("92345678", athlete.getPhone().value);
         JsonAddressBookStorage reloadedStorage =
                 new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
@@ -111,23 +111,37 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_editWithTagsOrRemarks_preservesRosterAndSavedFile() throws Exception {
+        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street");
+        Path savedPath = temporaryFolder.resolve("addressBook.json");
+        String savedData = Files.readString(savedPath);
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        for (String unsupported : new String[] {"t/", "t/sprinter t/relay", "r/", "r/note"}) {
+            assertThrows(ParseException.class, () -> logic.execute("edit 1 p/92345678 " + unsupported));
+            assertEquals(expectedModel, model);
+            assertEquals(savedData, Files.readString(savedPath));
+        }
+    }
+
+    @Test
     public void execute_sameNameMatchingContact_rejectsDuplicates() throws Exception {
-        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com");
+        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street");
         String[] variants = {"a/Under 16 p/91234567 e/avery.tan@example.com",
             "a/Under 14 p/92345678 e/avery.tan@example.com",
             "a/Under 14 p/91234567 e/other@example.com"};
         for (String variant : variants) {
-            assertThrows(CommandException.class, () -> logic.execute("add n/Avery Tan " + variant));
+            assertThrows(CommandException.class, () ->
+                logic.execute("add n/Avery Tan " + variant + " addr/123 Main Street"));
         }
         assertEquals(1, model.getFilteredPersonList().size());
         assertThrows(CommandException.class, "This athlete already exists in the roster: AVERY   TAN.", () ->
-            logic.execute("add n/AVERY   TAN a/under 14 p/91234567 e/AVERY.TAN@example.com"));
+            logic.execute("add n/AVERY   TAN a/under 14 p/91234567 e/AVERY.TAN@example.com addr/123 Main Street"));
         assertEquals(1, model.getFilteredPersonList().size());
     }
 
     @Test
-    public void execute_addAthleteWithoutOptionalData_survivesReload() throws Exception {
-        logic.execute("add n/Avery Tan a/under   16 p/91234567 e/Avery.Tan@example.com");
+    public void execute_addAthleteWithRequiredAddress_survivesReload() throws Exception {
+        logic.execute("add n/Avery Tan a/under   16 p/91234567 e/Avery.Tan@example.com addr/123 Main Street");
         JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
         Model reloaded = new ModelManager(storage.readAddressBook().orElseThrow(), new UserPrefs());
         Person athlete = reloaded.getFilteredPersonList().get(0);
@@ -136,36 +150,21 @@ public class LogicManagerTest {
         assertEquals("Under 16", athlete.getAgeCategory().value);
         assertEquals("91234567", athlete.getPhone().value);
         assertEquals("Avery.Tan@example.com", athlete.getEmail().value);
-        assertEquals("", athlete.getAddress().value);
+        assertEquals("123 Main Street", athlete.getAddress().value);
         assertEquals("", athlete.getRemark().value);
         assertEquals(0, athlete.getTags().size());
     }
 
     @Test
-    public void execute_addAthleteWithAllFields_survivesReload() throws Exception {
-        logic.execute("add n/Avery Tan a/Under 16 p/91234567 e/avery.tan@example.com"
-                + " addr/123 Main Street r/Prefers morning training t/sprints t/relay t/sprints");
-        JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
-        Model reloaded = new ModelManager(storage.readAddressBook().orElseThrow(), new UserPrefs());
-        Person athlete = reloaded.getFilteredPersonList().get(0);
-        assertEquals(1, reloaded.getFilteredPersonList().size());
-        assertEquals("Avery Tan", athlete.getName().fullName);
-        assertEquals("Under 16", athlete.getAgeCategory().value);
-        assertEquals("91234567", athlete.getPhone().value);
-        assertEquals("avery.tan@example.com", athlete.getEmail().value);
-        assertEquals("123 Main Street", athlete.getAddress().value);
-        assertEquals("Prefers morning training", athlete.getRemark().value);
-        assertEquals(new PersonBuilder().withTags("sprints", "relay").build().getTags(), athlete.getTags());
-    }
-
-    @Test
     public void execute_invalidAdd_preservesRosterAndSavedFile() throws Exception {
-        String validCommand = "add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com";
+        String validCommand = "add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street";
         logic.execute(validCommand);
         Path savedPath = temporaryFolder.resolve("addressBook.json");
         String savedData = Files.readString(savedPath);
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         String[] invalidCommands = {validCommand.replace(" a/Under 14", ""),
+            validCommand.replace(" addr/123 Main Street", ""),
+            validCommand.replace("addr/123 Main Street", "addr/"),
             validCommand.replace("Under 14", "Under 15"),
             validCommand.replace("91234567", "+65 9123 4567"),
             validCommand.replace("avery.tan@example.com", "invalid"),
@@ -180,8 +179,8 @@ public class LogicManagerTest {
 
     @Test
     public void execute_sort_changesDisplayButPreservesSavedRosterOrder() throws Exception {
-        logic.execute("add n/Zoe Tan a/Under 18 p/999 e/zoe@example.com");
-        logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com");
+        logic.execute("add n/Zoe Tan a/Under 18 p/999 e/zoe@example.com addr/123 Main Street");
+        logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com addr/123 Main Street");
 
         assertEquals("Sorted the displayed athlete list by name in ascending order.",
                 logic.execute("sort name").getFeedbackToUser());
@@ -196,7 +195,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_duplicateAfterReload_preservesRosterAndSavedFile() throws Exception {
-        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com");
+        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street");
         Path savedPath = temporaryFolder.resolve("addressBook.json");
         String savedData = Files.readString(savedPath);
         JsonAddressBookStorage storage = new JsonAddressBookStorage(savedPath);
@@ -204,7 +203,8 @@ public class LogicManagerTest {
         Logic reloadedLogic = new LogicManager(reloaded, new StorageManager(storage,
                 new JsonUserPrefsStorage(temporaryFolder.resolve("reloadedPrefs.json"))));
         assertThrows(CommandException.class, "This athlete already exists in the roster: avery   tan.", () ->
-            reloadedLogic.execute("add n/avery   tan a/UNDER 14 p/91234567 e/AVERY.TAN@example.com"));
+            reloadedLogic.execute("add n/avery   tan a/UNDER 14 p/91234567 e/AVERY.TAN@example.com"
+                + " addr/123 Main Street"));
         assertEquals(model.getAddressBook(), reloaded.getAddressBook());
         assertEquals(savedData, Files.readString(savedPath));
     }
@@ -304,8 +304,8 @@ public class LogicManagerTest {
 
         // Triggers the saveAddressBook method by executing an add command
         String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + " a/Open";
-        Person expectedPerson = new PersonBuilder(AMY).withTags().withAddress("").withRemark("").build();
+                + EMAIL_DESC_AMY + " a/Open addr/123 Main Street";
+        Person expectedPerson = new PersonBuilder(AMY).withTags().withAddress("123 Main Street").withRemark("").build();
         ModelManager expectedModel = new ModelManager();
         expectedModel.addPerson(expectedPerson);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
