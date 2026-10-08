@@ -38,6 +38,9 @@ public class PersonListPanel extends UiPart<Region> {
     /** Athletes that first appeared in the list since the last command finished. */
     private final List<Person> newPersons = new ArrayList<>();
 
+    /** Athletes that were removed from the list since the last command finished (some may have returned). */
+    private final List<Person> removedPersons = new ArrayList<>();
+
     /** The athlete added by the latest command, if it added exactly one. Each cell highlights itself to match. */
     private final ObjectProperty<Person> recentlyAddedPerson = new SimpleObjectProperty<>();
 
@@ -49,24 +52,22 @@ public class PersonListPanel extends UiPart<Region> {
         personListView.setItems(personList);
         personListView.setCellFactory(listView -> new PersonListViewCell());
         knownPersons.addAll(personList);
-        personList.addListener(this::recordNewPersons);
+        personList.addListener(this::recordListChange);
     }
 
     /**
-     * Records athletes that appear in the list for the first time. An athlete that replaces exactly one other
-     * athlete (e.g. after an edit) is an update rather than an addition, so it is not recorded as new.
+     * Records athletes that appear in the list for the first time, and athletes that are removed from it.
      */
-    private void recordNewPersons(ListChangeListener.Change<? extends Person> change) {
+    private void recordListChange(ListChangeListener.Change<? extends Person> change) {
         while (change.next()) {
-            if (change.wasPermutated() || change.wasUpdated() || !change.wasAdded()) {
+            if (change.wasPermutated() || change.wasUpdated()) {
                 continue;
             }
-            boolean isReplacementOfOne = change.wasReplaced()
-                    && change.getRemovedSize() == 1 && change.getAddedSize() == 1;
-            for (Person person : change.getAddedSubList()) {
-                if (knownPersons.add(person) && !isReplacementOfOne) {
-                    newPersons.add(person);
-                }
+            removedPersons.addAll(change.getRemoved());
+            if (change.wasAdded()) {
+                change.getAddedSubList().stream()
+                        .filter(knownPersons::add)
+                        .forEach(newPersons::add);
             }
         }
     }
@@ -74,15 +75,24 @@ public class PersonListPanel extends UiPart<Region> {
     /**
      * Highlights the athlete added by the command that just finished and scrolls to it, if the command added
      * exactly one athlete. Otherwise, clears any existing highlight.
+     * An athlete that appears while another athlete disappears for good (e.g. after an edit, which replaces the
+     * edited athlete) is an update rather than an addition, so it is not highlighted.
      */
     public void highlightNewlyAddedPerson() {
-        Person addedPerson = newPersons.size() == 1 ? newPersons.get(0) : null;
+        boolean hasReplacedPerson = removedPersons.stream().anyMatch(person -> !isShown(person));
+        Person addedPerson = newPersons.size() == 1 && !hasReplacedPerson ? newPersons.get(0) : null;
         newPersons.clear();
+        removedPersons.clear();
+
         recentlyAddedPerson.set(addedPerson);
         if (addedPerson != null) {
             // Scrolls once the list has laid out its rows, so that their actual heights are known.
             Platform.runLater(() -> personListView.scrollTo(addedPerson));
         }
+    }
+
+    private boolean isShown(Person person) {
+        return personListView.getItems().stream().anyMatch(shownPerson -> shownPerson == person);
     }
 
     /**
