@@ -312,7 +312,7 @@ Priorities: `* * *` = high (essential to the core workflow), `* *` = medium (use
 | US07 | `* * *` | MVP | coach | keep my previous roster unchanged when a change cannot be saved | avoid believing an unsaved update is permanent |
 | US08 | `* * *` | MVP | coach | have unreadable saved data preserved separately when loading fails | retain the possibility of recovering it while starting a new roster |
 | US09 | `* *` | Future | coach | edit an athlete's details directly | correct information without deleting and re-entering the record |
-| US10 | `* *` | Future | coach | find athletes by name | locate records without scanning the full roster |
+| US10 | `* *` | Future | coach | find athletes using partial values from any recorded field | locate records without scanning the full roster or remembering an exact value |
 | US11 | `* * *` | MVP | coach | filter athletes by age category | review athletes in a competition category |
 | US12 | `* *` | Future | coach | assign event-specialization tags to athletes | identify athletes who train for particular events |
 | US13 | `* *` | Future | new coach using TrackFlow | view built-in command help | learn or recall how to operate the application |

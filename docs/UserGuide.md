@@ -212,22 +212,36 @@ Examples:
 * `remark 1 r/100m personal best: 12.34s`
 * `remark 2 r/` removes the 2nd athlete's remark.
 
-### Locating athletes by name: `find`
+### Finding athletes across all fields: `find`
 
-Finds athletes whose names contain any of the given keywords.
+Finds athletes when any recorded field contains any of the given keywords.
 
 Format: `find KEYWORD [MORE_KEYWORDS]`
 
-* The search is case-insensitive; for example, `hans` matches `Hans`.
-* Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
-* The search considers only names.
-* Only full words match; for example, `Han` does not match `Hans`.
-* Athletes matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
+* Searchable fields are name, age category, phone, email, address, remark, and tags.
+* Matching is case-insensitive and accepts partial values. For example, `find ave` matches `Avery Tan`, and
+  `find 9123` matches a phone number such as `91234567`.
+* Each space-separated value is a keyword. An athlete is returned when at least one keyword occurs in at least one
+  searchable field (an `OR` search).
+* Keyword order does not matter. Duplicate matching fields do not cause an athlete to appear more than once.
+* Each `find` searches the entire roster and replaces any previous `find` or `filter`. Matching athletes retain their
+  roster order and receive indexes starting from 1. Use `list` to restore the complete roster.
+* An empty or whitespace-only search is rejected and displays the accepted command format.
+
+Feedback:
+
+* No matches: `No matching athletes found.`
+* One match: `Displaying 1 matching athlete.`
+* Multiple matches: `Displaying COUNT matching athletes.`
 
 Examples:
-* `find John` returns `john` and `John Doe`
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
+
+* `find ave` searches partial names and can return `Avery Tan`.
+* `find under` searches age categories such as `Under 14` and `Under 16`.
+* `find 9123` searches partial phone numbers.
+* `find tan@exam` searches partial email addresses.
+* `find sprint` searches addresses, remarks, and tags as well as the other fields.
+* `find avery 9123 under` returns athletes matching any of the three keywords.
 
 ### Deleting an athlete: `delete`
 
@@ -304,7 +318,7 @@ Action     | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS] [t/TAG]...`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`
-**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find avery 9123 under`
 **List**   | `list`
 **Remark** | `remark INDEX r/[REMARK]`<br> e.g., `remark 1 r/100m personal best: 12.34s`
 **Help**   | `help`
