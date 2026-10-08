@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.SVGPath?>
 
-<StackPane fx:id="placeHolder" styleClass="pane-with-border" xmlns="http://javafx.com/javafx/17"
-    xmlns:fx="http://javafx.com/fxml/1">
-  <TextArea fx:id="resultDisplay" editable="false" styleClass="result-display"/>
-</StackPane>
+<HBox styleClass="result-banner" spacing="6" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+  <StackPane fx:id="resultIcon" styleClass="result-icon" visible="false" managed="false">
+    <HBox.margin>
+      <Insets top="9" />
+    </HBox.margin>
+    <SVGPath fx:id="resultIconGlyph" styleClass="result-icon-glyph" />
+  </StackPane>
+  <TextArea fx:id="resultDisplay" editable="false" wrapText="true" styleClass="result-display" HBox.hgrow="ALWAYS"/>
+</HBox>
