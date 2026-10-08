@@ -12,6 +12,11 @@ import seedu.address.commons.util.ToStringBuilder;
 public class AgeCategoryPredicate implements Predicate<Person> {
     private final AgeCategory ageCategory;
 
+    /**
+     * Creates a predicate that matches an athlete's recorded {@code ageCategory}.
+     *
+     * @throws NullPointerException If {@code ageCategory} is null.
+     */
     public AgeCategoryPredicate(AgeCategory ageCategory) {
         this.ageCategory = requireNonNull(ageCategory);
     }

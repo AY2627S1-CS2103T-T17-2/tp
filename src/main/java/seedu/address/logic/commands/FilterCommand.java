@@ -11,6 +11,7 @@ import seedu.address.model.person.AgeCategoryPredicate;
  * Lists athletes in one age category, replacing the current filter.
  */
 public class FilterCommand extends Command {
+
     public static final String COMMAND_WORD = "filter";
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Lists athletes in the specified age category.\n"
@@ -22,6 +23,11 @@ public class FilterCommand extends Command {
 
     private final AgeCategory ageCategory;
 
+    /**
+     * Creates a command that filters athletes by {@code ageCategory}.
+     *
+     * @throws NullPointerException If {@code ageCategory} is null.
+     */
     public FilterCommand(AgeCategory ageCategory) {
         this.ageCategory = requireNonNull(ageCategory);
     }
@@ -30,13 +36,15 @@ public class FilterCommand extends Command {
     public CommandResult execute(Model model) {
         requireNonNull(model);
         model.updateFilteredPersonList(new AgeCategoryPredicate(ageCategory));
-        int count = model.getFilteredPersonList().size();
-        String feedback = count == 0
-                ? String.format(MESSAGE_NO_MATCHES, ageCategory)
-                : count == 1
-                        ? String.format(MESSAGE_SUCCESS_SINGLE, ageCategory)
-                        : String.format(MESSAGE_SUCCESS, count, ageCategory);
-        return new CommandResult(feedback);
+
+        int athleteCount = model.getFilteredPersonList().size();
+        if (athleteCount == 0) {
+            return new CommandResult(String.format(MESSAGE_NO_MATCHES, ageCategory));
+        } else if (athleteCount == 1) {
+            return new CommandResult(String.format(MESSAGE_SUCCESS_SINGLE, ageCategory));
+        } else {
+            return new CommandResult(String.format(MESSAGE_SUCCESS, athleteCount, ageCategory));
+        }
     }
 
     @Override

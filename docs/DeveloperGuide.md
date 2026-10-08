@@ -161,22 +161,13 @@ This section describes some noteworthy details on how certain features are imple
 
 ### Age-category filtering
 
-`AddressBookParser` dispatches `filter` to `FilterCommandParser`. The parser requires exactly one lowercase `a/`
-prefix and no preamble, rejects duplicates, and reuses `ParserUtil.parseAgeCategory` for the same canonical categories
-and normalization as `add`. Unsupported trailing arguments fail category validation.
+`AddressBookParser` dispatches `filter` to `FilterCommandParser`. The parser requires exactly one lowercase `a/` prefix and no preamble, rejects duplicates, and reuses `ParserUtil.parseAgeCategory` for the same canonical categories and normalization as `add`. Unsupported trailing arguments fail category validation.
 
-`FilterCommand` installs an `AgeCategoryPredicate` through `Model.updateFilteredPersonList`. The predicate compares
-`Person.getAgeCategory()` with the normalized category. Replacing the predicate searches the full underlying roster,
-preserves its order, and does not mutate records. Feedback distinguishes zero, one, and multiple matches.
-The filter is a view state and is not persisted across restarts.
+`FilterCommand` installs an `AgeCategoryPredicate` through `Model.updateFilteredPersonList`. The predicate compares `Person.getAgeCategory()` with the normalized category. Replacing the predicate searches the full underlying roster, preserves its order, and does not mutate records. Feedback distinguishes zero, one, and multiple matches. The filter is a view state and is not persisted across restarts.
 
-The existing `DeleteCommand` resolves indexes against `Model.getFilteredPersonList()`, so it already targets the
-correct displayed athlete and keeps the predicate active. No delete implementation changes are needed for filtering.
-`ListAthleteCommand` restores `PREDICATE_SHOW_ALL_PERSONS`; `find` and `filter` replace one another.
+The existing `DeleteCommand` resolves indexes against `Model.getFilteredPersonList()`, so it already targets the correct displayed athlete and keeps the predicate active. No delete implementation changes are needed for filtering. `ListAthleteCommand` restores `PREDICATE_SHOW_ALL_PERSONS`; `find` and `filter` replace one another.
 
-`FilterCommandParserTest` covers categories and invalid syntax, `AgeCategoryPredicateTest` covers exact category
-matching, and `FilterCommandTest` covers routing, feedback, unchanged records, replacing searches, invalid input,
-compatibility with existing deletion, and `list` restoration.
+`FilterCommandParserTest` covers categories and invalid syntax, `AgeCategoryPredicateTest` covers exact category matching, and `FilterCommandTest` covers routing, feedback, unchanged records, replacing searches, invalid input, compatibility with existing deletion, and `list` restoration.
 
 ### \[Proposed\] Undo/redo feature
 
@@ -302,15 +293,9 @@ The longer-term scope includes roster editing and searching, event organization,
 
 ### MVP feature responsibilities
 
-Age-category filtering (US11) is a **must-have**, promoted from the future/nice-to-have scope. Replace the proposed
-standalone persistence assignment with age-category filtering: category validation, match counts, empty-result
-feedback, compatibility with displayed indexes, restoring the roster with `list`, tests, and user-guide examples.
-Delete implementation remains the delete feature owner's responsibility.
+Age-category filtering (US11) is a required MVP feature. Its scope includes category validation, match counts, feedback for empty results, compatibility with displayed indexes, restoring the roster with `list`, tests, and user-guide examples. The delete feature owner is responsible for implementing deletion.
 
-Automatic local persistence remains required application behavior (US04, US07, US08), with shared integration
-responsibility rather than a standalone individual's new feature assignment. AB3 already provides basic persistence,
-name search, editing, help, and command parsing. The parsing owner's assignment is **improving parsing and validation
-to meet TrackFlow rules**, including required fields, supported categories, duplicate parameters, and actionable errors.
+Automatic local persistence remains required application behavior (US04, US07, US08). The team shares responsibility for persistence integration; persistence is not a standalone individual feature assignment. AB3 provides basic persistence, name search, editing, help, and command parsing. The parsing owner's scope is to improve parsing and validation to meet TrackFlow rules, including required fields, supported categories, duplicate parameters, and actionable errors.
 
 ### User stories
 
@@ -482,15 +467,13 @@ Use case ends.
 **MSS**
 
 1. The coach enters `filter a/AGE_CATEGORY` with one supported category.
-2. TrackFlow searches the full roster and displays matching athletes with current indexes and the match count.
-3. The coach enters `list` to restore the complete roster, or uses the displayed indexes with existing commands.
+1. TrackFlow searches the full roster and displays matching athletes with current indexes and the match count.
+1. The coach enters `list` to restore the complete roster, or uses the displayed indexes with existing commands.
 
 **Extensions**
 
-* **1a.** The category is missing, invalid, repeated, or accompanied by extra arguments.
-  TrackFlow reports the error and retains the previous display and roster.
-* **2a.** No athletes match, including when the roster is empty.
-  TrackFlow displays an empty list and an explicit zero-match message. `list` remains available.
+* **1a.** The category is missing, invalid, repeated, or accompanied by extra arguments. TrackFlow reports the error and retains the previous display and roster.
+* **2a.** No athletes match, including when the roster is empty. TrackFlow displays an empty list and an explicit zero-match message. `list` remains available.
 
 ### Non-Functional Requirements
 
@@ -582,19 +565,20 @@ testers are expected to do more *exploratory* testing.
 
 ### Filtering by age category
 
-1. In a disposable test roster, add an `Open` athlete followed by two distinct `Under 14` athletes.
-2. Run `filter a/under   14`. Expect two juniors in roster order, numbered 1 and 2, and
-   `Displaying 2 athletes in age category Under 14.`
-3. Run `delete 3`. Expect an invalid-index error and no changes, even though the full roster has three athletes.
-4. Run `delete 1`. Expect the first junior to be deleted, the other displayed as index 1, and the Open athlete retained.
-   Run `list` to verify both remaining records. These steps test compatibility with the existing delete command.
-5. Run `filter a/Under 20`. Expect an empty display and
-   `No athletes found in age category Under 20 (0 matches).` Run `list` to restore both records.
-6. Run `filter a/Open`. Expect one match and `Displaying 1 athlete in age category Open.`
-7. Try `filter`, `filter a/Under 15`, `filter a/`, and `filter a/Open a/Under 14`. Expect errors and the previous
-   display unchanged.
-8. Run `find` with the junior's name, then `filter a/Open`. Expect the Open athlete, proving the full roster is searched.
-9. Restart TrackFlow. Expect the full remaining roster; filtering has not removed or changed any saved records.
+Use a separate test roster for this procedure. The deletion steps test compatibility with the existing delete command and permanently remove test records.
+
+1. Prepare an empty test roster with one `Open` athlete followed by two distinct `Under 14` athletes.
+1. Run `filter a/under   14`. Expect the two `Under 14` athletes in roster order, numbered 1 and 2, and `Displaying 2 athletes in age category Under 14.`
+1. Run `delete 3`. Expect an invalid-index error and no changes, even though the full roster has three athletes.
+1. Run `delete 1`. Expect the first `Under 14` athlete to be deleted and the other to appear at index 1.
+1. Run `list`. Expect both remaining athletes, including the `Open` athlete.
+1. Run `filter a/Under 20`. Expect an empty display and `No athletes found in age category Under 20 (0 matches).`
+1. Run `list`. Expect both remaining athletes.
+1. Run `filter a/Open`. Expect one match and `Displaying 1 athlete in age category Open.`
+1. Try each invalid command separately: `filter`, `filter a/Under 15`, `filter a/`, and `filter a/Open a/Under 14`. Expect an error after each command and no change to the display.
+1. Run `find` with the remaining `Under 14` athlete's name. Expect that athlete in the results.
+1. Run `filter a/Open`. Expect the `Open` athlete, confirming that filtering searches the full roster.
+1. Restart TrackFlow. Expect both remaining athletes. The filter is not saved between sessions.
 
 ### Saving data
 

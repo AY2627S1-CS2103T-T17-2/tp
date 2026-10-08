@@ -11,7 +11,7 @@ import seedu.address.testutil.PersonBuilder;
 
 public class AgeCategoryPredicateTest {
     @Test
-    public void test_matchesOnlyRecordedCategory() {
+    public void test_sameAndDifferentCategories_matchesOnlyRecordedCategory() {
         AgeCategoryPredicate predicate = new AgeCategoryPredicate(new AgeCategory("under 14"));
         assertTrue(predicate.test(new PersonBuilder().withAgeCategory("Under 14").build()));
         for (String category : new String[] {"Under 16", "Under 18", "Under 20", "Open"}) {
@@ -20,13 +20,17 @@ public class AgeCategoryPredicateTest {
     }
 
     @Test
-    public void equals_comparesCategory() {
+    public void equals() {
         AgeCategoryPredicate predicate = new AgeCategoryPredicate(new AgeCategory("Open"));
         assertTrue(predicate.equals(predicate));
         assertEquals(predicate, new AgeCategoryPredicate(new AgeCategory("OPEN")));
         assertFalse(predicate.equals(new AgeCategoryPredicate(new AgeCategory("Under 14"))));
         assertFalse(predicate.equals(null));
         assertFalse(predicate.equals("Open"));
+    }
+
+    @Test
+    public void constructor_nullCategory_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new AgeCategoryPredicate(null));
     }
 }

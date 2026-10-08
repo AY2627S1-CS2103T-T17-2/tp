@@ -9,6 +9,7 @@
 While it has a Graphical User Interface (GUI), most user interactions occur using a Command Line Interface (CLI). It is strictly optimized for touch-typist coaches working at a desk between practices and meets who strongly prefer rapid, keyboard-driven text entry over navigating nested GUI drop-downs and bloated sports-management web platforms.
 
 ### Key Features
+
 * **Age-category filtering**: Use `filter a/Under 14` to display matching athletes and their count; `list` restores the full roster.
 * **Event Discipline Tagging**: Instantly group athletes by event specialization (e.g., `find t/Sprints`, `find t/HighJump`) to generate target lists for practice updates.
 * **Guardian & Emergency Contact Linking**: Map student-athlete cards directly to parent/guardian profiles, enabling single-command lookups of emergency numbers during road meets.
