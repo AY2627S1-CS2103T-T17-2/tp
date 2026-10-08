@@ -50,11 +50,7 @@ public class CommandBox extends UiPart<Region> {
             String selected = suggestionsListView.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 String commandWord = selected.split("\\s+")[0];
-                String nextPrefix = autocompleteEngine.getNextPrefix(commandWord + " ");
-                String newText = commandWord + " " + nextPrefix;
-                if (!nextPrefix.isEmpty() && !newText.endsWith(" ")) {
-                    newText += " ";
-                }
+                String newText = commandWord + " ";
                 commandTextField.setText(newText);
                 commandTextField.positionCaret(newText.length());
             }

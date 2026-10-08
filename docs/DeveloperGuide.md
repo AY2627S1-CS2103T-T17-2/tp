@@ -183,6 +183,27 @@ tested only against its selected field. The criteria use case-insensitive partia
 This allows `find n/und` to match a name such as `Underwood` without matching athletes merely because their age
 category starts with `Under`.
 
+### Command autocomplete
+
+The command autocomplete feature is facilitated by `CommandBox` and `AutocompleteEngine`.
+It provides real-time dropdown suggestions for commands based on the user's input, and an intelligent prefix insertion mechanism to guide the user in completing complex commands.
+
+#### Implementation Details
+
+* `AutocompleteEngine` stores a predefined list of command templates (e.g., `"add n/ a/ p/ e/ addr/"`).
+* `CommandBox` listens to changes in the `TextField`'s `textProperty`. For every keystroke, it asks the `AutocompleteEngine` for matching suggestions and displays them using a JavaFX `Popup` containing a `ListView`.
+* **Selection:** When the user selects a suggestion (via Mouse Click, `Tab`, or `Enter`), the `CommandBox` inserts the command word (e.g., `add `) leaving space for the user to insert an index if required.
+* **Incremental Prefix Insertion:** If the user presses `Tab` while the suggestion dropdown is closed, `CommandBox` uses `AutocompleteEngine#getNextPrefix` to scan the current input and append the next missing prefix based on the command's template. This allows the user to construct the command sequentially by pressing `Tab` after entering each parameter's data.
+
+#### Design Considerations
+
+* **Alternative 1:** Insert the entire command template at once (e.g., `add n/ a/ p/ e/ addr/`).
+  * Pros: Shows the user all required fields immediately.
+  * Cons: If the user accidentally executes the command before filling all fields, the parser fails with an invalid format error. It also requires manual navigation between the placeholders.
+* **Alternative 2 (Current Choice):** Incrementally insert prefixes using `Tab`.
+  * Pros: Creates a guided, IDE-like snippet experience. Prevents trailing empty prefixes from causing parsing errors.
+  * Cons: Requires slightly more complex logic to parse the current text and determine the next missing prefix.
+
 ### Age-category filtering
 
 `AddressBookParser` dispatches `filter` to `FilterCommandParser`. The parser requires exactly one case-insensitive `a/`
