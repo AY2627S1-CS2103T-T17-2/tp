@@ -29,13 +29,6 @@ public class ResultDisplay extends UiPart<Region> {
     }
 
     /**
-     * Displays {@code feedbackToUser} without marking it as a success or an error.
-     */
-    public void setFeedbackToUser(String feedbackToUser) {
-        showFeedback(feedbackToUser, FeedbackType.NEUTRAL);
-    }
-
-    /**
      * Displays {@code feedbackToUser} as the result of a command that succeeded.
      */
     public void showSuccess(String feedbackToUser) {
@@ -54,23 +47,19 @@ public class ResultDisplay extends UiPart<Region> {
         for (FeedbackType otherType : FeedbackType.values()) {
             getRoot().getStyleClass().remove(otherType.styleClass);
         }
-
-        boolean hasIcon = type != FeedbackType.NEUTRAL;
-        if (hasIcon) {
-            getRoot().getStyleClass().add(type.styleClass);
-            resultIconGlyph.setContent(type.iconShape);
-        }
-        resultIcon.setVisible(hasIcon);
-        resultIcon.setManaged(hasIcon);
+        getRoot().getStyleClass().add(type.styleClass);
+        resultIconGlyph.setContent(type.iconShape);
+        resultIcon.setVisible(true);
+        resultIcon.setManaged(true);
         resultDisplay.setText(feedbackToUser);
     }
 
     /**
      * Kinds of feedback, each with the style class and icon shape used to present it.
      * The message text itself always states the outcome, so colour is never the only cue.
+     * Before the first command, no icon is shown.
      */
     private enum FeedbackType {
-        NEUTRAL("result-neutral", ""),
         SUCCESS("result-success", "M5.5 10.5 L8.5 13.5 L14.5 6.5"),
         ERROR("result-error", "M6.5 6.5 L13.5 13.5 M13.5 6.5 L6.5 13.5");
 
