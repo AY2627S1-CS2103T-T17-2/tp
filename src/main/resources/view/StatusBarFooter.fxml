@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 
-<GridPane styleClass="status-bar" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-  <columnConstraints>
-    <ColumnConstraints hgrow="SOMETIMES" minWidth="10" />
-  </columnConstraints>
-  <Label fx:id="saveLocationStatus" />
-</GridPane>
+<HBox styleClass="status-bar" alignment="CENTER_LEFT" spacing="14" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1">
+  <HBox alignment="CENTER_LEFT" spacing="2" minWidth="-Infinity">
+    <Region styleClass="status-dot" />
+    <Label fx:id="saveStateStatus" styleClass="status-save-state" minWidth="-Infinity" />
+  </HBox>
+  <Label fx:id="saveLocationStatus" styleClass="status-path" />
+  <Region HBox.hgrow="ALWAYS" />
+  <Label fx:id="athleteCountStatus" minWidth="-Infinity" />
+</HBox>

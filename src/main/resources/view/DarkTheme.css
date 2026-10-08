@@ -342,13 +342,42 @@
 .status-bar {
     -fx-background-color: -tf-line, -tf-chrome;
     -fx-background-insets: 0, 1 0 0 0;
-    -fx-padding: 0 8 0 8;
+    -fx-padding: 0 12 0 14;
 }
 
 .status-bar .label {
     -fx-font-size: 11.5px;
     -fx-text-fill: -tf-muted;
-    -fx-padding: 6 6 6 6;
+    -fx-padding: 6 0 6 4;
+}
+
+.status-bar .status-path {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 11px;
+    -fx-text-fill: -tf-dim;
+}
+
+.status-dot {
+    -fx-min-width: 7;
+    -fx-pref-width: 7;
+    -fx-max-width: 7;
+    -fx-min-height: 7;
+    -fx-pref-height: 7;
+    -fx-max-height: 7;
+    -fx-background-radius: 4;
+    -fx-background-color: -tf-dim;
+}
+
+.status-saved .status-dot {
+    -fx-background-color: -tf-success;
+}
+
+.status-not-saved .status-dot {
+    -fx-background-color: -tf-error;
+}
+
+.status-not-saved .status-save-state {
+    -fx-text-fill: -tf-error;
 }
 
 /* ---------- Scroll bars ---------- */
