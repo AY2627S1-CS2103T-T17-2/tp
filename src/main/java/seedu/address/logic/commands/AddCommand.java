@@ -47,8 +47,9 @@ public class AddCommand extends Command {
             throw new CommandException(String.format(MESSAGE_DUPLICATE_PERSON, toAdd.getName()));
         }
 
+        String warning = Messages.getPossibleDuplicateWarning(toAdd, model.getAddressBook().getPersonList());
         model.addPerson(toAdd);
-        return new CommandResult(String.format(MESSAGE_SUCCESS, Messages.formatAthlete(toAdd)));
+        return new CommandResult(String.format(MESSAGE_SUCCESS, Messages.formatAthlete(toAdd)) + warning);
     }
 
     @Override

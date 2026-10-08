@@ -80,13 +80,17 @@ public class EditCommand extends Command {
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
-        if (!personToEdit.isSamePerson(editedPerson) && model.hasPerson(editedPerson)) {
+        List<Person> otherPersons = model.getAddressBook().getPersonList().stream()
+                .filter(person -> person != personToEdit).toList();
+        if (otherPersons.stream().anyMatch(editedPerson::isSamePerson)) {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
 
+        String warning = Messages.getPossibleDuplicateWarning(editedPerson, otherPersons);
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-        return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson)));
+        return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS,
+                Messages.formatAthlete(editedPerson)) + warning);
     }
 
     /**

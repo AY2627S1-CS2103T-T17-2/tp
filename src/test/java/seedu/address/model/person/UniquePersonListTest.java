@@ -22,6 +22,16 @@ public class UniquePersonListTest {
     private final UniquePersonList uniquePersonList = new UniquePersonList();
 
     @Test
+    public void setPerson_keepsPhoneButMatchesAnotherEmail_throwsDuplicatePersonException() {
+        Person other = new PersonBuilder(ALICE).withPhone("81112222").withEmail("other@example.com").build();
+        uniquePersonList.add(ALICE);
+        uniquePersonList.add(other);
+        Person edited = new PersonBuilder(ALICE).withEmail("other@example.com").build();
+        assertThrows(DuplicatePersonException.class, () -> uniquePersonList.setPerson(ALICE, edited));
+        assertEquals(List.of(ALICE, other), uniquePersonList.asUnmodifiableObservableList());
+    }
+
+    @Test
     public void contains_nullPerson_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> uniquePersonList.contains(null));
     }

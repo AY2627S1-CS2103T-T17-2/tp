@@ -27,6 +27,30 @@ public class AddCommandIntegrationTest {
     }
 
     @Test
+    public void execute_sharedContactOutsideFilteredList_succeedsWithWarning() {
+        Person existing = model.getAddressBook().getPersonList().get(0);
+        model.updateFilteredPersonList(person -> false);
+        Person candidate = new PersonBuilder(existing).withName("Different Athlete")
+                .withEmail("new@example.com").build();
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.updateFilteredPersonList(person -> false);
+        expectedModel.addPerson(candidate);
+        String expected = String.format(AddCommand.MESSAGE_SUCCESS, Messages.formatAthlete(candidate))
+                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, existing.getName());
+        assertCommandSuccess(new AddCommand(candidate), model, expected, expectedModel);
+    }
+
+    @Test
+    public void execute_sameNameDifferentContacts_succeedsWithoutWarning() {
+        Person existing = model.getAddressBook().getPersonList().get(0);
+        Person candidate = new PersonBuilder(existing).withPhone("81112222").withEmail("new@example.com").build();
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.addPerson(candidate);
+        assertCommandSuccess(new AddCommand(candidate), model,
+                String.format(AddCommand.MESSAGE_SUCCESS, Messages.formatAthlete(candidate)), expectedModel);
+    }
+
+    @Test
     public void execute_newPerson_success() {
         Person validPerson = new PersonBuilder().build();
 

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -123,18 +124,19 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_sameNameDifferentField_acceptsAthletes() throws Exception {
+    public void execute_sameNameMatchingContact_rejectsDuplicates() throws Exception {
         logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street");
         String[] variants = {"a/Under 16 p/91234567 e/avery.tan@example.com",
             "a/Under 14 p/92345678 e/avery.tan@example.com",
             "a/Under 14 p/91234567 e/other@example.com"};
         for (String variant : variants) {
-            logic.execute("add n/Avery Tan " + variant + " addr/123 Main Street");
+            assertThrows(CommandException.class, () ->
+                logic.execute("add n/Avery Tan " + variant + " addr/123 Main Street"));
         }
-        assertEquals(4, model.getFilteredPersonList().size());
+        assertEquals(1, model.getFilteredPersonList().size());
         assertThrows(CommandException.class, "This athlete already exists in the roster: AVERY   TAN.", () ->
             logic.execute("add n/AVERY   TAN a/under 14 p/91234567 e/AVERY.TAN@example.com addr/123 Main Street"));
-        assertEquals(4, model.getFilteredPersonList().size());
+        assertEquals(1, model.getFilteredPersonList().size());
     }
 
     @Test
@@ -166,12 +168,29 @@ public class LogicManagerTest {
             validCommand.replace("Under 14", "Under 15"),
             validCommand.replace("91234567", "+65 9123 4567"),
             validCommand.replace("avery.tan@example.com", "invalid"),
-            validCommand + " n/Other Athlete", validCommand + " t/sprints", validCommand + " r/note"};
+            validCommand + " n/Other Athlete", validCommand + " t/invalid-tag", validCommand + " r/note r/other",
+            validCommand + " addr/"};
         for (String invalidCommand : invalidCommands) {
             assertThrows(ParseException.class, () -> logic.execute(invalidCommand));
             assertEquals(expectedModel, model);
             assertEquals(savedData, Files.readString(savedPath));
         }
+    }
+
+    @Test
+    public void execute_sort_changesDisplayButPreservesSavedRosterOrder() throws Exception {
+        logic.execute("add n/Zoe Tan a/Under 18 p/999 e/zoe@example.com addr/123 Main Street");
+        logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com addr/123 Main Street");
+
+        assertEquals("Sorted the displayed athlete list by name in ascending order.",
+                logic.execute("sort name").getFeedbackToUser());
+        assertEquals(List.of("Amy Lim", "Zoe Tan"), getDisplayedNames(model));
+        assertEquals(List.of("Zoe Tan", "Amy Lim"), getStoredNames(model.getAddressBook()));
+
+        JsonAddressBookStorage storage =
+                new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
+        ReadOnlyAddressBook reloadedAddressBook = storage.readAddressBook().orElseThrow();
+        assertEquals(List.of("Zoe Tan", "Amy Lim"), getStoredNames(reloadedAddressBook));
     }
 
     @Test
@@ -290,5 +309,17 @@ public class LogicManagerTest {
         ModelManager expectedModel = new ModelManager();
         expectedModel.addPerson(expectedPerson);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
+    }
+
+    private static List<String> getDisplayedNames(Model model) {
+        return model.getFilteredPersonList().stream()
+                .map(person -> person.getName().fullName)
+                .toList();
+    }
+
+    private static List<String> getStoredNames(ReadOnlyAddressBook addressBook) {
+        return addressBook.getPersonList().stream()
+                .map(person -> person.getName().fullName)
+                .toList();
     }
 }

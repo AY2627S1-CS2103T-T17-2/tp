@@ -32,11 +32,14 @@ public class PersonTest {
         // null -> returns false
         assertFalse(ALICE.isSamePerson(null));
 
-        // Every essential field contributes to identity.
-        assertFalse(ALICE.isSamePerson(new PersonBuilder(ALICE).withPhone(VALID_PHONE_BOB).build()));
-        assertFalse(ALICE.isSamePerson(new PersonBuilder(ALICE).withEmail(VALID_EMAIL_BOB).build()));
+        // Matching name and either contact identifies a duplicate, regardless of category.
+        assertTrue(ALICE.isSamePerson(new PersonBuilder(ALICE).withPhone(VALID_PHONE_BOB).build()));
+        assertTrue(ALICE.isSamePerson(new PersonBuilder(ALICE).withEmail(VALID_EMAIL_BOB).build()));
         assertFalse(ALICE.isSamePerson(new PersonBuilder(ALICE).withName(VALID_NAME_BOB).build()));
-        assertFalse(ALICE.isSamePerson(new PersonBuilder(ALICE).withAgeCategory("Under 14").build()));
+        assertTrue(ALICE.isSamePerson(new PersonBuilder(ALICE).withAgeCategory("Under 14").build()));
+
+        assertFalse(ALICE.isSamePerson(new PersonBuilder(ALICE).withPhone(VALID_PHONE_BOB)
+                .withEmail(VALID_EMAIL_BOB).build()));
 
         // Display case, surrounding spaces, and repeated name spaces do not change identity.
         Person normalizedAlice = new PersonBuilder(ALICE).withName("Alice   Pauline ")
