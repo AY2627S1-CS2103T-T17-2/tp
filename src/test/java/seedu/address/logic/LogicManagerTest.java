@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -178,6 +179,22 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_sort_changesDisplayButPreservesSavedRosterOrder() throws Exception {
+        logic.execute("add n/Zoe Tan a/Under 18 p/999 e/zoe@example.com");
+        logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com");
+
+        assertEquals("Sorted the displayed athlete list by name in ascending order.",
+                logic.execute("sort name").getFeedbackToUser());
+        assertEquals(List.of("Amy Lim", "Zoe Tan"), getDisplayedNames(model));
+        assertEquals(List.of("Zoe Tan", "Amy Lim"), getStoredNames(model.getAddressBook()));
+
+        JsonAddressBookStorage storage =
+                new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
+        ReadOnlyAddressBook reloadedAddressBook = storage.readAddressBook().orElseThrow();
+        assertEquals(List.of("Zoe Tan", "Amy Lim"), getStoredNames(reloadedAddressBook));
+    }
+
+    @Test
     public void execute_duplicateAfterReload_preservesRosterAndSavedFile() throws Exception {
         logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com");
         Path savedPath = temporaryFolder.resolve("addressBook.json");
@@ -292,5 +309,17 @@ public class LogicManagerTest {
         ModelManager expectedModel = new ModelManager();
         expectedModel.addPerson(expectedPerson);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
+    }
+
+    private static List<String> getDisplayedNames(Model model) {
+        return model.getFilteredPersonList().stream()
+                .map(person -> person.getName().fullName)
+                .toList();
+    }
+
+    private static List<String> getStoredNames(ReadOnlyAddressBook addressBook) {
+        return addressBook.getPersonList().stream()
+                .map(person -> person.getName().fullName)
+                .toList();
     }
 }
