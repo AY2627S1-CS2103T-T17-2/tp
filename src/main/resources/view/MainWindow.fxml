@@ -53,21 +53,29 @@
 
         <StackPane VBox.vgrow="NEVER" fx:id="commandBoxPlaceholder" styleClass="pane-with-border">
           <padding>
-            <Insets top="5" right="10" bottom="5" left="10" />
+            <Insets top="12" right="14" bottom="8" left="14" />
           </padding>
+          <!-- Drawn above the command box (viewOrder) and ignores the mouse, so typing is unaffected. -->
+          <Label text="›" styleClass="command-prompt" mouseTransparent="true" viewOrder="-1"
+                 StackPane.alignment="CENTER_LEFT">
+            <StackPane.margin>
+              <Insets left="14" />
+            </StackPane.margin>
+          </Label>
         </StackPane>
 
         <StackPane VBox.vgrow="NEVER" fx:id="resultDisplayPlaceholder" styleClass="pane-with-border"
                    minHeight="100" prefHeight="100" maxHeight="100">
           <padding>
-            <Insets top="5" right="10" bottom="5" left="10" />
+            <Insets top="0" right="14" bottom="4" left="14" />
           </padding>
         </StackPane>
 
         <VBox fx:id="personList" styleClass="pane-with-border" minWidth="340" prefWidth="340" VBox.vgrow="ALWAYS">
           <padding>
-            <Insets top="10" right="10" bottom="10" left="10" />
+            <Insets top="8" right="14" bottom="12" left="14" />
           </padding>
+          <Label text="ROSTER" styleClass="section-label" />
           <StackPane fx:id="personListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
         </VBox>
 

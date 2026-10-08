@@ -149,7 +149,7 @@
     -fx-background-insets: 0, 1;
     -fx-background-radius: 9, 8;
     -fx-border-width: 0;
-    -fx-padding: 11 14 11 14;
+    -fx-padding: 11 14 11 34;
 }
 
 #commandTextField:hover {
@@ -160,6 +160,20 @@
     -fx-background-color: -tf-accent, -tf-panel;
     -fx-background-insets: 0, 1.5;
     -fx-effect: dropshadow(gaussian, rgba(255, 90, 54, 0.30), 10, 0.15, 0, 0);
+}
+
+.command-prompt {
+    -fx-font-family: "Plus Jakarta Sans";
+    -fx-font-weight: bold;
+    -fx-font-size: 17px;
+    -fx-text-fill: -tf-accent;
+}
+
+.section-label {
+    -fx-font-family: "Plus Jakarta Sans SemiBold";
+    -fx-font-size: 10.5px;
+    -fx-text-fill: -tf-dim;
+    -fx-padding: 6 2 7 2;
 }
 
 /* ---------- Result display ---------- */
@@ -193,20 +207,16 @@
 /* ---------- Athlete list ---------- */
 
 .list-view {
-    -fx-background-color: -tf-line, -tf-panel;
+    -fx-background-color: -tf-line-strong, -tf-panel;
     -fx-background-insets: 0, 1;
-    -fx-background-radius: 10, 9;
+    -fx-background-radius: 8, 7;
     -fx-padding: 1;
 }
 
-.list-view:focused {
-    -fx-background-color: -tf-line-strong, -tf-panel;
-}
-
 .list-cell {
-    -fx-padding: 0;
-    -fx-background-color: -tf-line, -tf-panel;
-    -fx-background-insets: 0, 0 0 1 0;
+    -fx-background-color: -tf-panel;
+    -fx-text-fill: -tf-text;
+    -fx-padding: 5 12 5 12;
 }
 
 .list-cell:empty {
@@ -214,14 +224,44 @@
 }
 
 .list-cell:filled:hover {
-    -fx-background-color: -tf-line, -tf-panel-hover;
+    -fx-background-color: -tf-panel-hover;
 }
 
 .list-cell:filled:selected {
+    -fx-background-color: #2a1d1a;
+    -fx-text-fill: -tf-accent-soft;
+}
+
+#personListView {
+    -fx-background-color: -tf-line, -tf-panel;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 10, 9;
+    -fx-padding: 1;
+}
+
+#personListView:focused {
+    -fx-background-color: -tf-line-strong, -tf-panel;
+}
+
+#personListView .list-cell {
+    -fx-padding: 0;
+    -fx-background-color: -tf-line, -tf-panel;
+    -fx-background-insets: 0, 0 0 1 0;
+}
+
+#personListView .list-cell:empty {
+    -fx-background-color: -tf-panel;
+}
+
+#personListView .list-cell:filled:hover {
+    -fx-background-color: -tf-line, -tf-panel-hover;
+}
+
+#personListView .list-cell:filled:selected {
     -fx-background-color: -tf-line, -tf-panel-selected;
 }
 
-.list-cell .label {
+#personListView .list-cell .label {
     -fx-text-fill: -tf-text;
 }
 
@@ -241,7 +281,7 @@
     -fx-text-fill: -tf-muted;
 }
 
-.list-cell .cell_small_label {
+#personListView .list-cell .cell_small_label {
     -fx-text-fill: -tf-muted;
 }
 
