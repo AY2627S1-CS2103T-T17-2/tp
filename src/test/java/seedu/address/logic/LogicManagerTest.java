@@ -111,18 +111,18 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_sameNameDifferentField_acceptsAthletes() throws Exception {
+    public void execute_sameNameMatchingContact_rejectsDuplicates() throws Exception {
         logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com");
         String[] variants = {"a/Under 16 p/91234567 e/avery.tan@example.com",
             "a/Under 14 p/92345678 e/avery.tan@example.com",
             "a/Under 14 p/91234567 e/other@example.com"};
         for (String variant : variants) {
-            logic.execute("add n/Avery Tan " + variant);
+            assertThrows(CommandException.class, () -> logic.execute("add n/Avery Tan " + variant));
         }
-        assertEquals(4, model.getFilteredPersonList().size());
+        assertEquals(1, model.getFilteredPersonList().size());
         assertThrows(CommandException.class, "This athlete already exists in the roster: AVERY   TAN.", () ->
             logic.execute("add n/AVERY   TAN a/under 14 p/91234567 e/AVERY.TAN@example.com"));
-        assertEquals(4, model.getFilteredPersonList().size());
+        assertEquals(1, model.getFilteredPersonList().size());
     }
 
     @Test

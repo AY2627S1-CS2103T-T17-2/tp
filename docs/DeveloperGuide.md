@@ -305,13 +305,13 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Value proposition**: TrackFlow helps a coach maintain and retrieve an organized athlete roster through short keyboard commands, reducing the effort of navigating forms and keeping contact information available between training sessions.
 
-**Requirements scope**: This appendix records the intended product requirements, including features beyond the minimum viable product (MVP). It is not a statement that all features are implemented. The MVP comprises adding, listing, filtering by age category, and permanently deleting athletes, automatic local persistence, and clear command feedback. An athlete's required MVP fields are name, age category, phone number, and email address.
+**Requirements scope**: This appendix records the intended product requirements, including features beyond the minimum viable product (MVP). It is not a statement that all features are implemented. The MVP comprises adding, listing, and permanently deleting athletes, automatic local persistence, and clear command feedback. An athlete's required MVP fields are name, age category, phone number, and email address. Age-category filtering is a nice-to-have enhancement beyond the required MVP.
 
 The longer-term scope includes roster editing and searching, event organization, guardian links, athlete logs, and recovery tools. Cloud synchronization and multi-user access were considered but are excluded from the selected single-user, local product. A coach operates their own roster; athletes and guardians are records, not application users.
 
 ### MVP feature responsibilities
 
-Age-category filtering (US11) is a required MVP feature. Its scope includes category validation, match counts, feedback for empty results, compatibility with displayed indexes, restoring the roster with `list`, tests, and user-guide examples. The delete feature owner is responsible for implementing deletion.
+Age-category filtering (US11) is a medium-priority nice-to-have enhancement. Coaches can maintain and review their roster using add, list, and delete; filtering makes reviewing a competition category faster. Its scope includes category validation, match counts, feedback for empty results, compatibility with displayed indexes, restoring the roster with `list`, tests, and user-guide examples. The delete feature owner is responsible for implementing deletion.
 
 Automatic local persistence remains required application behavior (US04, US07, US08). The team shares responsibility for persistence integration; persistence is not a standalone individual feature assignment. AB3 provides basic persistence, name search, editing, help, and command parsing. The parsing owner's scope is to improve parsing and validation to meet TrackFlow rules, including required fields, supported categories, duplicate parameters, and actionable errors.
 
@@ -326,17 +326,17 @@ Priorities: `* * *` = high (essential to the core workflow), `* *` = medium (use
 | US03 | `* * *` | MVP | coach | permanently delete one selected athlete | remove a record I no longer need |
 | US04 | `* * *` | MVP | returning coach | recover saved roster changes when I reopen TrackFlow | continue work without re-entering athletes |
 | US05 | `* * *` | MVP | coach | receive clear success messages and actionable errors | know whether a command worked and correct mistakes |
-| US06 | `* * *` | MVP | coach | have exact duplicate records rejected while allowing names and family contact details to be shared | avoid redundant entries without excluding different athletes |
+| US06 | `* * *` | MVP | coach | have matching-name records with a shared phone or email rejected, and receive warnings for differently named records sharing contacts | avoid redundant entries without excluding different athletes |
 | US07 | `* * *` | MVP | coach | keep my previous roster unchanged when a change cannot be saved | avoid believing an unsaved update is permanent |
 | US08 | `* * *` | MVP | coach | have unreadable saved data preserved separately when loading fails | retain the possibility of recovering it while starting a new roster |
 | US09 | `* *` | Future | coach | edit an athlete's details directly | correct information without deleting and re-entering the record |
 | US10 | `* *` | Future | coach | find athletes using partial values from any recorded field | locate records without scanning the full roster or remembering an exact value |
-| US11 | `* * *` | MVP | coach | filter athletes by age category | review athletes in a competition category |
-| US12 | `* *` | Future | coach | assign event-specialization tags to athletes | identify athletes who train for particular events |
+| US11 | `* *` | Future | coach | filter athletes by age category | review athletes in a competition category |
+| US12 | `* *` | Future | coach | assign and remove event-specialization tags for athletes | identify athletes who train for particular events and keep their specializations current |
 | US13 | `* *` | Future | new coach using TrackFlow | view built-in command help | learn or recall how to operate the application |
 | US14 | `* *` | Future | frequent user | recall previously entered commands | reduce repeated typing |
 | US15 | `* *` | Future | coach | archive and restore athlete records | keep departed athletes' information without including them in the active roster |
-| US16 | `* *` | Future | coach | record guardians and link them to athletes | find the appropriate family contact when needed |
+| US16 | `* *` | Future | coach | record guardians and add or remove their links to athletes | find the appropriate family contact and keep those links current |
 | US17 | `* *` | Future | coach | organize athletes into relay squads and event groups | review who belongs to each team or event |
 | US18 | `* *` | Future | coach | record and review personal bests by event | track an athlete's performance progress |
 | US19 | `* *` | Future | coach | record and review relevant medical notes | consult recorded considerations when planning training |
@@ -344,16 +344,13 @@ Priorities: `* * *` = high (essential to the core workflow), `* *` = medium (use
 | US21 | `* *` | Future | coach | record and review participation logs | track athletes' involvement in training or competitions |
 | US22 | `* *` | Future | coach | undo and redo roster changes | recover from accidental changes or reapply them |
 | US23 | `* *` | Future | coach | view an athlete's contact details, event tags, guardian links, and status notes together | prepare for a meet without searching through separate records |
-| US24 | `* *` | Future | coach | remove an event-specialization tag from an athlete | keep the athlete's recorded specializations current |
 | US25 | `* *` | Future | coach | view all event-specialization tags currently used in the roster | review which disciplines the team covers |
 | US26 | `* *` | Future | coach | view the contact information of athletes in an event group | communicate practice or meet updates to that group |
 | US27 | `* *` | Future | coach | link multiple guardians to one athlete | retain alternative contacts when a guardian is unavailable |
 | US28 | `* *` | Future | coach managing siblings | link one guardian record to multiple athletes | update shared contact details only once |
 | US29 | `* *` | Future | coach organizing travel | identify athletes without a guardian phone number | collect missing emergency contact information before departure |
-| US30 | `* *` | Future | coach | remove an outdated guardian link from an athlete | keep the athlete's recorded contacts current |
-| US31 | `* *` | Future | relay coach | assign athletes to specific relay legs | make the running order clear |
+| US31 | `* *` | Future | relay coach | assign or replace athletes on specific relay legs | maintain a clear running order and adjust the lineup when availability changes |
 | US32 | `* *` | Future | relay coach | designate alternate runners for a relay squad | record replacements before a meet |
-| US33 | `* *` | Future | relay coach | replace the athlete assigned to a specific relay leg | adjust a lineup quickly when availability changes |
 | US34 | `* *` | Future | coach | view an athlete's relay-squad and event-group memberships | review the athlete's assignments before making changes |
 | US35 | `* *` | Future | coach | correct an inaccurate personal-best or status log entry | keep the athlete's recorded history reliable |
 | US36 | `*` | Future | coach | import and export roster records in bulk | transfer my own records without entering each one manually |
@@ -368,7 +365,7 @@ Email reachability checking (US39) is a considered optional enhancement, not par
 
 ### Use cases
 
-For every use case below, the **system** is TrackFlow and the **primary actor** is the coach. **MSS** means main success scenario. These use cases describe required behavior, not verified implementation. All are within the MVP; future requirements remain recorded in the user stories.
+For every use case below, the **system** is TrackFlow and the **primary actor** is the coach. **MSS** means main success scenario. These use cases describe intended behavior, not verified implementation. UC01–UC04 are within the required MVP; UC05 describes the nice-to-have age-category filtering enhancement. Other future requirements remain recorded in the user stories.
 
 #### UC01: Register an athlete
 
@@ -381,7 +378,7 @@ For every use case below, the **system** is TrackFlow and the **primary actor** 
 1. The coach requests to view the roster.
 2. TrackFlow displays the roster with current indexes, or indicates that it is empty.
 3. The coach submits the new athlete's name, age category, phone number, and email address.
-4. TrackFlow validates the input, checks for an exact duplicate, and saves the new record.
+4. TrackFlow validates the input, checks for a duplicate, and saves the new record.
 5. TrackFlow refreshes the alphabetical roster and displays the added athlete's details.
 
 Use case ends.
@@ -391,12 +388,15 @@ Use case ends.
 * 3a. A required field is missing, repeated, or invalid, or an unsupported parameter is supplied.
   * 3a1. TrackFlow shows the applicable error and retains the entered command for correction. The roster is unchanged.
   * Use case resumes at step 3.
-* 4a. All four normalized fields match an existing athlete.
-  * 4a1. TrackFlow reports the duplicate and leaves the roster unchanged. A shared name, phone number, or email alone is not sufficient to reject a record.
+* 4a. The normalized name and either phone or email match an existing athlete.
+  * 4a1. TrackFlow reports the duplicate and leaves the roster unchanged. Age category does not affect this check. A shared name alone is allowed.
   * Use case resumes at step 3.
 * 4b. The change cannot be saved.
   * 4b1. TrackFlow reports the save failure. No athlete is added, and the previous roster remains visible.
   * Use case ends.
+* 4c. A differently named athlete shares the phone or email.
+  * 4c1. TrackFlow saves the new record and includes a possible-duplicate warning naming the matching athletes.
+  * Use case resumes at step 5.
 
 #### UC02: Remove an athlete
 
@@ -478,6 +478,7 @@ Use case ends.
 
 #### UC05: Filter athletes by age category
 
+**Scope**: Nice-to-have enhancement beyond the required MVP.<br>
 **Related stories**: US02, US03, US05, US11.<br>
 **Precondition**: TrackFlow is open.<br>
 **Success postcondition**: Only matching athletes are displayed; stored records are unchanged.
@@ -522,7 +523,7 @@ These are product requirements and acceptance targets, not claims about the curr
 | Archive / restore | A future capability to remove a record from the active roster while retaining it, and later return it to the active roster. This differs from permanent deletion. |
 | CLI / GUI | Command-line interface / graphical user interface. TrackFlow accepts typed commands in a graphical window and uses that window to display records and feedback. |
 | Displayed index | An athlete's positive, one-based position in the current displayed list. It is not a permanent identifier and may change after roster updates. |
-| Duplicate athlete record | A record whose normalized name, age category, phone, and email all equal those of another record. A shared name or contact detail alone does not make records duplicates. |
+| Duplicate athlete record | A record with the same normalized name and either the same phone or email as another record, regardless of age category. Differently named records sharing contacts are allowed with a possible-duplicate warning on add or edit. |
 | Eligibility | Whether an athlete meets the recorded participation conditions for a competition or event. Eligibility logs are a future feature, distinct from assigning an age category. |
 | Event specialization | An athletics discipline, such as sprinting or long jump, associated with an athlete through a future tagging feature. |
 | Guardian | A parent or other responsible adult whose future contact record may be linked to one or more athletes. |

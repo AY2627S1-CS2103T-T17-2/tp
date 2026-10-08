@@ -112,13 +112,13 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL [addr/ADDRESS] [r/REMA
 * Names retain the existing rule: nonblank alphanumeric characters and spaces only.
 * Phones retain the existing rule: digits only, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
 * Emails retain the existing email validation rules.
-* A duplicate is rejected only when normalized name, age category, phone, and email all match. Name comparisons ignore case and repeated spaces; email comparisons ignore case. Shared names or family contact details alone are allowed.
+* Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` for a nonblank address, `r/REMARK` for a remark, and one `t/TAG` per tag.
   Tags must be nonblank and alphanumeric. Omitted address and remark default to empty; omitted tags default to none.
   An empty `r/` is accepted. **`a/` means age category for `add`, `edit`, and `filter`.**
   Use `edit` to update athlete details, addresses, or tags, and `remark` to update remarks.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
-  existing address, tags, and remarks.
+  existing address, tags, and remarks. Saved rosters are checked using the same duplicate rule on loading.
 
 Examples:
 

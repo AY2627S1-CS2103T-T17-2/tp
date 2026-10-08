@@ -39,6 +39,38 @@ public class EditCommandTest {
     private Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
     @Test
+    public void execute_keepsPhoneButMatchesAnotherEmail_failure() {
+        Person original = new PersonBuilder().withName("Avery Tan").build();
+        Person other = new PersonBuilder(original).withPhone("81112222").withEmail("other@example.com").build();
+        model = new ModelManager();
+        model.addPerson(original);
+        model.addPerson(other);
+        model.updateFilteredPersonList(person -> person == original);
+        EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withEmail("other@example.com").build());
+        assertCommandFailure(command, model, EditCommand.MESSAGE_DUPLICATE_PERSON);
+    }
+
+    @Test
+    public void execute_sharedContactWithDifferentName_successWithWarning() {
+        Person original = new PersonBuilder().withName("Avery Tan").build();
+        Person other = new PersonBuilder().withName("Jordan Lee").withPhone("81112222")
+                .withEmail("other@example.com").build();
+        model = new ModelManager();
+        model.addPerson(original);
+        model.addPerson(other);
+        model.updateFilteredPersonList(person -> person == original);
+        Person edited = new PersonBuilder(original).withEmail("OTHER@example.com").build();
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.setPerson(original, edited);
+        EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withEmail("OTHER@example.com").build());
+        String expected = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(edited))
+                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, other.getName());
+        assertCommandSuccess(command, model, expected, expectedModel);
+    }
+
+    @Test
     public void execute_allFieldsSpecifiedUnfilteredList_success() {
         Person editedPerson = new PersonBuilder(model.getFilteredPersonList().get(0))
                 .withName(VALID_NAME_BOB).withAgeCategory("Under 16")
@@ -207,15 +239,16 @@ public class EditCommandTest {
     }
 
     @Test
-    public void execute_ageChangeCreatesNormalizedDuplicate_failure() {
+    public void execute_contactChangeCreatesNormalizedDuplicate_failure() {
         Person first = new PersonBuilder().withAgeCategory("Under 14").withTags("sprinter").build();
         Person second = new PersonBuilder(first).withName("AMY   BEE")
-                .withEmail("AMY@gmail.com").withAgeCategory("Under 16").withRemark("Keep me").build();
+                .withPhone("81112222").withEmail("other@example.com")
+                .withAgeCategory("Under 16").withRemark("Keep me").build();
         model.addPerson(first);
         model.addPerson(second);
         model.updateFilteredPersonList(new AgeCategoryPredicate(new AgeCategory("Under 16")));
         EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
-                new EditPersonDescriptorBuilder().withAgeCategory("Under 14").build());
+                new EditPersonDescriptorBuilder().withEmail(first.getEmail().value.toUpperCase()).build());
         assertCommandFailure(command, model, EditCommand.MESSAGE_DUPLICATE_PERSON);
         assertEquals(second.getRemark(), model.getFilteredPersonList().get(0).getRemark());
     }

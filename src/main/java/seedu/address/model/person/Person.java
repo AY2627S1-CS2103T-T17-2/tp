@@ -82,7 +82,7 @@ public class Person {
     }
 
     /**
-     * Returns true if all four normalized athlete fields match.
+     * Returns true if the normalized name and either phone or email match.
      * This defines a weaker notion of equality between two persons.
      */
     public boolean isSamePerson(Person otherPerson) {
@@ -92,9 +92,16 @@ public class Person {
 
         return otherPerson != null
                 && normalizeName(name).equalsIgnoreCase(normalizeName(otherPerson.name))
-                && ageCategory.equals(otherPerson.ageCategory)
-                && phone.value.replaceAll("\\D", "").equals(otherPerson.phone.value.replaceAll("\\D", ""))
-                && email.value.trim().equalsIgnoreCase(otherPerson.email.value.trim());
+                && hasSameContactDetails(otherPerson);
+    }
+
+    /**
+     * Returns true if either the normalized phone number or email matches.
+     */
+    public boolean hasSameContactDetails(Person otherPerson) {
+        return otherPerson != null
+                && (phone.value.replaceAll("\\D", "").equals(otherPerson.phone.value.replaceAll("\\D", ""))
+                || email.value.trim().equalsIgnoreCase(otherPerson.email.value.trim()));
     }
 
     private static String normalizeName(Name name) {
