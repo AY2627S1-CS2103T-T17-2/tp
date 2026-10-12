@@ -91,6 +91,12 @@ public class PersonTest {
         editedAlice = new PersonBuilder(ALICE).withAgeCategory("Under 14").build();
         assertFalse(ALICE.equals(editedAlice));
 
+        // different remark changes value equality without changing duplicate identity
+        editedAlice = new PersonBuilder(ALICE).withRemark("Different remark").build();
+        assertFalse(ALICE.equals(editedAlice));
+        assertTrue(ALICE.isSamePerson(editedAlice));
+        assertEquals(aliceCopy.hashCode(), ALICE.hashCode());
+
         // different tags -> returns false
         editedAlice = new PersonBuilder(ALICE).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(ALICE.equals(editedAlice));
