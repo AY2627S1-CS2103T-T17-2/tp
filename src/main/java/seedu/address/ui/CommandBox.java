@@ -60,9 +60,13 @@ public class CommandBox extends UiPart<Region> {
         suggestionsListView.setOnMouseClicked(event -> applySuggestion.run());
 
         suggestionsListView.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.TAB) {
+            if (event.getCode() == KeyCode.TAB) {
                 event.consume();
                 Platform.runLater(applySuggestion);
+            } else if (event.getCode() == KeyCode.ENTER) {
+                event.consume();
+                autocompletePopup.hide();
+                handleCommandEntered();
             }
         });
 
@@ -75,7 +79,8 @@ public class CommandBox extends UiPart<Region> {
                 return;
             }
             List<String> suggestions = autocompleteEngine.getSuggestions(query);
-            if (suggestions.isEmpty() || (suggestions.size() == 1 && suggestions.get(0).equals(query))) {
+            if (suggestions.isEmpty()
+                    || (suggestions.size() == 1 && suggestions.get(0).trim().equalsIgnoreCase(query.trim()))) {
                 autocompletePopup.hide();
             } else {
                 suggestionsListView.getItems().setAll(suggestions);
@@ -86,7 +91,10 @@ public class CommandBox extends UiPart<Region> {
                 double height = Math.min(suggestions.size() * 24 + 10, 150);
                 suggestionsListView.setPrefHeight(height);
 
-                if (!autocompletePopup.isShowing()) {
+                if (!autocompletePopup.isShowing()
+                        && commandTextField.getScene() != null
+                        && commandTextField.getScene().getWindow() != null
+                        && commandTextField.localToScreen(0, 0) != null) {
                     autocompletePopup.show(commandTextField.getScene().getWindow(),
                             commandTextField.localToScreen(0, 0).getX(),
                             commandTextField.localToScreen(0, 0).getY() + commandTextField.getHeight());
@@ -110,9 +118,11 @@ public class CommandBox extends UiPart<Region> {
                         suggestionsListView.getSelectionModel().select(selected + 1);
                         suggestionsListView.scrollTo(selected + 1);
                     }
-                } else if (event.getCode() == KeyCode.TAB || event.getCode() == KeyCode.ENTER) {
+                } else if (event.getCode() == KeyCode.TAB) {
                     event.consume();
                     Platform.runLater(applySuggestion);
+                } else if (event.getCode() == KeyCode.ENTER) {
+                    autocompletePopup.hide();
                 } else if (event.getCode() == KeyCode.ESCAPE) {
                     autocompletePopup.hide();
                 }
