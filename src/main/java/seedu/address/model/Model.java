@@ -64,6 +64,16 @@ public interface Model {
     /** Returns an unmodifiable view of the filtered person list */
     ObservableList<Person> getFilteredPersonList();
 
+    /** Returns the current display predicate for staging roster changes. */
+    default Predicate<Person> getPersonListPredicate() {
+        return PREDICATE_SHOW_ALL_PERSONS;
+    }
+
+    /** Returns the current display comparator, or null for roster order. */
+    default Comparator<Person> getPersonListComparator() {
+        return null;
+    }
+
     /**
      * Updates the filter of the filtered person list to filter by the given {@code predicate}.
      * @throws NullPointerException if {@code predicate} is null.

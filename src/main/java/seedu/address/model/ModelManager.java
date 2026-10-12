@@ -24,6 +24,8 @@ public class ModelManager implements Model {
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
     private final SortedList<Person> sortedPersons;
+    private Predicate<Person> personListPredicate = PREDICATE_SHOW_ALL_PERSONS;
+    private Comparator<Person> personListComparator;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -109,14 +111,26 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public Predicate<Person> getPersonListPredicate() {
+        return personListPredicate;
+    }
+
+    @Override
+    public Comparator<Person> getPersonListComparator() {
+        return personListComparator;
+    }
+
+    @Override
     public void updateFilteredPersonList(Predicate<Person> predicate) {
         requireNonNull(predicate);
+        personListPredicate = predicate;
         filteredPersons.setPredicate(predicate);
     }
 
     @Override
     public void updateSortedPersonList(Comparator<Person> comparator) {
-        sortedPersons.setComparator(requireNonNull(comparator));
+        personListComparator = requireNonNull(comparator);
+        sortedPersons.setComparator(comparator);
     }
 
     @Override

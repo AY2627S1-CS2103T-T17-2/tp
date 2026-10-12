@@ -36,6 +36,19 @@ public class CommandResultTest {
     }
 
     @Test
+    public void withDataSaved_preservesResultAndRecordsPersistence() {
+        CommandResult original = new CommandResult("saved", true, false);
+        CommandResult saved = original.withDataSaved();
+        assertFalse(original.isDataSaved());
+        assertTrue(saved.isDataSaved());
+        assertTrue(saved.isShowHelp());
+        assertFalse(saved.isExit());
+        assertEquals("saved", saved.getFeedbackToUser());
+        assertNotEquals(original, saved);
+        assertEquals(saved, original.withDataSaved());
+    }
+
+    @Test
     public void hashcode() {
         CommandResult commandResult = new CommandResult("feedback");
 
@@ -57,7 +70,7 @@ public class CommandResultTest {
         CommandResult commandResult = new CommandResult("feedback");
         String expected = CommandResult.class.getCanonicalName() + "{feedbackToUser="
                 + commandResult.getFeedbackToUser() + ", showHelp=" + commandResult.isShowHelp()
-                + ", exit=" + commandResult.isExit() + "}";
+                + ", exit=" + commandResult.isExit() + ", dataSaved=" + commandResult.isDataSaved() + "}";
         assertEquals(expected, commandResult.toString());
     }
 }

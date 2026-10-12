@@ -13,6 +13,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
+import seedu.address.model.ModelManager;
 import seedu.address.model.person.Person;
 import seedu.address.storage.Storage;
 
@@ -44,17 +45,30 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
-        CommandResult commandResult;
         Command command = addressBookParser.parseCommand(commandText);
-        commandResult = command.execute(model);
+        if (!command.changesRoster()) {
+            return command.execute(model);
+        }
+
+        Model workingModel = new ModelManager(model.getAddressBook(), model.getUserPrefs());
+        workingModel.updateFilteredPersonList(model.getPersonListPredicate() == null
+                ? Model.PREDICATE_SHOW_ALL_PERSONS : model.getPersonListPredicate());
+        if (model.getPersonListComparator() != null) {
+            workingModel.updateSortedPersonList(model.getPersonListComparator());
+        }
+        CommandResult commandResult = command.execute(workingModel);
 
         try {
-            storage.saveAddressBook(model.getAddressBook());
+            storage.saveAddressBook(workingModel.getAddressBook());
         } catch (AccessDeniedException e) {
             throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
         } catch (IOException ioe) {
             throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
         }
+
+        model.setAddressBook(workingModel.getAddressBook());
+        model.updateFilteredPersonList(workingModel.getPersonListPredicate());
+        commandResult = commandResult.withDataSaved();
 
         return commandResult;
     }

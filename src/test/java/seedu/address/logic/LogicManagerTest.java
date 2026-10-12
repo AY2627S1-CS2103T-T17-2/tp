@@ -8,7 +8,6 @@ import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
 import static seedu.address.testutil.Assert.assertThrows;
-import static seedu.address.testutil.TypicalPersons.AMY;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -35,7 +34,6 @@ import seedu.address.model.person.Person;
 import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
-import seedu.address.testutil.PersonBuilder;
 
 public class LogicManagerTest {
     private static final IOException DUMMY_IO_EXCEPTION = new IOException("dummy IO exception");
@@ -254,6 +252,56 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_failedMutations_preserveRosterViewAndSavedFile() throws Exception {
+        logic.execute("add n/Zoe a/Under 14 p/999 e/zoe@example.com addr/Home");
+        logic.execute("add n/Amy a/Open p/1000 e/amy@example.com addr/Home");
+        logic.execute("sort name desc");
+        logic.execute("find n/zoe");
+        Model before = new ModelManager(model.getAddressBook(), model.getUserPrefs());
+        List<Person> displayedBefore = List.copyOf(model.getFilteredPersonList());
+        var predicateBefore = model.getPersonListPredicate();
+        var comparatorBefore = model.getPersonListComparator();
+        Path savedPath = temporaryFolder.resolve("addressBook.json");
+        String savedBefore = Files.readString(savedPath);
+        int[] changes = {0};
+        model.getAddressBook().getPersonList().addListener((javafx.collections.ListChangeListener<Person>) change ->
+                changes[0]++);
+        JsonAddressBookStorage failingStorage = new JsonAddressBookStorage(savedPath) {
+            @Override
+            public void saveAddressBook(ReadOnlyAddressBook roster) throws IOException {
+                throw DUMMY_IO_EXCEPTION;
+            }
+        };
+        Logic failingLogic = new LogicManager(model, new StorageManager(failingStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("prefs.json"))));
+        for (String command : List.of("add n/Ben a/Open p/222 e/ben@example.com addr/Home",
+                "edit 1 n/Zed", "remark 1 r/Injured", "delete 1", "clear")) {
+            assertThrows(CommandException.class, () -> failingLogic.execute(command));
+            assertEquals(before.getAddressBook(), model.getAddressBook());
+            assertEquals(displayedBefore, model.getFilteredPersonList());
+            assertEquals(predicateBefore, model.getPersonListPredicate());
+            assertEquals(comparatorBefore, model.getPersonListComparator());
+            assertEquals(savedBefore, Files.readString(savedPath));
+            assertEquals(0, changes[0]);
+        }
+    }
+
+    @Test
+    public void execute_viewingCommandsWithUnavailableStorage_doNotSave() throws Exception {
+        JsonAddressBookStorage unavailableStorage = new JsonAddressBookStorage(temporaryFolder.resolve("missing")) {
+            @Override
+            public void saveAddressBook(ReadOnlyAddressBook roster) throws IOException {
+                throw DUMMY_IO_EXCEPTION;
+            }
+        };
+        Logic readOnlyLogic = new LogicManager(model, new StorageManager(unavailableStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("prefs.json"))));
+        for (String command : List.of("list", "find amy", "filter a/Open", "sort name", "help", "exit")) {
+            assertEquals(false, readOnlyLogic.execute(command).isDataSaved());
+        }
+    }
+
+    @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
     }
@@ -337,9 +385,7 @@ public class LogicManagerTest {
         // Triggers the saveAddressBook method by executing an add command
         String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
                 + EMAIL_DESC_AMY + " a/Open addr/123 Main Street";
-        Person expectedPerson = new PersonBuilder(AMY).withTags().withAddress("123 Main Street").withRemark("").build();
         ModelManager expectedModel = new ModelManager();
-        expectedModel.addPerson(expectedPerson);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
     }
 

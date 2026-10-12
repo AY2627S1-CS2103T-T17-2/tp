@@ -9,6 +9,13 @@ import seedu.address.model.Model;
 public abstract class Command {
 
     /**
+     * Returns whether execution requires the roster to be saved before publishing changes.
+     */
+    public boolean changesRoster() {
+        return false;
+    }
+
+    /**
      * Executes the command and returns the result message.
      *
      * @param model {@code Model} which the command should operate on.
