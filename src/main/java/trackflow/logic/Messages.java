@@ -1,0 +1,76 @@
+package trackflow.logic;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import trackflow.logic.parser.Prefix;
+import trackflow.model.person.Person;
+
+/**
+ * Container for user visible messages.
+ */
+public class Messages {
+
+    public static final String MESSAGE_EMPTY_COMMAND = "No command entered. Type a command and try again.";
+    public static final String MESSAGE_UNKNOWN_COMMAND = "Unknown command: %1$s.";
+    public static final String MESSAGE_INVALID_COMMAND_FORMAT = "Invalid command format!\n%1$s";
+    public static final String MESSAGE_INVALID_PERSON_DISPLAYED_INDEX = "The athlete index provided is invalid.";
+    public static final String MESSAGE_DUPLICATE_FIELDS =
+                "Multiple values specified for the following single-valued field(s): ";
+    public static final String MESSAGE_UNKNOWN_PARAMETER =
+            "%1$s is not valid for this command.\n%2$s";
+
+    public static final String MESSAGE_POSSIBLE_DUPLICATE =
+            "\nWarning: possible duplicate. Phone or email matches another athlete: %1$s. Please review the records.";
+
+    /**
+     * Warns about shared contacts with differently named athletes without blocking the change.
+     */
+    public static String getPossibleDuplicateWarning(Person person, Collection<Person> otherPersons) {
+        String matches = otherPersons.stream()
+                .filter(other -> !person.isSamePerson(other) && person.hasSameContactDetails(other))
+                .map(other -> other.getName().toString())
+                .collect(Collectors.joining(", "));
+        return matches.isEmpty() ? "" : String.format(MESSAGE_POSSIBLE_DUPLICATE, matches);
+    }
+
+    /**
+     * Returns an error message indicating the duplicate prefixes.
+     */
+    public static String getErrorMessageForDuplicatePrefixes(Prefix... duplicatePrefixes) {
+        assert duplicatePrefixes.length > 0;
+
+        Set<String> duplicateFields =
+                Stream.of(duplicatePrefixes).map(Prefix::toString).collect(Collectors.toSet());
+
+        return MESSAGE_DUPLICATE_FIELDS + String.join(" ", duplicateFields);
+    }
+
+    /**
+     * Formats the {@code person} for display to the user.
+     */
+    public static String formatAthlete(Person person) {
+        return person.getName() + "; Age category: " + person.getAgeCategory()
+                + "; Phone: " + person.getPhone() + "; Email: " + person.getEmail();
+    }
+
+    /**
+     * Formats all existing contact fields for legacy commands.
+     */
+    public static String format(Person person) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(person.getName())
+                .append("; Phone: ")
+                .append(person.getPhone())
+                .append("; Email: ")
+                .append(person.getEmail())
+                .append("; Address: ")
+                .append(person.getAddress())
+                .append("; Tags: ");
+        person.getTags().forEach(builder::append);
+        return builder.toString();
+    }
+
+}

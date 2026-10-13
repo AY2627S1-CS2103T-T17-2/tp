@@ -1,0 +1,143 @@
+package trackflow.logic.commands;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static trackflow.logic.commands.CommandTestUtil.assertCommandFailure;
+import static trackflow.logic.commands.CommandTestUtil.assertCommandSuccess;
+import static trackflow.logic.commands.CommandTestUtil.showPersonAtIndex;
+import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
+import static trackflow.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
+import static trackflow.testutil.TypicalPersons.getTypicalRoster;
+
+import org.junit.jupiter.api.Test;
+
+import trackflow.commons.core.index.Index;
+import trackflow.logic.Messages;
+import trackflow.model.Model;
+import trackflow.model.ModelManager;
+import trackflow.model.UserPrefs;
+import trackflow.model.person.Person;
+
+/**
+ * Contains integration tests (interaction with the Model) and unit tests for
+ * {@code DeleteCommand}.
+ */
+public class DeleteCommandTest {
+
+    private Model model = new ModelManager(getTypicalRoster(), new UserPrefs());
+
+    @Test
+    public void execute_validIndexUnfilteredList_success() {
+        Person personToDelete = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_PERSON);
+
+        String expectedMessage = String.format(DeleteCommand.MESSAGE_DELETE_ATHLETE_SUCCESS,
+                Messages.formatAthlete(personToDelete));
+
+        ModelManager expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
+        expectedModel.deletePerson(personToDelete);
+
+        assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_invalidIndexUnfilteredList_throwsCommandException() {
+        Index outOfBoundIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
+        DeleteCommand deleteCommand = new DeleteCommand(outOfBoundIndex);
+
+        assertCommandFailure(deleteCommand, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+    }
+
+    @Test
+    public void execute_validIndex_successMessageUsesAthleteDetails() throws Exception {
+        Person athleteToDelete = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_PERSON);
+
+        String feedback = deleteCommand.execute(model).getFeedbackToUser();
+
+        // The confirmation should use athlete details, not the legacy contact fields.
+        assertTrue(feedback.startsWith("Athlete deleted:"));
+        assertTrue(feedback.contains("Age category:"));
+        assertFalse(feedback.contains("Address:"));
+        assertFalse(feedback.contains("Tags:"));
+        assertEquals(String.format(DeleteCommand.MESSAGE_DELETE_ATHLETE_SUCCESS,
+                Messages.formatAthlete(athleteToDelete)), feedback);
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_PERSON);
+        assertThrows(NullPointerException.class, () -> deleteCommand.execute(null));
+    }
+
+    @Test
+    public void execute_validIndexFilteredList_success() {
+        showPersonAtIndex(model, INDEX_FIRST_PERSON);
+
+        Person personToDelete = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_PERSON);
+
+        String expectedMessage = String.format(DeleteCommand.MESSAGE_DELETE_ATHLETE_SUCCESS,
+                Messages.formatAthlete(personToDelete));
+
+        Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
+        expectedModel.deletePerson(personToDelete);
+        showNoPerson(expectedModel);
+
+        assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_invalidIndexFilteredList_throwsCommandException() {
+        showPersonAtIndex(model, INDEX_FIRST_PERSON);
+
+        Index outOfBoundIndex = INDEX_SECOND_PERSON;
+        // ensures that outOfBoundIndex is still in bounds of athlete roster list
+        assertTrue(outOfBoundIndex.getZeroBased() < model.getRoster().getPersonList().size());
+
+        DeleteCommand deleteCommand = new DeleteCommand(outOfBoundIndex);
+
+        assertCommandFailure(deleteCommand, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+    }
+
+    @Test
+    public void equals() {
+        DeleteCommand deleteFirstCommand = new DeleteCommand(INDEX_FIRST_PERSON);
+        DeleteCommand deleteSecondCommand = new DeleteCommand(INDEX_SECOND_PERSON);
+
+        // same object -> returns true
+        assertTrue(deleteFirstCommand.equals(deleteFirstCommand));
+
+        // same values -> returns true
+        DeleteCommand deleteFirstCommandCopy = new DeleteCommand(INDEX_FIRST_PERSON);
+        assertTrue(deleteFirstCommand.equals(deleteFirstCommandCopy));
+
+        // different types -> returns false
+        assertFalse(deleteFirstCommand.equals(1));
+
+        // null -> returns false
+        assertFalse(deleteFirstCommand.equals(null));
+
+        // different person -> returns false
+        assertFalse(deleteFirstCommand.equals(deleteSecondCommand));
+    }
+
+    @Test
+    public void toStringMethod() {
+        Index targetIndex = Index.fromOneBased(1);
+        DeleteCommand deleteCommand = new DeleteCommand(targetIndex);
+        String expected = DeleteCommand.class.getCanonicalName() + "{targetIndex=" + targetIndex + "}";
+        assertEquals(expected, deleteCommand.toString());
+    }
+
+    /**
+     * Updates {@code model}'s filtered list to show no one.
+     */
+    private void showNoPerson(Model model) {
+        model.updateFilteredPersonList(p -> false);
+
+        assertTrue(model.getFilteredPersonList().isEmpty());
+    }
+}
