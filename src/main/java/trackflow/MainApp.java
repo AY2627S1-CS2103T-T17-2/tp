@@ -22,7 +22,6 @@ import trackflow.model.UserPrefs;
 import trackflow.model.util.SampleDataUtil;
 import trackflow.storage.JsonRosterStorage;
 import trackflow.storage.JsonUserPrefsStorage;
-import trackflow.storage.RosterFileMigrator;
 import trackflow.storage.Storage;
 import trackflow.storage.StorageManager;
 import trackflow.ui.Ui;
@@ -38,7 +37,6 @@ public class MainApp extends Application {
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
     private static final Path USER_PREFS_FILE_PATH = Paths.get("preferences.json");
     private static final Path ROSTER_FILE_PATH = Paths.get("data", "trackflow.json");
-    private static final Path LEGACY_ROSTER_FILE_PATH = Paths.get("data", "addressbook.json");
 
     protected Ui ui;
     protected Logic logic;
@@ -52,8 +50,7 @@ public class MainApp extends Application {
 
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(USER_PREFS_FILE_PATH);
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
-        Path rosterFilePath = getRosterFilePath();
-        JsonRosterStorage rosterStorage = new JsonRosterStorage(rosterFilePath);
+        JsonRosterStorage rosterStorage = new JsonRosterStorage(ROSTER_FILE_PATH);
         storage = new StorageManager(rosterStorage, userPrefsStorage);
 
         model = initModelManager(storage, userPrefs);
@@ -61,16 +58,6 @@ public class MainApp extends Application {
         logic = new LogicManager(model, storage);
 
         ui = new UiManager(logic, storage.getRosterFilePath());
-    }
-
-    private Path getRosterFilePath() {
-        try {
-            return RosterFileMigrator.migrateIfNeeded(LEGACY_ROSTER_FILE_PATH, ROSTER_FILE_PATH);
-        } catch (IOException e) {
-            logger.warning("Could not migrate the legacy roster to " + ROSTER_FILE_PATH
-                    + ". Continuing with the existing file: " + StringUtil.getDetails(e));
-            return LEGACY_ROSTER_FILE_PATH;
-        }
     }
 
     /**
