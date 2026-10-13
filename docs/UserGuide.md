@@ -142,8 +142,9 @@ Successful output:
 
 A duplicate produces `This athlete already exists in the roster: Avery Tan.` Failed validation leaves the command text available for correction.
 
-Command words and parameter prefixes are case-insensitive. Use `sort` to change the displayed order. Rollback after a
-save failure is deferred; a save failure can leave a change visible in memory without retaining it on disk.
+Command words and parameter prefixes are case-insensitive. Use `sort` to change the displayed order. TrackFlow reports
+a roster-changing command as successful only after saving it. If saving fails, the roster and displayed list remain
+unchanged so that the application never presents an unsaved change as permanent.
 
 ### Listing all athletes: `list`
 

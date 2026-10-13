@@ -66,6 +66,20 @@ public interface Model {
     ObservableList<Person> getFilteredPersonList();
 
     /**
+     * Returns the predicate controlling which athletes are currently displayed.
+     */
+    default Predicate<Person> getPersonListPredicate() {
+        return PREDICATE_SHOW_ALL_PERSONS;
+    }
+
+    /**
+     * Returns the comparator controlling the displayed order, or {@code null} for roster order.
+     */
+    default Comparator<Person> getPersonListComparator() {
+        return null;
+    }
+
+    /**
      * Updates the filter of the filtered person list to filter by the given {@code predicate}.
      * @throws NullPointerException if {@code predicate} is null.
      */
