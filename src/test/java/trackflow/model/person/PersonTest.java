@@ -58,6 +58,7 @@ public class PersonTest {
         // same values -> returns true
         Person aliceCopy = new PersonBuilder(ALICE).build();
         assertTrue(ALICE.equals(aliceCopy));
+        assertEquals(ALICE.hashCode(), aliceCopy.hashCode());
 
         // same object -> returns true
         assertTrue(ALICE.equals(ALICE));
@@ -91,6 +92,11 @@ public class PersonTest {
         editedAlice = new PersonBuilder(ALICE).withAgeCategory("Under 14").build();
         assertFalse(ALICE.equals(editedAlice));
 
+        // different remark changes value equality but not duplicate identity
+        editedAlice = new PersonBuilder(ALICE).withRemark("Different remark").build();
+        assertFalse(ALICE.equals(editedAlice));
+        assertTrue(ALICE.isSamePerson(editedAlice));
+
         // different tags -> returns false
         editedAlice = new PersonBuilder(ALICE).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(ALICE.equals(editedAlice));
@@ -101,7 +107,8 @@ public class PersonTest {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName()
                 + ", ageCategory=" + ALICE.getAgeCategory()
                 + ", phone=" + ALICE.getPhone()
-                + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", tags=" + ALICE.getTags() + "}";
+                + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress()
+                + ", remark=" + ALICE.getRemark() + ", tags=" + ALICE.getTags() + "}";
         assertEquals(expected, ALICE.toString());
     }
 }

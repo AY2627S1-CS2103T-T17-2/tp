@@ -221,6 +221,7 @@ Format: `remark INDEX r/[REMARK]`
 * Exactly one `r/` prefix is required. The prefix is case-insensitive.
 * A new remark replaces the existing remark; remarks are not appended.
 * Use an empty remark, such as `remark 1 r/`, to remove the athlete's existing remark.
+* Remarks form part of the saved athlete record and remain after restarting TrackFlow.
 * Updating a remark preserves the athlete's age category and other details.
 
 Examples:

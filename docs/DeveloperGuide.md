@@ -133,6 +133,8 @@ The `Model` component,
   that view in a `SortedList` for display ordering. It exposes the sorted view as an unmodifiable
   `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when filtering, sorting, or roster
   data changes.
+* distinguishes duplicate identity from complete value equality. `Person.isSamePerson` compares the normalized name
+  and matching contact details, while `Person.equals` and `hashCode` include every stored field, including the remark.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 

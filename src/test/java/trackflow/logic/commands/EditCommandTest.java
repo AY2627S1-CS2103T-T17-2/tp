@@ -221,7 +221,7 @@ public class EditCommandTest {
         command.execute(model);
         Person edited = model.getFilteredPersonList().get(index.getZeroBased());
         assertEquals(new PersonBuilder(original).withAgeCategory("Under 14").build(), edited);
-        // Person.equals does not compare remarks, so check it explicitly.
+        // Keep an explicit assertion so the preservation requirement remains clear at the command level.
         assertEquals(original.getRemark(), edited.getRemark());
     }
 
