@@ -1,0 +1,111 @@
+package trackflow.logic.commands;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static trackflow.logic.commands.CommandTestUtil.DESC_AMY;
+import static trackflow.logic.commands.CommandTestUtil.DESC_BOB;
+import static trackflow.logic.commands.CommandTestUtil.VALID_EMAIL_BOB;
+import static trackflow.logic.commands.CommandTestUtil.VALID_NAME_BOB;
+import static trackflow.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+
+import trackflow.logic.commands.EditCommand.EditPersonDescriptor;
+import trackflow.model.person.Address;
+import trackflow.model.person.AgeCategory;
+import trackflow.model.tag.Tag;
+import trackflow.testutil.EditPersonDescriptorBuilder;
+
+public class EditPersonDescriptorTest {
+
+    @Test
+    public void equals() {
+        // same values -> returns true
+        EditPersonDescriptor descriptorWithSameValues = new EditPersonDescriptor(DESC_AMY);
+        assertTrue(DESC_AMY.equals(descriptorWithSameValues));
+
+        // same object -> returns true
+        assertTrue(DESC_AMY.equals(DESC_AMY));
+
+        // null -> returns false
+        assertFalse(DESC_AMY.equals(null));
+
+        // different types -> returns false
+        assertFalse(DESC_AMY.equals(5));
+
+        // different values -> returns false
+        assertFalse(DESC_AMY.equals(DESC_BOB));
+
+        // different name -> returns false
+        EditPersonDescriptor editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withName(VALID_NAME_BOB).build();
+        assertFalse(DESC_AMY.equals(editedAmy));
+
+        // different phone -> returns false
+        editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withPhone(VALID_PHONE_BOB).build();
+        assertFalse(DESC_AMY.equals(editedAmy));
+
+        // different email -> returns false
+        editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withEmail(VALID_EMAIL_BOB).build();
+        assertFalse(DESC_AMY.equals(editedAmy));
+
+        // different age category -> returns false
+        editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withAgeCategory("Under 16").build();
+        assertFalse(DESC_AMY.equals(editedAmy));
+    }
+
+    @Test
+    public void ageCategoryOnly_countsAsEditAndIsCopied() {
+        EditPersonDescriptor descriptor = new EditPersonDescriptor();
+        assertFalse(descriptor.isAnyFieldEdited());
+        descriptor.setAgeCategory(new AgeCategory("Under 14"));
+        assertTrue(descriptor.isAnyFieldEdited());
+        EditPersonDescriptor copy = new EditPersonDescriptor(descriptor);
+        descriptor.setAgeCategory(new AgeCategory("Open"));
+        assertEquals(new AgeCategory("Under 14"), copy.getAgeCategory().orElseThrow());
+    }
+
+    @Test
+    public void addressOnly_countsAsEditAndIsCopied() {
+        EditPersonDescriptor descriptor = new EditPersonDescriptor();
+        descriptor.setAddress(new Address("123 Main Street"));
+        assertTrue(descriptor.isAnyFieldEdited());
+        EditPersonDescriptor copy = new EditPersonDescriptor(descriptor);
+        descriptor.setAddress(new Address("456 Main Street"));
+        assertEquals(new Address("123 Main Street"), copy.getAddress().orElseThrow());
+        assertFalse(descriptor.equals(copy));
+    }
+
+    @Test
+    public void tags_defensiveCopyAndEmptyReplacement() {
+        Set<Tag> tags = new HashSet<>(Set.of(new Tag("sprinter")));
+        EditPersonDescriptor descriptor = new EditPersonDescriptor();
+        descriptor.setTags(tags);
+        EditPersonDescriptor copy = new EditPersonDescriptor(descriptor);
+        tags.clear();
+        assertEquals(Set.of(new Tag("sprinter")), descriptor.getTags().orElseThrow());
+        assertThrows(UnsupportedOperationException.class, descriptor.getTags().orElseThrow()::clear);
+        descriptor.setTags(Set.of());
+        assertTrue(descriptor.isAnyFieldEdited());
+        assertEquals(Set.of(), descriptor.getTags().orElseThrow());
+        assertEquals(Set.of(new Tag("sprinter")), copy.getTags().orElseThrow());
+        assertFalse(descriptor.equals(copy));
+    }
+
+    @Test
+    public void toStringMethod() {
+        EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
+        String expected = EditPersonDescriptor.class.getCanonicalName() + "{name="
+                + editPersonDescriptor.getName().orElse(null) + ", phone="
+                + editPersonDescriptor.getPhone().orElse(null) + ", email="
+                + editPersonDescriptor.getEmail().orElse(null) + ", ageCategory="
+                + editPersonDescriptor.getAgeCategory().orElse(null) + ", address="
+                + editPersonDescriptor.getAddress().orElse(null) + ", tags="
+                + editPersonDescriptor.getTags().orElse(null) + "}";
+        assertEquals(expected, editPersonDescriptor.toString());
+    }
+}

@@ -1,0 +1,69 @@
+package trackflow.logic.commands;
+
+import static java.util.Objects.requireNonNull;
+
+import trackflow.commons.util.ToStringBuilder;
+import trackflow.model.Model;
+import trackflow.model.person.PersonContainsKeywordsPredicate;
+
+/**
+ * Finds athletes whose searchable fields partially match any keyword.
+ */
+public class FindCommand extends Command {
+
+    public static final String COMMAND_WORD = "find";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds athletes when any recorded field contains "
+            + "any specified keyword. Prefix a value to search only that field. "
+            + "Matching is case-insensitive and partial.\n"
+            + "Parameters: [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] "
+            + "[addr/ADDRESS] [r/REMARK]\n"
+            + "Example: " + COMMAND_WORD + " n/avery\n"
+            + "Other examples: " + COMMAND_WORD + " avery 9123 under; "
+            + COMMAND_WORD + " a/Under 16 r/injured";
+    public static final String MESSAGE_EMPTY_FIELD =
+            "Search value for %1$s must not be empty.\n%2$s";
+    public static final String MESSAGE_SUCCESS = "Displaying %1$d matching athletes.";
+    public static final String MESSAGE_SUCCESS_SINGLE = "Displaying 1 matching athlete.";
+    public static final String MESSAGE_NO_MATCHES = "No matching athletes found.";
+
+    private final PersonContainsKeywordsPredicate predicate;
+
+    public FindCommand(PersonContainsKeywordsPredicate predicate) {
+        this.predicate = requireNonNull(predicate);
+    }
+
+    @Override
+    public CommandResult execute(Model model) {
+        requireNonNull(model);
+        model.updateFilteredPersonList(predicate);
+        int athleteCount = model.getFilteredPersonList().size();
+        if (athleteCount == 0) {
+            return new CommandResult(MESSAGE_NO_MATCHES);
+        } else if (athleteCount == 1) {
+            return new CommandResult(MESSAGE_SUCCESS_SINGLE);
+        }
+        return new CommandResult(String.format(MESSAGE_SUCCESS, athleteCount));
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+
+        // instanceof handles nulls
+        if (!(other instanceof FindCommand otherFindCommand)) {
+            return false;
+        }
+
+        return predicate.equals(otherFindCommand.predicate);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("predicate", predicate)
+                .toString();
+    }
+}
