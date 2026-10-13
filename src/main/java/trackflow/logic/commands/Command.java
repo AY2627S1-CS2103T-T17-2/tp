@@ -9,6 +9,13 @@ import trackflow.model.Model;
 public abstract class Command {
 
     /**
+     * Returns whether executing this command changes roster data that must be persisted.
+     */
+    public boolean changesRoster() {
+        return false;
+    }
+
+    /**
      * Executes the command and returns the result message.
      *
      * @param model {@code Model} which the command should operate on.

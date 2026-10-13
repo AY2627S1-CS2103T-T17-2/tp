@@ -48,6 +48,10 @@ public class LogicManager implements Logic {
         Command command = trackFlowParser.parseCommand(commandText);
         commandResult = command.execute(model);
 
+        if (!command.changesRoster()) {
+            return commandResult;
+        }
+
         try {
             storage.saveRoster(model.getRoster());
         } catch (AccessDeniedException e) {
@@ -56,7 +60,7 @@ public class LogicManager implements Logic {
             throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
         }
 
-        return commandResult;
+        return commandResult.withDataSaved();
     }
 
     @Override

@@ -340,7 +340,9 @@ The command does not accept parameters.
 
 ### Saving the data
 
-TrackFlow automatically saves data after every successful command. You do not need to save manually.
+TrackFlow automatically saves after every successful command that changes roster data: `add`, `edit`, `remark`,
+`delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite the data file.
+You do not need to save manually.
 
 ### Editing the data file
 

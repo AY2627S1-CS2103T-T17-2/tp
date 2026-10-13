@@ -15,6 +15,10 @@ public class ClearCommand extends Command {
             + "Example: " + COMMAND_WORD;
     public static final String MESSAGE_SUCCESS = "Athlete roster has been cleared!";
 
+    @Override
+    public boolean changesRoster() {
+        return true;
+    }
 
     @Override
     public CommandResult execute(Model model) {

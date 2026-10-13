@@ -140,7 +140,9 @@ public class MainWindow extends UiPart<Stage> {
             logger.info("Result: " + commandResult.getFeedbackToUser());
             personListPanel.highlightNewlyAddedPerson();
             resultDisplay.showSuccess(commandResult.getFeedbackToUser());
-            statusBarFooter.showSaved();
+            if (commandResult.isDataSaved()) {
+                statusBarFooter.showSaved();
+            }
 
             if (commandResult.isShowHelp()) {
                 handleHelp();

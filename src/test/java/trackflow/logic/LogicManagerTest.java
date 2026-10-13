@@ -86,6 +86,30 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_rosterChangingCommand_reportsDataSaved() throws Exception {
+        CommandResult result = logic.execute(
+                "add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/123 Main Street");
+
+        assertEquals(true, result.isDataSaved());
+    }
+
+    @Test
+    public void execute_viewCommandsWithUnavailableStorage_doNotSave() throws Exception {
+        JsonRosterStorage unavailableStorage = new JsonRosterStorage(temporaryFolder.resolve("unavailable.json")) {
+            @Override
+            public void saveRoster(ReadOnlyRoster roster) throws IOException {
+                throw DUMMY_IO_EXCEPTION;
+            }
+        };
+        Logic readOnlyLogic = new LogicManager(model, new StorageManager(unavailableStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("readOnlyPrefs.json"))));
+
+        for (String command : List.of("list", "find amy", "filter a/Open", "sort name", "help", "exit")) {
+            assertEquals(false, readOnlyLogic.execute(command).isDataSaved());
+        }
+    }
+
+    @Test
     public void execute_mixedCaseListWithAthlete_returnsAthleteCount() throws Exception {
         logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street");
         Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
