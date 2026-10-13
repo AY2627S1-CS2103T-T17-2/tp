@@ -191,18 +191,27 @@ It provides real-time dropdown suggestions for commands based on the user's inpu
 #### Implementation Details
 
 * `AutocompleteEngine` stores a predefined list of command templates (e.g., `"add n/ a/ p/ e/ addr/"`).
-* `CommandBox` listens to changes in the `TextField`'s `textProperty`. For every keystroke, it asks the `AutocompleteEngine` for matching suggestions and displays them using a JavaFX `Popup` containing a `ListView`.
-* **Selection:** When the user selects a suggestion (via Mouse Click, `Tab`, or `Enter`), the `CommandBox` inserts the command word (e.g., `add `) leaving space for the user to insert an index if required.
-* **Incremental Prefix Insertion:** If the user presses `Tab` while the suggestion dropdown is closed, `CommandBox` uses `AutocompleteEngine#getNextPrefix` to scan the current input and append the next missing prefix based on the command's template. This allows the user to construct the command sequentially by pressing `Tab` after entering each parameter's data.
+* `CommandBox` listens to changes in the `TextField`'s `textProperty`. While typing an initial command word, it queries `AutocompleteEngine#getSuggestions` for matching templates (matching case-insensitively) and displays them using a JavaFX `Popup` containing a `ListView`. Once whitespace or parameters are entered, or if there are no matches, the popup is hidden.
+* **Selection:** When the user selects a suggestion (via Mouse Click or `Tab`), `CommandBox` inserts the command word followed by a space (e.g., `add `), positions the caret, and hides the popup. This leaves space for the user to insert an index or parameters if required.
+* **Separation of Selection and Execution:** Pressing `Enter` does **not** select or apply autocomplete suggestions. If the user presses `Enter` while the suggestion dropdown is visible, `CommandBox` hides the popup and executes the command as typed in the text field. This prevents accidental template insertions when a fast typist intends to submit their input. Pressing `Escape` closes the dropdown without executing.
+* **Incremental Prefix Insertion:** If the user presses `Tab` while the suggestion dropdown is closed (or after selecting a command), `CommandBox` uses `AutocompleteEngine#getNextPrefix` to scan the current input and append the next missing prefix based on the command's template. Existing prefixes are matched case-insensitively and regardless of order, allowing the user to construct the command sequentially by pressing `Tab` after entering each parameter's data.
 
 #### Design Considerations
 
-* **Alternative 1:** Insert the entire command template at once (e.g., `add n/ a/ p/ e/ addr/`).
-  * Pros: Shows the user all required fields immediately.
-  * Cons: If the user accidentally executes the command before filling all fields, the parser fails with an invalid format error. It also requires manual navigation between the placeholders.
-* **Alternative 2 (Current Choice):** Incrementally insert prefixes using `Tab`.
-  * Pros: Creates a guided, IDE-like snippet experience. Prevents trailing empty prefixes from causing parsing errors.
-  * Cons: Requires slightly more complex logic to parse the current text and determine the next missing prefix.
+* **Aspect: Suggestion selection key (`Tab` only vs `Tab` and `Enter`)**
+  * **Alternative 1:** Allow both `Tab` and `Enter` to select suggestions.
+    * Pros: Familiar to users accustomed to web search bars that accept suggestions on `Enter`.
+    * Cons: Interferes with command execution. A fast typist who types a command and presses `Enter` may accidentally apply an unwanted suggestion template instead of executing what they typed.
+  * **Alternative 2 (Current Choice):** Use `Tab` exclusively to select suggestions and insert prefixes; reserve `Enter` strictly for command execution.
+    * Pros: Follows established CLI and code-editor conventions (e.g., bash, zsh, IDE snippets) where `Tab` completes and `Enter` executes. Eliminates accidental command template overwrites upon submission.
+    * Cons: Users who expect `Enter` to confirm a suggestion must use `Tab` or mouse click.
+* **Aspect: Prefix insertion strategy**
+  * **Alternative 1:** Insert the entire command template at once (e.g., `add n/ a/ p/ e/ addr/`).
+    * Pros: Shows the user all required fields immediately.
+    * Cons: If the user accidentally executes the command before filling all fields, the parser fails with an invalid format error. It also requires manual navigation between the placeholders.
+  * **Alternative 2 (Current Choice):** Incrementally insert prefixes using `Tab`.
+    * Pros: Creates a guided, IDE-like snippet experience. Prevents trailing empty prefixes from causing parsing errors.
+    * Cons: Requires slightly more complex logic to parse the current text and determine the next missing prefix.
 
 ### Age-category filtering
 
@@ -660,6 +669,34 @@ not already in sorted order.
 1. Try `sort`, `sort height`, `sort name upwards`, and `sort name asc extra`. Expect actionable errors and no display
    change.
 1. Restart TrackFlow. Expect the original saved roster order because sorting is not persisted.
+
+### Command autocomplete
+
+1. Real-time command suggestions
+   1. Type `a` in the command box.<br>
+      Expected: A dropdown popup appears showing `add n/ a/ p/ e/ addr/`.
+   2. Type `f`.<br>
+      Expected: The dropdown shows `filter a/` and `find `.
+   3. Press the Down and Up arrow keys.<br>
+      Expected: Selection moves between the suggestions in the list.
+   4. Press Enter while suggestions are displayed.<br>
+      Expected: The dropdown closes without auto-completing, and TrackFlow executes the typed input (showing an unknown command error for `f`).
+   5. Press Esc while suggestions are displayed.<br>
+      Expected: The dropdown closes without modifying the text in the command box.
+
+2. Selecting a suggestion with Tab
+   1. Type `ad` and press Tab (or click the suggestion with the mouse).<br>
+      Expected: The suggestion is applied and the command box updates to `add `. The dropdown closes.
+
+3. Incremental prefix insertion with Tab
+   1. With `add ` in the command box, press Tab.<br>
+      Expected: The first required prefix is inserted (`add n/ `).
+   2. Type `John Doe` and press Tab.<br>
+      Expected: The next missing prefix is inserted (`add n/John Doe a/ `).
+   3. Continue pressing Tab after typing parameter values for each field.<br>
+      Expected: Prefixes `p/`, `e/`, `addr/` are sequentially inserted with appropriate spacing.
+   4. Enter prefixes out of order, e.g., type `add a/Open ` and press Tab.<br>
+      Expected: The first missing prefix `n/` is inserted (`add a/Open n/ `).
 
 ### Saving data
 

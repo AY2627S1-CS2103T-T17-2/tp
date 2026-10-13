@@ -82,10 +82,13 @@ Interface (GUI).
 
 TrackFlow provides an autocomplete feature to speed up typing and ensure correct command formats.
 
-* As you type in the command box, a dropdown menu will appear with suggested commands and their required prefixes.
+* As you type a command word in the command box, a dropdown menu will appear with suggested commands and their required prefixes. Suggestions are matched case-insensitively.
 * Use the **Up** and **Down** arrow keys to navigate the list of suggestions.
-* Press **Tab** or **Enter**, or **Click** on a suggestion, to select it. This will insert the command word into the command box.
-* After you type the data for a parameter (or an index, if required), press **Tab** again to automatically insert the next prefix in the sequence. You can keep pressing **Tab** to step through all the prefixes for the command.
+* Press **Tab**, or **Click** on a suggestion, to select it. This will insert the command word (followed by a space) into the command box and close the suggestions dropdown.
+* Pressing **Enter** does **not** select or apply a suggestion; it closes the suggestions dropdown and executes the command currently typed in the command box.
+* Pressing **Esc** closes the suggestions dropdown without modifying your input.
+* After you enter the command word (or select it with **Tab**), press **Tab** again to automatically insert the next prefix in the sequence. After you type the data for a parameter (or an index, if required), press **Tab** again to insert the next prefix. You can keep pressing **Tab** to step through all the prefixes for the command.
+* Prefixes already entered in the command box (even in uppercase or in a different order) are recognized and skipped automatically.
 
 ### Command feedback and errors
 
