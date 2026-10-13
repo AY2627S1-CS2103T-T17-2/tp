@@ -152,8 +152,10 @@ The `Model` component,
 <puml src="diagrams/StorageClassDiagram.puml" width="550" />
 
 The `Storage` component,
-* can save both address book data and user preference data in JSON format, and read them back into corresponding objects.
-* is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonAddressBookStorage` and `JsonUserPrefsStorage` (one class per data file).
+* can save both athlete roster data and user preference data in JSON format, and read them back into corresponding objects.
+* is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonRosterStorage` and `JsonUserPrefsStorage` (one class per data file).
+* writes JSON to a temporary sibling file before replacing the destination. `FileUtil` uses an atomic move when the
+  filesystem supports it and cleans up the temporary file after success or failure.
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
 
 ### Common classes
@@ -706,7 +708,8 @@ not already in sorted order.
 
 1. Run `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home` and restart TrackFlow.<br>
    Expected: Avery remains in the roster after the restart.
-1. Temporarily remove write permission from the roster data file, then attempt each roster-changing command separately:
+1. Temporarily remove write permission from the folder containing the roster data file, then attempt each
+   roster-changing command separately:
    `add`, `edit`, `remark`, `delete`, and `clear`.<br>
    Expected: TrackFlow reports that it could not save. The roster, displayed athletes, filter, sort order, and data file
    remain unchanged after every attempt.

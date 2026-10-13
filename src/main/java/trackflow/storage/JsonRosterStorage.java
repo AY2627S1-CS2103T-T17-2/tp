@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import trackflow.commons.core.LogsCenter;
 import trackflow.commons.exceptions.DataLoadingException;
 import trackflow.commons.exceptions.IllegalValueException;
-import trackflow.commons.util.FileUtil;
 import trackflow.commons.util.JsonUtil;
 import trackflow.model.ReadOnlyRoster;
 
@@ -82,7 +81,6 @@ public class JsonRosterStorage {
         requireNonNull(roster);
         requireNonNull(filePath);
 
-        FileUtil.createIfMissing(filePath);
         JsonUtil.saveJsonFile(new JsonSerializableRoster(roster), filePath);
     }
 

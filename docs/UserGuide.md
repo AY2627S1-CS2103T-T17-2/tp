@@ -343,11 +343,12 @@ The command does not accept parameters.
 
 TrackFlow automatically saves after every successful command that changes roster data: `add`, `edit`, `remark`,
 `delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite the data file.
-You do not need to save manually.
+TrackFlow writes the complete update to a temporary file before replacing the existing roster, so an interrupted write
+does not leave a partially written roster. You do not need to save manually.
 
 ### Editing the data file
 
-TrackFlow data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are
+TrackFlow data is saved automatically as a JSON file `[JAR file location]/data/trackflow.json`. Advanced users are
 welcome to update data directly by editing that data file.
 
 <box type="warning" seamless>
