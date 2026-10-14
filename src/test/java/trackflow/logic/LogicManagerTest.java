@@ -1,6 +1,7 @@
 package trackflow.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static trackflow.logic.Messages.MESSAGE_EMPTY_COMMAND;
 import static trackflow.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static trackflow.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
@@ -8,7 +9,6 @@ import static trackflow.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static trackflow.logic.commands.CommandTestUtil.NAME_DESC_AMY;
 import static trackflow.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
 import static trackflow.testutil.Assert.assertThrows;
-import static trackflow.testutil.TypicalPersons.AMY;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -35,7 +35,6 @@ import trackflow.model.person.Person;
 import trackflow.storage.JsonRosterStorage;
 import trackflow.storage.JsonUserPrefsStorage;
 import trackflow.storage.StorageManager;
-import trackflow.testutil.PersonBuilder;
 
 public class LogicManagerTest {
     private static final IOException DUMMY_IO_EXCEPTION = new IOException("dummy IO exception");
@@ -83,6 +82,30 @@ public class LogicManagerTest {
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListAthleteCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListAthleteCommand.MESSAGE_EMPTY_ROSTER, model);
+    }
+
+    @Test
+    public void execute_rosterChangingCommand_reportsDataSaved() throws Exception {
+        CommandResult result = logic.execute(
+                "add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/123 Main Street");
+
+        assertEquals(true, result.isDataSaved());
+    }
+
+    @Test
+    public void execute_viewCommandsWithUnavailableStorage_doNotSave() throws Exception {
+        JsonRosterStorage unavailableStorage = new JsonRosterStorage(temporaryFolder.resolve("unavailable.json")) {
+            @Override
+            public void saveRoster(ReadOnlyRoster roster) throws IOException {
+                throw DUMMY_IO_EXCEPTION;
+            }
+        };
+        Logic readOnlyLogic = new LogicManager(model, new StorageManager(unavailableStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("readOnlyPrefs.json"))));
+
+        for (String command : List.of("list", "find amy", "filter a/Open", "sort name", "help", "exit")) {
+            assertEquals(false, readOnlyLogic.execute(command).isDataSaved());
+        }
     }
 
     @Test
@@ -254,6 +277,44 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_failedRosterChanges_preserveModelDisplayAndSavedFile() throws Exception {
+        logic.execute("add n/Zoe Tan a/Under 14 p/999 e/zoe@example.com addr/Home");
+        logic.execute("add n/Amy Lim a/Open p/1000 e/amy@example.com addr/Home");
+        logic.execute("sort name desc");
+        logic.execute("find n/zoe");
+
+        ReadOnlyRoster rosterBeforeFailure = new ModelManager(model.getRoster(), model.getUserPrefs()).getRoster();
+        List<Person> displayBeforeFailure = List.copyOf(model.getFilteredPersonList());
+        var predicateBeforeFailure = model.getPersonListPredicate();
+        var comparatorBeforeFailure = model.getPersonListComparator();
+        Path savedPath = temporaryFolder.resolve("roster.json");
+        String savedDataBeforeFailure = Files.readString(savedPath);
+        int[] publishedChanges = {0};
+        model.getRoster().getPersonList().addListener(
+                (javafx.collections.ListChangeListener<Person>) change -> publishedChanges[0]++);
+
+        JsonRosterStorage failingStorage = new JsonRosterStorage(savedPath) {
+            @Override
+            public void saveRoster(ReadOnlyRoster roster) throws IOException {
+                throw DUMMY_IO_EXCEPTION;
+            }
+        };
+        Logic failingLogic = new LogicManager(model, new StorageManager(failingStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("failingPrefs.json"))));
+
+        for (String command : List.of("add n/Ben Lee a/Open p/222 e/ben@example.com addr/Home",
+                "edit 1 n/Zed Tan", "remark 1 r/Injured", "delete 1", "clear")) {
+            assertThrows(CommandException.class, () -> failingLogic.execute(command));
+            assertEquals(rosterBeforeFailure, model.getRoster());
+            assertEquals(displayBeforeFailure, model.getFilteredPersonList());
+            assertSame(predicateBeforeFailure, model.getPersonListPredicate());
+            assertSame(comparatorBeforeFailure, model.getPersonListComparator());
+            assertEquals(savedDataBeforeFailure, Files.readString(savedPath));
+            assertEquals(0, publishedChanges[0]);
+        }
+    }
+
+    @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
     }
@@ -337,9 +398,7 @@ public class LogicManagerTest {
         // Triggers the saveRoster method by executing an add command
         String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
                 + EMAIL_DESC_AMY + " a/Open addr/123 Main Street";
-        Person expectedPerson = new PersonBuilder(AMY).withTags().withAddress("123 Main Street").withRemark("").build();
         ModelManager expectedModel = new ModelManager();
-        expectedModel.addPerson(expectedPerson);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
     }
 

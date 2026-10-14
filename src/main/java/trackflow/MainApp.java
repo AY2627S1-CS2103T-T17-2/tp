@@ -73,8 +73,9 @@ public class MainApp extends Application {
         try {
             rosterOptional = storage.readRoster();
             if (rosterOptional.isEmpty()) {
-                logger.info("Creating a new data file " + storage.getRosterFilePath()
-                        + " populated with a sample athlete roster.");
+                logger.info("No saved roster found at " + storage.getRosterFilePath()
+                        + ". Starting with the sample athlete roster; the file will be created after the first "
+                        + "successful roster change.");
             }
             initialData = rosterOptional.orElseGet(SampleDataUtil::getSampleRoster);
         } catch (DataLoadingException e) {

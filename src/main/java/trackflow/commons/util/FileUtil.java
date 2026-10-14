@@ -1,29 +1,16 @@
 package trackflow.commons.util;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Writes and reads files
  */
 public class FileUtil {
-
-    private static final String CHARSET = "UTF-8";
-
-    /**
-     * Creates a file if it does not exist along with its missing parent directories.
-     * @throws IOException if the file or directory cannot be created.
-     */
-    public static void createIfMissing(Path file) throws IOException {
-        if (Files.exists(file)) {
-            return;
-        }
-
-        createParentDirsOfFile(file);
-
-        Files.createFile(file);
-    }
 
     /**
      * Creates parent directories of file if it has a parent directory
@@ -40,15 +27,32 @@ public class FileUtil {
      * Assumes file exists
      */
     public static String readFromFile(Path file) throws IOException {
-        return new String(Files.readAllBytes(file), CHARSET);
+        return Files.readString(file, StandardCharsets.UTF_8);
     }
 
     /**
-     * Writes given string to a file.
-     * Will create the file if it does not exist yet.
+     * Writes content to a temporary sibling file before replacing {@code file}.
+     * The replacement is atomic when the filesystem supports atomic moves. Otherwise, the completed temporary file
+     * is moved into place normally. A failure before replacement leaves an existing destination unchanged.
      */
     public static void writeToFile(Path file, String content) throws IOException {
-        Files.write(file, content.getBytes(CHARSET));
+        Path destination = file.toAbsolutePath();
+        createParentDirsOfFile(destination);
+        Path temporaryFile = Files.createTempFile(destination.getParent(), ".trackflow-", ".tmp");
+        try {
+            Files.writeString(temporaryFile, content, StandardCharsets.UTF_8);
+            replaceFile(temporaryFile, destination);
+        } finally {
+            Files.deleteIfExists(temporaryFile);
+        }
+    }
+
+    private static void replaceFile(Path source, Path destination) throws IOException {
+        try {
+            Files.move(source, destination, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (AtomicMoveNotSupportedException e) {
+            Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
 }

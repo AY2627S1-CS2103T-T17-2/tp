@@ -33,6 +33,9 @@ public class CommandResultTest {
 
         // different exit value -> returns false
         assertFalse(commandResult.equals(new CommandResult("feedback", false, true)));
+
+        // different dataSaved value -> returns false
+        assertFalse(commandResult.equals(commandResult.withDataSaved()));
     }
 
     @Test
@@ -50,6 +53,9 @@ public class CommandResultTest {
 
         // different exit value -> returns different hashcode
         assertNotEquals(commandResult.hashCode(), new CommandResult("feedback", false, true).hashCode());
+
+        // different dataSaved value -> returns different hashcode
+        assertNotEquals(commandResult.hashCode(), commandResult.withDataSaved().hashCode());
     }
 
     @Test
@@ -57,7 +63,20 @@ public class CommandResultTest {
         CommandResult commandResult = new CommandResult("feedback");
         String expected = CommandResult.class.getCanonicalName() + "{feedbackToUser="
                 + commandResult.getFeedbackToUser() + ", showHelp=" + commandResult.isShowHelp()
-                + ", exit=" + commandResult.isExit() + "}";
+                + ", exit=" + commandResult.isExit() + ", dataSaved=" + commandResult.isDataSaved() + "}";
         assertEquals(expected, commandResult.toString());
+    }
+
+    @Test
+    public void withDataSaved_returnsSavedCopyWithoutChangingOriginal() {
+        CommandResult original = new CommandResult("feedback", true, false);
+
+        CommandResult saved = original.withDataSaved();
+
+        assertFalse(original.isDataSaved());
+        assertTrue(saved.isDataSaved());
+        assertEquals(original.getFeedbackToUser(), saved.getFeedbackToUser());
+        assertEquals(original.isShowHelp(), saved.isShowHelp());
+        assertEquals(original.isExit(), saved.isExit());
     }
 }

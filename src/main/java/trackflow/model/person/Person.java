@@ -109,8 +109,8 @@ public class Person {
     }
 
     /**
-     * Returns true if both persons have the same identity and data fields.
-     * This defines a stronger notion of equality between two persons.
+     * Returns true if both persons have the same identity and all stored data fields, including remarks.
+     * This defines a stronger notion of equality than {@link #isSamePerson(Person)}.
      */
     @Override
     public boolean equals(Object other) {
@@ -128,13 +128,14 @@ public class Person {
                 && phone.equals(otherPerson.phone)
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
+                && remark.equals(otherPerson.remark)
                 && tags.equals(otherPerson.tags);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, ageCategory, phone, email, address, tags);
+        return Objects.hash(name, ageCategory, phone, email, address, remark, tags);
     }
 
     @Override
@@ -145,6 +146,7 @@ public class Person {
                 .add("phone", phone)
                 .add("email", email)
                 .add("address", address)
+                .add("remark", remark)
                 .add("tags", tags)
                 .toString();
     }

@@ -142,8 +142,9 @@ Successful output:
 
 A duplicate produces `This athlete already exists in the roster: Avery Tan.` Failed validation leaves the command text available for correction.
 
-Command words and parameter prefixes are case-insensitive. Use `sort` to change the displayed order. Rollback after a
-save failure is deferred; a save failure can leave a change visible in memory without retaining it on disk.
+Command words and parameter prefixes are case-insensitive. Use `sort` to change the displayed order. TrackFlow reports
+a roster-changing command as successful only after saving it. If saving fails, the roster and displayed list remain
+unchanged so that the application never presents an unsaved change as permanent.
 
 ### Listing all athletes: `list`
 
@@ -220,6 +221,7 @@ Format: `remark INDEX r/[REMARK]`
 * Exactly one `r/` prefix is required. The prefix is case-insensitive.
 * A new remark replaces the existing remark; remarks are not appended.
 * Use an empty remark, such as `remark 1 r/`, to remove the athlete's existing remark.
+* Remarks form part of the saved athlete record and remain after restarting TrackFlow.
 * Updating a remark preserves the athlete's age category and other details.
 
 Examples:
@@ -340,11 +342,14 @@ The command does not accept parameters.
 
 ### Saving the data
 
-TrackFlow automatically saves data after every successful command. You do not need to save manually.
+TrackFlow automatically saves after every successful command that changes roster data: `add`, `edit`, `remark`,
+`delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite the data file.
+TrackFlow writes the complete update to a temporary file before replacing the existing roster, so an interrupted write
+does not leave a partially written roster. You do not need to save manually.
 
 ### Editing the data file
 
-TrackFlow data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are
+TrackFlow data is saved automatically as a JSON file `[JAR file location]/data/trackflow.json`. Advanced users are
 welcome to update data directly by editing that data file.
 
 <box type="warning" seamless>

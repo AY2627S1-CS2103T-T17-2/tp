@@ -13,6 +13,7 @@ import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.logic.parser.TrackFlowParser;
 import trackflow.logic.parser.exceptions.ParseException;
 import trackflow.model.Model;
+import trackflow.model.ModelManager;
 import trackflow.model.person.Person;
 import trackflow.storage.Storage;
 
@@ -44,19 +45,38 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
-        CommandResult commandResult;
         Command command = trackFlowParser.parseCommand(commandText);
-        commandResult = command.execute(model);
+        if (!command.changesRoster()) {
+            return command.execute(model);
+        }
+
+        Model stagedModel = createStagedModel();
+        CommandResult commandResult = command.execute(stagedModel);
 
         try {
-            storage.saveRoster(model.getRoster());
+            storage.saveRoster(stagedModel.getRoster());
         } catch (AccessDeniedException e) {
             throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
         } catch (IOException ioe) {
             throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
         }
 
-        return commandResult;
+        model.setRoster(stagedModel.getRoster());
+        model.updateFilteredPersonList(stagedModel.getPersonListPredicate());
+        return commandResult.withDataSaved();
+    }
+
+    /**
+     * Returns a detached copy of the model with the same roster and display state.
+     * Roster mutations are applied to this copy until persistence succeeds.
+     */
+    private Model createStagedModel() {
+        Model stagedModel = new ModelManager(model.getRoster(), model.getUserPrefs());
+        stagedModel.updateFilteredPersonList(model.getPersonListPredicate());
+        if (model.getPersonListComparator() != null) {
+            stagedModel.updateSortedPersonList(model.getPersonListComparator());
+        }
+        return stagedModel;
     }
 
     @Override

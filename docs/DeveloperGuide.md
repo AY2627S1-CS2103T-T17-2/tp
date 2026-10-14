@@ -106,6 +106,10 @@ How the `Logic` component works:
 1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteCommand`) which is executed by the `LogicManager`.
 1. The command can communicate with the `Model` when it is executed (e.g. to delete a person).<br>
    Note that although this is shown as a single step in the diagram above for simplicity, the code can require several interactions between the command object and the `Model` to complete the operation.
+1. A roster-changing command identifies itself through `Command.changesRoster()`. `LogicManager` executes it against a
+   detached model containing the current roster, filter, and sort order. It saves the staged roster before publishing
+   the change to the live model. If saving fails, the live roster and displayed list are never changed. View-only
+   commands such as `list`, `find`, `filter`, `sort`, `help`, and `exit` execute directly and do not write the roster.
 1. The result of the command execution is encapsulated as a `CommandResult` object which is returned from `Logic`.
 
 Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
@@ -129,6 +133,8 @@ The `Model` component,
   that view in a `SortedList` for display ordering. It exposes the sorted view as an unmodifiable
   `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when filtering, sorting, or roster
   data changes.
+* distinguishes duplicate identity from complete value equality. `Person.isSamePerson` compares the normalized name
+  and matching contact details, while `Person.equals` and `hashCode` include every stored field, including the remark.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
@@ -148,8 +154,10 @@ The `Model` component,
 <puml src="diagrams/StorageClassDiagram.puml" width="550" />
 
 The `Storage` component,
-* can save both address book data and user preference data in JSON format, and read them back into corresponding objects.
-* is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonAddressBookStorage` and `JsonUserPrefsStorage` (one class per data file).
+* can save both athlete roster data and user preference data in JSON format, and read them back into corresponding objects.
+* is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonRosterStorage` and `JsonUserPrefsStorage` (one class per data file).
+* writes JSON to a temporary sibling file before replacing the destination. `FileUtil` uses an atomic move when the
+  filesystem supports it and cleans up the temporary file after success or failure.
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
 
 ### Common classes
@@ -700,8 +708,14 @@ not already in sorted order.
 
 ### Saving data
 
-1. Dealing with missing/corrupted data files
-
-   1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
-
-1. _{ more test cases … }_
+1. Run `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home` and restart TrackFlow.<br>
+   Expected: Avery remains in the roster after the restart.
+1. Temporarily remove write permission from the folder containing the roster data file, then attempt each
+   roster-changing command separately:
+   `add`, `edit`, `remark`, `delete`, and `clear`.<br>
+   Expected: TrackFlow reports that it could not save. The roster, displayed athletes, filter, sort order, and data file
+   remain unchanged after every attempt.
+1. While storage is unwritable, run `list`, `find`, `filter`, `sort`, `help`, and `exit` separately.<br>
+   Expected: Each command succeeds because it does not need to rewrite roster data.
+1. Restore write permission and run a roster-changing command.<br>
+   Expected: The command succeeds, the status indicates that all changes are saved, and the change survives restart.

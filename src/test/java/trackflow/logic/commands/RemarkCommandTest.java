@@ -1,5 +1,6 @@
 package trackflow.logic.commands;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.logic.commands.CommandTestUtil.VALID_REMARK_AMY;
@@ -43,6 +44,7 @@ public class RemarkCommandTest {
         expectedModel.setPerson(personToEdit, editedPerson);
 
         assertCommandSuccess(remarkCommand, model, expectedMessage, expectedModel);
+        assertEquals(editedPerson.getRemark(), model.getFilteredPersonList().get(0).getRemark());
     }
 
     @Test
@@ -58,6 +60,7 @@ public class RemarkCommandTest {
         expectedModel.setPerson(personToEdit, editedPerson);
 
         assertCommandSuccess(remarkCommand, model, expectedMessage, expectedModel);
+        assertEquals(editedPerson.getRemark(), model.getFilteredPersonList().get(0).getRemark());
     }
 
     @Test
