@@ -39,19 +39,20 @@ Use the [Zulu JDK 25 setup](SettingUp.md#runtime-and-build-requirements). The fo
 
 ## Continuous integration (CI)
 
-The workflow files are in `.github/workflows`. `gradle.yml` configures Java CI for pushes and pull requests on
-Linux, macOS, and Windows; `docs.yml` configures MarkBind deployment for pushes to `master`. Before release, confirm
-that both workflows have completed successfully for the exact `master` commit. An older passing run does not verify
-a later merge. If a run is missing, check repository Actions settings and the merge/push event, then arrange a run
-with the release owner. Neither workflow currently declares `workflow_dispatch`.
+The workflow files are in `.github/workflows`. `docs.yml` runs MarkBind deployment on pushes to `master`
+and supports manual runs through `workflow_dispatch`. Java CI has separate triggers in `gradle.yml`:
+pushes and pull requests, with jobs on Linux, macOS, and Windows. Java CI does not declare `workflow_dispatch`.
 
 ### Code coverage
 
 As part of CI, Gradle generates JaCoCo coverage reports from the tests, and CI uploads the coverage data to Codecov. Codecov then provides information about test coverage.
 
-Inspect the Codecov upload step separately from the Gradle test and coverage results. Do not assume upload failures
-are ignored: the workflow does not declare `continue-on-error` for that step. The local JaCoCo report remains
-available in `build/reports/jacoco/`.
+The Linux coverage upload uses `codecov/codecov-action@v7`. Its
+[`fail_ci_if_error` input](https://github.com/codecov/codecov-action/blob/v7/action.yml) defaults to `false`,
+and `gradle.yml` does not override it. Codecov upload errors therefore do not fail CI by default; setting
+`fail_ci_if_error: true` makes those errors fail the step. This behavior is controlled by the action's input,
+not inferred from the absence of `continue-on-error`. Check the upload logs separately from the Gradle test
+and coverage results. The local JaCoCo report remains available in `build/reports/jacoco/`.
 
 To enable Codecov for forks of this project, follow the steps given in [this se-edu guide](https://se-education.org/guides/tutorials/codecov.html).
 
@@ -86,8 +87,8 @@ Here are the steps to create a new release.
 1. Run `./gradlew clean check coverage shadowJar` and the repository checks. Build the documentation using the
    [documentation guide](Documentation.md).
 1. Run `java -jar TrackFlow.jar` from a disposable folder containing a copy of `build/libs/TrackFlow.jar`.
-   Complete the [release checklist](DeveloperGuide.md#release-verification-checklist), including save/restart,
-   corrupt-file recovery, and the advertised runtime/processor combinations.
+   Follow the [manual testing instructions](DeveloperGuide.md#appendix-instructions-for-manual-testing),
+   including saving changes and restarting with the runtime from the [setup guide](SettingUp.md#runtime-and-build-requirements).
 1. Confirm Java CI and MarkBind Action have passed for the final `master` commit. Resolve any failed or missing runs.
 1. Tag that verified commit `v1.3` and create the GitHub release. Upload `TrackFlow.jar` and state the exact tested
    runtime requirements and any remaining limitations in the release notes.

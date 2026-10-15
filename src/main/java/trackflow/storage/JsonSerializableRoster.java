@@ -21,14 +21,14 @@ class JsonSerializableRoster {
 
     public static final String MESSAGE_DUPLICATE_PERSON = "Persons list contains duplicate person(s).";
 
-    private final List<JsonAdaptedPerson> persons = new ArrayList<>();
+    private final List<JsonAdaptedPerson> persons;
 
     /**
      * Constructs a {@code JsonSerializableRoster} with the given persons.
      */
     @JsonCreator
     public JsonSerializableRoster(@JsonProperty("persons") List<JsonAdaptedPerson> persons) {
-        this.persons.addAll(persons);
+        this.persons = persons == null ? null : new ArrayList<>(persons);
     }
 
     /**
@@ -37,7 +37,7 @@ class JsonSerializableRoster {
      * @param source future changes to this will not affect the created {@code JsonSerializableRoster}.
      */
     public JsonSerializableRoster(ReadOnlyRoster source) {
-        persons.addAll(source.getPersonList().stream().map(JsonAdaptedPerson::new).collect(Collectors.toList()));
+        persons = source.getPersonList().stream().map(JsonAdaptedPerson::new).collect(Collectors.toList());
     }
 
     /**
@@ -46,8 +46,14 @@ class JsonSerializableRoster {
      * @throws IllegalValueException if there were any data constraints violated.
      */
     public AthleteRoster toModelType() throws IllegalValueException {
+        if (persons == null) {
+            throw new IllegalValueException("Persons list is missing!");
+        }
         AthleteRoster roster = new AthleteRoster();
         for (JsonAdaptedPerson jsonAdaptedPerson : persons) {
+            if (jsonAdaptedPerson == null) {
+                throw new IllegalValueException("Persons list contains a null athlete!");
+            }
             Person person = jsonAdaptedPerson.toModelType();
             if (roster.hasPerson(person)) {
                 throw new IllegalValueException(MESSAGE_DUPLICATE_PERSON);

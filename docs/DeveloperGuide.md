@@ -290,15 +290,12 @@ this single-user, local product. Athletes and guardians are records, not applica
 sample roster; the first successful roster change creates the file. An intentionally saved empty roster remains
 empty on restart. `preferences.json` stores window settings separately.
 
-`JsonRosterStorage` converts invalid saved field values and duplicate athletes into `DataLoadingException`.
-`MainApp` handles that exception by logging the failure and starting an empty roster. **Release gaps:** null roots,
-null athletes, and null tag entries are not all validated safely, and no corrupt-file backup is created. A later
-successful roster change can replace the unreadable file. Until the loading/recovery fix is integrated, preserve an
-external copy before changing roster data. NFR09 and US08 below are acceptance targets, not implemented guarantees.
-
-There is no automatic filename migration. To reuse `data/addressbook.json`, close TrackFlow, keep an external
-backup, and copy the file to `data/trackflow.json`. Missing age categories default to `Open`; existing addresses,
-remarks, and legacy tags are retained when the records otherwise validate.
+`JsonRosterStorage` converts malformed JSON, null roots, missing or null persons lists, null athletes, null tag
+entries, invalid saved field values, and duplicate athletes into `DataLoadingException`. `MainApp` preserves the
+original bytes in a sibling file named `trackflow.json.unreadable-<UUID>.bak`, logs its path, and starts an empty
+roster. Each failed load creates a separate backup without overwriting earlier backups. Subsequent successful
+roster changes can replace the active file while the backup remains available for manual recovery. If backup
+creation fails, startup stops before commands become available, protecting the original from being overwritten.
 
 ### User stories
 
@@ -315,7 +312,7 @@ without committing it to a release; **Excluded** records an idea outside this pr
 | US05 | `* * *` | Implemented | coach | receive clear success messages and actionable errors | know whether a command worked and correct mistakes |
 | US06 | `* * *` | Implemented | coach | have matching-name records with a shared phone or email rejected, and receive warnings for differently named records sharing contacts | avoid redundant entries without excluding different athletes |
 | US07 | `* * *` | Implemented | coach | keep my previous roster unchanged when a change cannot be saved | avoid believing an unsaved update is permanent |
-| US08 | `* * *` | Release target | coach | have unreadable saved data preserved separately when loading fails | retain the possibility of recovering it while starting a new roster |
+| US08 | `* * *` | Implemented | coach | have unreadable saved data preserved separately when loading fails | retain the possibility of recovering it while starting a new roster |
 | US09 | `* *` | Implemented | coach | edit an athlete's details directly | correct information without deleting and re-entering the record |
 | US10 | `* *` | Implemented | coach | find athletes using partial values from any searchable field | locate records without scanning the full roster or remembering an exact value |
 | US11 | `* *` | Implemented | coach | filter athletes by age category | review athletes in a competition category |
@@ -353,8 +350,7 @@ Email reachability checking (US39) is a future enhancement beyond structural ema
 ### Use cases
 
 For every use case below, the **system** is TrackFlow and the **primary actor** is the coach. **MSS** means main
-success scenario. UC01–UC06 describe implemented workflows. The recovery extension of UC04 is explicitly marked as
-a release target pending integration. Future requirements remain in the user stories.
+success scenario. UC01–UC06 describe implemented workflows. Future requirements remain in the user stories.
 
 #### UC01: Register an athlete
 
@@ -464,10 +460,10 @@ Use case ends.
 * 3a. No saved roster exists, as on first use.
   * 3a1. TrackFlow starts with sample athletes and logs that no saved roster was found. The data file is created after the first successful roster change.
   * Use case resumes at step 4.
-* 3b. **[Release target: pending loading/recovery integration]** The saved roster cannot be recovered.
-  * 3b1. TrackFlow explains the loading failure and starts with an empty roster while preserving the unrecovered data.
+* 3b. The saved roster cannot be recovered.
+  * 3b1. TrackFlow logs the loading failure and backup path, and starts with an empty roster while preserving the unrecovered data in a separate file.
   * 3b2. Subsequent successful changes create a new active roster without replacing the preserved data. TrackFlow does not claim the old records were restored; the preserved copy remains until the coach removes it outside TrackFlow.
-  * Until this target is implemented, follow the external-backup procedure under [Persistence and recovery status](#persistence-and-recovery-status).
+  * 3b3. If the backup cannot be created, TrackFlow stops startup before accepting commands to protect the original file.
   * Use case resumes at step 4.
 
 #### UC05: Filter athletes by age category
@@ -512,12 +508,12 @@ These are product requirements and acceptance targets, not claims about the curr
 
 | ID | Requirement |
 |----|-------------|
-| NFR01 | TrackFlow shall run on Windows, Linux, and macOS with Azul Zulu JDK 25. On macOS the runtime requirement is the JDK FX distribution; packaged-JAR verification is required for each supported processor architecture. |
+| NFR01 | TrackFlow shall run on Windows, Linux, and macOS with Java 25 installed, without requiring another Java version. |
 | NFR02 | TrackFlow shall be distributed as a single JAR that runs without an installer or separately installed application dependencies other than the specified Azul Zulu JDK 25 runtime (JDK FX on macOS). |
 | NFR03 | Core roster operations and local persistence shall work without internet access, an account, or a TrackFlow-operated remote server. |
 | NFR04 | TrackFlow shall support one coach using a local roster. Shared accounts, simultaneous editing, and another user's access to the data file during normal operation are outside its scope. |
 | NFR05 | Roster data shall use locally stored, human-editable text files rather than a database management system. Valid manual edits made while TrackFlow is closed shall be loaded on the next launch. |
-| NFR06 | Every documented command shall be usable entirely by keyboard. Successful commands shall clear and refocus the command box; failed commands shall retain their text for correction. |
+| NFR06 | Adding, listing, and deleting athletes shall be possible entirely by keyboard. Successful commands shall clear and refocus the command box; failed commands shall retain their text for correction. |
 | NFR07 | Success and failure shall be communicated in text, without relying on color alone. Validation failures shall identify the input problem and shall not change the roster. |
 | NFR08 | A change shall be reported as successful only after it has been saved. A save failure shall leave the observable roster unchanged. Successfully saved changes shall survive normal closure and reopening. |
 | NFR09 | A loading failure shall not silently overwrite unrecovered data. That data shall remain separately preserved even if the coach makes changes to the new empty roster. |
@@ -545,7 +541,7 @@ These are product requirements and acceptance targets, not claims about the curr
 | Participation log | A future record of an athlete's involvement in training or competition. |
 | Personal best | An athlete's best recorded result for a particular event, intended for a future performance log. |
 | Relay squad / event group | A future grouping of athletes for a relay team or a particular athletics event. |
-| Unrecovered data | Previously saved roster data that TrackFlow could not load. Separate preservation is a release target; use an external backup until recovery support is integrated. |
+| Unrecovered data | Previously saved roster data that TrackFlow could not load, preserved in a separate `.bak` file before starting an empty roster. If preservation fails, startup stops. |
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -707,57 +703,3 @@ compares every stored value, including category, address, remark, and legacy tag
 1. Restart and repeat the duplicate attempts. Expect the same decisions after reloading.
 1. Run the automated `PersonTest` and `DuplicatePersistenceTest` checks described in the testing guide. Address-only
    and remark-only changes must affect full equality without changing duplicate identity.
-
-### Release command matrix
-
-For each supported command, check a valid form and the applicable invalid forms below. Use mixed-case command words and prefixes for every parameterized command.
-
-| Command | Valid example | Invalid inputs to check | Persistence expectation |
-|---------|---------------|-------------------------|-------------------------|
-| `add` | `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home` | Missing/empty required fields; repeated or unknown prefixes; `t/sprinter`; invalid category, phone or email | All fields survive restart |
-| `edit` | `edit 1 p/92345678` | Missing field; repeated/empty/unknown prefix; `t/sprinter`; zero, negative or very large index | Changed fields survive; omitted fields remain |
-| `remark` | `remark 1 r/Sprints` | Missing/repeated `r/`; unsupported prefix; invalid index | Replacement or removal survives restart |
-| `delete` | `delete 1` | Missing, zero, negative, nonnumeric or very large index; extra arguments | Selected athlete stays deleted |
-| `clear` | `clear` | Any extra argument | Empty roster reloads as empty |
-| `list` | `list` | Any extra argument | Does not write roster; active sort remains |
-| `find` | `find n/Avery` | Empty query; empty/repeated field prefix; `t/sprinter` | Does not write roster; replaces previous search/filter |
-| `filter` | `filter a/Under 14` | Missing/empty/repeated/unknown prefix; unsupported category; extra text | Does not write roster; replaces previous search/filter |
-| `sort` | `sort age desc` | Missing/unknown field; invalid order; extra arguments | Does not write roster; ordering resets on restart |
-| `help` | `help` | Any extra argument | Opens help even if roster storage is unwritable |
-| `exit` | `exit` | Any extra argument | Closes without saving roster; window preferences are saved separately |
-
-### Corrupt-file recovery acceptance procedure
-
-**Release target:** this procedure is expected to fail until the loading/recovery owner's fix is merged. Do not run it
-against a real roster. Keep an external copy of every corrupt fixture.
-
-1. Close TrackFlow and create a disposable `data/trackflow.json`. Test each fixture separately: empty content,
-   invalid JSON, `null`, `{}`, `{"persons":null}`, `{"persons":[null]}`, null required athlete fields, null tag
-   entries, duplicate athletes, and invalid age categories or contact fields.
-1. Launch the packaged JAR. The release target is a controlled loading error and a usable empty roster for every
-   invalid fixture, with a message identifying the separately preserved original file.
-1. Run `list`, then add a valid athlete. Verify the preserved file still contains the exact original bytes.
-1. Restart. Expect the newly saved roster to load and the original corrupt content to remain available separately.
-1. If backup creation fails, verify the original cannot be overwritten by a later command. Record the actual result
-   and report it to the loading/recovery owner.
-
-### Release verification checklist
-
-Record the tested commit, tester, date, OS/processor, exact `java -version`, and evidence for each result. The table is
-an execution record template; **Pending** is not a pass. Update it after integration on the final release commit.
-
-| Check | Result | Evidence to record |
-|-------|--------|--------------------|
-| Clean build, tests, Checkstyle, coverage and `shadowJar` | Pending | Gradle output and test report |
-| Packaged `TrackFlow.jar` launch | Pending | OS/processor, Zulu JDK 25 distribution and visible GUI |
-| Every command and invalid-input case in the command matrix | Pending | Commands, expected/actual results |
-| Add/edit/remark/delete/clear, save and restart | Pending | Reloaded roster and retained category/address/remarks |
-| Unwritable storage: each mutation fails without changing roster/filter/sort | Pending | Original file and display before/after |
-| Unwritable storage: list/find/filter/sort/help/exit | Pending | Successful view commands and unchanged roster file |
-| Sort/find/filter followed by indexed edit/remark/delete | Pending | Visible target before command and saved target after restart |
-| Empty search, then sort and list; invalid command with sorted filter | Pending | Display ordering and unchanged state on failure |
-| Duplicate rules, warnings and full-roster checks after reload | Pending | Duplicate procedure and automated test results |
-| Every corrupt fixture, backup, replacement roster and restart | Pending | Backup path and byte-for-byte content; loading/recovery owner sign-off |
-| Legacy filename transfer and retained legacy tags/remarks/category defaults | Pending | External original and loaded/copied roster |
-| MarkBind build and rendered guide/diagram review | Pending | Build output and page inspection |
-| Java CI and MarkBind Action on exact final master commit | Pending | Workflow run links and commit SHA |

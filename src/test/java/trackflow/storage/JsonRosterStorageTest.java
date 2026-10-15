@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -54,6 +55,21 @@ public class JsonRosterStorageTest {
     @Test
     public void readRoster_invalidPersonAthleteRoster_throwDataLoadingException() {
         assertThrows(DataLoadingException.class, () -> readRoster("invalidPersonAthleteRoster.json"));
+    }
+
+    @Test
+    public void readRoster_malformedStructure_throwsDataLoadingException() throws Exception {
+        Path filePath = testFolder.resolve("malformed.json");
+        List<String> malformedRosters = List.of("", "null", "{}", "{\"persons\":null}", "{\"persons\":[null]}",
+                """
+                {"persons": [{"name": "Avery Tan", "phone": "91234567",
+                "email": "avery.tan@example.com", "address": "", "remark": "", "tags": [null]}]}
+                """);
+        for (String json : malformedRosters) {
+            Files.writeString(filePath, json);
+            assertThrows(DataLoadingException.class, new JsonRosterStorage(filePath)::readRoster);
+            assertEquals(json, Files.readString(filePath));
+        }
     }
 
     @Test
