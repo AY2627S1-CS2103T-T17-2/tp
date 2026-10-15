@@ -360,18 +360,13 @@ TrackFlow saves roster data to `data/trackflow.json`, relative to the folder fro
 Following the quick-start instructions places it beside the JAR in the `data` subfolder. Close TrackFlow and make a
 separate backup before editing this file manually.
 
-If you have an older `data/addressbook.json` file, keep a backup and copy it to `data/trackflow.json` while TrackFlow
-is closed. TrackFlow does not automatically discover or rename the old filename. Do not replace an existing roster
-unless you intend to replace its contents.
-
 <box type="warning" seamless>
 
 **Caution:**
-Automatic corrupt-file backup is not implemented in this build. A loading error that TrackFlow handles starts an
-empty roster; a later successful roster-changing command can overwrite the invalid file. Some malformed structures
-can also prevent startup. If loading fails, close TrackFlow and copy `data/trackflow.json` to a separate location
-before changing any roster data. Repair the original file or restore a known-good backup before relaunching.
-View-only commands do not rewrite the roster. See [Known issues](#known-issues).
+If the saved roster cannot be loaded, TrackFlow preserves the original file in
+`data/trackflow.json.unreadable-<UUID>.bak`, logs the backup path, and starts with an empty roster.
+Later roster changes leave the backup intact. If the backup cannot be created, TrackFlow stops startup to
+protect the original file. Keep the preserved copy if you need to recover its records manually.
 </box>
 
 ### Archiving data files [Future]
@@ -396,8 +391,6 @@ replacing it. Launch from the destination home folder so TrackFlow reads the cop
   as an unsupported parameter. For broad searches, `find wrong/value` is treated as literal text, while
   `find x/value` is rejected as an unsupported prefix.
 
-* **Corrupt roster recovery:** automatic backups and validation of every malformed JSON structure are pending.
-  Preserve an external copy before retrying startup or making roster changes.
 * **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
   JDK 25 FX runtime on macOS and verify the packaged JAR on your machine; cross-platform release verification is
   tracked in the [release checklist](DeveloperGuide.md#release-verification-checklist).

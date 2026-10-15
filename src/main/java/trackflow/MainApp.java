@@ -1,9 +1,11 @@
 package trackflow;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
@@ -64,8 +66,11 @@ public class MainApp extends Application {
      * Returns a {@code ModelManager} with the data from {@code storage}'s athlete roster and {@code userPrefs}. <br>
      * The data from the sample athlete roster will be used instead if {@code storage}'s athlete roster is not found,
      * or an empty athlete roster will be used instead if errors occur when reading {@code storage}'s athlete roster.
+     * Unreadable roster data is backed up before using an empty roster.
+     *
+     * @throws IOException if the unreadable roster cannot be preserved; startup must stop to prevent data loss.
      */
-    private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
+    protected Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) throws IOException {
         logger.info("Using data file : " + storage.getRosterFilePath());
 
         Optional<ReadOnlyRoster> rosterOptional;
@@ -79,8 +84,19 @@ public class MainApp extends Application {
             }
             initialData = rosterOptional.orElseGet(SampleDataUtil::getSampleRoster);
         } catch (DataLoadingException e) {
+            Path rosterPath = storage.getRosterFilePath();
+            Path backupPath = rosterPath.resolveSibling(rosterPath.getFileName() + ".unreadable-"
+                    + UUID.randomUUID() + ".bak");
+            try {
+                Files.copy(rosterPath, backupPath);
+            } catch (IOException backupError) {
+                logger.severe("Could not preserve unreadable data file at " + rosterPath
+                        + ". Stopping startup to prevent overwriting the original: " + backupError);
+                throw new IOException("Cannot preserve unreadable roster at " + rosterPath
+                        + "; startup stopped to protect the original.", backupError);
+            }
             logger.warning("Data file at " + storage.getRosterFilePath() + " could not be loaded."
-                    + " Will be starting with an empty athlete roster.");
+                    + " Original data preserved at " + backupPath + ". Will be starting with an empty athlete roster.");
             initialData = new AthleteRoster();
         }
 
