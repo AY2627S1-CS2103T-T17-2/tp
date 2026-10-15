@@ -49,6 +49,15 @@ public class AutocompleteEngineTest {
     public void getSuggestions_partialCommandWord_returnsMatchingSuggestions() {
         List<String> suggestions = autocompleteEngine.getSuggestions("a");
         assertEquals(List.of("add n/ a/ p/ e/ addr/"), suggestions);
+
+        suggestions = autocompleteEngine.getSuggestions("d");
+        assertEquals(List.of("delete INDEX"), suggestions);
+
+        suggestions = autocompleteEngine.getSuggestions("ed");
+        assertEquals(List.of("edit INDEX n/ a/ p/ e/ addr/"), suggestions);
+
+        suggestions = autocompleteEngine.getSuggestions("r");
+        assertEquals(List.of("remark INDEX r/"), suggestions);
     }
 
     @Test

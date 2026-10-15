@@ -13,7 +13,9 @@
 
 ## **Acknowledgements**
 
-* _{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}_
+* This project is based on the AddressBook-Level3 project created by the [SE-EDU initiative](https://se-education.org).
+* Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5).
+* Font used: [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) by Tokotype, licensed under [OFL 1.1](https://scripts.sil.org/OFL).
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -35,7 +37,7 @@ The following provides a quick overview of the main components and their interac
 
 **Main components of the architecture**
 
-**`Main`** (consisting of classes [`Main`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
+**`Main`** (consisting of classes [`Main`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/Main.java) and [`MainApp`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/MainApp.java)) is in charge of the app launch and shut down.
 * At app launch, it initializes the other components in the correct sequence, and connects them up with each other.
 * At shut down, it shuts down the other components and invokes cleanup methods where necessary.
 
@@ -67,13 +69,13 @@ The sections below give more details of each component.
 
 ### UI component
 
-The **API** of this component is specified in [`Ui.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/Ui.java)
+The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/Ui.java)
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
 The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
 
-The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
+The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/MainWindow.java).
 
 The `UI` component,
 
@@ -84,7 +86,7 @@ The `UI` component,
 
 ### Logic component
 
-**API** : [`Logic.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/logic/Logic.java)
+**API** : [`Logic.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/logic/Logic.java)
 
 Here's a (partial) class diagram of the `Logic` component:
 
@@ -102,7 +104,7 @@ The sequence diagram below illustrates the interactions within the `Logic` compo
 
 How the `Logic` component works:
 
-1. When `Logic` is called upon to execute a command, the command is passed to an `AddressBookParser` object, which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
+1. When `Logic` is called upon to execute a command, the command is passed to a `TrackFlowParser` object, which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
 1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteCommand`) which is executed by the `LogicManager`.
 1. The command can communicate with the `Model` when it is executed (e.g. to delete a person).<br>
    Note that although this is shown as a single step in the diagram above for simplicity, the code can require several interactions between the command object and the `Model` to complete the operation.
@@ -117,18 +119,18 @@ Here are the other classes in `Logic` (omitted from the class diagram above) tha
 <puml src="diagrams/ParserClasses.puml" width="600"/>
 
 How the parsing works:
-* When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `AddressBookParser` returns that object as a `Command` object.
+* When called upon to parse a user command, the `TrackFlowParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `TrackFlowParser` returns that object as a `Command` object.
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
 ### Model component
-**API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
+**API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/model/Model.java)
 
 <puml src="diagrams/ModelClassDiagram.puml" width="450" />
 
 
 The `Model` component,
 
-* stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
+* stores the athlete roster data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
 * stores the `Person` objects selected by the current filter, such as search results, in a `FilteredList`, and wraps
   that view in a `SortedList` for display ordering. It exposes the sorted view as an unmodifiable
   `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when filtering, sorting, or roster
@@ -149,7 +151,7 @@ The `Model` component,
 
 ### Storage component
 
-**API** : [`Storage.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java)
+**API** : [`Storage.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/storage/Storage.java)
 
 <puml src="diagrams/StorageClassDiagram.puml" width="550" />
 
@@ -162,7 +164,7 @@ The `Storage` component,
 
 ### Common classes
 
-Classes used by multiple components are in the `seedu.address.commons` package.
+Classes used by multiple components are in the `trackflow.commons` package.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -172,7 +174,7 @@ This section describes some noteworthy details on how certain features are imple
 
 ### Command parsing and validation
 
-`AddressBookParser` treats command words without considering letter case and routes commands with parameters to their
+`TrackFlowParser` treats command words without considering letter case and routes commands with parameters to their
 dedicated parsers. `ArgumentTokenizer` recognizes supported parameter prefixes without considering letter case while
 storing them under their canonical prefix. `ParserUtil.verifyNoUnknownPrefixes` rejects unsupported parameter-like
 tokens before values are parsed, producing a command-specific error instead of allowing one field to absorb an
@@ -198,7 +200,7 @@ It provides real-time dropdown suggestions for commands based on the user's inpu
 
 #### Implementation Details
 
-* `AutocompleteEngine` stores a predefined list of command templates (e.g., `"add n/ a/ p/ e/ addr/"`).
+* `AutocompleteEngine` stores a predefined list of command templates (e.g., `"add n/ a/ p/ e/ addr/"`, `"edit INDEX n/ a/ p/ e/ addr/"`, `"delete INDEX"`, `"remark INDEX r/"`).
 * `CommandBox` listens to changes in the `TextField`'s `textProperty`. While typing an initial command word, it queries `AutocompleteEngine#getSuggestions` for matching templates (matching case-insensitively) and displays them using a JavaFX `Popup` containing a `ListView`. Once whitespace or parameters are entered, or if there are no matches, the popup is hidden.
 * **Selection:** When the user selects a suggestion (via Mouse Click or `Tab`), `CommandBox` inserts the command word followed by a space (e.g., `add `), positions the caret, and hides the popup. This leaves space for the user to insert an index or parameters if required.
 * **Separation of Selection and Execution:** Pressing `Enter` does **not** select or apply autocomplete suggestions. If the user presses `Enter` while the suggestion dropdown is visible, `CommandBox` hides the popup and executes the command as typed in the text field. This prevents accidental template insertions when a fast typist intends to submit their input. Pressing `Escape` closes the dropdown without executing.
@@ -223,7 +225,7 @@ It provides real-time dropdown suggestions for commands based on the user's inpu
 
 ### Age-category filtering
 
-`AddressBookParser` dispatches `filter` to `FilterCommandParser`. The parser requires exactly one case-insensitive `a/`
+`TrackFlowParser` dispatches `filter` to `FilterCommandParser`. The parser requires exactly one case-insensitive `a/`
 prefix and no preamble, rejects duplicates and unknown prefixes, and reuses `ParserUtil.parseAgeCategory` for the same
 canonical categories and normalization as `add`. Unsupported trailing text fails category validation.
 
@@ -235,13 +237,13 @@ The existing `DeleteCommand` resolves indexes against `Model.getFilteredPersonLi
 
 ### Multi-field sorting
 
-`AddressBookParser` dispatches `sort` to `SortCommandParser`. The parser requires one supported field and accepts one
+`TrackFlowParser` dispatches `sort` to `SortCommandParser`. The parser requires one supported field and accepts one
 optional order, defaulting to ascending. It accepts short (`asc`, `desc`) and long (`ascending`, `descending`) order
 names without considering letter case, while rejecting missing fields, unsupported values, and extra arguments.
 
 `ModelManager` wraps its existing `FilteredList<Person>` in a `SortedList<Person>`. `SortCommand` installs the selected
 comparator through `Model.updateSortedPersonList`, changing only the displayed view rather than the underlying
-`AddressBook` order. Consequently, sorting composes with `find`, `filter`, and `list`, and indexed commands continue to
+`roster` order. Consequently, sorting composes with `find`, `filter`, and `list`, and indexed commands continue to
 resolve athletes against exactly what the user sees. The comparator is session-only and is not persisted.
 
 Text fields are compared without considering letter case. Phone numbers are converted to arbitrary-precision numeric
@@ -685,11 +687,15 @@ not already in sorted order.
       Expected: A dropdown popup appears showing `add n/ a/ p/ e/ addr/`.
    2. Type `f`.<br>
       Expected: The dropdown shows `filter a/` and `find `.
-   3. Press the Down and Up arrow keys.<br>
+   3. Type `ed`.<br>
+      Expected: The dropdown shows `edit INDEX n/ a/ p/ e/ addr/`.
+   4. Type `d`.<br>
+      Expected: The dropdown shows `delete INDEX`.
+   5. Press the Down and Up arrow keys.<br>
       Expected: Selection moves between the suggestions in the list.
-   4. Press Enter while suggestions are displayed.<br>
+   6. Press Enter while suggestions are displayed.<br>
       Expected: The dropdown closes without auto-completing, and TrackFlow executes the typed input (showing an unknown command error for `f`).
-   5. Press Esc while suggestions are displayed.<br>
+   7. Press Esc while suggestions are displayed.<br>
       Expected: The dropdown closes without modifying the text in the command box.
 
 2. Selecting a suggestion with Tab

@@ -25,7 +25,7 @@ Interface (GUI).
 
 1. Copy the file to the folder you want to use as the _home folder_ for TrackFlow.
 
-1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
+1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar TrackFlow.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
    ![Ui](images/Ui.png)
 
@@ -82,7 +82,7 @@ Interface (GUI).
 
 TrackFlow provides an autocomplete feature to speed up typing and ensure correct command formats.
 
-* As you type a command word in the command box, a dropdown menu will appear with suggested commands and their required prefixes. Suggestions are matched case-insensitively.
+* As you type a command word in the command box, a dropdown menu will appear with suggested commands, including mandatory index parameters and prefixes (e.g., `edit INDEX n/ a/ p/ e/ addr/`, `delete INDEX`, `remark INDEX r/`). Suggestions are matched case-insensitively.
 * Use the **Up** and **Down** arrow keys to navigate the list of suggestions.
 * Press **Tab**, or **Click** on a suggestion, to select it. This will insert the command word (followed by a space) into the command box and close the suggestions dropdown.
 * Pressing **Enter** does **not** select or apply a suggestion; it closes the suggestions dropdown and executes the command currently typed in the command box.
