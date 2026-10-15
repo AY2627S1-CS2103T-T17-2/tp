@@ -25,7 +25,6 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 <img src="images/qiyuannn.png" width="200px">
 
 [[github](http://github.com/qiyuannn)]
-[[portfolio](team/johndoe.md)]
 
 * Role: Testing
 * Responsibilities: Ensures the testing of the project is done properly and on time.
@@ -52,7 +51,6 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 <img src="images/antonydchakola-hub.png" width="200px">
 
 [[github](https://github.com/antonydchakola-hub)]
-[[portfolio](team/johndoe.md)]
 
 * Role: Deliverables and deadlines expert
 * Responsibilities: Ensures project deliverables are done on time and in the right format.

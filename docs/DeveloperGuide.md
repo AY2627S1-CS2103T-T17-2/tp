@@ -38,6 +38,7 @@ The following provides a quick overview of the main components and their interac
 **Main components of the architecture**
 
 **`Main`** (consisting of classes [`Main`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/Main.java) and [`MainApp`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/MainApp.java)) is in charge of the app launch and shut down.
+
 * At app launch, it initializes the other components in the correct sequence, and connects them up with each other.
 * At shut down, it shuts down the other components and invokes cleanup methods where necessary.
 
@@ -115,10 +116,12 @@ Here are the other classes in `Logic` (omitted from the class diagram above) tha
 <puml src="diagrams/ParserClasses.puml" width="600"/>
 
 How the parsing works:
+
 * When called upon to parse a user command, the `TrackFlowParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `TrackFlowParser` returns that object as a `Command` object.
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
 ### Model component
+
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/model/Model.java)
 
 <puml src="diagrams/ModelClassDiagram.puml" width="800" />
@@ -149,6 +152,7 @@ rosters; `UniqueTagList` is not part of the implementation.
 <puml src="diagrams/StorageClassDiagram.puml" width="550" />
 
 The `Storage` component,
+
 * can save both athlete roster data and user preference data in JSON format, and read them back into corresponding objects.
 * is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonRosterStorage` and `JsonUserPrefsStorage` (one class per data file).
 * writes JSON to a temporary sibling file before replacing the destination. `FileUtil` uses an atomic move when the
@@ -173,7 +177,7 @@ storing them under their canonical prefix. `ParserUtil.verifyNoUnknownPrefixes` 
 tokens of the reserved single-letter or `addr/` form before values are parsed. For example, unsupported `t/`
 produces a command-specific error. Longer slash-containing words such as `wrong/value` are treated as text, while
 `x/value` is treated as an unsupported parameter. Single-letter slash text inside addresses or remarks can also be
-misidentified as a parameter; prefix handling remains a parsing-owner release item.
+misidentified as a parameter.
 
 Commands that take no arguments (`clear`, `help`, and `exit`) reject extra text. `remark` requires exactly one `r/`
 prefix. Index parsing accepts arbitrarily long positive digit sequences and safely maps values beyond the in-memory
@@ -184,7 +188,7 @@ index range to an out-of-range displayed index, avoiding numeric-overflow errors
 `FindCommandParser` supports unprefixed broad keywords and the field prefixes `n/`, `a/`, `p/`, `e/`, `addr/`, and
 `r/`. It rejects empty or repeated supported field parameters and unsupported reserved prefixes. `PersonContainsKeywordsPredicate` stores broad keywords
 separately from field-specific criteria. Broad keywords search the combined athlete text, while a prefixed value is
-tested only against its selected field. The criteria use case-insensitive partial matching and OR semantics.
+tested as a single phrase only against its selected field. Broad keywords must precede the first field prefix. The criteria use case-insensitive partial matching and OR semantics.
 This allows `find n/und` to match a name such as `Underwood` without matching athletes merely because their age
 category starts with `Under`.
 
@@ -198,7 +202,7 @@ It provides real-time dropdown suggestions for commands based on the user's inpu
 * `AutocompleteEngine` stores a predefined list of command templates (e.g., `"add n/ a/ p/ e/ addr/"`, `"edit INDEX n/ a/ p/ e/ addr/"`, `"delete INDEX"`, `"remark INDEX r/"`).
 * `CommandBox` listens to changes in the `TextField`'s `textProperty`. While typing an initial command word, it queries `AutocompleteEngine#getSuggestions` for matching templates (matching case-insensitively) and displays them using a JavaFX `Popup` containing a `ListView`. Once whitespace or parameters are entered, or if there are no matches, the popup is hidden.
 * **Selection:** When the user selects a suggestion (via Mouse Click or `Tab`), `CommandBox` inserts the command word followed by a space (e.g., `add `), positions the caret, and hides the popup. This leaves space for the user to insert an index or parameters if required.
-* **Separation of Selection and Execution:** Pressing `Enter` does **not** select or apply autocomplete suggestions. If the user presses `Enter` while the suggestion dropdown is visible, `CommandBox` hides the popup and executes the command as typed in the text field. This prevents accidental template insertions when a fast typist intends to submit their input. Pressing `Escape` closes the dropdown without executing.
+* **Separation of Selection and Execution:** Pressing `Enter` does **not** select or apply autocomplete suggestions. If the user presses `Enter` while the suggestion dropdown is visible, `CommandBox` hides the popup and executes the command as typed in the text field. This prevents accidental template insertions when a fast typist intends to submit their input.
 * **Incremental Prefix Insertion:** If the user presses `Tab` while the suggestion dropdown is closed (or after selecting a command), `CommandBox` uses `AutocompleteEngine#getNextPrefix` to scan the current input and append the next missing prefix based on the command's template. Existing prefixes are matched case-insensitively and regardless of order, allowing the user to construct the command sequentially by pressing `Tab` after entering each parameter's data.
 
 #### Design Considerations
@@ -460,11 +464,13 @@ Use case ends.
 * 3a. No saved roster exists, as on first use.
   * 3a1. TrackFlow starts with sample athletes and logs that no saved roster was found. The data file is created after the first successful roster change.
   * Use case resumes at step 4.
-* 3b. The saved roster cannot be recovered.
+* 3b. The saved roster cannot be loaded.
   * 3b1. TrackFlow logs the loading failure and backup path, and starts with an empty roster while preserving the unrecovered data in a separate file.
   * 3b2. Subsequent successful changes create a new active roster without replacing the preserved data. TrackFlow does not claim the old records were restored; the preserved copy remains until the coach removes it outside TrackFlow.
-  * 3b3. If the backup cannot be created, TrackFlow stops startup before accepting commands to protect the original file.
   * Use case resumes at step 4.
+* 3c. The saved roster cannot be loaded and its backup cannot be created.
+  * 3c1. TrackFlow stops startup before accepting commands to protect the original file.
+  * Use case ends.
 
 #### UC05: Filter athletes by age category
 
@@ -594,7 +600,7 @@ testers are expected to do more *exploratory* testing.
 
 Use a separate test roster for this procedure. The deletion steps test compatibility with the existing delete command and permanently remove test records.
 
-1. Prepare an empty test roster with one `Open` athlete followed by two distinct `Under 14` athletes.
+1. Prepare an empty test roster with one `Open` athlete followed by two distinct `Under 14` athletes. Restart to reset any active sorting.
 1. Run `filter a/under   14`. Expect the two `Under 14` athletes in roster order, numbered 1 and 2, and `Displaying 2 athletes in age category Under 14.`
 1. Run `delete 3`. Expect an invalid-index error and no changes, even though the full roster has three athletes.
 1. Run `delete 1`. Expect the first `Under 14` athlete to be deleted and the other to appear at index 1.
@@ -627,6 +633,8 @@ not already in sorted order.
 
 ### Command autocomplete
 
+When a step asks you to type a new command below, replace the previous input rather than appending to it.
+
 1. Real-time command suggestions
    1. Type `a` in the command box.<br>
       Expected: A dropdown popup appears showing `add n/ a/ p/ e/ addr/`.
@@ -636,12 +644,10 @@ not already in sorted order.
       Expected: The dropdown shows `edit INDEX n/ a/ p/ e/ addr/`.
    4. Type `d`.<br>
       Expected: The dropdown shows `delete INDEX`.
-   5. Press the Down and Up arrow keys.<br>
+   5. Replace the input with `f`, then press the Down and Up arrow keys.<br>
       Expected: Selection moves between the suggestions in the list.
    6. Press Enter while suggestions are displayed.<br>
       Expected: The dropdown closes without auto-completing, and TrackFlow executes the typed input (showing an unknown command error for `f`).
-   7. Press Esc while suggestions are displayed.<br>
-      Expected: The dropdown closes without modifying the text in the command box.
 
 2. Selecting a suggestion with Tab
    1. Type `ad` and press Tab (or click the suggestion with the mouse).<br>
@@ -651,7 +657,7 @@ not already in sorted order.
    1. With `add ` in the command box, press Tab.<br>
       Expected: The first required prefix is inserted (`add n/ `).
    2. Type `John Doe` and press Tab.<br>
-      Expected: The next missing prefix is inserted (`add n/John Doe a/ `).
+      Expected: The next missing prefix is inserted (`add n/ John Doe a/ `).
    3. Continue pressing Tab after typing parameter values for each field.<br>
       Expected: Prefixes `p/`, `e/`, `addr/` are sequentially inserted with appropriate spacing.
    4. Enter prefixes out of order, e.g., type `add a/Open ` and press Tab.<br>
@@ -682,7 +688,7 @@ Use a disposable home folder; these procedures change saved data.
 1. Run `remark 1 r/Recovery`, then restart. Expect `Recovery` to replace `Sprints`.
 1. Run `remark 1 r/`, then restart. Expect the remark to be empty and the category still `Under 16`.
 1. Try `add n/Incomplete`, `edit 1`, `edit 0 p/999`, `edit 1 addr/`, and `remark 1`.
-   Expect errors with no roster changes. Add/edit/find with `t/sprinter` must report an unsupported parameter.
+   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add, edit, or find command must produce an error; add reports invalid command format, while edit and find identify the unsupported prefix.
 1. Run `clear`, restart, and confirm the roster stays empty rather than loading samples again.
 
 ### Duplicate identity and complete equality

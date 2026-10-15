@@ -8,7 +8,9 @@
 [![Java CI](https://github.com/AY2627S1-CS2103T-T17-2/tp/actions/workflows/gradle.yml/badge.svg)](https://github.com/AY2627S1-CS2103T-T17-2/tp/actions/workflows/gradle.yml)
 [![codecov](https://codecov.io/gh/AY2627S1-CS2103T-T17-2/tp/branch/master/graph/badge.svg)](https://codecov.io/gh/AY2627S1-CS2103T-T17-2/tp)
 
-![Ui](images/Ui.png)
+![TrackFlow design mockup](images/Ui.png)
+
+_Design mockup: the grade/event fields and command examples shown are not available in v1.3. See the [User Guide](UserGuide.md) for current commands._
 
 **TrackFlow** is a lightning-fast, keyboard-driven roster and contact manager designed specifically for **track and field head and assistant coaches**. While it has a GUI, most of the user interactions happen using a CLI (Command Line Interface).
 
