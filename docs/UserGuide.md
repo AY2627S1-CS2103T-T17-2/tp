@@ -392,8 +392,8 @@ replacing it. Launch from the destination home folder so TrackFlow reads the cop
   `find x/value` is rejected as an unsupported prefix.
 
 * **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
-  JDK 25 FX runtime on macOS and verify the packaged JAR on your machine; cross-platform release verification is
-  tracked in the [release checklist](DeveloperGuide.md#release-verification-checklist).
+  JDK 25 FX runtime on macOS and verify the packaged JAR on your machine. See the
+  [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
 
 * **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
 * **If you minimize the Help Window** and then run the `help` command again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.

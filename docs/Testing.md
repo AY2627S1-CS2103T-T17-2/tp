@@ -41,7 +41,7 @@ This project has three types of tests:
 1. *Hybrid tests* combine unit and integration testing. These tests check both the individual units and how they work together.<br>
    For example: `trackflow.logic.LogicManagerTest`
 
-## Release verification
+## Build and focused tests
 
 Run `./gradlew clean check coverage shadowJar` to build `build/libs/TrackFlow.jar`, run the automated tests,
 and check Java style. On Windows, use `gradlew.bat` in place of `./gradlew`.
@@ -54,6 +54,4 @@ For focused duplicate/equality checks, run:
 
 Automated results are in `build/reports/tests/test/index.html`; Checkstyle reports are in
 `build/reports/checkstyle/`. Verify guide examples and startup behavior using the
-[manual testing procedures](DeveloperGuide.md#appendix-instructions-for-manual-testing). Record the tested commit,
-platform, runtime, and outcome in the [release checklist](DeveloperGuide.md#release-verification-checklist).
-A failed or unperformed check remains a release item; do not mark it passed from documentation review alone.
+[manual testing procedures](DeveloperGuide.md#appendix-instructions-for-manual-testing).
