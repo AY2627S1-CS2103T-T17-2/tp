@@ -16,6 +16,11 @@ public class HelpWindow extends UiPart<Stage> {
 
     private static final Logger logger = LogsCenter.getLogger(HelpWindow.class);
     private static final String FXML = "HelpWindow.fxml";
+    private static final String SUBTITLE_FORMAT =
+            "All %d commands, with syntax and examples. Type a command and press Enter.";
+
+    @FXML
+    private Label subtitle;
 
     @FXML
     private VBox commandList;
@@ -27,6 +32,7 @@ public class HelpWindow extends UiPart<Stage> {
      */
     public HelpWindow(Stage root) {
         super(FXML, root);
+        subtitle.setText(String.format(SUBTITLE_FORMAT, HelpCommand.COMMAND_USAGES.size()));
         for (String usage : HelpCommand.COMMAND_USAGES) {
             commandList.getChildren().add(createCommandCard(usage));
         }
@@ -125,10 +131,15 @@ public class HelpWindow extends UiPart<Stage> {
     }
 
     /**
-     * Focuses on the help window.
+     * Restores the help window if it is minimised, then brings it to the front and focuses on it.
      */
     public void focus() {
-        getRoot().requestFocus();
+        Stage stage = getRoot();
+        if (stage.isIconified()) {
+            stage.setIconified(false);
+        }
+        stage.toFront();
+        stage.requestFocus();
     }
 
 }

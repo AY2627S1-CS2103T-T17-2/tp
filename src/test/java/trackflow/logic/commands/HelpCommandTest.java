@@ -1,5 +1,6 @@
 package trackflow.logic.commands;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static trackflow.logic.commands.HelpCommand.SHOWING_HELP_MESSAGE;
@@ -39,5 +40,17 @@ public class HelpCommandTest {
         }
         assertTrue(HelpCommand.HELP_MESSAGE.contains("square brackets mark optional fields"));
         assertTrue(HelpCommand.HELP_MESSAGE.contains("remark 1 r/"));
+    }
+
+    @Test
+    public void commandUsages_listEveryCommandOnceInOrder() {
+        List<String> expected = List.of(AddCommand.COMMAND_WORD, EditCommand.COMMAND_WORD,
+                DeleteCommand.COMMAND_WORD, ListAthleteCommand.COMMAND_WORD, FindCommand.COMMAND_WORD,
+                FilterCommand.COMMAND_WORD, SortCommand.COMMAND_WORD, RemarkCommand.COMMAND_WORD,
+                ClearCommand.COMMAND_WORD, HelpCommand.COMMAND_WORD, ExitCommand.COMMAND_WORD);
+        List<String> listed = HelpCommand.COMMAND_USAGES.stream()
+                .map(usage -> usage.substring(0, usage.indexOf(':')))
+                .toList();
+        assertEquals(expected, listed);
     }
 }

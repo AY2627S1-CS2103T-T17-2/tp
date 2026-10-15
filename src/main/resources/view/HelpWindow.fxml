@@ -23,7 +23,8 @@
           <VBox spacing="20.0" styleClass="help-content">
             <VBox spacing="8.0">
               <Label text="Command guide" styleClass="help-title" />
-              <Label text="All 10 commands, with syntax and examples. Type a command and press Enter."
+              <Label fx:id="subtitle"
+                  text="All commands, with syntax and examples. Type a command and press Enter."
                   wrapText="true" styleClass="help-subtitle" />
             </VBox>
             <VBox spacing="6.0" styleClass="help-notes">
