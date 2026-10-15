@@ -5,8 +5,9 @@ skinparam ArrowFontStyle plain
 actor User as user USER_COLOR
 participant ":UI" as ui UI_COLOR
 participant ":LogicManager" as logic LOGIC_COLOR
+participant "command:DeleteCommand" as command LOGIC_COLOR
 participant "live:Model" as model MODEL_COLOR
-participant "staged:Model" as staged MODEL_COLOR
+participant "stagedModel:Model" as staged MODEL_COLOR
 participant ":Storage" as storage STORAGE_COLOR
 
 user -> ui : "delete 1"
@@ -15,12 +16,18 @@ activate logic LOGIC_COLOR
 logic -> model : getRoster(), getUserPrefs()\ngetPersonListPredicate(), getPersonListComparator()
 model --> logic : roster and display state
 logic -> staged : create detached model with same state
-logic -> staged : execute DeleteCommand\nagainst displayed index
-staged --> logic : CommandResult
-logic -> storage : saveRoster(staged.getRoster())
+logic -> command : execute(stagedModel)
+activate command LOGIC_COLOR
+command -> staged : getFilteredPersonList()
+staged --> command : displayed athletes
+command -> staged : deletePerson(athleteToDelete)
+staged --> command : athlete removed
+command --> logic : CommandResult
+deactivate command
+logic -> storage : saveRoster(stagedModel.getRoster())
 alt save succeeds
     storage --> logic : saved
-    logic -> model : setRoster(staged.getRoster())\nupdateFilteredPersonList(staged predicate)
+    logic -> model : setRoster(stagedModel.getRoster())\nupdateFilteredPersonList(stagedModel.getPersonListPredicate())
     note right of model: Existing sort comparator is retained.
     logic --> ui : CommandResult.withDataSaved()
     ui --> user : updated roster and confirmation
