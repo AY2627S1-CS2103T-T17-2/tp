@@ -4,51 +4,35 @@ skinparam arrowThickness 1.1
 skinparam arrowColor MODEL_COLOR
 skinparam classBackgroundColor MODEL_COLOR
 
-Package Model as ModelPackage <<Rectangle>>{
-Class "<<interface>>\nReadOnlyAddressBook" as ReadOnlyAddressBook
-Class "<<interface>>\nReadOnlyUserPrefs" as ReadOnlyUserPrefs
-Class "<<interface>>\nModel" as Model
-Class AddressBook
-Class ModelManager
-Class UserPrefs
-
-Class UniquePersonList
-Class Person
-Class Address
-Class Email
-Class Name
-Class Phone
-Class Tag
-
-Class I #FFFFFF
+package Model {
+    interface Model
+    interface ReadOnlyRoster
+    interface ReadOnlyUserPrefs
+    class ModelManager
+    class AthleteRoster
+    class UserPrefs
+    class UniquePersonList
+    class Person
 }
 
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Model
-
-AddressBook .up.|> ReadOnlyAddressBook
+package "JavaFX views" {
+    class "FilteredList<Person>" as FilteredList
+    class "SortedList<Person>" as SortedList
+}
 
 ModelManager .up.|> Model
-Model .right.> ReadOnlyUserPrefs
-Model .left.> ReadOnlyAddressBook
-ModelManager -left-> "1" AddressBook
-ModelManager -right-> "1" UserPrefs
+AthleteRoster .up.|> ReadOnlyRoster
 UserPrefs .up.|> ReadOnlyUserPrefs
-
-AddressBook *--> "1" UniquePersonList
-UniquePersonList --> "~* all" Person
-Person *--> Name
-Person *--> Phone
-Person *--> Email
-Person *--> Address
-Person *--> "*" Tag
-
-Person -[hidden]up--> I
-UniquePersonList -[hidden]right-> I
-
-Name -[hidden]right-> Phone
-Phone -[hidden]right-> Address
-Address -[hidden]right-> Email
-
-ModelManager --> "~* filtered" Person
+ModelManager *--> "1" AthleteRoster
+ModelManager *--> "1" UserPrefs
+AthleteRoster *--> "1" UniquePersonList
+UniquePersonList --> "*" Person
+ModelManager --> FilteredList
+ModelManager --> SortedList
+SortedList --> FilteredList : wraps
+FilteredList ..> UniquePersonList : views its observable list
+note bottom of SortedList
+  getFilteredPersonList() exposes this view.
+  Indexed commands use its displayed order.
+end note
 @enduml
