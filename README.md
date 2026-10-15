@@ -16,7 +16,7 @@ While it has a Graphical User Interface (GUI), most user interactions occur usin
 * **Multi-field sorting**: Sort the displayed roster by name, age category, phone, email, or address in ascending or descending order (e.g., `sort age desc`).
 * **Athlete remarks**: Attach coach notes, status updates, or medical flags directly to athlete profiles with `remark INDEX r/REMARK`.
 
-### Upcoming Features `[coming in v2.0]`
+### Upcoming Features `[coming in v1.4]`
 
 * **Guardian & emergency contact linking**: Map student-athlete cards directly to parent/guardian profiles, enabling single-command lookups of emergency numbers during road meets.
 * **Relay squads & event grouping**: Organize athletes into designated relay squads (e.g., `group g/4x100mA c/1,4,7,12`), track specific relay legs, and log alternate runners.
