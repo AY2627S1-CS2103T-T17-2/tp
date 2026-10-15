@@ -17,8 +17,9 @@ Interface (GUI).
 
 ## Quick start
 
-1. Ensure that Java `25` or later is installed on your computer.<br>
-   **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
+1. Install **Azul Zulu JDK 25**. On macOS, use the **JDK FX** distribution, which includes JavaFX,
+   and select the package matching your processor (Apple Silicon or Intel). See the
+   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements and packaging limitations.
 
 1. Download the latest `.jar` file from
    [the TrackFlow releases page](https://github.com/AY2627S1-CS2103T-T17-2/tp/releases).
@@ -102,8 +103,8 @@ so that it can be corrected.
   example, `enrol n/Avery` displays `Unknown command: enrol.`
 * Validation errors explain the accepted format or constraint. The roster is not changed when parsing or validation
   fails.
-* A parameter-like prefix that is not supported by a command is rejected explicitly instead of being treated as part
-  of another value.
+* Unsupported single-letter prefixes such as `t/` are rejected explicitly. See [Known issues](#known-issues)
+  for limitations when slash-containing text resembles a prefix.
 
 ### Viewing help: `help`
 
@@ -152,7 +153,8 @@ Shows the complete athlete roster.
 
 Format: `list`
 
-The command also restores the complete roster after a `find` or `filter` command. It does not accept parameters.
+The command also restores the complete roster after a `find` or `filter` command, retaining the current sort order.
+Without an active sort, athletes appear in saved roster order. It does not accept parameters.
 
 * An empty roster displays `The athlete roster is empty.`
 * A roster with one athlete displays `Displaying 1 athlete.`
@@ -174,7 +176,7 @@ Format: `filter a/AGE_CATEGORY`
 * Supply exactly one `a/` parameter. Accepted categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`.
 * Category values ignore case and repeated spaces: `filter a/under   14` is equivalent to `filter A/Under 14`.
 * Matching uses the recorded category, not an exact age or eligibility calculation. `Under 16` does not include athletes recorded as `Under 14`.
-* Each `filter` searches the entire roster and replaces any previous `find` or `filter`. Likewise, `find` replaces the age filter. Matching athletes retain their roster order and receive indexes starting from 1.
+* Each `filter` searches the entire roster and replaces any previous `find` or `filter`. Likewise, `find` replaces the age filter. Matching athletes retain the current displayed ordering, including any active sort, and receive indexes starting from 1.
 * Filtering does not change or delete athlete records. Use `list` to show everyone again, including after no matches. TrackFlow does not save the filter between application sessions.
 * Missing `a/` shows command usage. An empty or unsupported category (for example, `filter a/Under 15`) shows `Age category must be Under 14, Under 16, Under 18, Under 20, or Open.` Repeated `a/` parameters and extra arguments are rejected. An invalid filter leaves the previous display and roster unchanged.
 
@@ -223,6 +225,7 @@ Format: `remark INDEX r/[REMARK]`
 * Use an empty remark, such as `remark 1 r/`, to remove the athlete's existing remark.
 * Remarks form part of the saved athlete record and remain after restarting TrackFlow.
 * Updating a remark preserves the athlete's age category and other details.
+* A successful remark update displays the full roster again and retains the current sort order.
 
 Examples:
 
@@ -244,8 +247,8 @@ Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/A
 * Broad and field-specific criteria can be combined. An athlete is returned when any broad keyword or field-specific
   value matches. Each field prefix may appear at most once and cannot have an empty value.
 * Keyword order does not matter. Duplicate matching fields do not cause an athlete to appear more than once.
-* Each `find` searches the entire roster and replaces any previous `find` or `filter`. Matching athletes retain their
-  roster order and receive indexes starting from 1. Use `list` to restore the complete roster.
+* Each `find` searches the entire roster and replaces any previous `find` or `filter`. Matching athletes retain the
+  current displayed ordering, including any active sort, and receive indexes starting from 1. Use `list` to restore the complete roster.
 * An empty or whitespace-only search is rejected and displays the accepted command format.
 
 Feedback:
@@ -345,25 +348,36 @@ The command does not accept parameters.
 TrackFlow automatically saves after every successful command that changes roster data: `add`, `edit`, `remark`,
 `delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite the data file.
 TrackFlow writes the complete update to a temporary file before replacing the existing roster, so an interrupted write
-does not leave a partially written roster. You do not need to save manually.
+does not leave a partially written roster when atomic replacement is supported by the filesystem. On other
+filesystems, TrackFlow moves the completed temporary file into place without an atomicity guarantee.
+If saving fails, the command reports an error and the in-memory roster, filter, and sort order remain unchanged.
+Fix the file or folder permissions, then retry the command. `list`, `find`, `filter`, `sort`, `help`, and `exit` remain
+available without saving the roster. You do not need to save manually.
 
 ### Editing the data file
 
-TrackFlow data is saved automatically as a JSON file `[JAR file location]/data/trackflow.json`. Advanced users are
-welcome to update data directly by editing that data file.
+TrackFlow saves roster data to `data/trackflow.json`, relative to the folder from which you launch the application.
+Following the quick-start instructions places it beside the JAR in the `data` subfolder. Close TrackFlow and make a
+separate backup before editing this file manually.
+
+If you have an older `data/addressbook.json` file, keep a backup and copy it to `data/trackflow.json` while TrackFlow
+is closed. TrackFlow does not automatically discover or rename the old filename. Do not replace an existing roster
+unless you intend to replace its contents.
 
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, TrackFlow starts with an empty roster at the next run. The invalid file
-remains on disk until you run a successful command. Still, we recommend backing up the file before editing it.<br>
-Furthermore, certain edits can cause TrackFlow to behave unexpectedly (e.g., if a value entered is outside of the
-acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+Automatic corrupt-file backup is not implemented in this build. A loading error that TrackFlow handles starts an
+empty roster; a later successful roster-changing command can overwrite the invalid file. Some malformed structures
+can also prevent startup. If loading fails, close TrackFlow and copy `data/trackflow.json` to a separate location
+before changing any roster data. Repair the original file or restore a known-good backup before relaunching.
+View-only commands do not rewrite the roster. See [Known issues](#known-issues).
 </box>
 
-### Archiving data files `[coming in v2.0]`
+### Archiving data files [Future]
 
-_Details coming soon ..._
+Archiving and restoring individual athlete records are not available in v1.3. Keep external copies of roster files
+when you need a historical snapshot. No release version is committed for in-app archiving.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -371,14 +385,25 @@ _Details coming soon ..._
 
 **Q**: How do I transfer my data to another computer?<br>
 **A**: Install TrackFlow on the other computer and overwrite the data file it creates with the data file from your
-previous TrackFlow home folder.
+previous TrackFlow home folder. Close TrackFlow on both computers first and back up any destination roster before
+replacing it. Launch from the destination home folder so TrackFlow reads the copied `data/trackflow.json`.
 
 --------------------------------------------------------------------------------------------------------------------
 
 ## Known issues
 
-1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
-2. **If you minimize the Help Window** and then run the `help` command again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
+* **Slash-containing input:** a single-letter token followed by `/`, such as `A/B` in an address, may be interpreted
+  as an unsupported parameter. For broad searches, `find wrong/value` is treated as literal text, while
+  `find x/value` is rejected as an unsupported prefix.
+
+* **Corrupt roster recovery:** automatic backups and validation of every malformed JSON structure are pending.
+  Preserve an external copy before retrying startup or making roster changes.
+* **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
+  JDK 25 FX runtime on macOS and verify the packaged JAR on your machine; cross-platform release verification is
+  tracked in the [release checklist](DeveloperGuide.md#release-verification-checklist).
+
+* **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
+* **If you minimize the Help Window** and then run the `help` command again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
 
 --------------------------------------------------------------------------------------------------------------------
 

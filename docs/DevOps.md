@@ -16,7 +16,7 @@
 This project uses Gradle for **build automation and dependency management**. **We recommend reading [this Gradle tutorial from se-edu/guides](https://se-education.org/guides/tutorials/gradle.html).**
 
 
-The following commands perform common Gradle tasks.
+Use the [Zulu JDK 25 setup](SettingUp.md#runtime-and-build-requirements). The following commands perform common Gradle tasks.
 
 
 * **`clean`**: Deletes the files created during the previous build tasks (e.g. files in the `build` folder).<br>
@@ -39,13 +39,19 @@ The following commands perform common Gradle tasks.
 
 ## Continuous integration (CI)
 
-This project uses GitHub Actions for CI. The necessary workflow configuration files are in `.github/workflows`. No further setup is required.
+The workflow files are in `.github/workflows`. `gradle.yml` configures Java CI for pushes and pull requests on
+Linux, macOS, and Windows; `docs.yml` configures MarkBind deployment for pushes to `master`. Before release, confirm
+that both workflows have completed successfully for the exact `master` commit. An older passing run does not verify
+a later merge. If a run is missing, check repository Actions settings and the merge/push event, then arrange a run
+with the release owner. Neither workflow currently declares `workflow_dispatch`.
 
 ### Code coverage
 
 As part of CI, Gradle generates JaCoCo coverage reports from the tests, and CI uploads the coverage data to Codecov. Codecov then provides information about test coverage.
 
-However, because Codecov is known to run into intermittent problems (e.g., report upload fails) due to issues on the Codecov service side, the CI is configured to pass even if the Codecov task failed. Therefore, developers are advised to check the code coverage levels periodically and take corrective actions if the coverage level falls below desired levels.
+Inspect the Codecov upload step separately from the Gradle test and coverage results. Do not assume upload failures
+are ignored: the workflow does not declare `continue-on-error` for that step. The local JaCoCo report remains
+available in `build/reports/jacoco/`.
 
 To enable Codecov for forks of this project, follow the steps given in [this se-edu guide](https://se-education.org/guides/tutorials/codecov.html).
 
@@ -76,7 +82,12 @@ Any warnings or errors will be printed out to the console.
 
 Here are the steps to create a new release.
 
-1. Update the version number in [`MainApp.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/MainApp.java).
-1. Generate a fat JAR file using Gradle (i.e., `./gradlew shadowJar`).
-1. Tag the repo with the version number. e.g. `v0.1`
-1. [Create a new release using GitHub](https://help.github.com/articles/creating-releases/). Upload the JAR file you created.
+1. Ensure `MainApp.VERSION` is `v1.3` and the Gradle project version is `1.3`.
+1. Run `./gradlew clean check coverage shadowJar` and the repository checks. Build the documentation using the
+   [documentation guide](Documentation.md).
+1. Run `java -jar TrackFlow.jar` from a disposable folder containing a copy of `build/libs/TrackFlow.jar`.
+   Complete the [release checklist](DeveloperGuide.md#release-verification-checklist), including save/restart,
+   corrupt-file recovery, and the advertised runtime/processor combinations.
+1. Confirm Java CI and MarkBind Action have passed for the final `master` commit. Resolve any failed or missing runs.
+1. Tag that verified commit `v1.3` and create the GitHub release. Upload `TrackFlow.jar` and state the exact tested
+   runtime requirements and any remaining limitations in the release notes.
