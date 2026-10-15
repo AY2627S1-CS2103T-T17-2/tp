@@ -59,6 +59,17 @@ public class StatusBarFooter extends UiPart<Region> {
         setSaveState(NOT_SAVED_STATUS, NOT_SAVED_STYLE_CLASS);
     }
 
+    /**
+     * Resets the save state to the neutral status if the last save had failed. A failed save is rolled back,
+     * so nothing is left unsaved once a later command succeeds.
+     */
+    public void clearNotSaved() {
+        if (getRoot().getStyleClass().contains(NOT_SAVED_STYLE_CLASS)) {
+            getRoot().getStyleClass().remove(NOT_SAVED_STYLE_CLASS);
+            saveStateStatus.setText(NO_CHANGES_STATUS);
+        }
+    }
+
     private void setSaveState(String status, String styleClass) {
         getRoot().getStyleClass().removeAll(SAVED_STYLE_CLASS, NOT_SAVED_STYLE_CLASS);
         getRoot().getStyleClass().add(styleClass);
