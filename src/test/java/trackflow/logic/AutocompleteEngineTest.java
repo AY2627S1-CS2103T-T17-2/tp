@@ -96,7 +96,7 @@ public class AutocompleteEngineTest {
         List<String> suggestions = autocompleteEngine.getSuggestions("add n/John");
         assertTrue(suggestions.isEmpty());
 
-        suggestions = autocompleteEngine.getSuggestions("filter a/20");
+        suggestions = autocompleteEngine.getSuggestions("filter a/Under 20");
         assertTrue(suggestions.isEmpty());
     }
 
@@ -151,53 +151,53 @@ public class AutocompleteEngineTest {
         assertEquals("a/", autocompleteEngine.getNextPrefix("add n/John "));
 
         // With name and age
-        assertEquals(" p/", autocompleteEngine.getNextPrefix("add n/John a/30"));
+        assertEquals(" p/", autocompleteEngine.getNextPrefix("add n/John a/Under 20"));
 
         // With name, age, phone
-        assertEquals(" e/", autocompleteEngine.getNextPrefix("add n/John a/30 p/91234567"));
+        assertEquals(" e/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567"));
 
         // With name, age, phone, email
-        assertEquals(" addr/", autocompleteEngine.getNextPrefix("add n/John a/30 p/91234567 e/j@e.com"));
+        assertEquals(" addr/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567 e/j@e.com"));
 
         // All prefixes present
-        assertEquals("", autocompleteEngine.getNextPrefix("add n/John a/30 p/91234567 e/j@e.com addr/NUS"));
+        assertEquals("", autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567 e/j@e.com addr/NUS"));
     }
 
     @Test
     public void getNextPrefix_uppercasePrefixes_matchesCaseInsensitively() {
         // Issue 1B fix: Uppercase prefixes should be recognized so that already entered prefixes are not repeated
         assertEquals(" a/", autocompleteEngine.getNextPrefix("add N/John"));
-        assertEquals(" p/", autocompleteEngine.getNextPrefix("add N/John A/30"));
-        assertEquals(" e/", autocompleteEngine.getNextPrefix("add n/John a/30 P/91234567"));
-        assertEquals(" addr/", autocompleteEngine.getNextPrefix("add n/John a/30 p/91234567 E/j@e.com"));
-        assertEquals("", autocompleteEngine.getNextPrefix("add N/John A/30 P/91234567 E/j@e.com ADDR/NUS"));
+        assertEquals(" p/", autocompleteEngine.getNextPrefix("add N/John A/Under 20"));
+        assertEquals(" e/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 P/91234567"));
+        assertEquals(" addr/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567 E/j@e.com"));
+        assertEquals("", autocompleteEngine.getNextPrefix("add N/John A/Under 20 P/91234567 E/j@e.com ADDR/NUS"));
     }
 
     @Test
     public void getNextPrefix_outOfOrderPrefixes_returnsFirstMissingTemplatePrefix() {
         // Age is present, name is missing
-        assertEquals(" n/", autocompleteEngine.getNextPrefix("add a/30"));
+        assertEquals(" n/", autocompleteEngine.getNextPrefix("add a/Under 20"));
 
         // Name and address are present, age is missing
         assertEquals(" a/", autocompleteEngine.getNextPrefix("add n/John addr/NUS"));
 
         // Name, age, email present, phone is missing
-        assertEquals(" p/", autocompleteEngine.getNextPrefix("add n/John a/30 e/j@e.com"));
+        assertEquals(" p/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 e/j@e.com"));
     }
 
     @Test
     public void getNextPrefix_editCommand_returnsPrefixes() {
         assertEquals(" n/", autocompleteEngine.getNextPrefix("edit 1"));
         assertEquals(" a/", autocompleteEngine.getNextPrefix("edit 1 n/Alex"));
-        assertEquals("", autocompleteEngine.getNextPrefix("edit 1 n/Alex a/20 p/91234567 e/a@b.com addr/NUS"));
+        assertEquals("", autocompleteEngine.getNextPrefix("edit 1 n/Alex a/Under 20 p/91234567 e/a@b.com addr/NUS"));
     }
 
     @Test
     public void getNextPrefix_filterCommand_returnsPrefix() {
         assertEquals("a/", autocompleteEngine.getNextPrefix("filter "));
         assertEquals(" a/", autocompleteEngine.getNextPrefix("filter"));
-        assertEquals("", autocompleteEngine.getNextPrefix("filter a/20"));
-        assertEquals("", autocompleteEngine.getNextPrefix("filter A/20"));
+        assertEquals("", autocompleteEngine.getNextPrefix("filter a/Under 20"));
+        assertEquals("", autocompleteEngine.getNextPrefix("filter A/Under 20"));
     }
 
     @Test
