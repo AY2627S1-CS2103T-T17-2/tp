@@ -27,8 +27,8 @@ Interface (GUI).
 1. Copy the file to the folder you want to use as the _home folder_ for TrackFlow.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar TrackFlow.jar`.<br>
-   A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
-   ![Ui](images/Ui.png)
+   The GUI opens with sample athletes. The image below is a design mockup: its grade/event fields and command examples do not represent v1.3. Use the commands documented in this guide.<br>
+   ![TrackFlow design mockup](images/Ui.png)
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
@@ -41,7 +41,7 @@ Interface (GUI).
 
    * `sort name`: Sorts the displayed athletes by name in ascending order.
 
-   * `delete 3` : Deletes the 3rd athlete shown in the current list.
+   * Run `list`, then `delete 3`: Displays the complete roster and deletes the athlete shown at index 3. This requires at least three athletes in the roster.
 
    * `clear` : Deletes all athletes.
 
@@ -66,7 +66,7 @@ Interface (GUI).
 * Items followed by `...` can appear zero or more times.<br>
   For example, `find KEYWORD [MORE_KEYWORDS]...` can include `Avery` or `Avery Tan`.
 
-* Parameters can be in any order.<br>
+* Field prefixes can be in any order. For `find`, put unprefixed keywords before field prefixes.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
 * Command words and parameter prefixes are case-insensitive. For example, `LIST`, `List`, and `list` invoke the same
@@ -87,7 +87,6 @@ TrackFlow provides an autocomplete feature to speed up typing and ensure correct
 * Use the **Up** and **Down** arrow keys to navigate the list of suggestions.
 * Press **Tab**, or **Click** on a suggestion, to select it. This will insert the command word (followed by a space) into the command box and close the suggestions dropdown.
 * Pressing **Enter** does **not** select or apply a suggestion; it closes the suggestions dropdown and executes the command currently typed in the command box.
-* Pressing **Esc** closes the suggestions dropdown without modifying your input.
 * After you enter the command word (or select it with **Tab**), press **Tab** again to automatically insert the next prefix in the sequence. After you type the data for a parameter (or an index, if required), press **Tab** again to insert the next prefix. You can keep pressing **Tab** to step through all the prefixes for the command.
 * Prefixes already entered in the command box (even in uppercase or in a different order) are recognized and skipped automatically.
 
@@ -103,7 +102,7 @@ so that it can be corrected.
   example, `enrol n/Avery` displays `Unknown command: enrol.`
 * Validation errors explain the accepted format or constraint. The roster is not changed when parsing or validation
   fails.
-* Unsupported single-letter prefixes such as `t/` are rejected explicitly. See [Known issues](#known-issues)
+* Unsupported parameters such as `t/` are rejected with an error. See [Known issues](#known-issues)
   for limitations when slash-containing text resembles a prefix.
 
 ### Viewing help: `help`
@@ -123,9 +122,9 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS`
 * All five fields are required.
 * Fields may appear in any order. Each parameter may appear only once.
 * Age category must be `Under 14`, `Under 16`, `Under 18`, `Under 20`, or `Open`. Category input ignores case and normalizes repeated spaces.
-* Names retain the existing rule: nonblank alphanumeric characters and spaces only.
-* Phones retain the existing rule: digits only, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
-* Emails retain the existing email validation rules.
+* Names must be nonblank and contain only alphanumeric characters and spaces.
+* Phone numbers must contain only digits, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
+* Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` to supply the required nonblank address.
 * Add does not accept tags or remarks. `edit` updates athlete details and addresses, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
@@ -209,6 +208,7 @@ Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]
 * A successful edit displays the full roster again; failed edits leave the roster and displayed list unchanged.
 
 Examples:
+
 *  `edit 1 addr/123 Main Street` Updates the 1st athlete's address.
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st athlete to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower a/Under 16` Edits the name and age category of the 2nd athlete, retaining their other details.
@@ -240,13 +240,13 @@ Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/A
 
 * Searchable fields are name, age category, phone, email, address, and remark.
 * Matching is case-insensitive and accepts partial values.
-* Each space-separated value is a keyword. An athlete is returned when at least one keyword occurs in at least one
+* Before any field prefix, each space-separated value is a keyword. An athlete is returned when at least one keyword occurs in at least one
   searchable field (an `OR` search). This broad form remains useful when the field is unknown.
 * Prefix a value to restrict it to one field: `n/` name, `a/` age category, `p/` phone, `e/` email, `addr/` address,
   or `r/` remark. For example, `find n/und` searches names without matching every `Under` age category.
 * Broad and field-specific criteria can be combined. An athlete is returned when any broad keyword or field-specific
   value matches. Each field prefix may appear at most once and cannot have an empty value.
-* Keyword order does not matter. Duplicate matching fields do not cause an athlete to appear more than once.
+* Broad keyword order does not matter: `find Avery Tan` and `find Tan Avery` return the same results. A prefixed value is matched as one phrase, so `find n/Avery Tan` matches that name but `find n/Tan Avery` does not. Put broad keywords before any field prefixes. Each athlete appears at most once.
 * Each `find` searches the entire roster and replaces any previous `find` or `filter`. Matching athletes retain the
   current displayed ordering, including any active sort, and receive indexes starting from 1. Use `list` to restore the complete roster.
 * An empty or whitespace-only search is rejected and displays the accepted command format.
@@ -324,6 +324,7 @@ Format: `delete INDEX`
 * On success, the deleted athlete's details are shown, e.g. `Athlete deleted: Avery Tan; Age category: Under 18; Phone: 91234567; Email: avery@example.com`.
 
 Examples:
+
 * `list` followed by `delete 2` deletes the 2nd athlete in the roster.
 * `find Betsy` followed by `delete 1` deletes the 1st athlete in the results of the `find` command.
 
@@ -395,8 +396,6 @@ replacing it. Launch from the destination home folder so TrackFlow reads the cop
   JDK 25 FX runtime on macOS and verify the packaged JAR on your machine. See the
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
 
-* **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
-* **If you minimize the Help Window** and then run the `help` command again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
 
 --------------------------------------------------------------------------------------------------------------------
 
