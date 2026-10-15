@@ -2,38 +2,32 @@
 !include style.puml
 skinparam ArrowFontStyle plain
 
-Actor User as user USER_COLOR
-Participant ":UI" as ui UI_COLOR
-Participant ":Logic" as logic LOGIC_COLOR
-Participant ":Model" as model MODEL_COLOR
-Participant ":Storage" as storage STORAGE_COLOR
+actor User as user USER_COLOR
+participant ":UI" as ui UI_COLOR
+participant ":LogicManager" as logic LOGIC_COLOR
+participant "live:Model" as model MODEL_COLOR
+participant "staged:Model" as staged MODEL_COLOR
+participant ":Storage" as storage STORAGE_COLOR
 
-user -[USER_COLOR]> ui : "delete 1"
-activate ui UI_COLOR
-
-ui -[UI_COLOR]> logic : execute("delete 1")
+user -> ui : "delete 1"
+ui -> logic : execute("delete 1")
 activate logic LOGIC_COLOR
-
-logic -[LOGIC_COLOR]> model : deletePerson(p)
-activate model MODEL_COLOR
-
-model -[MODEL_COLOR]-> logic
-deactivate model
-
-logic -[LOGIC_COLOR]> storage : saveAddressBook(addressBook)
-activate storage STORAGE_COLOR
-
-storage -[STORAGE_COLOR]> storage : Save to file
-activate storage STORAGE_COLOR_T1
-storage --[STORAGE_COLOR]> storage
-deactivate storage
-
-storage --[STORAGE_COLOR]> logic
-deactivate storage
-
-logic --[LOGIC_COLOR]> ui
+logic -> model : getRoster(), getUserPrefs()\ngetPersonListPredicate(), getPersonListComparator()
+model --> logic : roster and display state
+logic -> staged : create detached model with same state
+logic -> staged : execute DeleteCommand\nagainst displayed index
+staged --> logic : CommandResult
+logic -> storage : saveRoster(staged.getRoster())
+alt save succeeds
+    storage --> logic : saved
+    logic -> model : setRoster(staged.getRoster())\nupdateFilteredPersonList(staged predicate)
+    note right of model: Existing sort comparator is retained.
+    logic --> ui : CommandResult.withDataSaved()
+    ui --> user : updated roster and confirmation
+else save fails
+    storage --> logic : IOException
+    logic --> ui : CommandException
+    ui --> user : error; live roster and display unchanged
+end
 deactivate logic
-
-ui--[UI_COLOR]> user
-deactivate ui
 @enduml

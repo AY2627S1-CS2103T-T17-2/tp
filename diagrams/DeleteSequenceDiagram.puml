@@ -2,69 +2,46 @@
 !include style.puml
 skinparam ArrowFontStyle plain
 
-box Logic LOGIC_COLOR_T1
-participant ":LogicManager" as LogicManager LOGIC_COLOR
-participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
-participant ":DeleteCommandParser" as DeleteCommandParser LOGIC_COLOR
-participant "d:DeleteCommand" as DeleteCommand LOGIC_COLOR
-participant "r:CommandResult" as CommandResult LOGIC_COLOR
-end box
+participant ":LogicManager" as logic LOGIC_COLOR
+participant ":TrackFlowParser" as parser LOGIC_COLOR
+participant ":DeleteCommandParser" as deleteParser LOGIC_COLOR
+participant "d:DeleteCommand" as command LOGIC_COLOR
+participant "staged:Model" as model MODEL_COLOR
+participant ":Storage" as storage STORAGE_COLOR
+participant "live:Model" as live MODEL_COLOR
 
-box Model MODEL_COLOR_T1
-participant "m:Model" as Model MODEL_COLOR
-end box
-
-[-> LogicManager : execute("delete 1")
-activate LogicManager
-
-LogicManager -> AddressBookParser : parseCommand("delete 1")
-activate AddressBookParser
-
-create DeleteCommandParser
-AddressBookParser -> DeleteCommandParser
-activate DeleteCommandParser
-
-DeleteCommandParser --> AddressBookParser
-deactivate DeleteCommandParser
-
-AddressBookParser -> DeleteCommandParser : parse("1")
-activate DeleteCommandParser
-
-create DeleteCommand
-DeleteCommandParser -> DeleteCommand
-activate DeleteCommand
-
-DeleteCommand --> DeleteCommandParser :
-deactivate DeleteCommand
-
-DeleteCommandParser --> AddressBookParser : d
-deactivate DeleteCommandParser
-'Hidden arrow to position the destroy marker below the end of the activation bar.
-DeleteCommandParser -[hidden]-> AddressBookParser
-destroy DeleteCommandParser
-
-AddressBookParser --> LogicManager : d
-deactivate AddressBookParser
-
-LogicManager -> DeleteCommand : execute(m)
-activate DeleteCommand
-
-DeleteCommand -> Model : deletePerson(1)
-activate Model
-
-Model --> DeleteCommand
-deactivate Model
-
-create CommandResult
-DeleteCommand -> CommandResult
-activate CommandResult
-
-CommandResult --> DeleteCommand
-deactivate CommandResult
-
-DeleteCommand --> LogicManager : r
-deactivate DeleteCommand
-
-[<--LogicManager
-deactivate LogicManager
+[-> logic : execute("delete 1")
+activate logic
+logic -> parser : parseCommand("delete 1")
+activate parser
+create deleteParser
+parser -> deleteParser : parse(" 1")
+activate deleteParser
+create command
+deleteParser -> command : new DeleteCommand(index)
+deleteParser --> parser : d
+deactivate deleteParser
+destroy deleteParser
+parser --> logic : d
+deactivate parser
+logic -> live : read roster and display state
+live --> logic : snapshot
+logic -> model : create detached copy
+logic -> command : execute(staged)
+activate command
+command -> model : getFilteredPersonList()
+model --> command : displayed athletes
+command -> model : deletePerson(personToDelete)
+command --> logic : CommandResult
+deactivate command
+logic -> storage : saveRoster(staged.getRoster())
+alt save succeeds
+    storage --> logic : saved
+    logic -> live : setRoster(staged.getRoster())\nupdateFilteredPersonList(staged predicate)
+    [<-- logic : result.withDataSaved()
+else save fails
+    storage --> logic : IOException
+    [<-- logic : CommandException (live model unchanged)
+end
+deactivate logic
 @enduml
