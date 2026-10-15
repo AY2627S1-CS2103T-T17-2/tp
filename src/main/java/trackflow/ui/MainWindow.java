@@ -142,6 +142,8 @@ public class MainWindow extends UiPart<Stage> {
             resultDisplay.showSuccess(commandResult.getFeedbackToUser());
             if (commandResult.isDataSaved()) {
                 statusBarFooter.showSaved();
+            } else {
+                statusBarFooter.clearNotSaved();
             }
 
             if (commandResult.isShowHelp()) {
