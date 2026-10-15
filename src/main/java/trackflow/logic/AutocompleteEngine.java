@@ -14,15 +14,15 @@ public class AutocompleteEngine {
     private final List<String> commandTemplates = List.of(
             "add n/ a/ p/ e/ addr/",
             "clear",
-            "delete ",
-            "edit n/ a/ p/ e/ addr/",
+            "delete INDEX",
+            "edit INDEX n/ a/ p/ e/ addr/",
             "exit",
             "filter a/",
             "find ",
             "sort",
             "help",
             "list",
-            "remark r/"
+            "remark INDEX r/"
     );
 
     /**

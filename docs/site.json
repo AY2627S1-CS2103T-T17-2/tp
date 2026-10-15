@@ -1,8 +1,8 @@
 {
   "baseUrl": "",
-  "titlePrefix": "TrackFlow",
-  "titleSuffix": "AddressBook Level-3",
-  "faviconPath": "images/SeEduLogo.png",
+  "titlePrefix": "",
+  "titleSuffix": "TrackFlow",
+  "faviconPath": "images/trackflow_32.png",
   "style": {
     "codeTheme": "light"
   },
