@@ -76,8 +76,33 @@ Interface (GUI).
 
 * Leading and trailing whitespace around a command is ignored.
 
+* Enter one command per submission, using spaces to separate its word and parameters. The command box is a
+  single-line field: pasted tabs and line breaks can be removed, joining adjacent text. Replace them with spaces
+  before pasting a command. TrackFlow does not execute batches of commands.
+
+* Indexes use digits `0`–`9` and must identify a displayed athlete. Leading zeroes are accepted (`0001` means `1`).
+  Zero, signs, decimals, and extra words are rejected; very large numbers report an invalid displayed index.
+
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
+
+### Addresses and remarks containing slashes
+
+Type ordinary addresses and notes normally. If the text looks like a command parameter, such as `A/B` or `r/relay`,
+double its slash to enter it literally:
+
+* `edit 1 addr/Block A//B` stores `Block A/B`.
+* `remark 1 r/Practise r//relay on Mon/Tue` stores `Practise r/relay on Mon/Tue`.
+* `find addr/Block A//B` searches that address.
+
+This applies only to a token shaped like a single-letter parameter or `addr/`. URLs such as
+`https://example.com/a//b`, network paths such as `//server/share`, backslashes, and quotation marks have no escape
+behaviour. Exactly one extra slash is removed, once: enter `A///B` to store `A//B`.
+Do not use quotes to escape parameters: they are kept as part of the value, and a parameter after a space
+inside quoted text is still recognised. Use `//` for literal parameter-like text instead.
+
+If a value begins with a slash, put a space after the real parameter: `edit 1 addr/ /home/coach` stores
+`/home/coach`. An escaped token never replaces a required parameter, and repeated real parameters still cause an error.
 
 ### Command autocomplete
 
@@ -102,8 +127,8 @@ so that it can be corrected.
   example, `enrol n/Avery` displays `Unknown command: enrol.`
 * Validation errors explain the accepted format or constraint. The roster is not changed when parsing or validation
   fails.
-* Unsupported parameters such as `t/` are rejected with an error. See [Known issues](#known-issues)
-  for limitations when slash-containing text resembles a prefix.
+* Unsupported parameters such as `t/` are rejected with an error. To enter such text as part of an address or note,
+  see [Addresses and remarks containing slashes](#addresses-and-remarks-containing-slashes).
 
 ### Viewing help: `help`
 
@@ -387,10 +412,6 @@ replacing it. Launch from the destination home folder so TrackFlow reads the cop
 --------------------------------------------------------------------------------------------------------------------
 
 ## Known issues
-
-* **Slash-containing input:** a single-letter token followed by `/`, such as `A/B` in an address, may be interpreted
-  as an unsupported parameter. For broad searches, `find wrong/value` is treated as literal text, while
-  `find x/value` is rejected as an unsupported prefix.
 
 * **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
   JDK 25 FX runtime on macOS and verify the packaged JAR on your machine. See the

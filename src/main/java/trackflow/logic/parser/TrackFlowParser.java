@@ -30,9 +30,11 @@ import trackflow.logic.parser.exceptions.ParseException;
 public class TrackFlowParser {
 
     /**
-     * Used for initial separation of command word and args.
+     * Separates one command word from its arguments, including arguments pasted across lines.
+     * The arguments are passed to one command parser; this does not execute a batch of commands.
      */
-    private static final Pattern BASIC_COMMAND_FORMAT = Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)");
+    private static final Pattern BASIC_COMMAND_FORMAT =
+            Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)", Pattern.DOTALL);
     private static final Logger logger = LogsCenter.getLogger(TrackFlowParser.class);
 
     /**
