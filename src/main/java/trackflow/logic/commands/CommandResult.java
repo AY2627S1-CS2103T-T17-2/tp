@@ -23,7 +23,12 @@ public class CommandResult {
     private final boolean dataSaved;
 
     /**
-     * Constructs a {@code CommandResult} with the specified fields.
+     * Constructs feedback with the requested help and exit actions, without claiming that data was saved.
+     *
+     * @param feedbackToUser Message to display to the user.
+     * @param showHelp Whether the UI should show the help window.
+     * @param exit Whether the UI should close the application.
+     * @throws NullPointerException If {@code feedbackToUser} is null.
      */
     public CommandResult(String feedbackToUser, boolean showHelp, boolean exit) {
         this(feedbackToUser, showHelp, exit, false);
@@ -37,8 +42,9 @@ public class CommandResult {
     }
 
     /**
-     * Constructs a {@code CommandResult} with the specified {@code feedbackToUser},
-     * and other fields set to their default value.
+     * Constructs feedback with no help, exit, or successful-save indication.
+     *
+     * @throws NullPointerException If {@code feedbackToUser} is null.
      */
     public CommandResult(String feedbackToUser) {
         this(feedbackToUser, false, false);
@@ -61,7 +67,8 @@ public class CommandResult {
     }
 
     /**
-     * Returns an equivalent result recording that roster data was successfully saved.
+     * Returns a new result recording a successful roster save, preserving the feedback and requested UI actions.
+     * Calling this method does not perform a save; the logic layer calls it after persistence succeeds.
      */
     public CommandResult withDataSaved() {
         return new CommandResult(feedbackToUser, showHelp, exit, true);
