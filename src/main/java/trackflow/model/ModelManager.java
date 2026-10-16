@@ -41,6 +41,9 @@ public class ModelManager implements Model {
         sortedPersons = new SortedList<>(filteredPersons);
     }
 
+    /**
+     * Creates a model with an empty roster, default preferences, and no active filter or sort.
+     */
     public ModelManager() {
         this(new AthleteRoster(), new UserPrefs());
     }
@@ -102,8 +105,8 @@ public class ModelManager implements Model {
     //=========== Filtered Person List Accessors =============================================================
 
     /**
-     * Returns an unmodifiable view of the list of {@code Person} backed by the internal list of
-     * {@code roster}
+     * Returns a live, unmodifiable view of the roster after applying the current filter and sort order.
+     * Roster changes are reflected in this view; sorting does not reorder the stored roster.
      */
     @Override
     public ObservableList<Person> getFilteredPersonList() {

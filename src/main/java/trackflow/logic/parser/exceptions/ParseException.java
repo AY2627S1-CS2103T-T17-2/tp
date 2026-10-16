@@ -7,10 +7,16 @@ import trackflow.commons.exceptions.IllegalValueException;
  */
 public class ParseException extends IllegalValueException {
 
+    /**
+     * Constructs a parse error with the user-facing {@code message}.
+     */
     public ParseException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a parse error with the user-facing {@code message} and original {@code cause}.
+     */
     public ParseException(String message, Throwable cause) {
         super(message, cause);
     }

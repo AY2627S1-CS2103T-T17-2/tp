@@ -49,6 +49,10 @@ If you plan to use IntelliJ IDEA (highly recommended):
 
 1. **Configure the coding style**
 
+   Follow the [SE-EDU Java coding standard (Basic + Intermediate)](https://se-education.org/guides/conventions/java/intermediate.html).
+   The repository's `config/checkstyle/checkstyle.xml` checks a subset of these rules; review comments for accuracy
+   as well as checking their format.
+
    If using IDEA, follow the guide [_[se-edu/guides] IDEA: Configuring the code style_](https://se-education.org/guides/tutorials/intellijCodeStyle.html) to set up IDEA's coding style to match ours.
 
    <box type="tip" seamless>
@@ -73,3 +77,32 @@ If you plan to use IntelliJ IDEA (highly recommended):
    * [Tracing code](https://se-education.org/guides/tutorials/ab3TracingCode.html)
    * [Adding a new command](https://se-education.org/guides/tutorials/ab3AddRemark.html)
    * [Removing fields](https://se-education.org/guides/tutorials/ab3RemovingFields.html)
+
+--------------------------------------------------------------------------------------------------------------------
+
+## Documenting code changes
+
+Write descriptive Javadoc headers for classes, public constructors, and public methods. Simple getters/setters,
+test code, and overrides whose inherited documentation applies exactly may omit a header. An override with a
+different contract should explain it, using `{@inheritDoc}` where helpful.
+
+Start method summaries with a verb such as "Returns", "Creates", or "Updates". Explain behavior callers need to
+know: accepted values, normalization, empty or null handling, side effects, returned views or copies, and failures.
+Keep comments consistent with the implementation; do not promise validation, persistence, or features that the
+method does not provide. Use English with American spelling.
+
+Use `@param` for every parameter or omit the tags when the description already explains all parameters.
+Include useful `@return` and `@throws` descriptions. Keep the opening `/**` on its own line, separate the summary
+from block tags with a blank line, and end tag descriptions with punctuation. Link related API types with
+`{@link ...}` so generated documentation can resolve them.
+
+Run the following from the repository root before opening a documentation PR:
+
+```bash
+./gradlew check javadoc
+```
+
+On Windows, use `gradlew.bat`. Open `build/docs/javadoc/index.html` to inspect the generated API documentation.
+The Javadoc tool can also report optional missing tags or comments on simple accessors/constants; those warnings
+are separate from the course standard's documented exceptions. Resolve malformed markup and broken references,
+and manually verify that each changed header describes the current behavior.

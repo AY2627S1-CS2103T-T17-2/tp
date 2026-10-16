@@ -2,11 +2,14 @@ package trackflow.logic.parser;
 
 /**
  * A prefix that marks the beginning of an argument in an arguments string.
- * E.g. 't/' in 'add James t/ friend'.
+ * For example, {@code n/} in {@code add n/Avery Tan ...}.
  */
 public class Prefix {
     private final String prefix;
 
+    /**
+     * Constructs a prefix using the supplied text. An empty prefix represents the argument preamble.
+     */
     public Prefix(String prefix) {
         this.prefix = prefix;
     }

@@ -10,7 +10,8 @@ import trackflow.model.Model;
 import trackflow.model.person.Person;
 
 /**
- * Sorts the displayed athlete list by a selected field and order.
+ * Sorts the displayed athlete list by a selected field and order, preserving its current filter.
+ * Changes only the display order; the stored roster order is unchanged.
  */
 public class SortCommand extends Command {
 
@@ -54,6 +55,9 @@ public class SortCommand extends Command {
         return new CommandResult(String.format(MESSAGE_SUCCESS, field.displayName, order.displayName));
     }
 
+    /**
+     * Returns an ascending comparator: case-insensitive text, numeric phone values, or competition category rank.
+     */
     private static Comparator<Person> getComparator(SortField field) {
         return switch (field) {
             case NAME -> Comparator.comparing(person -> person.getName().fullName, CASE_INSENSITIVE_TEXT_COMPARATOR);
@@ -64,6 +68,11 @@ public class SortCommand extends Command {
         };
     }
 
+    /**
+     * Returns the competition order of a canonical category, with Open after the Under 20 category.
+     *
+     * @throws IllegalArgumentException If {@code ageCategory} is not a canonical supported category.
+     */
     private static int getAgeCategoryRank(String ageCategory) {
         return switch (ageCategory) {
             case "Under 14" -> 0;
@@ -90,7 +99,9 @@ public class SortCommand extends Command {
                 .toString();
     }
 
-    /** Fields supported by the sort command. */
+    /**
+     * Fields supported by the sort command.
+     */
     public enum SortField {
         NAME("name"),
         AGE("age category"),
@@ -105,7 +116,9 @@ public class SortCommand extends Command {
         }
     }
 
-    /** Directions supported by the sort command. */
+    /**
+     * Directions supported by the sort command.
+     */
     public enum SortOrder {
         ASCENDING("ascending"),
         DESCENDING("descending");

@@ -22,6 +22,10 @@ public class JsonRosterStorage {
 
     private Path filePath;
 
+    /**
+     * Creates storage that reads and writes roster data at {@code filePath}.
+     * The file is not read or created until a read or save operation is requested.
+     */
     public JsonRosterStorage(Path filePath) {
         this.filePath = filePath;
     }
@@ -31,20 +35,21 @@ public class JsonRosterStorage {
     }
 
     /**
-     * Returns AthleteRoster data as a {@link ReadOnlyRoster}.
-     * Returns {@code Optional.empty()} if storage file is not found.
+     * Returns validated roster data from the configured file without changing the file.
+     * An absent file returns {@code Optional.empty()}; an existing empty roster returns a present roster.
      *
-     * @throws DataLoadingException if loading the data from storage failed.
+     * @throws DataLoadingException If reading, JSON conversion, field validation, or duplicate checks fail.
      */
     public Optional<ReadOnlyRoster> readRoster() throws DataLoadingException {
         return readRoster(filePath);
     }
 
     /**
-     * Similar to {@link #readRoster()}.
+     * Returns validated roster data from {@code filePath}, following the same rules as {@link #readRoster()}.
      *
-     * @param filePath location of the data. Cannot be null.
-     * @throws DataLoadingException if loading the data from storage failed.
+     * @param filePath Location of the data; must not be null.
+     * @return The loaded roster, or an empty optional if the file is absent.
+     * @throws DataLoadingException If reading, JSON conversion, field validation, or duplicate checks fail.
      */
     public Optional<ReadOnlyRoster> readRoster(Path filePath) throws DataLoadingException {
         requireNonNull(filePath);
@@ -65,17 +70,21 @@ public class JsonRosterStorage {
 
     /**
      * Saves the given {@link ReadOnlyRoster} to the storage.
-     * @param roster cannot be null.
-     * @throws IOException if there was any problem writing to the file.
+     *
+     * @param roster Roster to save; must not be null.
+     * @throws IOException If there is a problem writing or replacing the file.
      */
     public void saveRoster(ReadOnlyRoster roster) throws IOException {
         saveRoster(roster, filePath);
     }
 
     /**
-     * Similar to {@link #saveRoster(ReadOnlyRoster)}.
+     * Saves the roster as JSON at {@code filePath}, creating parent directories as needed.
+     * Writes to a temporary sibling before replacing the destination; replacement is atomic when supported.
      *
-     * @param filePath location of the data. Cannot be null.
+     * @param roster Roster to save; must not be null.
+     * @param filePath Destination of the data; must not be null.
+     * @throws IOException If there is a problem writing or replacing the file.
      */
     public void saveRoster(ReadOnlyRoster roster, Path filePath) throws IOException {
         requireNonNull(roster);

@@ -57,8 +57,12 @@ public class EditCommand extends Command {
     private final EditPersonDescriptor editPersonDescriptor;
 
     /**
-     * @param index of the person in the filtered person list to edit
-     * @param editPersonDescriptor details to edit the person with
+     * Creates a command that replaces the supplied fields of the athlete at the displayed {@code index}.
+     * Copies the descriptor so that subsequent changes to it do not affect this command.
+     *
+     * @param index Index in the current filtered and sorted list, resolved during execution.
+     * @param editPersonDescriptor Replacement values; omitted fields retain their current values.
+     * @throws NullPointerException If either argument is null.
      */
     public EditCommand(Index index, EditPersonDescriptor editPersonDescriptor) {
         requireNonNull(index);
@@ -143,7 +147,8 @@ public class EditCommand extends Command {
 
     /**
      * Stores the details to edit the person with. Each provided field value will replace the
-     * corresponding field value of the person.
+     * corresponding field value of the person. A null field means that it is not being edited;
+     * an empty replacement tag set removes all tags.
      */
     public static class EditPersonDescriptor {
         private Name name;
@@ -153,10 +158,13 @@ public class EditCommand extends Command {
         private Address address;
         private Set<Tag> tags;
 
+        /**
+         * Creates a descriptor with no fields selected for editing.
+         */
         public EditPersonDescriptor() {}
 
         /**
-         * Copy constructor.
+         * Copies the replacement values from {@code toCopy}, including a defensive copy of its tags.
          */
         public EditPersonDescriptor(EditPersonDescriptor toCopy) {
             setName(toCopy.name);
