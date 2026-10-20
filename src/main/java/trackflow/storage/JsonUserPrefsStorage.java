@@ -40,7 +40,14 @@ public class JsonUserPrefsStorage {
      * @throws DataLoadingException if the file format is not as expected.
      */
     public Optional<UserPrefs> readUserPrefs(Path prefsFilePath) throws DataLoadingException {
-        return JsonUtil.readJsonFile(prefsFilePath, UserPrefs.class);
+        Optional<UserPrefs> userPrefs = JsonUtil.readJsonFile(prefsFilePath, UserPrefs.class);
+        if (userPrefs.isPresent() && userPrefs.get().getGuiSettings() == null) {
+            // A preferences file with "guiSettings": null would otherwise crash start-up; treat it as unreadable
+            // so that the caller falls back to the default preferences.
+            throw new DataLoadingException(
+                    new IllegalArgumentException("Preferences file is missing its GUI settings."));
+        }
+        return userPrefs;
     }
 
     /**

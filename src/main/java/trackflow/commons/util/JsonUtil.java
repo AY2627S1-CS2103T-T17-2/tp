@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +29,9 @@ public class JsonUtil {
     private static ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules()
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            // Reject files with repeated keys so that a corrupted or hand-edited file is treated as unreadable
+            // (and preserved) instead of silently keeping only one of the duplicated values.
+            .configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true)
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
@@ -93,7 +97,15 @@ public class JsonUtil {
      * @return The instance of T with the specified values in the JSON string
      */
     public static <T> T fromJsonString(String json, Class<T> instanceClass) throws IOException {
-        return objectMapper.readValue(json, instanceClass);
+        try (JsonParser parser = objectMapper.getFactory().createParser(json)) {
+            T value = objectMapper.readValue(parser, instanceClass);
+            if (parser.nextToken() != null) {
+                // Content after the first JSON value means the file is malformed; rejecting it lets the caller
+                // preserve the file instead of silently dropping the trailing data on the next save.
+                throw new IOException("Unexpected content after the JSON value.");
+            }
+            return value;
+        }
     }
 
     /**
