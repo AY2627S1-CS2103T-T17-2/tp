@@ -122,8 +122,8 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS`
 * All five fields are required.
 * Fields may appear in any order. Each parameter may appear only once.
 * Age category must be `Under 14`, `Under 16`, `Under 18`, `Under 20`, or `Open`. Category input ignores case and normalizes repeated spaces.
-* Names must be nonblank and contain only alphanumeric characters and spaces.
-* Phone numbers must contain only digits, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
+* Names must be nonblank and contain only alphanumeric characters, spaces, hyphens, and apostrophes (for example, `Mary-Jane` or `O'Brien`).
+* Phone numbers must contain at least three digits. They may also include spaces, the characters `+`, `-`, `(`, `)`, and notes in brackets such as `(HP)` (for example, `+65 9123 4567` or `9123 4567 (HP)`). Two numbers with the same digits are treated as the same number, so the brackets and spaces are ignored when checking for duplicates.
 * Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` to supply the required nonblank address.

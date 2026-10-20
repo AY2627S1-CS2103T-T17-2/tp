@@ -221,7 +221,7 @@ public class LogicManagerTest {
             validCommand.replace(" addr/123 Main Street", ""),
             validCommand.replace("addr/123 Main Street", "addr/"),
             validCommand.replace("Under 14", "Under 15"),
-            validCommand.replace("91234567", "+65 9123 4567"),
+            validCommand.replace("91234567", "911a"),
             validCommand.replace("avery.tan@example.com", "invalid"),
             validCommand + " n/Other Athlete", validCommand + " t/invalid-tag", validCommand + " r/note r/other",
             validCommand + " addr/"};

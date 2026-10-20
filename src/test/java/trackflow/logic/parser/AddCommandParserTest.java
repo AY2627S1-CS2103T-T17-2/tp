@@ -106,11 +106,11 @@ public class AddCommandParserTest {
     @Test
     public void parse_invalidValue_failure() {
         assertParseFailure(parser, validArgs.replace("Avery Tan", ""), Name.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, validArgs.replace("Avery Tan", "Avery-Tan"), Name.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, validArgs.replace("Avery Tan", "Avery*Tan"), Name.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, validArgs.replace("Under 14", ""), AgeCategory.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, validArgs.replace("Under 14", "Under 15"), AgeCategory.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, validArgs.replace("91234567", ""), Phone.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, validArgs.replace("91234567", "+65 9123 4567"), Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, validArgs.replace("91234567", "12"), Phone.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, validArgs.replace("avery.tan@example.com", ""), Email.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, validArgs.replace("avery.tan@example.com", "invalid"), Email.MESSAGE_CONSTRAINTS);
     }
