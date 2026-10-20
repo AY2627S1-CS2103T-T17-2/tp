@@ -13,7 +13,10 @@ import java.util.stream.Collectors;
 import trackflow.commons.util.ToStringBuilder;
 
 /**
- * Tests whether any keyword is a case-insensitive substring of any searchable field of a {@code Person}.
+ * Tests a {@code Person} against find keywords using case-insensitive substring matching. An unprefixed keyword
+ * matches when it occurs in any searchable field, and the person matches if any unprefixed keyword matches.
+ * A prefixed keyword is matched only against its field. Different field prefixes are combined with AND, so a
+ * person must satisfy every field criterion (and at least one unprefixed keyword, when any are given).
  */
 public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     private final List<String> keywords;
@@ -42,10 +45,14 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     @Override
     public boolean test(Person person) {
         requireNonNull(person);
-        boolean broadMatch = containsAnyKeyword(getSearchableText(person), keywords);
-        boolean fieldMatch = fieldKeywords.entrySet().stream()
-                .anyMatch(entry -> containsAnyKeyword(getFieldText(person, entry.getKey()), entry.getValue()));
-        return broadMatch || fieldMatch;
+        if (keywords.isEmpty() && fieldKeywords.isEmpty()) {
+            return false;
+        }
+        boolean matchesBroadKeywords = keywords.isEmpty()
+                || containsAnyKeyword(getSearchableText(person), keywords);
+        boolean matchesEveryField = fieldKeywords.entrySet().stream()
+                .allMatch(entry -> containsAnyKeyword(getFieldText(person, entry.getKey()), entry.getValue()));
+        return matchesBroadKeywords && matchesEveryField;
     }
 
     private static boolean containsAnyKeyword(String text, List<String> keywords) {

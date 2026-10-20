@@ -97,6 +97,32 @@ public class PersonContainsKeywordsPredicateTest {
     }
 
     @Test
+    public void test_multipleFields_requiresAllToMatch() {
+        // n/avery a/Under 16 -> both field criteria must hold.
+        PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of(), Map.of(
+                SearchField.NAME, List.of("avery"),
+                SearchField.AGE_CATEGORY, List.of("Under 16")));
+        assertTrue(predicate.test(ATHLETE));
+
+        // Same name but a different age category -> the age criterion fails, so no match.
+        Person openAvery = new PersonBuilder(ATHLETE).withAgeCategory("Open").build();
+        assertFalse(predicate.test(openAvery));
+    }
+
+    @Test
+    public void test_broadKeywordAndField_requiresBoth() {
+        // avery e/other.com -> the broad keyword matches but the email field does not, so no match.
+        PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of("avery"),
+                Map.of(SearchField.EMAIL, List.of("other.com")));
+        assertFalse(predicate.test(ATHLETE));
+
+        // avery e/example.com -> both hold, so it matches.
+        PersonContainsKeywordsPredicate matching = new PersonContainsKeywordsPredicate(List.of("avery"),
+                Map.of(SearchField.EMAIL, List.of("example.com")));
+        assertTrue(matching.test(ATHLETE));
+    }
+
+    @Test
     public void test_scopedKeywordInWrongField_returnsFalse() {
         assertFalse(new PersonContainsKeywordsPredicate(List.of(),
                 Map.of(SearchField.NAME, List.of("9123"))).test(ATHLETE));

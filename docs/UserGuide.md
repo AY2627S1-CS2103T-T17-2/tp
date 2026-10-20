@@ -244,8 +244,10 @@ Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/A
   searchable field (an `OR` search). This broad form remains useful when the field is unknown.
 * Prefix a value to restrict it to one field: `n/` name, `a/` age category, `p/` phone, `e/` email, `addr/` address,
   or `r/` remark. For example, `find n/und` searches names without matching every `Under` age category.
-* Broad and field-specific criteria can be combined. An athlete is returned when any broad keyword or field-specific
-  value matches. Each field prefix may appear at most once and cannot have an empty value.
+* When several field prefixes are given, an athlete must match **every** one (an `AND` search). For example,
+  `find n/avery a/Under 16` returns only athletes named like `avery` **and** in the `Under 16` category.
+* Broad and field-specific criteria can be combined. An athlete is returned when at least one broad keyword matches
+  **and** every field-specific value matches. Each field prefix may appear at most once and cannot have an empty value.
 * Broad keyword order does not matter: `find Avery Tan` and `find Tan Avery` return the same results. A prefixed value is matched as one phrase, so `find n/Avery Tan` matches that name but `find n/Tan Avery` does not. Put broad keywords before any field prefixes. Each athlete appears at most once.
 * Each `find` searches the entire roster and replaces any previous `find` or `filter`. Matching athletes retain the
   current displayed ordering, including any active sort, and receive indexes starting from 1. Use `list` to restore the complete roster.
