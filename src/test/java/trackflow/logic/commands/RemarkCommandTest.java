@@ -38,7 +38,7 @@ public class RemarkCommandTest {
         Person editedPerson = new PersonBuilder(personToEdit).withRemark(VALID_REMARK_AMY).build();
 
         String expectedMessage = String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS,
-                Messages.format(editedPerson));
+                Messages.formatAthlete(editedPerson));
 
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
         expectedModel.setPerson(personToEdit, editedPerson);
@@ -54,7 +54,7 @@ public class RemarkCommandTest {
         Person editedPerson = new PersonBuilder(personToEdit).withRemark("").build();
 
         String expectedMessage = String.format(RemarkCommand.MESSAGE_DELETE_REMARK_SUCCESS,
-                Messages.format(editedPerson));
+                Messages.formatAthlete(editedPerson));
 
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
         expectedModel.setPerson(personToEdit, editedPerson);
