@@ -58,6 +58,19 @@ public class AutocompleteEngineTest {
 
         suggestions = autocompleteEngine.getSuggestions("r");
         assertEquals(List.of("remark INDEX r/"), suggestions);
+
+        suggestions = autocompleteEngine.getSuggestions("ta");
+        assertEquals(List.of("tag INDEX t/"), suggestions);
+
+        suggestions = autocompleteEngine.getSuggestions("u");
+        assertEquals(List.of("untag INDEX t/"), suggestions);
+    }
+
+    @Test
+    public void getNextPrefix_tagCommands_suggestsEventPrefix() {
+        assertEquals(" t/", autocompleteEngine.getNextPrefix("tag 1"));
+        assertEquals("t/", autocompleteEngine.getNextPrefix("untag 1 "));
+        assertEquals("", autocompleteEngine.getNextPrefix("tag 1 t/100m"));
     }
 
     @Test
