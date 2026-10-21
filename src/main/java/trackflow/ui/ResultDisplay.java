@@ -24,6 +24,9 @@ public class ResultDisplay extends UiPart<Region> {
     @FXML
     private SVGPath resultIconGlyph;
 
+    /**
+     * Creates the command feedback display from its FXML layout.
+     */
     public ResultDisplay() {
         super(FXML);
     }

@@ -8,19 +8,24 @@ import trackflow.logic.parser.exceptions.ParseException;
 import trackflow.model.person.Person;
 
 /**
- * API of the Logic component
+ * API for executing commands and reading the current athlete view and GUI preferences.
  */
 public interface Logic {
     /**
-     * Executes the command and returns the result.
+     * Executes a command and returns its feedback and UI actions.
+     * Roster-changing commands must be saved before their changes are published to the live model.
+     * Commands that only change the view do not save roster data.
+     *
      * @param commandText The command as entered by the user.
-     * @return the result of the command execution.
-     * @throws CommandException If an error occurs during command execution.
-     * @throws ParseException If an error occurs during parsing.
+     * @return The command result, with its saved flag set only after a successful roster save.
+     * @throws CommandException If command execution or saving fails.
+     * @throws ParseException If the input does not conform to the command's format or field constraints.
      */
     CommandResult execute(String commandText) throws CommandException, ParseException;
 
-    /** Returns an unmodifiable view of the filtered list of persons */
+    /**
+     * Returns the live, unmodifiable athlete list in its current filtered and sorted display order.
+     */
     ObservableList<Person> getFilteredPersonList();
 
     /**
@@ -29,7 +34,7 @@ public interface Logic {
     GuiSettings getGuiSettings();
 
     /**
-     * Set the user prefs' GUI settings.
+     * Sets the user prefs' GUI settings.
      */
     void setGuiSettings(GuiSettings guiSettings);
 }

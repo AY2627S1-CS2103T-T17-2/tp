@@ -35,8 +35,11 @@ public class RemarkCommand extends Command {
     private final Remark remark;
 
     /**
-     * @param index of the person in the filtered person list to edit the remark
-     * @param remark of the person to be updated to
+     * Creates a command that replaces the remark of the athlete at the displayed {@code index}.
+     *
+     * @param index Index in the current filtered and sorted list, resolved during execution.
+     * @param remark Replacement remark; an empty value removes the recorded remark.
+     * @throws NullPointerException If either argument is null.
      */
     public RemarkCommand(Index index, Remark remark) {
         requireAllNonNull(index, remark);

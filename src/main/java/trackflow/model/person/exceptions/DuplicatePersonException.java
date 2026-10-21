@@ -5,6 +5,9 @@ package trackflow.model.person.exceptions;
  * identity).
  */
 public class DuplicatePersonException extends RuntimeException {
+    /**
+     * Constructs an error indicating that an athlete with the same identity already exists.
+     */
     public DuplicatePersonException() {
         super("Operation would result in duplicate persons");
     }

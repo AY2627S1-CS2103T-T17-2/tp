@@ -30,6 +30,11 @@ public class FindCommand extends Command {
 
     private final PersonContainsKeywordsPredicate predicate;
 
+    /**
+     * Creates a command that replaces the current filter with {@code predicate}, preserving the sort order.
+     *
+     * @throws NullPointerException If {@code predicate} is null.
+     */
     public FindCommand(PersonContainsKeywordsPredicate predicate) {
         this.predicate = requireNonNull(predicate);
     }
