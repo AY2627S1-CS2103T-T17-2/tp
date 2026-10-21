@@ -7,6 +7,7 @@ import static trackflow.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static trackflow.logic.parser.CliSyntax.PREFIX_NAME;
 import static trackflow.logic.parser.CliSyntax.PREFIX_PHONE;
 import static trackflow.logic.parser.CliSyntax.PREFIX_REMARK;
+import static trackflow.logic.parser.CliSyntax.PREFIX_TAG;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -30,12 +31,12 @@ public class FindCommandParser implements Parser<FindCommand> {
     public FindCommand parse(String args) throws ParseException {
         ParserUtil.verifyNoUnknownPrefixes(args, FindCommand.MESSAGE_USAGE,
                 PREFIX_NAME, PREFIX_AGE_CATEGORY, PREFIX_PHONE, PREFIX_EMAIL,
-                PREFIX_ADDRESS, PREFIX_REMARK);
+                PREFIX_ADDRESS, PREFIX_REMARK, PREFIX_TAG);
         ArgumentMultimap arguments = ArgumentTokenizer.tokenize(args,
                 PREFIX_NAME, PREFIX_AGE_CATEGORY, PREFIX_PHONE, PREFIX_EMAIL,
-                PREFIX_ADDRESS, PREFIX_REMARK);
+                PREFIX_ADDRESS, PREFIX_REMARK, PREFIX_TAG);
         arguments.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_AGE_CATEGORY, PREFIX_PHONE, PREFIX_EMAIL,
-                PREFIX_ADDRESS, PREFIX_REMARK);
+                PREFIX_ADDRESS, PREFIX_REMARK, PREFIX_TAG);
 
         String preamble = arguments.getPreamble();
         List<String> broadKeywords = preamble.isEmpty() ? List.of() : List.of(preamble.split("\\s+"));
@@ -46,6 +47,7 @@ public class FindCommandParser implements Parser<FindCommand> {
         addFieldKeyword(arguments, PREFIX_EMAIL, SearchField.EMAIL, fieldKeywords);
         addFieldKeyword(arguments, PREFIX_ADDRESS, SearchField.ADDRESS, fieldKeywords);
         addFieldKeyword(arguments, PREFIX_REMARK, SearchField.REMARK, fieldKeywords);
+        addFieldKeyword(arguments, PREFIX_TAG, SearchField.EVENT, fieldKeywords);
 
         if (broadKeywords.isEmpty() && fieldKeywords.isEmpty()) {
             throw new ParseException(

@@ -64,7 +64,8 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
                 person.getPhone().value,
                 person.getEmail().value,
                 person.getAddress().value,
-                person.getRemark().value)
+                person.getRemark().value,
+                getEventsText(person))
                 .stream()
                 .collect(Collectors.joining("\n"));
     }
@@ -77,7 +78,17 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
             case EMAIL -> person.getEmail().value;
             case ADDRESS -> person.getAddress().value;
             case REMARK -> person.getRemark().value;
+            case EVENT -> getEventsText(person);
         };
+    }
+
+    /**
+     * Returns the athlete's events on separate lines, so that a keyword cannot match across two events.
+     */
+    private static String getEventsText(Person person) {
+        return person.getTags().stream()
+                .map(event -> event.tagName)
+                .collect(Collectors.joining("\n"));
     }
 
     @Override
@@ -106,6 +117,7 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
         PHONE,
         EMAIL,
         ADDRESS,
-        REMARK
+        REMARK,
+        EVENT
     }
 }
