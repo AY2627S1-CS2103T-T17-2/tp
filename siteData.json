@@ -74,6 +74,7 @@
         "command-autocomplete-2": "Command autocomplete",
         "saving-data": "Saving data",
         "adding-editing-and-remarks": "Adding, editing, and remarks",
+        "parser-robustness": "Parser robustness",
         "tagging-athletes-with-events": "Tagging athletes with events",
         "duplicate-identity-and-complete-equality": "Duplicate identity and complete equality"
       },
@@ -126,6 +127,7 @@
         "trackflow-user-guide": "TrackFlow User Guide",
         "quick-start": "Quick start",
         "features": "Features",
+        "addresses-and-remarks-containing-slashes": "Addresses and remarks containing slashes",
         "command-autocomplete": "Command autocomplete",
         "command-feedback-and-errors": "Command feedback and errors",
         "viewing-help-help": "Viewing help: help",
