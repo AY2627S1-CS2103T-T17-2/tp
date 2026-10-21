@@ -215,7 +215,8 @@ Examples:
 
 ### Adding or removing an athlete remark: `remark`
 
-Replaces the remark of an athlete in the currently displayed list.
+Replaces the remark of an athlete in the currently displayed list. Use remarks for general notes such as injuries,
+personal bests or availability. To record which track events an athlete competes in, use [`tag`](#tagging-athletes-with-track-events-tag-untag) instead.
 
 Format: `remark INDEX r/[REMARK]`
 
@@ -234,7 +235,8 @@ Examples:
 
 ### Tagging athletes with track events: `tag`, `untag`
 
-Records which track events each athlete competes in. Events are shown as labels on the athlete's card.
+Records which track events each athlete competes in. Events are shown as labels on the athlete's card. For other
+notes, such as injuries or personal bests, use [`remark`](#adding-or-removing-an-athlete-remark-remark).
 
 Format: `tag INDEX t/EVENT [t/EVENT]...`<br>
 Format: `untag INDEX t/EVENT [t/EVENT]...`
