@@ -103,7 +103,8 @@
         "setting-up-and-getting-started": "Setting up and getting started",
         "runtime-and-build-requirements": "Runtime and build requirements",
         "setting-up-the-project-on-your-computer": "Setting up the project on your computer",
-        "before-writing-code": "Before writing code"
+        "before-writing-code": "Before writing code",
+        "documenting-code-changes": "Documenting code changes"
       },
       "headingKeywords": {}
     },
