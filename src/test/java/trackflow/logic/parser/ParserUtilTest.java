@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
+import java.math.BigInteger;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -53,6 +55,85 @@ public class ParserUtilTest {
         // Leading and trailing whitespaces
         assertEquals(INDEX_FIRST_PERSON, ParserUtil.parseIndex("  1  "));
         assertEquals(INDEX_FIRST_PERSON, ParserUtil.parseIndex("0001"));
+    }
+
+    @Test
+    public void parseIndex_extremeDigitSequences_validatesEntireInput() throws Exception {
+        assertEquals(INDEX_FIRST_PERSON, ParserUtil.parseIndex("0".repeat(10000) + "1"));
+        assertEquals(Index.fromOneBased(Integer.MAX_VALUE), ParserUtil.parseIndex("9".repeat(10000)));
+        assertEquals(Index.fromOneBased(Integer.MAX_VALUE), ParserUtil.parseIndex("2147483648"));
+        assertEquals(Index.fromOneBased(Integer.MAX_VALUE), ParserUtil.parseIndex("2147483647"));
+        for (String invalid : new String[] {"0".repeat(10000), "9".repeat(10000) + "x", "-1", "+1", "1.0"}) {
+            assertThrows(ParseException.class, () -> ParserUtil.parseIndex(invalid));
+        }
+    }
+
+    @Test
+    public void parseIndex_randomDigitSequences_matchesBoundedBigInteger() throws Exception {
+        Random random = new Random(2103);
+        BigInteger maximumIndex = BigInteger.valueOf(Integer.MAX_VALUE);
+        for (int sample = 0; sample < 500; sample++) {
+            StringBuilder digits = new StringBuilder();
+            for (int digit = 0, length = 1 + random.nextInt(100); digit < length; digit++) {
+                digits.append(random.nextInt(10));
+            }
+            String input = digits.toString();
+            BigInteger number = new BigInteger(input);
+            if (number.signum() == 0) {
+                assertThrows(ParseException.class, () -> ParserUtil.parseIndex(input));
+            } else {
+                assertEquals(number.min(maximumIndex).intValue(), ParserUtil.parseIndex(input).getOneBased());
+            }
+            assertThrows(ParseException.class, () -> ParserUtil.parseIndex(input + "x"));
+        }
+    }
+
+    @Test
+    public void verifyNoUnknownPrefixes_realAndEscapedTokens_useSameBoundaries() throws Exception {
+        for (String boundary : List.of("", " ", "\t", "\r\n", "\f", "\u2003")) {
+            for (char letter = 'a'; letter <= 'z'; letter++) {
+                String token = String.valueOf(letter);
+                String unknown = boundary + token + "/value";
+                assertThrows(ParseException.class, () ->
+                        ParserUtil.verifyNoUnknownPrefixes(unknown, "usage"));
+                ParserUtil.verifyNoUnknownPrefixes(unknown, "usage", new Prefix(token + "/"));
+                ParserUtil.verifyNoUnknownPrefixes(boundary + token + "//value", "usage");
+                ParserUtil.verifyNoUnknownPrefixes(boundary + token + "////value", "usage");
+            }
+            assertThrows(ParseException.class, () ->
+                    ParserUtil.verifyNoUnknownPrefixes(boundary + "AdDr/value", "usage"));
+            ParserUtil.verifyNoUnknownPrefixes(boundary + "AdDr/value", "usage", new Prefix("addr/"));
+            ParserUtil.verifyNoUnknownPrefixes(boundary + "AdDr//value", "usage");
+        }
+    }
+
+    @Test
+    public void verifyNoUnknownPrefixes_escapedTokenBeforeRealUnknown_stillRejectsUnknown() {
+        for (String unknown : List.of("x/", "X/value", "addr/value", "r/value")) {
+            assertThrows(ParseException.class, () ->
+                    ParserUtil.verifyNoUnknownPrefixes("x//literal " + unknown, "usage"));
+        }
+    }
+
+    @Test
+    public void verifyNoUnknownPrefixes_urlsPathsAndPunctuation_areOrdinaryText() throws Exception {
+        for (String text : List.of("https://example.com/n/value?p//other", "file:///home/coach",
+                "x://host/path", "//server/share", "C:\\Training", "Mon/Tue", "wrong/value",
+                "(x/value)", "\"x/value\"", "'x/value'", "\\x/value", "\u00a0x/value", "\u200bx/value")) {
+            ParserUtil.verifyNoUnknownPrefixes(text, "usage");
+        }
+        // Quotes are ordinary characters, so whitespace inside them still introduces a parameter.
+        assertThrows(ParseException.class, () ->
+                ParserUtil.verifyNoUnknownPrefixes("\"some text x/value\"", "usage"));
+    }
+
+    @Test
+    public void parseIndex_nullAndNonAsciiDigits_areNotValidIndexes() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseIndex(null));
+        for (String input : List.of("", "null", "NaN", "Infinity", "\u0661", "\uff11", "1\u0000", "1\u200b",
+                "1 0", "1\t0", "9".repeat(10000) + "\uff11")) {
+            assertThrows(ParseException.class, () -> ParserUtil.parseIndex(input));
+        }
     }
 
     @Test

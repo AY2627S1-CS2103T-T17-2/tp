@@ -3,6 +3,7 @@ package trackflow.logic.parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -12,12 +13,18 @@ import java.util.stream.Collectors;
  * 2. Leading and trailing whitespaces of an argument value will be discarded.<br>
  * 3. An argument may be repeated and all its values will be accumulated e.g. the value of {@code t/}
  *    in the above example.<br>
+ * 4. A doubled slash in a prefix-like token marks literal text, e.g. {@code A//B} represents {@code A/B}.
+ *    Exactly one slash is removed after splitting arguments; backslashes and quotation marks are ordinary text.
  */
 public class ArgumentTokenizer {
 
+    private static final Pattern ESCAPED_PREFIX_PATTERN =
+            Pattern.compile("(?<!\\P{javaWhitespace})((?i:addr)|[A-Za-z])/(/+)");
+
     /**
      * Tokenizes an arguments string and returns an {@code ArgumentMultimap} object that maps prefixes to their
-     * respective argument values. Only the given prefixes will be recognized in the arguments string.
+     * respective argument values. Only the given prefixes will be recognized, ignoring case.
+     * Prefixes followed by an extra slash are literal content and do not introduce arguments.
      *
      * @param argsString Arguments string of the form: {@code preamble <prefix>value <prefix>value ...}
      * @param prefixes   Prefixes to tokenize the arguments string with
@@ -61,8 +68,9 @@ public class ArgumentTokenizer {
     /**
      * Returns the index of the first occurrence of {@code prefix} in
      * {@code argsString} starting from index {@code fromIndex}. An occurrence
-     * is valid if there is a whitespace before {@code prefix}. Returns -1 if no
-     * such occurrence can be found.
+     * is valid at the beginning of the string or after whitespace, ignoring case.
+     * A slash-terminated prefix followed by another slash is literal text, not a delimiter.
+     * Returns -1 if no such occurrence can be found.
      *
      * E.g if {@code argsString} = "e/hip/900", {@code prefix} = "p/" and
      * {@code fromIndex} = 0, this method returns -1 as there are no valid
@@ -74,7 +82,10 @@ public class ArgumentTokenizer {
         int latestStart = argsString.length() - prefix.length();
         for (int index = Math.max(0, fromIndex); index <= latestStart; index++) {
             boolean isAtBoundary = index == 0 || Character.isWhitespace(argsString.charAt(index - 1));
-            if (isAtBoundary && argsString.regionMatches(true, index, prefix, 0, prefix.length())) {
+            int prefixEnd = index + prefix.length();
+            boolean isEscaped = prefix.endsWith("/") && prefixEnd < argsString.length()
+                    && argsString.charAt(prefixEnd) == '/';
+            if (isAtBoundary && !isEscaped && argsString.regionMatches(true, index, prefix, 0, prefix.length())) {
                 return index;
             }
         }
@@ -116,7 +127,8 @@ public class ArgumentTokenizer {
     }
 
     /**
-     * Returns the trimmed value of the argument in the arguments string specified by {@code currentPrefixPosition}.
+     * Returns the stripped argument value, decoding one extra slash in each escaped prefix-like token.
+     * The argument is specified by {@code currentPrefixPosition}.
      * The end position of the value is determined by {@code nextPrefixPosition}.
      */
     private static String extractArgumentValue(String argsString,
@@ -127,7 +139,7 @@ public class ArgumentTokenizer {
         int valueStartPos = currentPrefixPosition.getStartPosition() + prefix.getPrefix().length();
         String value = argsString.substring(valueStartPos, nextPrefixPosition.getStartPosition());
 
-        return value.trim();
+        return ESCAPED_PREFIX_PATTERN.matcher(value.strip()).replaceAll("$1$2");
     }
 
     /**

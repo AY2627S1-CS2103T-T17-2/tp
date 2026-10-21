@@ -52,6 +52,25 @@ For focused duplicate/equality checks, run:
 ./gradlew test --tests trackflow.model.person.PersonTest --tests trackflow.logic.DuplicatePersistenceTest
 ```
 
+For parser boundaries, double-slash escapes, literal paths, empty values, duplicate parameters, null inputs,
+multiline input, large indexes, and rejected-command checks, run:
+
+```bash
+./gradlew test \
+    --tests trackflow.logic.ParserRobustnessTest \
+    --tests trackflow.logic.parser.ArgumentTokenizerTest \
+    --tests trackflow.logic.parser.ParserUtilTest \
+    --tests trackflow.logic.parser.TrackFlowParserTest
+```
+
+`ParserRobustnessTest` uses real JSON storage in a temporary folder to check that parsed values survive reload and
+that invalid commands preserve the roster, current predicate/comparator, displayed athletes, and saved file.
+The tests distinguish Java `null` API inputs from the literal text `null`, exercise duplicate parameters even when
+one value is empty or escaped, and verify that restarts and unrelated edits do not decode stored text again.
+The tokenizer tests cover every single-letter escape in both cases, multiple whitespace boundaries, long slash runs,
+URLs, network paths, and ordinary quotes/backslashes. Parser tests check all 120 orders of the five add fields.
+Existing `JsonRosterStorageTest` and `MainAppTest` also check null JSON roots/entries and preservation of malformed data.
+
 Automated results are in `build/reports/tests/test/index.html`; Checkstyle reports are in
 `build/reports/checkstyle/`. Verify guide examples and startup behavior using the
 [manual testing procedures](DeveloperGuide.md#appendix-instructions-for-manual-testing).

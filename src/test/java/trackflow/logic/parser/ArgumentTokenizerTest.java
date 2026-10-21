@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static trackflow.testutil.Assert.assertThrows;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -85,6 +88,123 @@ public class ArgumentTokenizerTest {
 
         assertPreambleEmpty(argMultimap);
         assertArgumentPresent(argMultimap, pSlash, "91234567");
+    }
+
+    @Test
+    public void tokenize_prefixAtStartOrAfterWhitespace_recognized() {
+        for (String separator : new String[] {"", " ", "\t", "\r\n", "\u2003"}) {
+            ArgumentMultimap arguments = ArgumentTokenizer.tokenize(separator + "P/123", pSlash);
+            assertPreambleEmpty(arguments);
+            assertArgumentPresent(arguments, pSlash, "123");
+        }
+    }
+
+    @Test
+    public void tokenize_escapedPrefixes_preservesLiteralValues() {
+        ArgumentMultimap arguments = ArgumentTokenizer.tokenize(
+                "P//value p/Call p//office A//B ADDR//annex C:\\Training Mon/Tue", pSlash);
+
+        assertPreamblePresent(arguments, "P/value");
+        assertArgumentPresent(arguments, pSlash, "Call p/office A/B ADDR/annex C:\\Training Mon/Tue");
+    }
+
+    @Test
+    public void tokenize_repeatedSlashes_decodesExactlyOnce() {
+        for (String token : new String[] {"a", "A", "n", "N", "p", "P", "e", "E", "r", "R", "addr", "AdDr", "x"}) {
+            for (int count = 2; count <= 6; count++) {
+                ArgumentMultimap arguments = ArgumentTokenizer.tokenize(
+                        "p/" + token + "/".repeat(count) + "value", pSlash);
+                assertArgumentPresent(arguments, pSlash, token + "/".repeat(count - 1) + "value");
+            }
+        }
+    }
+
+    @Test
+    public void tokenize_otherSlashesAndQuotes_preservesLiteralText() {
+        for (String value : new String[] {"https://example.com/a//b", "//server/share",
+            "wrong//value", "C:\\Training", "\"Coach said go\"", "\"unfinished", "/"}) {
+            assertArgumentPresent(ArgumentTokenizer.tokenize("p/ " + value, pSlash), pSlash, value);
+        }
+    }
+
+    @Test
+    public void tokenize_backslashesBeforePrefix_preservesAllBackslashes() {
+        for (int count = 1; count <= 4; count++) {
+            String backslashes = "\\".repeat(count);
+            ArgumentMultimap arguments = ArgumentTokenizer.tokenize(
+                    "p/" + backslashes + "A/B", pSlash);
+            assertArgumentPresent(arguments, pSlash, backslashes + "A/B");
+        }
+    }
+
+    @Test
+    public void tokenize_nullArguments_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ArgumentTokenizer.tokenize(null, pSlash));
+        assertThrows(NullPointerException.class, () -> ArgumentTokenizer.tokenize(null));
+    }
+
+    @Test
+    public void tokenize_blankArguments_hasNoNullOrPhantomValues() {
+        for (String input : List.of("", " ", "\t", "\r\n", "\f", "\u2003", " \t\u2003\n")) {
+            ArgumentMultimap arguments = ArgumentTokenizer.tokenize(input, pSlash);
+            assertPreambleEmpty(arguments);
+            assertArgumentAbsent(arguments, pSlash);
+        }
+        assertArgumentPresent(ArgumentTokenizer.tokenize("p/", pSlash), pSlash, "");
+        assertArgumentPresent(ArgumentTokenizer.tokenize("p/ \t\u2003", pSlash), pSlash, "");
+        assertArgumentPresent(ArgumentTokenizer.tokenize("p/null", pSlash), pSlash, "null");
+    }
+
+    @Test
+    public void tokenize_allLetterEscapesAtWhitespaceBoundaries_decodesOnceWithoutCreatingParameters() {
+        // Build the expected text directly, independently of the tokenizer's regular expression.
+        for (char letter = 'a'; letter <= 'z'; letter++) {
+            for (String token : List.of(String.valueOf(letter), String.valueOf(Character.toUpperCase(letter)))) {
+                assertEscapeBoundaries(token);
+            }
+        }
+        assertEscapeBoundaries("addr");
+        assertEscapeBoundaries("AdDr");
+    }
+
+    private void assertEscapeBoundaries(String token) {
+        for (String boundary : List.of(" ", "\t", "\n", "\r\n", "\f", "\u2003")) {
+            for (int slashCount = 2; slashCount <= 5; slashCount++) {
+                String entered = token + "/".repeat(slashCount) + "literal";
+                String decoded = token + "/".repeat(slashCount - 1) + "literal";
+                ArgumentMultimap arguments = ArgumentTokenizer.tokenize(
+                        entered + boundary + "P/first" + boundary + entered + boundary + "p/last", pSlash);
+                assertPreamblePresent(arguments, decoded);
+                assertArgumentPresent(arguments, pSlash, "first" + boundary + decoded, "last");
+            }
+        }
+    }
+
+    @Test
+    public void tokenize_slashesWithoutTokenBoundary_remainUnchanged() {
+        for (String text : List.of("https://host/a//b", "http://host/?n/value&p//other#addr//here",
+                "file:///home/coach", "mailto:coach@example.com", "//server/share", "///server/share",
+                "AA//B", "addrx//annex", "0A//B", "_A//B", "(A//B)", "\"A//B\"", "'A//B'",
+                "\\A//B", "😀A//B", "\u00a0A//B", "\u200bA//B")) {
+            assertArgumentPresent(ArgumentTokenizer.tokenize("p/ " + text, pSlash), pSlash, text);
+        }
+    }
+
+    @Test
+    public void tokenize_quotesDoNotProtectRealPrefixes() {
+        ArgumentMultimap arguments = ArgumentTokenizer.tokenize("p/\"first P/second\"", pSlash);
+        assertArgumentPresent(arguments, pSlash, "\"first", "second\"");
+    }
+
+    @Test
+    public void tokenize_longEscapedText_doesNotRescanOrDropSlashes() {
+        String entered = "A" + "/".repeat(100000) + "B";
+        String decoded = "A" + "/".repeat(99999) + "B";
+        assertArgumentPresent(ArgumentTokenizer.tokenize("p/" + entered, pSlash), pSlash, decoded);
+
+        String manyEscapes = "A//B p///value addr////annex ".repeat(2000).strip();
+        String expected = "A/B p//value addr///annex ".repeat(2000).strip();
+        assertArgumentPresent(ArgumentTokenizer.tokenize("p/" + manyEscapes, pSlash), pSlash, expected);
     }
 
     @Test

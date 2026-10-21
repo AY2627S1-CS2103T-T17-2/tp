@@ -10,6 +10,7 @@ import static trackflow.logic.parser.CliSyntax.PREFIX_TAG;
 import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,45 @@ public class TrackFlowParserTest {
         assertEquals(new AddCommand(person), command);
         AddCommand uppercaseCommand = (AddCommand) parser.parseCommand("ADD" + addCommandText.substring(3));
         assertEquals(new AddCommand(person), uppercaseCommand);
+    }
+
+    @Test
+    public void parseCommand_allAddFieldOrdersWithEscapedAddress_produceSameAthlete() throws Exception {
+        List<List<String>> permutations = List.of(List.of());
+        for (String field : List.of("N/Ben Lim", "A/Open", "P/92345678", "E/ben@example.com",
+                "ADDR/Block A//B p//literal https://host/a//b")) {
+            List<List<String>> expanded = new ArrayList<>();
+            for (List<String> permutation : permutations) {
+                for (int index = 0; index <= permutation.size(); index++) {
+                    List<String> reordered = new ArrayList<>(permutation);
+                    reordered.add(index, field);
+                    expanded.add(reordered);
+                }
+            }
+            permutations = expanded;
+        }
+        AddCommand expected = new AddCommand(new PersonBuilder().withName("Ben Lim").withPhone("92345678")
+                .withEmail("ben@example.com").withAddress("Block A/B p/literal https://host/a//b")
+                .withAgeCategory("Open").withRemark("").withTags().build());
+        assertEquals(120, permutations.size());
+        for (List<String> fields : permutations) {
+            for (String separator : List.of(" ", "\t", "\r\n", "\u2003")) {
+                // Keep the command-word separator ASCII; Unicode separators here are parameter boundaries.
+                String input = "AdD " + String.join(separator, fields);
+                assertEquals(expected, parser.parseCommand(input), input);
+            }
+        }
+    }
+
+    @Test
+    public void parseCommand_nullInput_failsFastWithoutInventingACommand() {
+        assertThrows(NullPointerException.class, () -> parser.parseCommand(null));
+        List<Parser<?>> commandParsers = List.of(new AddCommandParser(), new EditCommandParser(),
+                new DeleteCommandParser(), new RemarkCommandParser(), new FindCommandParser(),
+                new FilterCommandParser(), new SortCommandParser(), new ListAthleteCommandParser());
+        for (Parser<?> commandParser : commandParsers) {
+            assertThrows(NullPointerException.class, () -> commandParser.parse(null));
+        }
     }
 
     @Test

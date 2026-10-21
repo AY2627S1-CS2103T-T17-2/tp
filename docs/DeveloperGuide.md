@@ -172,16 +172,32 @@ This section describes some noteworthy details on how certain features are imple
 ### Command parsing and validation
 
 `TrackFlowParser` treats command words without considering letter case and routes commands with parameters to their
-dedicated parsers. `ArgumentTokenizer` recognizes supported parameter prefixes without considering letter case while
-storing them under their canonical prefix. `ParserUtil.verifyNoUnknownPrefixes` rejects unsupported parameter-like
-tokens of the reserved single-letter or `addr/` form before values are parsed. For example, `t/` given to `add`
-produces a command-specific error. Longer slash-containing words such as `wrong/value` are treated as text, while
-`x/value` is treated as an unsupported parameter. Single-letter slash text inside addresses or remarks can also be
-misidentified as a parameter.
+dedicated parsers. Its initial matcher accepts line breaks in arguments; the entire submission is still parsed as one
+command, not a batch. Each field keeps its existing validation rules. The JavaFX command box is a single-line
+`TextField` that removes pasted tabs and line breaks before parsing; users should paste commands on one line with
+spaces. Parser-level tests exercise multiline input directly.
+
+`ArgumentTokenizer` recognizes supported parameter prefixes without considering letter case at the start of the
+arguments or after `Character.isWhitespace` characters, storing them under their canonical prefix.
+`ParserUtil.verifyNoUnknownPrefixes` uses the same boundary to reject unsupported parameter-like tokens of the
+reserved single-letter or `addr/` form before values are parsed. For example, unsupported `t/` produces a
+command-specific error. Longer slash-containing words such as `wrong/value` remain text.
+
+An extra slash marks literal parameter-like text, such as `A//B` or `r//relay`. Both prefix detection and
+unknown-prefix validation skip slash-terminated prefixes followed by another slash. After splitting arguments, the
+tokenizer strips surrounding whitespace and removes exactly one slash from a run of at least two slashes after a
+single-letter or `addr` token. Decoding happens once, including in the broad-search preamble, so decoded text cannot
+introduce new arguments. `A///B` becomes `A//B`, not `A/B`. URLs, network paths, quotation marks, and backslashes
+are not special syntax. Escaped tokens cannot supply required fields or bypass ordinary field validation.
+
+A slash-led value must be separated from its real prefix by whitespace: `addr/ /home/coach` supplies the address
+`/home/coach`, while `addr//home/coach` is literal text and does not introduce an address parameter.
 
 Commands that take no arguments (`clear`, `help`, and `exit`) reject extra text. `remark` requires exactly one `r/`
-prefix. Index parsing accepts arbitrarily long positive digit sequences and safely maps values beyond the in-memory
-index range to an out-of-range displayed index, avoiding numeric-overflow errors.
+prefix. Index parsing scans ASCII digits once, capping the accumulated value at `Integer.MAX_VALUE` without building
+an arbitrary-precision number. It continues validating the remaining characters after reaching the cap, so an
+oversized number followed by text is still rejected. Leading zeroes are accepted; all-zero and malformed indexes are
+rejected. Oversized positive numbers reach the command's normal invalid-displayed-index check.
 
 ### Broad and field-scoped finding
 
@@ -206,6 +222,7 @@ It provides real-time dropdown suggestions for commands based on the user's inpu
 * **Selection:** When the user selects a suggestion (via Mouse Click or `Tab`), `CommandBox` inserts the command word followed by a space (e.g., `add `), positions the caret, and hides the popup. This leaves space for the user to insert an index or parameters if required.
 * **Separation of Selection and Execution:** Pressing `Enter` does **not** select or apply autocomplete suggestions. If the user presses `Enter` while the suggestion dropdown is visible, `CommandBox` hides the popup and executes the command as typed in the text field. This prevents accidental template insertions when a fast typist intends to submit their input.
 * **Incremental Prefix Insertion:** If the user presses `Tab` while the suggestion dropdown is closed (or after selecting a command), `CommandBox` uses `AutocompleteEngine#getNextPrefix` to scan the current input and append the next missing prefix based on the command's template. Existing prefixes are matched case-insensitively and regardless of order, allowing the user to construct the command sequentially by pressing `Tab` after entering each parameter's data.
+  Prefix completion uses `ArgumentTokenizer` so escaped literal tokens do not count as supplied parameters.
 
 #### Design Considerations
 
@@ -757,6 +774,27 @@ Use a disposable home folder; these procedures change saved data.
    Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add or edit command must produce an error; add reports invalid command format, while edit identifies the unsupported prefix.
 1. Run `clear`, restart, and confirm the roster stays empty rather than loading samples again.
 
+### Parser robustness
+
+Use a disposable roster with at least one athlete. Check the roster and saved file after each rejected command.
+
+1. Run `edit 1 addr/Block A//B addr//Annex`, followed by `remark 1 r/Practise r//relay x//y Mon/Tue`.
+   Expect address `Block A/B addr/Annex` and remark `Practise r/relay x/y Mon/Tue`. Restart and verify both values.
+1. Run `find A//B`, `find addr/Block A//B`, and `find r/r//relay` separately.
+   Expect the athlete in each result, with the extra escape slash removed from the saved fields.
+1. Run `edit 1 addr/C:\Training`. Expect the ordinary backslash to remain in the stored address.
+1. Run `ParserRobustnessTest` using the focused command in the testing guide. It supplies multiline commands
+   directly to the logic layer, checks that one edit is applied, and verifies that `clear` followed by a line break
+   and `exit` is rejected without deletion. In the GUI, replace pasted tabs and line breaks with spaces first,
+   because its single-line command box removes them.
+1. Try `edit 1 p/999 P/888`, `remark 1 r/first R/second`, `find n/`, and `edit 1 x/value`.
+   Expect errors without roster, display, or file changes.
+1. Run `edit 1 addr/Block A///B`, then `find addr/Block A///B`.
+   Expect the stored address to contain `A//B`; it must not be decoded twice.
+1. Run `edit 1 addr/ /home/coach` and `remark 1 r/ //server/share`.
+   Expect the leading slash and network path to remain intact. `remark 1 r/` should still remove the remark.
+1. Try `delete 0`, `delete -1`, `delete +1`, `delete 1.0`, and a delete index containing thousands of digits.
+   Expect controlled errors without deletion. `edit 0001 p/999` should update the first displayed athlete.
 ### Tagging athletes with events
 
 Prerequisite: run `list` so that several athletes are shown. Note the events on the 1st athlete's card.
