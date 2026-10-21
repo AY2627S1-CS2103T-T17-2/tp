@@ -1,47 +1,45 @@
 @startuml
 !include style.puml
-skinparam arrowThickness 1.1
 skinparam arrowColor LOGIC_COLOR_T4
 skinparam classBackgroundColor LOGIC_COLOR
+skinparam ArrowFontStyle plain
+skinparam linetype polyline
+show members
+hide empty members
 
-package Logic as LogicPackage {
-
-package "Parser Classes" as ParserClasses{
+package "Logic" as LogicPackage {
+    interface Logic <<interface>> LOGIC_COLOR_T1 {
+        +execute(commandText: String): CommandResult
+    }
+    class LogicManager
+    class TrackFlowParser
+    abstract class "{abstract}\nCommand" as Command {
+        +changesRoster(): boolean
+        {abstract} +execute(model: Model): CommandResult
+    }
+    class EditCommand
+    class FindCommand
+    class CommandResult {
+        +withDataSaved(): CommandResult
+    }
 }
-Class XYZCommand
-Class CommandResult
-Class "{abstract}\nCommand" as Command
 
+interface Model <<interface>> MODEL_COLOR_T1
+interface Storage <<interface>> STORAGE_COLOR_T1
 
-Class "<<interface>>\nLogic" as Logic
-Class LogicManager
-}
+LogicManager .up.|> Logic
+LogicManager *-left-> "1" TrackFlowParser
+LogicManager -right-> "1" Storage
+LogicManager -down-> "1" Model : live model
+LogicManager .down.> Command : executes
+TrackFlowParser .down.> Command : returns
+EditCommand -up-|> Command
+FindCommand -up-|> Command
+Command .down.> Model : uses during execution
+LogicManager .down.> CommandResult : marks saved\nafter persistence
 
-package Model {
-Class HiddenModel #FFFFFF
-}
-
-package Storage {
-}
-
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Logic
-
-LogicManager .right.|> Logic
-LogicManager -right->"1" ParserClasses
-ParserClasses ..> XYZCommand : <<create>>
-
-XYZCommand -up-|> Command
-LogicManager .left.> Command : <<call>>
-
-LogicManager --> Model
-LogicManager --> Storage
-Storage --[hidden] Model
-Command .[hidden]up.> Storage
-Command .right.> Model
-note right of XYZCommand: XYZCommand = AddCommand, \nFindCommand, etc
-
-Logic ..> CommandResult
-LogicManager .down.> CommandResult
-Command .up.> CommandResult : <<create>>
+legend bottom
+  Partial view: EditCommand changes the roster; FindCommand changes the view.
+  Roster changes execute on a detached model, then save before publication.
+endlegend
 @enduml
