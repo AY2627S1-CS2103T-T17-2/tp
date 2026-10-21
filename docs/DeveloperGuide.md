@@ -185,12 +185,14 @@ index range to an out-of-range displayed index, avoiding numeric-overflow errors
 
 ### Broad and field-scoped finding
 
-`FindCommandParser` supports unprefixed broad keywords and the field prefixes `n/`, `a/`, `p/`, `e/`, `addr/`, and
-`r/`. It rejects empty or repeated supported field parameters and unsupported reserved prefixes. `PersonContainsKeywordsPredicate` stores broad keywords
+`FindCommandParser` supports unprefixed broad keywords and the field prefixes `n/`, `a/`, `p/`, `e/`, `addr/`,
+`r/`, and `t/` (event). It rejects empty or repeated supported field parameters and unsupported reserved prefixes. `PersonContainsKeywordsPredicate` stores broad keywords
 separately from field-specific criteria. Broad keywords search the combined athlete text, while a prefixed value is
 tested as a single phrase only against its selected field. Broad keywords must precede the first field prefix. The criteria use case-insensitive partial matching and OR semantics.
 This allows `find n/und` to match a name such as `Underwood` without matching athletes merely because their age
 category starts with `Under`.
+Events are tested one at a time rather than as one combined string, so a keyword cannot match across the end of one
+event and the start of the next.
 
 ### Command autocomplete
 
@@ -752,7 +754,7 @@ Use a disposable home folder; these procedures change saved data.
 1. Run `remark 1 r/Recovery`, then restart. Expect `Recovery` to replace `Sprints`.
 1. Run `remark 1 r/`, then restart. Expect the remark to be empty and the category still `Under 16`.
 1. Try `add n/Incomplete`, `edit 1`, `edit 0 p/999`, `edit 1 addr/`, and `remark 1`.
-   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add, edit, or find command must produce an error; add reports invalid command format, while edit and find identify the unsupported prefix.
+   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add or edit command must produce an error; add reports invalid command format, while edit identifies the unsupported prefix.
 1. Run `clear`, restart, and confirm the roster stays empty rather than loading samples again.
 
 ### Tagging athletes with events

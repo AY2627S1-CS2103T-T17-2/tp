@@ -271,14 +271,14 @@ Successful output:
 
 Finds athletes using broad keywords, field-specific values, or both.
 
-Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK]`
+Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK] [t/EVENT]`
 
-* Searchable fields are name, age category, phone, email, address, and remark.
+* Searchable fields are name, age category, phone, email, address, remark, and track events.
 * Matching is case-insensitive and accepts partial values.
 * Before any field prefix, each space-separated value is a keyword. An athlete is returned when at least one keyword occurs in at least one
   searchable field (an `OR` search). This broad form remains useful when the field is unknown.
 * Prefix a value to restrict it to one field: `n/` name, `a/` age category, `p/` phone, `e/` email, `addr/` address,
-  or `r/` remark. For example, `find n/und` searches names without matching every `Under` age category.
+  `r/` remark, or `t/` event. For example, `find n/und` searches names without matching every `Under` age category.
 * Broad and field-specific criteria can be combined. An athlete is returned when any broad keyword or field-specific
   value matches. Each field prefix may appear at most once and cannot have an empty value.
 * Broad keyword order does not matter: `find Avery Tan` and `find Tan Avery` return the same results. A prefixed value is matched as one phrase, so `find n/Avery Tan` matches that name but `find n/Tan Avery` does not. Put broad keywords before any field prefixes. Each athlete appears at most once.
@@ -302,6 +302,7 @@ Examples:
 * `find p/9123` searches only phone numbers.
 * `find tan@exam` searches partial email addresses.
 * `find r/injured` searches only remarks.
+* `find t/hurdles` searches only events, returning athletes with an event such as `Hurdles` or `110m-Hurdles`.
 * `find avery 9123 under` returns athletes matching any of the three keywords.
 * `find n/avery r/relay` returns athletes whose name contains `avery` or whose remark contains `relay`.
 
@@ -443,7 +444,7 @@ Action     | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`
-**Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK]`<br> e.g., `find n/avery r/relay`
+**Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK] [t/EVENT]`<br> e.g., `find n/avery r/relay`, `find t/100m`
 **List**   | `list`
 **Remark** | `remark INDEX r/[REMARK]`<br> e.g., `remark 1 r/100m personal best: 12.34s`
 **Sort**   | `sort FIELD [ORDER]`<br> e.g., `sort age desc`

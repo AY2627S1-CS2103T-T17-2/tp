@@ -2,6 +2,7 @@ package trackflow.logic.parser;
 
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static trackflow.logic.parser.CliSyntax.PREFIX_NAME;
+import static trackflow.logic.parser.CliSyntax.PREFIX_TAG;
 import static trackflow.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static trackflow.logic.parser.CommandParserTestUtil.assertParseSuccess;
 
@@ -70,8 +71,19 @@ public class FindCommandParserTest {
     public void parse_unknownParameter_throwsParseException() {
         assertParseFailure(parser, " x/value",
                 String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "x/", FindCommand.MESSAGE_USAGE));
-        assertParseFailure(parser, " t/sprint",
-                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "t/", FindCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_eventScopedArgs_returnsFindCommand() {
+        PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.EVENT, List.of("long jump")));
+
+        assertParseSuccess(parser, " t/long jump", new FindCommand(predicate));
+        assertParseSuccess(parser, " T/long jump", new FindCommand(predicate));
+        assertParseFailure(parser, " t/",
+                String.format(FindCommand.MESSAGE_EMPTY_FIELD, PREFIX_TAG, FindCommand.MESSAGE_USAGE));
+        assertParseFailure(parser, " t/100m t/200m",
+                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_TAG));
     }
 
     @Test

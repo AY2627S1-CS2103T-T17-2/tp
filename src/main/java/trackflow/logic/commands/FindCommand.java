@@ -17,10 +17,11 @@ public class FindCommand extends Command {
             + "any specified keyword. Prefix a value to search only that field. "
             + "Matching is case-insensitive and partial.\n"
             + "Parameters: [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] "
-            + "[addr/ADDRESS] [r/REMARK]\n"
+            + "[addr/ADDRESS] [r/REMARK] [t/EVENT]\n"
             + "Example: " + COMMAND_WORD + " n/avery\n"
             + "Other examples: " + COMMAND_WORD + " avery 9123 under; "
-            + COMMAND_WORD + " a/Under 16 r/injured";
+            + COMMAND_WORD + " a/Under 16 r/injured; "
+            + COMMAND_WORD + " t/hurdles";
     public static final String MESSAGE_EMPTY_FIELD =
             "Search value for %1$s must not be empty.\n%2$s";
     public static final String MESSAGE_SUCCESS = "Displaying %1$d matching athletes.";
