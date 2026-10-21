@@ -16,7 +16,11 @@ public final class AgeCategory {
     public final String value;
 
     /**
-     * Constructs a category, ignoring case and normalizing whitespace.
+     * Constructs a supported category in its canonical display form, ignoring case and normalizing whitespace.
+     *
+     * @param category Category text, such as {@code under 14} or {@code Open}.
+     * @throws NullPointerException If {@code category} is null.
+     * @throws IllegalArgumentException If the text does not name a supported category.
      */
     public AgeCategory(String category) {
         requireNonNull(category);
@@ -26,7 +30,9 @@ public final class AgeCategory {
     }
 
     /**
-     * Returns whether the input names a supported category.
+     * Returns whether the input names a supported category, ignoring case and normalizing whitespace.
+     *
+     * @throws NullPointerException If {@code category} is null.
      */
     public static boolean isValidAgeCategory(String category) {
         requireNonNull(category);

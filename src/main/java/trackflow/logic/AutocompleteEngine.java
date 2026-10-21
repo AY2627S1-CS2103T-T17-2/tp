@@ -26,7 +26,9 @@ public class AutocompleteEngine {
             "sort",
             "help",
             "list",
-            "remark INDEX r/"
+            "remark INDEX r/",
+            "tag INDEX t/",
+            "untag INDEX t/"
     );
 
     /**

@@ -10,16 +10,18 @@ public abstract class Command {
 
     /**
      * Returns whether executing this command changes roster data that must be persisted.
+     * The default is false. Mutating commands override this so the logic layer stages and saves their changes.
      */
     public boolean changesRoster() {
         return false;
     }
 
     /**
-     * Executes the command and returns the result message.
+     * Executes the command against the supplied model and returns feedback and any requested UI actions.
+     * This method does not persist roster data; the logic layer manages saving for mutating commands.
      *
      * @param model {@code Model} which the command should operate on.
-     * @return feedback message of the operation result for display
+     * @return The result of executing the command.
      * @throws CommandException If an error occurs during command execution.
      */
     public abstract CommandResult execute(Model model) throws CommandException;

@@ -6,6 +6,7 @@ import static trackflow.logic.Messages.MESSAGE_EMPTY_COMMAND;
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static trackflow.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static trackflow.logic.parser.CliSyntax.PREFIX_REMARK;
+import static trackflow.logic.parser.CliSyntax.PREFIX_TAG;
 import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
@@ -28,10 +29,13 @@ import trackflow.logic.commands.RemarkCommand;
 import trackflow.logic.commands.SortCommand;
 import trackflow.logic.commands.SortCommand.SortField;
 import trackflow.logic.commands.SortCommand.SortOrder;
+import trackflow.logic.commands.TagCommand;
+import trackflow.logic.commands.UntagCommand;
 import trackflow.logic.parser.exceptions.ParseException;
 import trackflow.model.person.Person;
 import trackflow.model.person.PersonContainsKeywordsPredicate;
 import trackflow.model.person.Remark;
+import trackflow.model.util.SampleDataUtil;
 import trackflow.testutil.EditPersonDescriptorBuilder;
 import trackflow.testutil.PersonBuilder;
 import trackflow.testutil.PersonUtil;
@@ -152,6 +156,20 @@ public class TrackFlowParserTest {
         RemarkCommand command = (RemarkCommand) parser.parseCommand(RemarkCommand.COMMAND_WORD + " "
                 + INDEX_FIRST_PERSON.getOneBased() + " " + PREFIX_REMARK + remark.value);
         assertEquals(new RemarkCommand(INDEX_FIRST_PERSON, remark), command);
+    }
+
+    @Test
+    public void parseCommand_tag() throws Exception {
+        TagCommand command = (TagCommand) parser.parseCommand(TagCommand.COMMAND_WORD + " "
+                + INDEX_FIRST_PERSON.getOneBased() + " " + PREFIX_TAG + "100m");
+        assertEquals(new TagCommand(INDEX_FIRST_PERSON, SampleDataUtil.getTagSet("100m")), command);
+    }
+
+    @Test
+    public void parseCommand_untag() throws Exception {
+        UntagCommand command = (UntagCommand) parser.parseCommand(UntagCommand.COMMAND_WORD + " "
+                + INDEX_FIRST_PERSON.getOneBased() + " " + PREFIX_TAG + "100m");
+        assertEquals(new UntagCommand(INDEX_FIRST_PERSON, SampleDataUtil.getTagSet("100m")), command);
     }
 
     @Test

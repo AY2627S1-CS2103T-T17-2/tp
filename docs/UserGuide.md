@@ -127,8 +127,9 @@ so that it can be corrected.
   example, `enrol n/Avery` displays `Unknown command: enrol.`
 * Validation errors explain the accepted format or constraint. The roster is not changed when parsing or validation
   fails.
-* Unsupported parameters such as `t/` are rejected with an error. To enter such text as part of an address or note,
-  see [Addresses and remarks containing slashes](#addresses-and-remarks-containing-slashes).
+* Parameters a command does not support, such as `t/` in `add`, are rejected with an error.
+  To enter prefix-like text as part of an address or remark, see
+  [Addresses and remarks containing slashes](#addresses-and-remarks-containing-slashes).
 
 ### Viewing help: `help`
 
@@ -152,9 +153,9 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS`
 * Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` to supply the required nonblank address.
-* Add does not accept tags or remarks. `edit` updates athlete details and addresses, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
+* Add does not accept events or remarks. `edit` updates athlete details and addresses, `tag` and `untag` update track events, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
-  existing address, tags, and remarks. Saved rosters are checked using the same duplicate rule on loading.
+  existing address, events, and remarks. Saved rosters are checked using the same duplicate rule on loading.
 
 Examples:
 
@@ -225,10 +226,10 @@ Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]
 * Edits the athlete at the specified `INDEX`. The index refers to the index number shown in the displayed athlete list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
-* Omitted fields retain their current values. Stored tags and remarks are preserved.
+* Omitted fields retain their current values. Track events and remarks are preserved.
 * `a/` now means age category, replacing the old address syntax. Supported categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`; case and extra whitespace are normalized.
 * Use `addr/ADDRESS` to edit the address. An empty or whitespace-only address is rejected.
-* Repeated field prefixes, empty or invalid values, and `t/` or `r/` parameters are rejected.
+* Repeated field prefixes, empty or invalid values, and `t/` or `r/` parameters are rejected. Use `tag`/`untag` for events and `remark` for remarks.
 * Edits that create a duplicate athlete are rejected using the same normalized name and contact comparison as `add`.
 * A successful edit displays the full roster again; failed edits leave the roster and displayed list unchanged.
 
@@ -240,7 +241,8 @@ Examples:
 
 ### Adding or removing an athlete remark: `remark`
 
-Replaces the remark of an athlete in the currently displayed list.
+Replaces the remark of an athlete in the currently displayed list. Use remarks for general notes such as injuries,
+personal bests or availability. To record which track events an athlete competes in, use [`tag`](#tagging-athletes-with-track-events-tag-untag) instead.
 
 Format: `remark INDEX r/[REMARK]`
 
@@ -257,18 +259,52 @@ Examples:
 * `remark 1 r/100m personal best: 12.34s`
 * `remark 2 r/` removes the 2nd athlete's remark.
 
+### Tagging athletes with track events: `tag`, `untag`
+
+Records which track events each athlete competes in. Events are shown as labels on the athlete's card. For other
+notes, such as injuries or personal bests, use [`remark`](#adding-or-removing-an-athlete-remark-remark).
+
+Format: `tag INDEX t/EVENT [t/EVENT]...`<br>
+Format: `untag INDEX t/EVENT [t/EVENT]...`
+
+* `tag` adds the given events to the athlete at `INDEX`. The athlete's existing events are kept.
+* `untag` removes the given events from the athlete at `INDEX`.
+* `INDEX` refers to the index number shown in the displayed athlete list and must be a positive integer.
+* At least one `t/EVENT` is required. Give `t/` once per event to add or remove several events at once.
+* An event can contain letters, digits, spaces and hyphens, must start and end with a letter or digit, and can be
+  up to 30 characters long, e.g. `100m`, `4x100m`, `Long Jump`, `110m-Hurdles`. Extra spaces inside an event are
+  reduced to one.
+* Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalisation it was first added with.
+* If the athlete already has some of the events given to `tag`, only the new events are added and the message lists
+  the events that were skipped. If the athlete already has all of them, an error is shown.
+* If any event given to `untag` is not one of the athlete's events, an error is shown and **no** events are removed.
+  This guards against removing the wrong events because of a typo.
+* A successful `tag` or `untag` displays the full roster again.
+
+Examples:
+
+* `tag 1 t/100m t/200m` adds `100m` and `200m` to the 1st athlete.
+* `tag 3 t/Long Jump` adds `Long Jump` to the 3rd athlete.
+* `untag 1 t/200m` removes `200m` from the 1st athlete.
+
+Successful output:
+
+* `Added event(s) 100m, 200m to Avery Tan.`
+* `Added event(s) 200m to Avery Tan. Already had: 100m.`
+* `Removed event(s) 200m from Avery Tan.`
+
 ### Finding athletes across all or selected fields: `find`
 
 Finds athletes using broad keywords, field-specific values, or both.
 
-Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK]`
+Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK] [t/EVENT]`
 
-* Searchable fields are name, age category, phone, email, address, and remark.
+* Searchable fields are name, age category, phone, email, address, remark, and track events.
 * Matching is case-insensitive and accepts partial values.
 * Before any field prefix, each space-separated value is a keyword. An athlete is returned when at least one keyword occurs in at least one
   searchable field (an `OR` search). This broad form remains useful when the field is unknown.
 * Prefix a value to restrict it to one field: `n/` name, `a/` age category, `p/` phone, `e/` email, `addr/` address,
-  or `r/` remark. For example, `find n/und` searches names without matching every `Under` age category.
+  `r/` remark, or `t/` event. For example, `find n/und` searches names without matching every `Under` age category.
 * Broad and field-specific criteria can be combined. An athlete is returned when any broad keyword or field-specific
   value matches. Each field prefix may appear at most once and cannot have an empty value.
 * Broad keyword order does not matter: `find Avery Tan` and `find Tan Avery` return the same results. A prefixed value is matched as one phrase, so `find n/Avery Tan` matches that name but `find n/Tan Avery` does not. Put broad keywords before any field prefixes. Each athlete appears at most once.
@@ -292,6 +328,7 @@ Examples:
 * `find p/9123` searches only phone numbers.
 * `find tan@exam` searches partial email addresses.
 * `find r/injured` searches only remarks.
+* `find t/hurdles` searches only events, returning athletes with an event such as `Hurdles` or `110m-Hurdles`.
 * `find avery 9123 under` returns athletes matching any of the three keywords.
 * `find n/avery r/relay` returns athletes whose name contains `avery` or whose remark contains `relay`.
 
@@ -429,9 +466,11 @@ Action     | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`
-**Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK]`<br> e.g., `find n/avery r/relay`
+**Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK] [t/EVENT]`<br> e.g., `find n/avery r/relay`, `find t/100m`
 **List**   | `list`
 **Remark** | `remark INDEX r/[REMARK]`<br> e.g., `remark 1 r/100m personal best: 12.34s`
 **Sort**   | `sort FIELD [ORDER]`<br> e.g., `sort age desc`
+**Tag**    | `tag INDEX t/EVENT [t/EVENT]...`<br> e.g., `tag 1 t/100m t/Long Jump`
+**Untag**  | `untag INDEX t/EVENT [t/EVENT]...`<br> e.g., `untag 1 t/100m`
 **Help**   | `help`
 **Exit**   | `exit`

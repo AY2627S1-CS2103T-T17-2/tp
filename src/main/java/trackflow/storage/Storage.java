@@ -10,7 +10,7 @@ import trackflow.model.ReadOnlyUserPrefs;
 import trackflow.model.UserPrefs;
 
 /**
- * API of the Storage component
+ * API for loading and saving roster data and user preferences.
  */
 public interface Storage {
 
@@ -40,10 +40,11 @@ public interface Storage {
     Path getRosterFilePath();
 
     /**
-     * Returns AthleteRoster data as a {@link ReadOnlyRoster}.
-     * Returns {@code Optional.empty()} if storage file is not found.
+     * Returns saved roster data after validating its structure, athlete fields, and duplicate identities.
+     * Returns {@code Optional.empty()} only when the data file is absent; a saved empty roster is still present.
+     * Reading does not replace or repair the source file.
      *
-     * @throws DataLoadingException if loading the data from storage failed.
+     * @throws DataLoadingException If the file cannot be read or contains invalid roster data.
      */
     Optional<ReadOnlyRoster> readRoster() throws DataLoadingException;
 

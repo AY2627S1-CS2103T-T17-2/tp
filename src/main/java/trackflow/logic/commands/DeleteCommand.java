@@ -27,6 +27,10 @@ public class DeleteCommand extends Command {
 
     private final Index targetIndex;
 
+    /**
+     * Creates a command that deletes the athlete at {@code targetIndex} in the displayed list.
+     * The index is resolved when the command executes.
+     */
     public DeleteCommand(Index targetIndex) {
         this.targetIndex = targetIndex;
     }

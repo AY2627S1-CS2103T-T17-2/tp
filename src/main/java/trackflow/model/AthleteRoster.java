@@ -11,16 +11,19 @@ import trackflow.model.person.UniquePersonList;
 
 /**
  * Wraps all data at the athlete-roster level.
- * Duplicates are not allowed (by .isSamePerson comparison).
+ * Duplicates are not allowed, as determined by {@link Person#isSamePerson(Person)}.
  */
 public class AthleteRoster implements ReadOnlyRoster {
 
     private final UniquePersonList persons = new UniquePersonList();
 
+    /**
+     * Creates an empty athlete roster.
+     */
     public AthleteRoster() {}
 
     /**
-     * Creates an AthleteRoster using the Persons in the {@code toBeCopied}
+     * Creates a roster with the athletes from {@code toBeCopied}, preserving their order.
      */
     public AthleteRoster(ReadOnlyRoster toBeCopied) {
         this();

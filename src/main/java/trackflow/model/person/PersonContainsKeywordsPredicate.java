@@ -13,21 +13,26 @@ import java.util.stream.Collectors;
 import trackflow.commons.util.ToStringBuilder;
 
 /**
- * Tests whether any keyword is a case-insensitive substring of any searchable field of a {@code Person}.
+ * Tests whether any broad or field-specific keyword matches an athlete, ignoring case.
+ * Broad keywords search name, age category, phone, email, address, and remark; field keywords search only their
+ * selected field. The two kinds of matches are combined with OR, and empty keyword collections match no athletes.
  */
 public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     private final List<String> keywords;
     private final Map<SearchField, List<String>> fieldKeywords;
 
     /**
-     * Creates a predicate that matches a person when any keyword occurs in any searchable field.
+     * Creates a predicate that matches any broad keyword in any searchable field.
+     * Copies the supplied list; null lists or elements are rejected. Blank keywords do not match.
      */
     public PersonContainsKeywordsPredicate(List<String> keywords) {
         this(keywords, Map.of());
     }
 
     /**
-     * Creates a predicate with broad keywords and keywords restricted to specific fields.
+     * Creates a predicate that matches any broad keyword or any keyword in its specified field.
+     * Defensively copies both collections and their nested lists. Null collections, keys, or elements are rejected.
+     * Keywords are trimmed before case-insensitive substring matching; blank keywords do not match.
      */
     public PersonContainsKeywordsPredicate(List<String> keywords,
             Map<SearchField, List<String>> fieldKeywords) {
@@ -64,7 +69,8 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
                 person.getPhone().value,
                 person.getEmail().value,
                 person.getAddress().value,
-                person.getRemark().value)
+                person.getRemark().value,
+                getEventsText(person))
                 .stream()
                 .collect(Collectors.joining("\n"));
     }
@@ -77,7 +83,17 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
             case EMAIL -> person.getEmail().value;
             case ADDRESS -> person.getAddress().value;
             case REMARK -> person.getRemark().value;
+            case EVENT -> getEventsText(person);
         };
+    }
+
+    /**
+     * Returns the athlete's events on separate lines, so that a keyword cannot match across two events.
+     */
+    private static String getEventsText(Person person) {
+        return person.getTags().stream()
+                .map(event -> event.tagName)
+                .collect(Collectors.joining("\n"));
     }
 
     @Override
@@ -106,6 +122,7 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
         PHONE,
         EMAIL,
         ADDRESS,
-        REMARK
+        REMARK,
+        EVENT
     }
 }

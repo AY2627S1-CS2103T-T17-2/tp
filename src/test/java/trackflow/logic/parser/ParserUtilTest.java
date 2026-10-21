@@ -252,6 +252,11 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseTag_repeatedInnerWhitespace_collapsesToSingleSpace() throws Exception {
+        assertEquals("Long Jump", ParserUtil.parseTag("Long  \t Jump").tagName);
+    }
+
+    @Test
     public void parseTags_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parseTags(null));
     }
