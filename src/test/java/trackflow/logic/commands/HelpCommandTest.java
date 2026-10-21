@@ -47,7 +47,8 @@ public class HelpCommandTest {
         List<String> expected = List.of(AddCommand.COMMAND_WORD, EditCommand.COMMAND_WORD,
                 DeleteCommand.COMMAND_WORD, ListAthleteCommand.COMMAND_WORD, FindCommand.COMMAND_WORD,
                 FilterCommand.COMMAND_WORD, SortCommand.COMMAND_WORD, RemarkCommand.COMMAND_WORD,
-                ClearCommand.COMMAND_WORD, HelpCommand.COMMAND_WORD, ExitCommand.COMMAND_WORD);
+                TagCommand.COMMAND_WORD, UntagCommand.COMMAND_WORD, ClearCommand.COMMAND_WORD,
+                HelpCommand.COMMAND_WORD, ExitCommand.COMMAND_WORD);
         List<String> listed = HelpCommand.COMMAND_USAGES.stream()
                 .map(usage -> usage.substring(0, usage.indexOf(':')))
                 .toList();
