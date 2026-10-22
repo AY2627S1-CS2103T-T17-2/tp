@@ -14,7 +14,6 @@ import trackflow.model.person.Address;
 import trackflow.model.person.AgeCategory;
 import trackflow.model.person.Email;
 import trackflow.model.person.Name;
-import trackflow.model.person.Performance;
 import trackflow.model.person.Person;
 import trackflow.model.person.Phone;
 import trackflow.model.person.Remark;
@@ -34,22 +33,13 @@ class JsonAdaptedPerson {
     private final String address;
     private final String remark;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
-    private final List<JsonAdaptedPerformance> performances = new ArrayList<>();
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
      */
     public JsonAdaptedPerson(String name, String phone, String email, String address,
             String remark, List<JsonAdaptedTag> tags) {
-        this(name, phone, email, address, remark, tags, null, null);
-    }
-
-    /**
-     * Constructs a {@code JsonAdaptedPerson} with the given person details and an explicit age category.
-     */
-    public JsonAdaptedPerson(String name, String phone, String email, String address,
-            String remark, List<JsonAdaptedTag> tags, String ageCategory) {
-        this(name, phone, email, address, remark, tags, ageCategory, null);
+        this(name, phone, email, address, remark, tags, null);
     }
 
     /**
@@ -59,8 +49,7 @@ class JsonAdaptedPerson {
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
             @JsonProperty("remark") String remark, @JsonProperty("tags") List<JsonAdaptedTag> tags,
-            @JsonProperty("ageCategory") String ageCategory,
-            @JsonProperty("performances") List<JsonAdaptedPerformance> performances) {
+            @JsonProperty("ageCategory") String ageCategory) {
         this.ageCategory = ageCategory;
         this.name = name;
         this.phone = phone;
@@ -69,9 +58,6 @@ class JsonAdaptedPerson {
         this.remark = remark;
         if (tags != null) {
             this.tags.addAll(tags);
-        }
-        if (performances != null) {
-            this.performances.addAll(performances);
         }
     }
 
@@ -87,9 +73,6 @@ class JsonAdaptedPerson {
         remark = source.getRemark().value;
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
-                .collect(Collectors.toList()));
-        performances.addAll(source.getPerformances().stream()
-                .map(JsonAdaptedPerformance::new)
                 .collect(Collectors.toList()));
     }
 
@@ -148,17 +131,8 @@ class JsonAdaptedPerson {
         }
         final Remark modelRemark = new Remark(remark);
 
-        final List<Performance> modelPerformances = new ArrayList<>();
-        for (JsonAdaptedPerformance performance : performances) {
-            if (performance == null) {
-                throw new IllegalValueException("Person's performances contain a null performance!");
-            }
-            modelPerformances.add(performance.toModelType());
-        }
-
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        return new Person(modelName, modelAgeCategory, modelPhone, modelEmail, modelAddress, modelRemark, modelTags,
-                modelPerformances);
+        return new Person(modelName, modelAgeCategory, modelPhone, modelEmail, modelAddress, modelRemark, modelTags);
     }
 
 }

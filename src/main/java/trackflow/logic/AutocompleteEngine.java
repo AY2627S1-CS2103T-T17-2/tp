@@ -28,9 +28,7 @@ public class AutocompleteEngine {
             "list",
             "remark INDEX r/",
             "tag INDEX t/",
-            "untag INDEX t/",
-            "pb INDEX t/ v/ d/",
-            "pbdel INDEX"
+            "untag INDEX t/"
     );
 
     /**

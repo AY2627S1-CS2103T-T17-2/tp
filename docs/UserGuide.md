@@ -293,44 +293,6 @@ Successful output:
 * `Added event(s) 200m to Avery Tan. Already had: 100m.`
 * `Removed event(s) 200m from Avery Tan.`
 
-### Recording a personal best: `pb`
-
-Records an athlete's personal best for an event. An athlete keeps one best per event; a better result replaces the previous one.
-
-Format: `pb INDEX t/EVENT v/RESULT [d/DATE]`
-
-* `INDEX` is the positive number shown beside the athlete in the displayed list.
-* `t/EVENT` names the event, for example `100m` or `Long Jump`.
-* `v/RESULT` is either:
-  * a **time**, where a lower value is better: plain seconds (`12.34`), seconds with a trailing `s` (`58.7s`), minutes and seconds (`2:05.4`), or hours, minutes and seconds (`1:02:03.4`). In a `:` format the seconds (and the minutes in `H:MM:SS`) must be under 60.
-  * a **distance** in metres ending in `m`, where a higher value is better, for example `6.21m`.
-* `d/DATE` is optional and must be a real calendar date in `YYYY-MM-DD` form.
-* If the athlete has no best for that event, it is recorded. If the new result is better (a faster time or a longer distance), it replaces the previous best. If it is equal or worse, the existing best is kept and the command reports it.
-* A result must be the same kind (time or distance) as the existing best for that event; otherwise the command is rejected.
-
-Examples:
-
-* `pb 1 t/100m v/12.34 d/2026-10-22`
-* `pb 2 t/Long Jump v/6.21m`
-
-Successful output:
-
-* `Recorded personal best for Avery Tan: 100m 12.34 (2026-10-22)`
-* `New personal best for Avery Tan in 100m: 12.10 (previous: 12.34)`
-
-### Removing a performance: `pbdel`
-
-Removes one recorded performance from an athlete.
-
-Format: `pbdel INDEX ENTRY_INDEX`
-
-* `INDEX` is the athlete's number in the displayed list.
-* `ENTRY_INDEX` is the position of the performance in that athlete's list of personal bests (starting from 1), as shown on the athlete card.
-
-Example:
-
-* `pbdel 1 2` removes the 2nd recorded performance of the 1st athlete.
-
 ### Finding athletes across all or selected fields: `find`
 
 Finds athletes using broad keywords, field-specific values, or both.
@@ -510,7 +472,5 @@ Action     | Format, Examples
 **Sort**   | `sort FIELD [ORDER]`<br> e.g., `sort age desc`
 **Tag**    | `tag INDEX t/EVENT [t/EVENT]...`<br> e.g., `tag 1 t/100m t/Long Jump`
 **Untag**  | `untag INDEX t/EVENT [t/EVENT]...`<br> e.g., `untag 1 t/100m`
-**Pb**     | `pb INDEX t/EVENT v/RESULT [d/DATE]`<br> e.g., `pb 1 t/100m v/12.34 d/2026-10-22`
-**Pbdel**  | `pbdel INDEX ENTRY_INDEX`<br> e.g., `pbdel 1 2`
 **Help**   | `help`
 **Exit**   | `exit`
