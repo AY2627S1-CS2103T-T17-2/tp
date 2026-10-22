@@ -1,36 +1,27 @@
 @startuml
 !include style.puml
-skinparam arrowThickness 1.1
-skinparam arrowColor STORAGE_COLOR
+skinparam ArrowFontStyle plain
+skinparam linetype polyline
+skinparam arrowColor STORAGE_COLOR_T4
 skinparam classBackgroundColor STORAGE_COLOR
-
-package Storage as StoragePackage {
-
-Class "<<interface>>\nStorage" as Storage
-Class StorageManager
-
-package "UserPrefs Storage" #F4F6F6{
-Class JsonUserPrefsStorage
+package "Storage" as StoragePackage {
+    interface Storage <<interface>> STORAGE_COLOR_T1
+    class StorageManager
+    class JsonUserPrefsStorage
+    class JsonRosterStorage
+    class JsonSerializableRoster
+    class JsonAdaptedPerson
+    class JsonAdaptedTag
 }
-
-package "AthleteRoster Storage" #F4F6F6{
-Class JsonRosterStorage
-Class JsonSerializableRoster
-Class JsonAdaptedPerson
-Class JsonAdaptedTag
-}
-
-}
-
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Storage
-
 StorageManager .up.|> Storage
-StorageManager -down-> "1" JsonUserPrefsStorage
-StorageManager -down-> "1" JsonRosterStorage
-
-JsonRosterStorage ..> JsonSerializableRoster
+StorageManager --> "1" JsonUserPrefsStorage
+StorageManager --> "1" JsonRosterStorage
+JsonRosterStorage ..> JsonSerializableRoster : reads / writes
 JsonSerializableRoster --> "*" JsonAdaptedPerson
 JsonAdaptedPerson --> "*" JsonAdaptedTag
-
+legend bottom
+  Partial persistence view; DTOs convert stored fields to model objects.
+  The JSON roster key remains "persons" for compatibility with existing files.
+  File utilities and model conversion dependencies are omitted.
+endlegend
 @enduml

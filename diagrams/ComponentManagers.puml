@@ -1,31 +1,33 @@
 @startuml
 !include style.puml
-skinparam arrowThickness 1.1
+skinparam ArrowFontStyle plain
+skinparam linetype polyline
 skinparam arrowColor LOGIC_COLOR_T4
 skinparam classBackgroundColor LOGIC_COLOR
-
-package Logic as LogicPackage {
-Class "<<interface>>\nLogic" as Logic
-Class LogicManager
+package "UI" as UIPackage {
+    interface Ui <<interface>> UI_COLOR_T1
+    class UiManager UI_COLOR
 }
-
-package Model as ModelPackage {
-Class "<<interface>>\nModel" as Model
-Class ModelManager
+package "Logic" as LogicPackage {
+    interface Logic <<interface>> LOGIC_COLOR_T1
+    class LogicManager LOGIC_COLOR
 }
-
-package Storage as StoragePackage {
-Class "<<interface>>\nStorage" as Storage
-Class StorageManager
+package "Model" as ModelPackage {
+    interface Model <<interface>> MODEL_COLOR_T1
+    class ModelManager MODEL_COLOR
 }
-
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Logic
-
+package "Storage" as StoragePackage {
+    interface Storage <<interface>> STORAGE_COLOR_T1
+    class StorageManager STORAGE_COLOR
+}
+UiManager .up.|> Ui
 LogicManager .up.|> Logic
 ModelManager .up.|> Model
 StorageManager .up.|> Storage
-
-LogicManager --> Model
-LogicManager --> Storage
+UiManager --> "1" Logic
+LogicManager --> "1" Model
+LogicManager --> "1" Storage
+legend bottom
+  Partial view: manager APIs and their retained component references.
+endlegend
 @enduml

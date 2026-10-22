@@ -54,6 +54,7 @@
         "command-parsing-and-validation": "Command parsing and validation",
         "broad-and-field-scoped-finding": "Broad and field-scoped finding",
         "command-autocomplete": "Command autocomplete",
+        "athlete-remarks": "Athlete remarks",
         "event-tagging": "Event tagging",
         "age-category-filtering": "Age-category filtering",
         "multi-field-sorting": "Multi-field sorting",
@@ -92,7 +93,8 @@
         "sequence-diagram-notation": "Sequence diagram notation",
         "layout-and-readability": "Layout and readability",
         "before-opening-or-updating-a-pr": "Before opening or updating a PR",
-        "picking-up-the-shared-uml-changes": "Picking up the shared UML changes"
+        "picking-up-the-shared-uml-changes": "Picking up the shared UML changes",
+        "project-portfolio-pages": "Project portfolio pages"
       },
       "headingKeywords": {}
     },
@@ -163,14 +165,6 @@
       "title": "",
       "headings": {
         "trackflow": "TrackFlow"
-      },
-      "headingKeywords": {}
-    },
-    {
-      "src": "team/johndoe.md",
-      "title": "John Doe's Project Portfolio Page",
-      "headings": {
-        "project-trackflow": "Project: TrackFlow"
       },
       "headingKeywords": {}
     }
