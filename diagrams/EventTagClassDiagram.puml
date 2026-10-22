@@ -1,0 +1,75 @@
+@startuml
+!include style.puml
+skinparam arrowColor LOGIC_COLOR_T4
+skinparam classBackgroundColor LOGIC_COLOR
+skinparam ArrowFontStyle plain
+skinparam linetype polyline
+show members
+hide empty members
+'style.puml styles generic boxes for interfaces only; give this generic class the same readable box.
+skinparam ClassStereotypeFontColor<<generic>> #1E293B
+skinparam ClassBorderColor<<generic>> #64748B
+hide <<generic>> stereotype
+
+package "Parsing" {
+    interface "Parser<T extends Command>" as Parser <<interface>> LOGIC_COLOR_T1 {
+        +parse(userInput: String): T
+    }
+    abstract class EventTagCommandParser<T extends EventTagCommand> <<generic>> {
+        +parse(args: String): T
+        {abstract} #getUsage(): String
+        {abstract} #createCommand(index: Index, events: Set<Tag>): T
+    }
+    class TagCommandParser
+    class UntagCommandParser
+}
+
+package "Commands" {
+    class TagCommand {
+        +execute(model: Model): CommandResult
+    }
+    class UntagCommand {
+        +execute(model: Model): CommandResult
+    }
+    abstract class "{abstract}\nEventTagCommand" as EventTagCommand {
+        #index: Index
+        +changesRoster(): boolean
+        #getTargetAthlete(model: Model): Person
+        {static} #replaceEvents(...): Person
+        {static} #formatEvents(events: Collection<Tag>): String
+    }
+    abstract class "{abstract}\nCommand" as Command {
+        +changesRoster(): boolean
+        {abstract} +execute(model: Model): CommandResult
+    }
+}
+
+class Tag MODEL_COLOR
+class Person MODEL_COLOR
+interface Model <<interface>> MODEL_COLOR_T1
+
+EventTagCommandParser .up.|> Parser : T = T
+TagCommandParser -up-|> EventTagCommandParser : T = TagCommand
+UntagCommandParser -up-|> EventTagCommandParser : T = UntagCommand
+
+TagCommandParser .down.> TagCommand : <<create>>
+UntagCommandParser .down.> UntagCommand : <<create>>
+
+TagCommand -down-|> EventTagCommand
+UntagCommand -down-|> EventTagCommand
+EventTagCommand -down-|> Command
+
+EventTagCommand -right-> "1..*" Tag : #events
+EventTagCommand .right.> Person : <<create>>\nupdated copy
+EventTagCommand .right.> Model : uses during\nexecution
+
+'Invisible links constrain layout only; they are not UML relationships.
+Tag -[hidden]down-> Person
+Person -[hidden]down-> Model
+
+legend bottom
+  Partial view: shared parsing and execution of tag and untag.
+  Omits message constants, parser helpers, Person's events
+  and the parameters of replaceEvents(...).
+endlegend
+@enduml
