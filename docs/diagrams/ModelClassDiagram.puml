@@ -18,6 +18,10 @@ package "JavaFX views" {
     class FilteredList MODEL_COLOR_T2
     class SortedList MODEL_COLOR_T2
 }
+package "Display state" {
+    interface "Predicate<Person>" as PersonPredicate <<interface>> MODEL_COLOR_T1
+    interface "Comparator<Person>" as PersonComparator <<interface>> MODEL_COLOR_T1
+}
 ModelManager .up.|> Model
 AthleteRoster .up.|> ReadOnlyRoster
 UserPrefs .up.|> ReadOnlyUserPrefs
@@ -25,11 +29,14 @@ ModelManager *--> "1" AthleteRoster
 ModelManager *--> "1" UserPrefs
 AthleteRoster *--> "1" UniquePersonList
 UniquePersonList --> "*" Person
-ModelManager --> "1" FilteredList
-ModelManager --> "1" SortedList
+ModelManager --> "1" FilteredList : filteredPersons
+ModelManager --> "1" SortedList : sortedPersons
+ModelManager --> "1" PersonPredicate : personListPredicate
+ModelManager --> "0..1" PersonComparator : personListComparator
 SortedList --> "1" FilteredList : source
 legend bottom
   Partial view. JavaFX lists contain Person; generic parameters are omitted.
+  ModelManager retains the active filter and optional sort comparator as display state.
   FilteredList observes UniquePersonList's observable list, not the wrapper object.
   getFilteredPersonList() exposes SortedList, preserving displayed index order.
 endlegend
