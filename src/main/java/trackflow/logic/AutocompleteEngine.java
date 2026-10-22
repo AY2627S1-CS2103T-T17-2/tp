@@ -62,7 +62,7 @@ public class AutocompleteEngine {
 
     /**
      * Returns the next missing prefix for the command in the given text.
-     * Prefix matching is case-insensitive.
+     * Prefix matching is case-insensitive. Commands needing an index receive prefixes only after a numeric index.
      *
      * @param currentText The current text in the command box.
      * @return The next prefix to append (e.g., " p/"), or an empty string if none.
@@ -81,6 +81,9 @@ public class AutocompleteEngine {
                 .orElse(null);
 
         if (template == null) {
+            return "";
+        }
+        if (template.contains(" INDEX") && (parts.length < 2 || !parts[1].matches("[0-9]+"))) {
             return "";
         }
 

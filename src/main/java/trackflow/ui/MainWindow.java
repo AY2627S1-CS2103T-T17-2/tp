@@ -1,11 +1,11 @@
 package trackflow.ui;
 
-import java.awt.Point;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.layout.StackPane;
@@ -31,6 +31,7 @@ public class MainWindow extends UiPart<Stage> {
     private Stage primaryStage;
     private Logic logic;
     private Path dataFilePath;
+    private GuiSettings windowedSettings;
 
     // Independent Ui parts residing in this Ui container
     private PersonListPanel personListPanel;
@@ -64,8 +65,13 @@ public class MainWindow extends UiPart<Stage> {
 
         // Configure the UI
         setWindowDefaultSize(logic.getGuiSettings());
+        primaryStage.xProperty().addListener(unused -> Platform.runLater(this::rememberWindowedBounds));
+        primaryStage.yProperty().addListener(unused -> Platform.runLater(this::rememberWindowedBounds));
+        primaryStage.widthProperty().addListener(unused -> Platform.runLater(this::rememberWindowedBounds));
+        primaryStage.heightProperty().addListener(unused -> Platform.runLater(this::rememberWindowedBounds));
 
         helpWindow = new HelpWindow();
+        helpWindow.getRoot().initOwner(primaryStage);
     }
 
     public Stage getPrimaryStage() {
@@ -90,26 +96,31 @@ public class MainWindow extends UiPart<Stage> {
     }
 
     /**
-     * Sets the default size based on {@code guiSettings}, and the saved position only if it is still visible
-     * on a connected screen. Otherwise the position is left unset, so JavaFX centers the window on the
-     * primary screen when it is shown, and the size is capped to that screen.
+     * Fits saved outer bounds to a connected screen's usable area, including window decorations.
+     * Centers on the primary screen when the saved position is no longer reachable.
      */
     private void setWindowDefaultSize(GuiSettings guiSettings) {
-        double width = guiSettings.getWindowWidth();
-        double height = guiSettings.getWindowHeight();
-        Point coordinates = guiSettings.getWindowCoordinates();
         List<Rectangle2D> screens = Screen.getScreens().stream().map(Screen::getVisualBounds).toList();
+        Rectangle2D bounds = WindowPlacement.fit(guiSettings, screens, Screen.getPrimary().getVisualBounds());
+        primaryStage.setMinWidth(Math.min(WindowPlacement.MIN_WINDOW_WIDTH, bounds.getWidth()));
+        primaryStage.setMinHeight(Math.min(WindowPlacement.MIN_WINDOW_HEIGHT, bounds.getHeight()));
+        primaryStage.setWidth(bounds.getWidth());
+        primaryStage.setHeight(bounds.getHeight());
+        primaryStage.setX(bounds.getMinX());
+        primaryStage.setY(bounds.getMinY());
+        windowedSettings = new GuiSettings(bounds.getWidth(), bounds.getHeight(),
+                (int) bounds.getMinX(), (int) bounds.getMinY());
+    }
 
-        if (coordinates != null
-                && WindowPlacement.isReachable(coordinates.getX(), coordinates.getY(), width, height, screens)) {
-            primaryStage.setWidth(width);
-            primaryStage.setHeight(height);
-            primaryStage.setX(coordinates.getX());
-            primaryStage.setY(coordinates.getY());
-        } else {
-            Rectangle2D primaryScreen = Screen.getPrimary().getVisualBounds();
-            primaryStage.setWidth(Math.min(width, primaryScreen.getWidth()));
-            primaryStage.setHeight(Math.min(height, primaryScreen.getHeight()));
+    /**
+     * Remembers normal outer bounds after native window-state changes have settled.
+     */
+    private void rememberWindowedBounds() {
+        if (primaryStage.isShowing() && !primaryStage.isIconified()
+                && !primaryStage.isMaximized() && !primaryStage.isFullScreen()) {
+            windowedSettings = new GuiSettings(primaryStage.getWidth(), primaryStage.getHeight(),
+                    (int) primaryStage.getX(), (int) primaryStage.getY());
+            logic.setGuiSettings(windowedSettings);
         }
     }
 
@@ -125,8 +136,12 @@ public class MainWindow extends UiPart<Stage> {
         }
     }
 
+    /**
+     * Shows the stage and remembers its normal outer bounds.
+     */
     void show() {
         primaryStage.show();
+        rememberWindowedBounds();
     }
 
     /**
@@ -134,12 +149,8 @@ public class MainWindow extends UiPart<Stage> {
      */
     @FXML
     private void handleExit() {
-        if (!primaryStage.isIconified()) {
-            // A minimized window can report a meaningless position, so keep the previously saved settings.
-            GuiSettings guiSettings = new GuiSettings(primaryStage.getWidth(), primaryStage.getHeight(),
-                    (int) primaryStage.getX(), (int) primaryStage.getY());
-            logic.setGuiSettings(guiSettings);
-        }
+        rememberWindowedBounds();
+        logic.setGuiSettings(windowedSettings);
         helpWindow.hide();
         primaryStage.hide();
     }
