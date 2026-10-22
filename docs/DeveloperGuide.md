@@ -317,7 +317,7 @@ delete, including age category, phone, and email. These diagrams omit helpers, t
 
 Coaches record the track events each athlete competes in with `tag INDEX t/EVENT...` and remove them with
 `untag INDEX t/EVENT...`. Events are stored as the athlete's `Tag` set, so no change to `Person` or the JSON format
-was needed, and rosters saved by earlier versions still load.
+was needed.
 
 #### Implementation details
 
@@ -329,6 +329,19 @@ was needed, and rosters saved by earlier versions still load.
 * `Tag` accepts letters, digits, single spaces and single hyphens (e.g. `Long Jump`, `110m-Hurdles`), up to 30
   characters. `Tag#equals` and `Tag#hashCode` ignore case, so normal `Set` operations treat `100m` and `100M` as
   the same event while the first-entered spelling is kept for display.
+
+The class diagram below is a partial view of the event tagging classes. It shows how the two commands share
+parsing and execution steps; message constants, parser helpers such as `ParserUtil`, and the athlete's own event
+set are omitted.
+
+<puml src="diagrams/EventTagClassDiagram.puml" width="725" alt="Tag and untag parsers extend generic EventTagCommandParser and create TagCommand and UntagCommand, which extend EventTagCommand; EventTagCommand keeps its events, uses Model during execution, and creates an updated Person" />
+
+`EventTagCommandParser` implements `Parser<T>` with its own type parameter `T`. `TagCommandParser` and
+`UntagCommandParser` bind `T` to their command and implement `getUsage()` and `createCommand(...)`, so the shared
+`parse(...)` method returns the correct command. Each command keeps the displayed-list `Index` and its non-empty set
+of events, but uses `Model` only while executing. `EventTagCommand` provides the shared steps:
+`getTargetAthlete(...)` finds the athlete at the index, and the static `replaceEvents(...)` creates and stores an
+updated copy of that athlete. `TagCommand` and `UntagCommand` differ only in how they work out the updated events.
 
 `TagCommand` adds only the events the athlete does not already have and lists any skipped events in its message.
 It fails only when every given event is already present, so that the coach knows nothing changed. `UntagCommand`

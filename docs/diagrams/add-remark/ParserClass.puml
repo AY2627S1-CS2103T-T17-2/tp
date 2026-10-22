@@ -7,7 +7,7 @@ skinparam classBackgroundColor LOGIC_COLOR
 show members
 hide empty members
 interface "Parser<T extends Command>" as Parser <<interface>> LOGIC_COLOR_T1 {
-    +parse(args: String): T
+    +parse(userInput: String): T
 }
 class RemarkCommandParser {
     +parse(args: String): RemarkCommand
