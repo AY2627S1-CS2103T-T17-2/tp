@@ -434,10 +434,23 @@ are records, not application users.
 
 ### Persistence and recovery status
 
-`MainApp` loads `data/trackflow.json` relative to the process working directory. If no file exists, it supplies the
-sample roster; the first successful roster change creates the file. An intentionally saved empty roster remains
-empty on restart. `preferences.json` stores window settings separately.
+`ApplicationHome` resolves the real location of the code archive. For a packaged JAR, its parent directory is home,
+including when launched through a symbolic link or from another working directory. An IDE/test launch from
+unpacked class files uses the process working directory. Resolution does not log because `LogsCenter` needs the
+same home before normal application startup. An unresolvable code location stops initialization instead of
+silently choosing another folder.
 
+`MainApp` loads `data/trackflow.json` inside that home. If no file exists, it supplies the sample roster; the first
+successful roster change creates the file. An intentionally saved empty roster remains empty on restart.
+`preferences.json` and rotated logs share the same home. Backups and temporary roster saves use roster-file siblings.
+
+`JsonUserPrefsStorage` rejects null GUI settings and dimensions that are nonpositive or nonfinite, including values
+Jackson assigns directly to fields. Missing properties retain their defaults. Coordinates may be null (automatic
+placement) or integer positions; the UI handles actual screen visibility. `MainApp.initPrefs` recovers from invalid
+preferences with defaults and attempts to save them without changing the roster.
+
+`JsonUtil` requires exactly one JSON root followed only by whitespace, for both rosters and preferences. Extra roots,
+garbage and truncation cause a loading error; reading never silently accepts just the first root.
 `JsonRosterStorage` converts malformed JSON, null roots, missing or null persons lists, null athletes, null tag
 entries, invalid saved field values, and duplicate athletes into `DataLoadingException`. `MainApp` preserves the
 original bytes in a sibling file named `trackflow.json.unreadable-<UUID>.bak`, logs its path, and starts an empty

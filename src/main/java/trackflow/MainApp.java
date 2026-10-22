@@ -3,7 +3,6 @@ package trackflow;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -12,6 +11,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import trackflow.commons.core.LogsCenter;
 import trackflow.commons.exceptions.DataLoadingException;
+import trackflow.commons.util.ApplicationHome;
 import trackflow.commons.util.StringUtil;
 import trackflow.logic.Logic;
 import trackflow.logic.LogicManager;
@@ -37,8 +37,8 @@ public class MainApp extends Application {
     public static final String VERSION = "v1.4";
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
-    private static final Path USER_PREFS_FILE_PATH = Paths.get("preferences.json");
-    private static final Path ROSTER_FILE_PATH = Paths.get("data", "trackflow.json");
+    private static final Path USER_PREFS_FILE_PATH = ApplicationHome.resolve("preferences.json");
+    private static final Path ROSTER_FILE_PATH = ApplicationHome.resolve("data/trackflow.json");
 
     protected Ui ui;
     protected Logic logic;

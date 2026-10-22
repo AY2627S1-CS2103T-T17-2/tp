@@ -71,6 +71,24 @@ The tokenizer tests cover every single-letter escape in both cases, multiple whi
 URLs, network paths, and ordinary quotes/backslashes. Parser tests check all 120 orders of the five add fields.
 Existing `JsonRosterStorageTest` and `MainAppTest` also check null JSON roots/entries and preservation of malformed data.
 
+For startup/preferences, strict JSON roots, application-home paths and unavailable file logging, run:
+
+```bash
+./gradlew test \
+    --tests trackflow.MainAppTest \
+    --tests trackflow.storage.JsonUserPrefsStorageTest \
+    --tests trackflow.commons.core.GuiSettingsTest \
+    --tests trackflow.commons.util.JsonUtilTest \
+    --tests trackflow.commons.util.ApplicationHomeTest \
+    --tests trackflow.StartupProcessTest
+```
+
+`StartupProcessTest` packages the compiled application classes into a temporary JAR and starts bounded child JVMs
+with the normal test runtime dependencies. It checks recovery, saving and reopening from another directory, a home
+path containing spaces and `%u`, temporary-file cleanup, and console fallback when the log path is blocked.
+It initializes the application and runs real commands/storage without opening a GUI; it does not replace native
+window tests or launch verification of the final release JAR on each supported runtime/platform.
+
 Automated results are in `build/reports/tests/test/index.html`; Checkstyle reports are in
 `build/reports/checkstyle/`. Verify guide examples and startup behavior using the
 [manual testing procedures](DeveloperGuide.md#appendix-instructions-for-manual-testing).
