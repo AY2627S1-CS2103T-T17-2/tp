@@ -25,7 +25,7 @@ public class HelpCommandTest {
     @Test
     public void helpMessage_containsEveryCommandWithExamples() {
         for (String commandWord : List.of("add", "edit", "delete", "list", "find", "filter",
-                "sort", "remark", "clear", "help", "exit")) {
+                "sort", "remark", "pb", "pbdel", "clear", "help", "exit")) {
             assertTrue(HelpCommand.HELP_MESSAGE.contains(commandWord + ":"), commandWord);
             assertTrue(HelpCommand.HELP_MESSAGE.contains("Example: " + commandWord), commandWord);
         }
@@ -47,7 +47,8 @@ public class HelpCommandTest {
         List<String> expected = List.of(AddCommand.COMMAND_WORD, EditCommand.COMMAND_WORD,
                 DeleteCommand.COMMAND_WORD, ListAthleteCommand.COMMAND_WORD, FindCommand.COMMAND_WORD,
                 FilterCommand.COMMAND_WORD, SortCommand.COMMAND_WORD, RemarkCommand.COMMAND_WORD,
-                TagCommand.COMMAND_WORD, UntagCommand.COMMAND_WORD, ClearCommand.COMMAND_WORD,
+                TagCommand.COMMAND_WORD, UntagCommand.COMMAND_WORD, PbCommand.COMMAND_WORD,
+                PbDelCommand.COMMAND_WORD, ClearCommand.COMMAND_WORD,
                 HelpCommand.COMMAND_WORD, ExitCommand.COMMAND_WORD);
         List<String> listed = HelpCommand.COMMAND_USAGES.stream()
                 .map(usage -> usage.substring(0, usage.indexOf(':')))

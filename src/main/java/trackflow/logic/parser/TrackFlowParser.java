@@ -20,6 +20,8 @@ import trackflow.logic.commands.FilterCommand;
 import trackflow.logic.commands.FindCommand;
 import trackflow.logic.commands.HelpCommand;
 import trackflow.logic.commands.ListAthleteCommand;
+import trackflow.logic.commands.PbCommand;
+import trackflow.logic.commands.PbDelCommand;
 import trackflow.logic.commands.RemarkCommand;
 import trackflow.logic.commands.SortCommand;
 import trackflow.logic.commands.TagCommand;
@@ -76,6 +78,8 @@ public class TrackFlowParser {
             case SortCommand.COMMAND_WORD -> new SortCommandParser().parse(arguments);
             case TagCommand.COMMAND_WORD -> new TagCommandParser().parse(arguments);
             case UntagCommand.COMMAND_WORD -> new UntagCommandParser().parse(arguments);
+            case PbCommand.COMMAND_WORD -> new PbCommandParser().parse(arguments);
+            case PbDelCommand.COMMAND_WORD -> new PbDelCommandParser().parse(arguments);
             default -> {
                 logger.finer("This user input caused a ParseException: " + userInput);
                 throw new ParseException(String.format(MESSAGE_UNKNOWN_COMMAND, commandWord));

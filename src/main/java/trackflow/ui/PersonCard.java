@@ -3,11 +3,15 @@ package trackflow.ui;
 import java.util.Comparator;
 
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
+import trackflow.model.person.Performance;
 import trackflow.model.person.Person;
 
 /**
@@ -42,6 +46,10 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label remark;
     @FXML
+    private Label performancesCaption;
+    @FXML
+    private FlowPane performances;
+    @FXML
     private FlowPane tags;
 
     /**
@@ -57,6 +65,12 @@ public class PersonCard extends UiPart<Region> {
         email.setText(person.getEmail().value);
         showIfNotEmpty(address, person.getAddress().value);
         showIfNotEmpty(remark, person.getRemark().value);
+        for (Performance performance : person.getPerformances()) {
+            performances.getChildren().add(createPerformanceChip(performance));
+        }
+        boolean hasPerformances = !person.getPerformances().isEmpty();
+        setShown(performancesCaption, hasPerformances);
+        setShown(performances, hasPerformances);
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
@@ -71,5 +85,30 @@ public class PersonCard extends UiPart<Region> {
         label.setText(text);
         label.setVisible(!text.isEmpty());
         label.setManaged(label.isVisible());
+    }
+
+    /**
+     * Returns a chip for a performance with the event and the result (including its unit) shown as two separate
+     * parts, and its date (if any) shown as a tooltip.
+     */
+    private static Node createPerformanceChip(Performance performance) {
+        Label event = new Label(performance.getEvent());
+        event.getStyleClass().add("pb-chip-event");
+        Label value = new Label(performance.getDisplayResult());
+        value.getStyleClass().add("pb-chip-value");
+        HBox chip = new HBox(event, value);
+        chip.getStyleClass().add("pb-chip");
+        if (performance.getDate() != null) {
+            Tooltip.install(chip, new Tooltip("Achieved " + performance.getDate()));
+        }
+        return chip;
+    }
+
+    /**
+     * Shows or hides {@code node}, removing it from the layout when hidden.
+     */
+    private static void setShown(Node node, boolean shown) {
+        node.setVisible(shown);
+        node.setManaged(shown);
     }
 }

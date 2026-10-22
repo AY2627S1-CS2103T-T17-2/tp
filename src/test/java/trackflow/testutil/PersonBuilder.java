@@ -1,12 +1,16 @@
 package trackflow.testutil;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import trackflow.model.person.Address;
 import trackflow.model.person.AgeCategory;
 import trackflow.model.person.Email;
 import trackflow.model.person.Name;
+import trackflow.model.person.Performance;
 import trackflow.model.person.Person;
 import trackflow.model.person.Phone;
 import trackflow.model.person.Remark;
@@ -31,6 +35,7 @@ public class PersonBuilder {
     private Address address;
     private Remark remark;
     private Set<Tag> tags;
+    private List<Performance> performances;
 
     /**
      * Creates a {@code PersonBuilder} with the default details.
@@ -42,6 +47,7 @@ public class PersonBuilder {
         address = new Address(DEFAULT_ADDRESS);
         remark = new Remark(DEFAULT_REMARK);
         tags = new HashSet<>();
+        performances = new ArrayList<>();
     }
 
     /**
@@ -55,6 +61,7 @@ public class PersonBuilder {
         address = personToCopy.getAddress();
         remark = personToCopy.getRemark();
         tags = new HashSet<>(personToCopy.getTags());
+        performances = new ArrayList<>(personToCopy.getPerformances());
     }
 
     /**
@@ -113,8 +120,26 @@ public class PersonBuilder {
         return this;
     }
 
+    /**
+     * Sets the athlete's recorded performances. Each entry is {@code "EVENT|RESULT"} or
+     * {@code "EVENT|RESULT|YYYY-MM-DD"}.
+     */
+    public PersonBuilder withPerformances(String... performances) {
+        this.performances = new ArrayList<>();
+        for (String entry : performances) {
+            String[] parts = entry.split("\\|", -1);
+            LocalDate date = parts.length > 2 && !parts[2].isEmpty() ? LocalDate.parse(parts[2]) : null;
+            this.performances.add(new Performance(parts[0], parts[1], date));
+        }
+        return this;
+    }
+
+    /**
+     * Builds the {@code Person} with the configured details.
+     */
     public Person build() {
-        return new Person(name, ageCategory, phone, email, address, remark, tags);
+        return new Person(name, ageCategory, phone, email, address, remark, tags,
+                new ArrayList<>(performances));
     }
 
 }
