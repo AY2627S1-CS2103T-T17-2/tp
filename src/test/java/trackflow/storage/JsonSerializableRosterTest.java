@@ -5,6 +5,7 @@ import static trackflow.testutil.Assert.assertThrows;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,18 @@ public class JsonSerializableRosterTest {
                 JsonSerializableRoster.class).get();
         assertThrows(IllegalValueException.class, JsonSerializableRoster.MESSAGE_DUPLICATE_PERSON,
                 dataFromFile::toModelType);
+    }
+
+    @Test
+    public void toModelType_nullPersonsList_throwsIllegalValueException() {
+        JsonSerializableRoster roster = new JsonSerializableRoster((List<JsonAdaptedPerson>) null);
+        assertThrows(IllegalValueException.class, "Persons list is missing!", roster::toModelType);
+    }
+
+    @Test
+    public void toModelType_nullPersonElement_throwsIllegalValueException() {
+        JsonSerializableRoster roster = new JsonSerializableRoster(Collections.singletonList(null));
+        assertThrows(IllegalValueException.class, "Persons list contains a null athlete!", roster::toModelType);
     }
 
 }

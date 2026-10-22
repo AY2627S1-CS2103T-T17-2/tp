@@ -6,6 +6,7 @@ import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalPersons.BENSON;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,8 @@ import trackflow.model.person.Email;
 import trackflow.model.person.Name;
 import trackflow.model.person.Person;
 import trackflow.model.person.Phone;
+import trackflow.model.person.Remark;
+import trackflow.model.tag.Tag;
 import trackflow.testutil.PersonBuilder;
 
 public class JsonAdaptedPersonTest {
@@ -47,7 +50,6 @@ public class JsonAdaptedPersonTest {
         JsonAdaptedPerson legacy = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL,
                 VALID_ADDRESS, VALID_REMARK, VALID_TAGS);
         assertEquals(BENSON, legacy.toModelType());
-        assertEquals(new AgeCategory("Open"), legacy.toModelType().getAgeCategory());
     }
 
     @Test
@@ -130,12 +132,28 @@ public class JsonAdaptedPersonTest {
     }
 
     @Test
+    public void toModelType_nullRemark_throwsIllegalValueException() {
+        JsonAdaptedPerson person =
+                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, null, VALID_TAGS);
+        String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Remark.class.getSimpleName());
+        assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
+    }
+
+    @Test
     public void toModelType_invalidTags_throwsIllegalValueException() {
         List<JsonAdaptedTag> invalidTags = new ArrayList<>(VALID_TAGS);
         invalidTags.add(new JsonAdaptedTag(INVALID_TAG));
         JsonAdaptedPerson person =
                 new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_REMARK, invalidTags);
-        assertThrows(IllegalValueException.class, person::toModelType);
+        assertThrows(IllegalValueException.class, Tag.MESSAGE_CONSTRAINTS, person::toModelType);
+    }
+
+    @Test
+    public void toModelType_nullTagElement_throwsIllegalValueException() {
+        List<JsonAdaptedTag> tagsWithNull = Collections.singletonList(null);
+        JsonAdaptedPerson person =
+                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_REMARK, tagsWithNull);
+        assertThrows(IllegalValueException.class, "Person's tags contain a null tag!", person::toModelType);
     }
 
 }

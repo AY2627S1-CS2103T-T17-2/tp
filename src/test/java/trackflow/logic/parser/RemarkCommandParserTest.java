@@ -36,6 +36,7 @@ public class RemarkCommandParserTest {
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE);
 
         // no parameters
+        assertParseFailure(parser, "", expectedMessage);
         assertParseFailure(parser, RemarkCommand.COMMAND_WORD, expectedMessage);
 
         // no index
@@ -43,6 +44,12 @@ public class RemarkCommandParserTest {
 
         // no remark prefix
         assertParseFailure(parser, INDEX_FIRST_PERSON.getOneBased() + "", expectedMessage);
+    }
+
+    @Test
+    public void parse_unknownParameter_failure() {
+        assertParseFailure(parser, "1 r/Note n/Alice",
+                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "n/", RemarkCommand.MESSAGE_USAGE));
     }
 
     @Test

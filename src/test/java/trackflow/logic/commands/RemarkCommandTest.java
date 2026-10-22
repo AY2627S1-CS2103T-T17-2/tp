@@ -1,12 +1,13 @@
 package trackflow.logic.commands;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.logic.commands.CommandTestUtil.VALID_REMARK_AMY;
 import static trackflow.logic.commands.CommandTestUtil.VALID_REMARK_BOB;
 import static trackflow.logic.commands.CommandTestUtil.assertCommandFailure;
 import static trackflow.logic.commands.CommandTestUtil.assertCommandSuccess;
+import static trackflow.logic.commands.CommandTestUtil.showPersonAtIndex;
+import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static trackflow.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static trackflow.testutil.TypicalPersons.getTypicalRoster;
@@ -31,6 +32,18 @@ public class RemarkCommandTest {
     private Model model = new ModelManager(getTypicalRoster(), new UserPrefs());
 
     @Test
+    public void constructor_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new RemarkCommand(null, new Remark(VALID_REMARK_AMY)));
+        assertThrows(NullPointerException.class, () -> new RemarkCommand(INDEX_FIRST_PERSON, null));
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        RemarkCommand remarkCommand = new RemarkCommand(INDEX_FIRST_PERSON, new Remark(VALID_REMARK_AMY));
+        assertThrows(NullPointerException.class, () -> remarkCommand.execute(null));
+    }
+
+    @Test
     public void execute_addRemarkUnfilteredList_success() {
         Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Remark remark = new Remark(VALID_REMARK_AMY);
@@ -44,7 +57,6 @@ public class RemarkCommandTest {
         expectedModel.setPerson(personToEdit, editedPerson);
 
         assertCommandSuccess(remarkCommand, model, expectedMessage, expectedModel);
-        assertEquals(editedPerson.getRemark(), model.getFilteredPersonList().get(0).getRemark());
     }
 
     @Test
@@ -60,7 +72,24 @@ public class RemarkCommandTest {
         expectedModel.setPerson(personToEdit, editedPerson);
 
         assertCommandSuccess(remarkCommand, model, expectedMessage, expectedModel);
-        assertEquals(editedPerson.getRemark(), model.getFilteredPersonList().get(0).getRemark());
+    }
+
+    @Test
+    public void execute_filteredList_success() {
+        showPersonAtIndex(model, INDEX_SECOND_PERSON);
+
+        Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Remark remark = new Remark(VALID_REMARK_AMY);
+        RemarkCommand remarkCommand = new RemarkCommand(INDEX_FIRST_PERSON, remark);
+        Person editedPerson = new PersonBuilder(personToEdit).withRemark(VALID_REMARK_AMY).build();
+
+        String expectedMessage = String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS,
+                Messages.format(editedPerson));
+
+        Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
+        expectedModel.setPerson(personToEdit, editedPerson);
+
+        assertCommandSuccess(remarkCommand, model, expectedMessage, expectedModel);
     }
 
     @Test
@@ -69,6 +98,23 @@ public class RemarkCommandTest {
         RemarkCommand remarkCommand = new RemarkCommand(outOfBoundIndex, new Remark(VALID_REMARK_AMY));
 
         assertCommandFailure(remarkCommand, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+    }
+
+    @Test
+    public void execute_invalidPersonIndexFilteredList_failure() {
+        showPersonAtIndex(model, INDEX_FIRST_PERSON);
+        Index outOfBoundIndex = INDEX_SECOND_PERSON;
+        assertTrue(outOfBoundIndex.getZeroBased() < model.getRoster().getPersonList().size());
+
+        RemarkCommand remarkCommand = new RemarkCommand(outOfBoundIndex, new Remark(VALID_REMARK_AMY));
+
+        assertCommandFailure(remarkCommand, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+    }
+
+    @Test
+    public void changesRoster_returnsTrue() {
+        RemarkCommand remarkCommand = new RemarkCommand(INDEX_FIRST_PERSON, new Remark(VALID_REMARK_AMY));
+        assertTrue(remarkCommand.changesRoster());
     }
 
     @Test

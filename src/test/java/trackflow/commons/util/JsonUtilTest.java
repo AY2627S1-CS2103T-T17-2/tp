@@ -1,45 +1,78 @@
 package trackflow.commons.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static trackflow.testutil.Assert.assertThrows;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import trackflow.commons.exceptions.DataLoadingException;
 import trackflow.testutil.SerializableTestClass;
-import trackflow.testutil.TestUtil;
 
 /**
  * Tests JSON Read and Write
  */
 public class JsonUtilTest {
 
-    private static final Path SERIALIZATION_FILE = TestUtil.getFilePathInSandboxFolder("serialize.json");
+    @TempDir
+    public Path tempDir;
 
     @Test
     public void serializeObjectToJsonFile_noExceptionThrown() throws IOException {
+        Path serializationFile = tempDir.resolve("serialize.json");
         SerializableTestClass serializableTestClass = new SerializableTestClass();
         serializableTestClass.setTestValues();
 
-        JsonUtil.serializeObjectToJsonFile(SERIALIZATION_FILE, serializableTestClass);
+        JsonUtil.serializeObjectToJsonFile(serializationFile, serializableTestClass);
 
-        assertEquals(FileUtil.readFromFile(SERIALIZATION_FILE), SerializableTestClass.JSON_STRING_REPRESENTATION);
+        assertEquals(FileUtil.readFromFile(serializationFile), SerializableTestClass.JSON_STRING_REPRESENTATION);
     }
 
     @Test
     public void deserializeObjectFromJsonFile_noExceptionThrown() throws IOException {
-        FileUtil.writeToFile(SERIALIZATION_FILE, SerializableTestClass.JSON_STRING_REPRESENTATION);
+        Path serializationFile = tempDir.resolve("serialize.json");
+        FileUtil.writeToFile(serializationFile, SerializableTestClass.JSON_STRING_REPRESENTATION);
 
         SerializableTestClass serializableTestClass = JsonUtil
-                .deserializeObjectFromJsonFile(SERIALIZATION_FILE, SerializableTestClass.class);
+                .deserializeObjectFromJsonFile(serializationFile, SerializableTestClass.class);
 
         assertEquals(serializableTestClass.getName(), SerializableTestClass.getNameTestValue());
         assertEquals(serializableTestClass.getListOfLocalDateTimes(), SerializableTestClass.getListTestValues());
         assertEquals(serializableTestClass.getMapOfIntegerToString(), SerializableTestClass.getHashMapTestValues());
     }
 
-    //TODO: @Test jsonUtil_readJsonStringToObjectInstance_correctObject()
+    @Test
+    public void jsonUtil_writeThenReadObjectToJson_correctObject() throws IOException {
+        SerializableTestClass original = new SerializableTestClass();
+        original.setTestValues();
 
-    //TODO: @Test jsonUtil_writeThenReadObjectToJson_correctObject()
+        String jsonString = JsonUtil.toJsonString(original);
+        assertEquals(SerializableTestClass.JSON_STRING_REPRESENTATION, jsonString);
+
+        SerializableTestClass deserialized = JsonUtil.fromJsonString(jsonString, SerializableTestClass.class);
+        assertEquals(original.getName(), deserialized.getName());
+        assertEquals(original.getListOfLocalDateTimes(), deserialized.getListOfLocalDateTimes());
+        assertEquals(original.getMapOfIntegerToString(), deserialized.getMapOfIntegerToString());
+    }
+
+    @Test
+    public void readJsonFile_missingOrInvalid_handlesGracefully() throws Exception {
+        Path missingFile = tempDir.resolve("missing.json");
+        assertTrue(JsonUtil.readJsonFile(missingFile, SerializableTestClass.class).isEmpty());
+
+        Path nullRootFile = tempDir.resolve("nullRoot.json");
+        Files.writeString(nullRootFile, "null");
+        assertThrows(DataLoadingException.class, () ->
+                JsonUtil.readJsonFile(nullRootFile, SerializableTestClass.class));
+
+        Path malformedFile = tempDir.resolve("malformed.json");
+        Files.writeString(malformedFile, "{invalid json");
+        assertThrows(DataLoadingException.class, () ->
+                JsonUtil.readJsonFile(malformedFile, SerializableTestClass.class));
+    }
 }

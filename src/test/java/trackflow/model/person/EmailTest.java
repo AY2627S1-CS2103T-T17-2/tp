@@ -1,5 +1,6 @@
 package trackflow.model.person;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
@@ -16,7 +17,7 @@ public class EmailTest {
     @Test
     public void constructor_invalidEmail_throwsIllegalArgumentException() {
         String invalidEmail = "";
-        assertThrows(IllegalArgumentException.class, () -> new Email(invalidEmail));
+        assertThrows(IllegalArgumentException.class, Email.MESSAGE_CONSTRAINTS, () -> new Email(invalidEmail));
     }
 
     @Test
@@ -72,6 +73,8 @@ public class EmailTest {
 
         // same values -> returns true
         assertTrue(email.equals(new Email("valid@email")));
+        assertEquals(email.hashCode(), new Email("valid@email").hashCode());
+        assertEquals("valid@email", email.toString());
 
         // same object -> returns true
         assertTrue(email.equals(email));

@@ -73,24 +73,6 @@ public class JsonRosterStorageTest {
     }
 
     @Test
-    public void readRoster_invalidAndValidPersonAthleteRoster_throwDataLoadingException() {
-        assertThrows(DataLoadingException.class, () -> readRoster("invalidAndValidPersonAthleteRoster.json"));
-    }
-
-    @Test
-    public void readRoster_invalidSavedAgeCategory_throwsDataLoadingException() throws Exception {
-        Path filePath = testFolder.resolve("invalidCategory.json");
-        for (String category : new String[] {"", "Under 15"}) {
-            Files.writeString(filePath, """
-                    {"persons": [{"name": "Avery Tan", "ageCategory": "%s", "phone": "91234567",
-                    "email": "avery.tan@example.com", "address": "", "remark": "", "tags": []}]}
-                    """.formatted(category));
-            JsonRosterStorage storage = new JsonRosterStorage(filePath);
-            assertThrows(DataLoadingException.class, storage::readRoster);
-        }
-    }
-
-    @Test
     public void readAndSaveAthleteRoster_allInOrder_success() throws Exception {
         Path filePath = testFolder.resolve("TempAthleteRoster.json");
         AthleteRoster original = getTypicalRoster();

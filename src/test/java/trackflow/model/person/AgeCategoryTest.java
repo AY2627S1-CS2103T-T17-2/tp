@@ -15,11 +15,13 @@ public class AgeCategoryTest {
             assertEquals(category, new AgeCategory(category.toUpperCase()).value);
         }
         assertEquals("Under 14", new AgeCategory("  under \t  14  ").value);
+        assertEquals("Under 14", new AgeCategory("under 14").toString());
     }
 
     @Test
     public void constructor_invalidCategory_throws() {
         assertThrows(NullPointerException.class, () -> new AgeCategory(null));
+        assertThrows(NullPointerException.class, () -> AgeCategory.isValidAgeCategory(null));
         for (String category : new String[] {"", " ", "14", "U14", "Under 15"}) {
             assertFalse(AgeCategory.isValidAgeCategory(category));
             assertThrows(IllegalArgumentException.class, AgeCategory.MESSAGE_CONSTRAINTS, () ->

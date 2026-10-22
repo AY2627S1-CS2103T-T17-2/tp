@@ -1,11 +1,13 @@
 package trackflow.logic.commands;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.logic.commands.CommandTestUtil.assertCommandFailure;
 import static trackflow.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static trackflow.logic.commands.CommandTestUtil.showPersonAtIndex;
 import static trackflow.model.util.SampleDataUtil.getTagSet;
+import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static trackflow.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static trackflow.testutil.TypicalPersons.getTypicalRoster;
@@ -27,6 +29,18 @@ import trackflow.testutil.PersonBuilder;
 public class TagCommandTest {
 
     private final Model model = new ModelManager(getTypicalRoster(), new UserPrefs());
+
+    @Test
+    public void constructor_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new TagCommand(null, getTagSet("100m")));
+        assertThrows(NullPointerException.class, () -> new TagCommand(INDEX_FIRST_PERSON, null));
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        TagCommand command = new TagCommand(INDEX_FIRST_PERSON, getTagSet("100m"));
+        assertThrows(NullPointerException.class, () -> command.execute(null));
+    }
 
     @Test
     public void execute_newEvents_addsEventsAndKeepsExisting() {
@@ -108,7 +122,9 @@ public class TagCommandTest {
         assertTrue(standardCommand.equals(new TagCommand(INDEX_FIRST_PERSON, getTagSet("100m"))));
 
         // same events in different case -> returns true
-        assertTrue(standardCommand.equals(new TagCommand(INDEX_FIRST_PERSON, getTagSet("100M"))));
+        TagCommand caseInsensitiveCopy = new TagCommand(INDEX_FIRST_PERSON, getTagSet("100M"));
+        assertTrue(standardCommand.equals(caseInsensitiveCopy));
+        assertEquals(standardCommand.hashCode(), caseInsensitiveCopy.hashCode());
 
         // same object -> returns true
         assertTrue(standardCommand.equals(standardCommand));
@@ -127,5 +143,9 @@ public class TagCommandTest {
 
         // different events -> returns false
         assertFalse(standardCommand.equals(new TagCommand(INDEX_FIRST_PERSON, getTagSet("200m"))));
+
+        String expected = TagCommand.class.getCanonicalName()
+                + "{index=" + INDEX_FIRST_PERSON + ", events=" + getTagSet("100m") + "}";
+        assertEquals(expected, standardCommand.toString());
     }
 }

@@ -3,6 +3,7 @@ package trackflow.model.person;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static trackflow.testutil.Assert.assertThrows;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,12 @@ public class PersonContainsKeywordsPredicateTest {
             .build();
 
     @Test
+    public void constructor_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new PersonContainsKeywordsPredicate(null));
+        assertThrows(NullPointerException.class, () -> new PersonContainsKeywordsPredicate(List.of(), null));
+    }
+
+    @Test
     public void equals() {
         List<String> firstKeywordList = List.of("first");
         List<String> secondKeywordList = List.of("first", "second");
@@ -35,6 +42,8 @@ public class PersonContainsKeywordsPredicateTest {
         assertTrue(firstPredicate.equals(firstPredicate));
         assertTrue(firstPredicate.equals(new PersonContainsKeywordsPredicate(firstKeywordList)));
         assertFalse(firstPredicate.equals(secondPredicate));
+        assertFalse(firstPredicate.equals(new PersonContainsKeywordsPredicate(firstKeywordList,
+                Map.of(SearchField.NAME, List.of("first")))));
         assertFalse(firstPredicate.equals(1));
         assertFalse(firstPredicate.equals(null));
     }
@@ -120,6 +129,24 @@ public class PersonContainsKeywordsPredicateTest {
                 Map.of(SearchField.EVENT, List.of("sprintsrelay"))).test(ATHLETE));
         assertFalse(new PersonContainsKeywordsPredicate(List.of(),
                 Map.of(SearchField.EVENT, List.of("personal"))).test(ATHLETE));
+    }
+
+    @Test
+    public void test_combinedBroadAndScopedKeywords_matchesIfEitherMatches() {
+        // broad matches, scoped does not -> returns true
+        PersonContainsKeywordsPredicate broadMatchPredicate = new PersonContainsKeywordsPredicate(
+                List.of("avery"), Map.of(SearchField.PHONE, List.of("0000")));
+        assertTrue(broadMatchPredicate.test(ATHLETE));
+
+        // broad does not match, scoped matches -> returns true
+        PersonContainsKeywordsPredicate scopedMatchPredicate = new PersonContainsKeywordsPredicate(
+                List.of("nonexistent"), Map.of(SearchField.PHONE, List.of("2345")));
+        assertTrue(scopedMatchPredicate.test(ATHLETE));
+
+        // neither matches -> returns false
+        PersonContainsKeywordsPredicate noMatchPredicate = new PersonContainsKeywordsPredicate(
+                List.of("nonexistent"), Map.of(SearchField.PHONE, List.of("0000")));
+        assertFalse(noMatchPredicate.test(ATHLETE));
     }
 
     @Test
