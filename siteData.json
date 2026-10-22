@@ -141,6 +141,7 @@
         "features": "Features",
         "addresses-and-remarks-containing-slashes": "Addresses and remarks containing slashes",
         "command-autocomplete": "Command autocomplete",
+        "window-size-and-scrolling": "Window size and scrolling",
         "command-feedback-and-errors": "Command feedback and errors",
         "viewing-help-help": "Viewing help: help",
         "adding-an-athlete-add": "Adding an athlete: add",
