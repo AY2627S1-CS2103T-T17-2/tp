@@ -14,6 +14,7 @@ import trackflow.model.person.Email;
 import trackflow.model.person.Name;
 import trackflow.model.person.Person;
 import trackflow.model.person.Phone;
+import trackflow.model.tag.Tag;
 import trackflow.testutil.PersonBuilder;
 
 public class AddCommandParserTest {
@@ -101,6 +102,8 @@ public class AddCommandParserTest {
             assertParseFailure(parser, validArgs + " " + prefix + "invalid",
                     Messages.getErrorMessageForDuplicatePrefixes(prefix));
         }
+        assertParseFailure(parser, validArgs + " r/first r/second",
+                Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_REMARK));
     }
 
     @Test
@@ -113,16 +116,44 @@ public class AddCommandParserTest {
         assertParseFailure(parser, validArgs.replace("91234567", "+65 9123 4567"), Phone.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, validArgs.replace("avery.tan@example.com", ""), Email.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, validArgs.replace("avery.tan@example.com", "invalid"), Email.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, validArgs + " t/", Tag.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, validArgs + " t/100m*", Tag.MESSAGE_CONSTRAINTS);
     }
 
     @Test
-    public void parse_unsupportedParameter_failure() {
-        String expected = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE);
-        assertParseFailure(parser, validArgs + " t/sprints", expected);
-        assertParseFailure(parser, validArgs + " r/note", expected);
-        assertParseFailure(parser, validArgs + " t/", expected);
-        assertParseFailure(parser, validArgs + " r/", expected);
-        assertParseFailure(parser, " t/sprints t/relay" + validArgs, expected);
-        assertParseFailure(parser, validArgs + " r/note", expected);
+    public void parse_optionalTagsAndRemark_success() {
+        // single tag
+        Person withSingleTag = new PersonBuilder().withName("Avery Tan").withAgeCategory("Under 14")
+                .withPhone("91234567").withEmail("avery.tan@example.com")
+                .withAddress("123 Main Street").withRemark("").withTags("100m").build();
+        assertParseSuccess(parser, validArgs + " t/100m", new AddCommand(withSingleTag));
+
+        // multiple tags in any position
+        Person withTags = new PersonBuilder().withName("Avery Tan").withAgeCategory("Under 14")
+                .withPhone("91234567").withEmail("avery.tan@example.com")
+                .withAddress("123 Main Street").withRemark("").withTags("100m", "200m Relay").build();
+        assertParseSuccess(parser, validArgs + " t/100m t/200m   Relay", new AddCommand(withTags));
+        assertParseSuccess(parser, " t/100m t/200m Relay" + validArgs, new AddCommand(withTags));
+
+        // repeated tag with different case is deduplicated
+        assertParseSuccess(parser, validArgs + " t/100m t/100M", new AddCommand(withSingleTag));
+
+        // remark present
+        Person withRemark = new PersonBuilder().withName("Avery Tan").withAgeCategory("Under 14")
+                .withPhone("91234567").withEmail("avery.tan@example.com")
+                .withAddress("123 Main Street").withRemark("Team captain").withTags().build();
+        assertParseSuccess(parser, validArgs + " r/Team captain", new AddCommand(withRemark));
+
+        // empty remark
+        Person withEmptyRemark = new PersonBuilder().withName("Avery Tan").withAgeCategory("Under 14")
+                .withPhone("91234567").withEmail("avery.tan@example.com")
+                .withAddress("123 Main Street").withRemark("").withTags().build();
+        assertParseSuccess(parser, validArgs + " r/", new AddCommand(withEmptyRemark));
+
+        // both multiple tags and remark
+        Person withBoth = new PersonBuilder().withName("Avery Tan").withAgeCategory("Under 14")
+                .withPhone("91234567").withEmail("avery.tan@example.com")
+                .withAddress("123 Main Street").withRemark("Needs blocks").withTags("100m", "Long Jump").build();
+        assertParseSuccess(parser, validArgs + " t/100m r/Needs blocks t/Long Jump", new AddCommand(withBoth));
     }
 }

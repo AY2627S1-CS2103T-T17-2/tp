@@ -424,7 +424,7 @@ success scenario. UC01–UC06 describe implemented workflows. Future requirement
 
 1. The coach requests to view the roster.
 2. TrackFlow displays the roster with current indexes, or indicates that it is empty.
-3. The coach submits the new athlete's name, age category, phone number, email address, and address.
+3. The coach submits the new athlete's name, age category, phone number, email address, and address (plus optional events and remark).
 4. TrackFlow validates the input, checks for a duplicate, and saves the new record.
 5. TrackFlow displays the full roster in the current sort order, or saved roster order if no sort is active, and displays the added athlete's details.
 
@@ -771,7 +771,7 @@ Use a disposable home folder; these procedures change saved data.
 1. Run `remark 1 r/Recovery`, then restart. Expect `Recovery` to replace `Sprints`.
 1. Run `remark 1 r/`, then restart. Expect the remark to be empty and the category still `Under 16`.
 1. Try `add n/Incomplete`, `edit 1`, `edit 0 p/999`, `edit 1 addr/`, and `remark 1`.
-   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add or edit command must produce an error; add reports invalid command format, while edit identifies the unsupported prefix.
+   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid `edit` command must produce an error identifying the unsupported prefix.
 1. Run `clear`, restart, and confirm the roster stays empty rather than loading samples again.
 
 ### Parser robustness

@@ -45,6 +45,18 @@ public class AddCommandTest {
     }
 
     @Test
+    public void execute_personWithTagsAndRemarkAcceptedByModel_addSuccessful() throws Exception {
+        ModelStubAcceptingPersonAdded modelStub = new ModelStubAcceptingPersonAdded();
+        Person validPerson = new PersonBuilder().withRemark("Captain").withTags("100m", "200m").build();
+
+        CommandResult commandResult = new AddCommand(validPerson).execute(modelStub);
+
+        assertEquals(String.format(AddCommand.MESSAGE_SUCCESS, Messages.formatAthlete(validPerson)),
+                commandResult.getFeedbackToUser());
+        assertEquals(List.of(validPerson), modelStub.personsAdded);
+    }
+
+    @Test
     public void execute_duplicatePerson_throwsCommandException() {
         Person validPerson = new PersonBuilder().build();
         AddCommand addCommand = new AddCommand(validPerson);

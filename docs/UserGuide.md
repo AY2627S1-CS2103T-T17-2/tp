@@ -127,7 +127,7 @@ so that it can be corrected.
   example, `enrol n/Avery` displays `Unknown command: enrol.`
 * Validation errors explain the accepted format or constraint. The roster is not changed when parsing or validation
   fails.
-* Parameters a command does not support, such as `t/` in `add`, are rejected with an error.
+* Parameters a command does not support, such as `t/` in `edit`, are rejected with an error.
   To enter prefix-like text as part of an address or remark, see
   [Addresses and remarks containing slashes](#addresses-and-remarks-containing-slashes).
 
@@ -141,26 +141,27 @@ Format: `help`
 
 ### Adding an athlete: `add`
 
-Adds an athlete with a name, age category, phone number, email address, and address.
+Adds an athlete with a name, age category, phone number, email address, and address, plus optional track events and a remark.
 
-Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS`
+Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS [t/EVENT]... [r/REMARK]`
 
-* All five fields are required.
-* Fields may appear in any order. Each parameter may appear only once.
+* Name, age category, phone number, email, and address are required; track events (`t/EVENT`) and remark (`r/REMARK`) are optional.
+* Fields may appear in any order. Each single-valued parameter (`n/`, `a/`, `p/`, `e/`, `addr/`, `r/`) may appear only once; `t/EVENT` may appear multiple times to assign multiple events in a single `add` command.
 * Age category must be `Under 14`, `Under 16`, `Under 18`, `Under 20`, or `Open`. Category input ignores case and normalizes repeated spaces.
 * Names must be nonblank and contain only alphanumeric characters and spaces.
 * Phone numbers must contain only digits, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
 * Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` to supply the required nonblank address.
-* Add does not accept events or remarks. `edit` updates athlete details and addresses, `tag` and `untag` update track events, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
+* Each `t/EVENT` must be 1–30 characters of letters, digits, spaces, or hyphens. Repeated events in the same `add` command (compared case-insensitively) are treated as one.
+* `edit` updates athlete details and addresses, `tag` and `untag` update track events, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
   existing address, events, and remarks. Saved rosters are checked using the same duplicate rule on loading.
 
 Examples:
 
 * `add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street`
-* `add e/jordan.lee@example.com p/92345678 a/open n/Jordan Lee addr/123 Main Street`
+* `add e/jordan.lee@example.com p/92345678 a/open n/Jordan Lee addr/123 Main Street t/100m t/Long Jump r/Team captain`
 
 Successful output:
 
@@ -461,7 +462,7 @@ replacing it. Launch from the destination home folder so TrackFlow reads the cop
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com addr/123 Main Street`
+**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS [t/EVENT]... [r/REMARK]` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com addr/123 Main Street t/100m r/Captain`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`

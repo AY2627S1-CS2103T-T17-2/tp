@@ -5,6 +5,8 @@ import static trackflow.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
 import static trackflow.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static trackflow.logic.parser.CliSyntax.PREFIX_NAME;
 import static trackflow.logic.parser.CliSyntax.PREFIX_PHONE;
+import static trackflow.logic.parser.CliSyntax.PREFIX_REMARK;
+import static trackflow.logic.parser.CliSyntax.PREFIX_TAG;
 
 import trackflow.logic.commands.AddCommand;
 import trackflow.logic.commands.EditCommand.EditPersonDescriptor;
@@ -34,6 +36,12 @@ public class PersonUtil {
         if (!person.getAddress().value.isEmpty()) {
             sb.append(PREFIX_ADDRESS).append(person.getAddress().value).append(" ");
         }
+        if (!person.getRemark().value.isEmpty()) {
+            sb.append(PREFIX_REMARK).append(person.getRemark().value).append(" ");
+        }
+        person.getTags().stream().forEach(
+            s -> sb.append(PREFIX_TAG + s.tagName + " ")
+        );
         return sb.toString();
     }
 

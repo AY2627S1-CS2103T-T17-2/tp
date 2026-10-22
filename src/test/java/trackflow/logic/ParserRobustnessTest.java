@@ -238,6 +238,7 @@ public class ParserRobustnessTest {
                 commands.add("find " + repeated);
                 if (field.equals("r")) {
                     commands.add("remark 1 " + repeated);
+                    commands.add("add " + String.join(" ", validFields) + " " + repeated);
                 } else {
                     commands.add("edit 1 " + repeated);
                     String remaining = String.join(" ", validFields.stream()

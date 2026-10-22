@@ -196,6 +196,11 @@ public class AutocompleteEngineTest {
 
         // Name, age, email present, phone is missing
         assertEquals(" p/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 e/j@e.com"));
+
+        // Optional t/ and r/ prefixes in add do not interfere with suggesting missing required prefixes
+        assertEquals(" a/", autocompleteEngine.getNextPrefix("add n/John t/100m r/Captain"));
+        assertEquals("", autocompleteEngine.getNextPrefix(
+                "add n/John a/Under 20 p/91234567 e/j@e.com addr/NUS t/100m r/Captain"));
     }
 
     @Test

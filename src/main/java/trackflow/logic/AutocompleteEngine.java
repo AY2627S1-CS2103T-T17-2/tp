@@ -1,5 +1,9 @@
 package trackflow.logic;
 
+import static trackflow.logic.parser.CliSyntax.PREFIX_REMARK;
+import static trackflow.logic.parser.CliSyntax.PREFIX_TAG;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -88,7 +92,12 @@ public class AutocompleteEngine {
         List<Prefix> prefixes = prefixMatcher.results()
                 .map(result -> new Prefix(result.group(1)))
                 .toList();
-        ArgumentMultimap arguments = ArgumentTokenizer.tokenize(currentText, prefixes.toArray(Prefix[]::new));
+        List<Prefix> tokenPrefixes = new ArrayList<>(prefixes);
+        if ("add".equals(commandWord)) {
+            tokenPrefixes.add(PREFIX_TAG);
+            tokenPrefixes.add(PREFIX_REMARK);
+        }
+        ArgumentMultimap arguments = ArgumentTokenizer.tokenize(currentText, tokenPrefixes.toArray(Prefix[]::new));
         for (Prefix prefix : prefixes) {
             if (arguments.getValue(prefix).isEmpty()) {
                 return (currentText.endsWith(" ") ? "" : " ") + prefix.getPrefix();
