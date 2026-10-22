@@ -47,7 +47,8 @@ public class PersonContainsKeywordsPredicateTest {
                 "2345", // phone
                 "tan@exam", // email
                 "stad", // address
-                "personal"); // remark
+                "personal", // remark
+                "rela"); // event
 
         for (String keyword : partialMatches) {
             PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of(keyword));
@@ -89,7 +90,8 @@ public class PersonContainsKeywordsPredicateTest {
                 SearchField.PHONE, "2345",
                 SearchField.EMAIL, "tan@exam",
                 SearchField.ADDRESS, "stad",
-                SearchField.REMARK, "personal");
+                SearchField.REMARK, "personal",
+                SearchField.EVENT, "sprint");
 
         matchingValues.forEach((field, keyword) -> assertTrue(
                 new PersonContainsKeywordsPredicate(List.of(), Map.of(field, List.of(keyword))).test(ATHLETE),
@@ -110,16 +112,21 @@ public class PersonContainsKeywordsPredicateTest {
     }
 
     @Test
-    public void test_broadKeywordAndField_requiresBoth() {
-        // avery e/other.com -> the broad keyword matches but the email field does not, so no match.
-        PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of("avery"),
+    public void test_broadKeywordOrField_matchesEither() {
+        // avery e/other.com -> the broad keyword matches even though the email field does not (OR).
+        PersonContainsKeywordsPredicate broadMatches = new PersonContainsKeywordsPredicate(List.of("avery"),
                 Map.of(SearchField.EMAIL, List.of("other.com")));
-        assertFalse(predicate.test(ATHLETE));
+        assertTrue(broadMatches.test(ATHLETE));
 
-        // avery e/example.com -> both hold, so it matches.
-        PersonContainsKeywordsPredicate matching = new PersonContainsKeywordsPredicate(List.of("avery"),
+        // zzznomatch e/example.com -> the email field matches even though the broad keyword does not (OR).
+        PersonContainsKeywordsPredicate fieldMatches = new PersonContainsKeywordsPredicate(List.of("zzznomatch"),
                 Map.of(SearchField.EMAIL, List.of("example.com")));
-        assertTrue(matching.test(ATHLETE));
+        assertTrue(fieldMatches.test(ATHLETE));
+
+        // Neither the broad keyword nor the field matches -> no match.
+        PersonContainsKeywordsPredicate neither = new PersonContainsKeywordsPredicate(List.of("zzznomatch"),
+                Map.of(SearchField.EMAIL, List.of("other.com")));
+        assertFalse(neither.test(ATHLETE));
     }
 
     @Test
@@ -135,7 +142,15 @@ public class PersonContainsKeywordsPredicateTest {
         assertFalse(new PersonContainsKeywordsPredicate(List.of()).test(ATHLETE));
         assertFalse(new PersonContainsKeywordsPredicate(List.of("   ")).test(ATHLETE));
         assertFalse(new PersonContainsKeywordsPredicate(List.of("swimming", "9999")).test(ATHLETE));
-        assertFalse(new PersonContainsKeywordsPredicate(List.of("sprints", "relay")).test(ATHLETE));
+    }
+
+    @Test
+    public void test_eventKeywordAcrossTwoEvents_returnsFalse() {
+        // events are matched one at a time, so a keyword spanning two events must not match
+        assertFalse(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.EVENT, List.of("sprintsrelay"))).test(ATHLETE));
+        assertFalse(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.EVENT, List.of("personal"))).test(ATHLETE));
     }
 
     @Test

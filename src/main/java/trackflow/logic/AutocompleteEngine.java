@@ -6,6 +6,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import trackflow.logic.parser.ArgumentMultimap;
+import trackflow.logic.parser.ArgumentTokenizer;
+import trackflow.logic.parser.Prefix;
+
 /**
  * Handles the logic for the command box autocomplete feature.
  */
@@ -22,7 +26,9 @@ public class AutocompleteEngine {
             "sort",
             "help",
             "list",
-            "remark INDEX r/"
+            "remark INDEX r/",
+            "tag INDEX t/",
+            "untag INDEX t/"
     );
 
     /**
@@ -78,15 +84,14 @@ public class AutocompleteEngine {
             return "";
         }
 
-        Matcher m = Pattern.compile("(?:^|\\s)([a-zA-Z]+/)").matcher(template);
-        while (m.find()) {
-            String prefix = m.group(1);
-            // Check case-insensitively if the current text already contains this prefix preceded by whitespace
-            boolean isAlreadyPresent = Pattern.compile("(?i)(?:^|\\s)" + Pattern.quote(prefix))
-                    .matcher(currentText)
-                    .find();
-            if (!isAlreadyPresent) {
-                return (currentText.endsWith(" ") ? "" : " ") + prefix;
+        Matcher prefixMatcher = Pattern.compile("(?:^|\\s)([a-zA-Z]+/)").matcher(template);
+        List<Prefix> prefixes = prefixMatcher.results()
+                .map(result -> new Prefix(result.group(1)))
+                .toList();
+        ArgumentMultimap arguments = ArgumentTokenizer.tokenize(currentText, prefixes.toArray(Prefix[]::new));
+        for (Prefix prefix : prefixes) {
+            if (arguments.getValue(prefix).isEmpty()) {
+                return (currentText.endsWith(" ") ? "" : " ") + prefix.getPrefix();
             }
         }
         return "";

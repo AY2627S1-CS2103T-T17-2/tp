@@ -2,7 +2,6 @@ package trackflow.logic.parser;
 
 import static java.util.Objects.requireNonNull;
 
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
@@ -11,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import trackflow.commons.core.index.Index;
-import trackflow.commons.util.StringUtil;
 import trackflow.logic.Messages;
 import trackflow.logic.parser.exceptions.ParseException;
 import trackflow.model.person.Address;
@@ -27,12 +25,14 @@ import trackflow.model.tag.Tag;
 public class ParserUtil {
 
     public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
+
     /**
      * Matches the CLI's reserved parameter-prefix shapes: a single letter followed by {@code /}, or {@code addr/}.
      * Longer words followed by a slash are treated as field content, such as {@code Mon/Tue} in a remark.
+     * Uses the same whitespace boundary as {@link ArgumentTokenizer}; an extra slash marks literal text.
      */
     private static final Pattern PARAMETER_PREFIX_PATTERN =
-            Pattern.compile("(?<!\\S)((?i:addr/)|[A-Za-z]/)");
+            Pattern.compile("(?<!\\P{javaWhitespace})((?i:addr/)|[A-Za-z]/)(?!/)");
 
     /**
      * Parses an age category using its canonical display form.
@@ -47,17 +47,30 @@ public class ParserUtil {
 
     /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be
-     * trimmed.
+     * stripped. Values beyond the index range are capped while scanning, without constructing an arbitrary-size
+     * number. Every character is still validated, including characters after the cap is reached.
+     *
      * @throws ParseException if the specified index is invalid (not a non-zero unsigned integer).
      */
     public static Index parseIndex(String oneBasedIndex) throws ParseException {
-        String trimmedIndex = oneBasedIndex.trim();
-        if (!StringUtil.isNonZeroUnsignedInteger(trimmedIndex)) {
+        requireNonNull(oneBasedIndex);
+        String trimmedIndex = oneBasedIndex.strip();
+        int boundedIndex = 0;
+        for (int index = 0; index < trimmedIndex.length(); index++) {
+            char character = trimmedIndex.charAt(index);
+            if (character < '0' || character > '9') {
+                throw new ParseException(MESSAGE_INVALID_INDEX);
+            }
+            int digit = character - '0';
+            if (boundedIndex > (Integer.MAX_VALUE - digit) / 10) {
+                boundedIndex = Integer.MAX_VALUE;
+            } else {
+                boundedIndex = boundedIndex * 10 + digit;
+            }
+        }
+        if (boundedIndex == 0) {
             throw new ParseException(MESSAGE_INVALID_INDEX);
         }
-        BigInteger parsedIndex = new BigInteger(trimmedIndex);
-        BigInteger maximumIndex = BigInteger.valueOf(Integer.MAX_VALUE);
-        int boundedIndex = parsedIndex.min(maximumIndex).intValue();
         return Index.fromOneBased(boundedIndex);
     }
 
@@ -145,13 +158,13 @@ public class ParserUtil {
 
     /**
      * Parses a {@code String tag} into a {@code Tag}.
-     * Leading and trailing whitespaces will be trimmed.
+     * Leading and trailing whitespaces will be trimmed, and repeated inner whitespace collapsed to one space.
      *
      * @throws ParseException if the given {@code tag} is invalid.
      */
     public static Tag parseTag(String tag) throws ParseException {
         requireNonNull(tag);
-        String trimmedTag = tag.trim();
+        String trimmedTag = tag.trim().replaceAll("\\s+", " ");
         if (!Tag.isValidTagName(trimmedTag)) {
             throw new ParseException(Tag.MESSAGE_CONSTRAINTS);
         }

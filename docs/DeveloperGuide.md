@@ -140,8 +140,8 @@ The `Model` component,
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
 
-The following diagram focuses on stored athlete fields. `Tag` remains an internal compatibility field for legacy
-rosters; `UniqueTagList` is not part of the implementation.
+The following diagram focuses on stored athlete fields. Each `Tag` is one track event of the athlete (e.g. `100m`);
+see [Event tagging](#event-tagging). `UniqueTagList` is not part of the implementation.
 
 <puml src="diagrams/BetterModelClassDiagram.puml" width="850" />
 
@@ -172,25 +172,43 @@ This section describes some noteworthy details on how certain features are imple
 ### Command parsing and validation
 
 `TrackFlowParser` treats command words without considering letter case and routes commands with parameters to their
-dedicated parsers. `ArgumentTokenizer` recognizes supported parameter prefixes without considering letter case while
-storing them under their canonical prefix. `ParserUtil.verifyNoUnknownPrefixes` rejects unsupported parameter-like
-tokens of the reserved single-letter or `addr/` form before values are parsed. For example, unsupported `t/`
-produces a command-specific error. Longer slash-containing words such as `wrong/value` are treated as text, while
-`x/value` is treated as an unsupported parameter. Single-letter slash text inside addresses or remarks can also be
-misidentified as a parameter.
+dedicated parsers. Its initial matcher accepts line breaks in arguments; the entire submission is still parsed as one
+command, not a batch. Each field keeps its existing validation rules. The JavaFX command box is a single-line
+`TextField` that removes pasted tabs and line breaks before parsing; users should paste commands on one line with
+spaces. Parser-level tests exercise multiline input directly.
+
+`ArgumentTokenizer` recognizes supported parameter prefixes without considering letter case at the start of the
+arguments or after `Character.isWhitespace` characters, storing them under their canonical prefix.
+`ParserUtil.verifyNoUnknownPrefixes` uses the same boundary to reject unsupported parameter-like tokens of the
+reserved single-letter or `addr/` form before values are parsed. For example, unsupported `t/` produces a
+command-specific error. Longer slash-containing words such as `wrong/value` remain text.
+
+An extra slash marks literal parameter-like text, such as `A//B` or `r//relay`. Both prefix detection and
+unknown-prefix validation skip slash-terminated prefixes followed by another slash. After splitting arguments, the
+tokenizer strips surrounding whitespace and removes exactly one slash from a run of at least two slashes after a
+single-letter or `addr` token. Decoding happens once, including in the broad-search preamble, so decoded text cannot
+introduce new arguments. `A///B` becomes `A//B`, not `A/B`. URLs, network paths, quotation marks, and backslashes
+are not special syntax. Escaped tokens cannot supply required fields or bypass ordinary field validation.
+
+A slash-led value must be separated from its real prefix by whitespace: `addr/ /home/coach` supplies the address
+`/home/coach`, while `addr//home/coach` is literal text and does not introduce an address parameter.
 
 Commands that take no arguments (`clear`, `help`, and `exit`) reject extra text. `remark` requires exactly one `r/`
-prefix. Index parsing accepts arbitrarily long positive digit sequences and safely maps values beyond the in-memory
-index range to an out-of-range displayed index, avoiding numeric-overflow errors.
+prefix. Index parsing scans ASCII digits once, capping the accumulated value at `Integer.MAX_VALUE` without building
+an arbitrary-precision number. It continues validating the remaining characters after reaching the cap, so an
+oversized number followed by text is still rejected. Leading zeroes are accepted; all-zero and malformed indexes are
+rejected. Oversized positive numbers reach the command's normal invalid-displayed-index check.
 
 ### Broad and field-scoped finding
 
-`FindCommandParser` supports unprefixed broad keywords and the field prefixes `n/`, `a/`, `p/`, `e/`, `addr/`, and
-`r/`. It rejects empty or repeated supported field parameters and unsupported reserved prefixes. `PersonContainsKeywordsPredicate` stores broad keywords
+`FindCommandParser` supports unprefixed broad keywords and the field prefixes `n/`, `a/`, `p/`, `e/`, `addr/`,
+`r/`, and `t/` (event). It rejects empty or repeated supported field parameters and unsupported reserved prefixes. `PersonContainsKeywordsPredicate` stores broad keywords
 separately from field-specific criteria. Broad keywords search the combined athlete text, while a prefixed value is
-tested as a single phrase only against its selected field. Broad keywords must precede the first field prefix. Matching is case-insensitive and partial. Broad keywords are combined with OR, but different field prefixes are combined with AND, so an athlete must satisfy every field criterion (and at least one broad keyword, when any are given).
+tested as a single phrase only against its selected field. Broad keywords must precede the first field prefix. Matching is case-insensitive and partial. Broad keywords are combined with OR, and different field prefixes are combined with AND (an athlete must satisfy every field criterion). When both broad keywords and field criteria are given, an athlete matches if any broad keyword matches or every field criterion matches.
 This allows `find n/und` to match a name such as `Underwood` without matching athletes merely because their age
 category starts with `Under`.
+Events are tested one at a time rather than as one combined string, so a keyword cannot match across the end of one
+event and the start of the next.
 
 ### Command autocomplete
 
@@ -204,6 +222,7 @@ It provides real-time dropdown suggestions for commands based on the user's inpu
 * **Selection:** When the user selects a suggestion (via Mouse Click or `Tab`), `CommandBox` inserts the command word followed by a space (e.g., `add `), positions the caret, and hides the popup. This leaves space for the user to insert an index or parameters if required.
 * **Separation of Selection and Execution:** Pressing `Enter` does **not** select or apply autocomplete suggestions. If the user presses `Enter` while the suggestion dropdown is visible, `CommandBox` hides the popup and executes the command as typed in the text field. This prevents accidental template insertions when a fast typist intends to submit their input.
 * **Incremental Prefix Insertion:** If the user presses `Tab` while the suggestion dropdown is closed (or after selecting a command), `CommandBox` uses `AutocompleteEngine#getNextPrefix` to scan the current input and append the next missing prefix based on the command's template. Existing prefixes are matched case-insensitively and regardless of order, allowing the user to construct the command sequentially by pressing `Tab` after entering each parameter's data.
+  Prefix completion uses `ArgumentTokenizer` so escaped literal tokens do not count as supplied parameters.
 
 #### Design Considerations
 
@@ -221,6 +240,46 @@ It provides real-time dropdown suggestions for commands based on the user's inpu
   * **Alternative 2 (Current Choice):** Incrementally insert prefixes using `Tab`.
     * Pros: Creates a guided, IDE-like snippet experience. Prevents trailing empty prefixes from causing parsing errors.
     * Cons: Requires slightly more complex logic to parse the current text and determine the next missing prefix.
+
+### Event tagging
+
+Coaches record the track events each athlete competes in with `tag INDEX t/EVENT...` and remove them with
+`untag INDEX t/EVENT...`. Events are stored as the athlete's `Tag` set, so no change to `Person` or the JSON format
+was needed, and rosters saved by earlier versions still load.
+
+#### Implementation details
+
+* `TagCommandParser` and `UntagCommandParser` extend `EventTagCommandParser`, which parses the shared
+  `INDEX t/EVENT [t/EVENT]...` format. It rejects a missing or invalid index, a missing `t/`, and unknown prefixes.
+  Each event goes through `ParserUtil.parseTag`, which trims it and reduces repeated inner whitespace to one space.
+* `TagCommand` and `UntagCommand` extend `EventTagCommand`, which holds the index and events, looks up the target
+  athlete in the displayed list, and replaces that athlete with a copy that has the updated events.
+* `Tag` accepts letters, digits, single spaces and single hyphens (e.g. `Long Jump`, `110m-Hurdles`), up to 30
+  characters. `Tag#equals` and `Tag#hashCode` ignore case, so normal `Set` operations treat `100m` and `100M` as
+  the same event while the first-entered spelling is kept for display.
+
+`TagCommand` adds only the events the athlete does not already have and lists any skipped events in its message.
+It fails only when every given event is already present, so that the coach knows nothing changed. `UntagCommand`
+fails without removing anything if any given event is not one of the athlete's events, as that usually signals a
+typo. Both commands then show the full roster, matching `edit` and `remark`.
+
+#### Design considerations
+
+* **Aspect: How events are entered**
+  * **Alternative 1 (current choice):** Free text with light validation.
+    * Pros: Supports any event, including unusual ones such as `Javelin 500g`, and avoids rejecting valid input.
+    * Cons: The same event can be entered in different forms (e.g. `100m` and `100 m`).
+  * **Alternative 2:** Choose from a fixed list of track events.
+    * Pros: Consistent names across athletes.
+    * Cons: Rejects events not on the list, which is overly strict for coaches whose events differ.
+* **Aspect: Commands for changing events**
+  * **Alternative 1 (current choice):** Separate `tag` and `untag` commands that add to or remove from the
+    existing events.
+    * Pros: One event can be changed without retyping the others.
+    * Cons: Two commands to learn.
+  * **Alternative 2:** Replace all events through `edit INDEX t/...`, as in AB3.
+    * Pros: One command.
+    * Cons: Adding one event requires retyping every existing event, and a mistake silently removes events.
 
 ### Age-category filtering
 
@@ -253,8 +312,7 @@ values for comparison, avoiding overflow and lexicographic ordering errors. Age 
 
 Undo/redo, archiving, guardian links, relay squads, event grouping, and structured performance logs are not
 implemented in v1.3. Their user stories record possible future scope; they do not describe existing classes or
-commit to a release version. Legacy tag data remains in the model and JSON schema for compatibility, but tag
-commands are not part of this release.
+commit to a release version.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -323,7 +381,7 @@ without committing it to a release; **Excluded** records an idea outside this pr
 | US09 | `* *` | Implemented | coach | edit an athlete's details directly | correct information without deleting and re-entering the record |
 | US10 | `* *` | Implemented | coach | find athletes using partial values from any searchable field | locate records without scanning the full roster or remembering an exact value |
 | US11 | `* *` | Implemented | coach | filter athletes by age category | review athletes in a competition category |
-| US12 | `* *` | [Future] | coach | assign and remove event-specialization tags for athletes | identify athletes who train for particular events and keep their specializations current |
+| US12 | `* *` | Implemented | coach | assign and remove event-specialization tags for athletes | identify athletes who train for particular events and keep their specializations current |
 | US13 | `* *` | Implemented | new coach using TrackFlow | view built-in command help | learn or recall how to operate the application |
 | US14 | `* *` | [Future] | frequent user | recall previously entered commands | reduce repeated typing |
 | US15 | `* *` | [Future] | coach | archive and restore athlete records | keep departed athletes' information without including them in the active roster |
@@ -421,7 +479,7 @@ Use case ends. Deletion has no confirmation prompt, archive, or undo operation.
 
 **Related stories**: US02, US05, US06, US07, US09.<br>
 **Precondition**: TrackFlow is open and the athlete is in the roster.<br>
-**Success postcondition**: The selected athlete's updated details are saved; omitted fields, remarks, and legacy tags
+**Success postcondition**: The selected athlete's updated details are saved; omitted fields, remarks, and events
 are retained.
 
 **MSS**
@@ -510,6 +568,31 @@ Use case ends.
 * **1a.** The index is invalid or the required `r/` prefix is missing or repeated. TrackFlow reports the error and
   leaves the roster unchanged.
 * **3a.** Saving fails. TrackFlow reports the failure and leaves the live roster, filter, and sort order unchanged.
+
+#### UC07: Add or remove an athlete's track events
+
+**Related stories**: US05, US07, US12.<br>
+**Precondition**: TrackFlow displays the athlete to update.<br>
+**Success postcondition**: The athlete's events are updated and saved without changing other stored fields.
+
+**MSS**
+
+1. The coach submits `tag INDEX t/EVENT [t/EVENT]...` using the current displayed index.
+2. TrackFlow adds the events the athlete does not already have.
+3. TrackFlow saves the change, shows the full roster, and confirms which events were added.
+
+Use case ends.
+
+**Extensions**
+
+* **1a.** The index is invalid, no `t/` is given, or an event is invalid. TrackFlow reports the error and leaves the
+  roster unchanged.
+* **2a.** The athlete already has some of the events. TrackFlow adds the rest and also lists the skipped events.
+* **2b.** The athlete already has all of the events. TrackFlow reports this and leaves the roster unchanged.
+* **3a.** Saving fails. TrackFlow reports the failure and leaves the live roster unchanged.
+
+Removing events with `untag INDEX t/EVENT [t/EVENT]...` follows the same steps, except that if any event is not one of
+the athlete's events, TrackFlow reports it and removes nothing.
 
 ### Non-Functional Requirements
 
@@ -691,14 +774,52 @@ Use a disposable home folder; these procedures change saved data.
 1. Run `remark 1 r/Recovery`, then restart. Expect `Recovery` to replace `Sprints`.
 1. Run `remark 1 r/`, then restart. Expect the remark to be empty and the category still `Under 16`.
 1. Try `add n/Incomplete`, `edit 1`, `edit 0 p/999`, `edit 1 addr/`, and `remark 1`.
-   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add, edit, or find command must produce an error; add reports invalid command format, while edit and find identify the unsupported prefix.
+   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add or edit command must produce an error; add reports invalid command format, while edit identifies the unsupported prefix.
 1. Run `clear`, restart, and confirm the roster stays empty rather than loading samples again.
+
+### Parser robustness
+
+Use a disposable roster with at least one athlete. Check the roster and saved file after each rejected command.
+
+1. Run `edit 1 addr/Block A//B addr//Annex`, followed by `remark 1 r/Practise r//relay x//y Mon/Tue`.
+   Expect address `Block A/B addr/Annex` and remark `Practise r/relay x/y Mon/Tue`. Restart and verify both values.
+1. Run `find A//B`, `find addr/Block A//B`, and `find r/r//relay` separately.
+   Expect the athlete in each result, with the extra escape slash removed from the saved fields.
+1. Run `edit 1 addr/C:\Training`. Expect the ordinary backslash to remain in the stored address.
+1. Run `ParserRobustnessTest` using the focused command in the testing guide. It supplies multiline commands
+   directly to the logic layer, checks that one edit is applied, and verifies that `clear` followed by a line break
+   and `exit` is rejected without deletion. In the GUI, replace pasted tabs and line breaks with spaces first,
+   because its single-line command box removes them.
+1. Try `edit 1 p/999 P/888`, `remark 1 r/first R/second`, `find n/`, and `edit 1 x/value`.
+   Expect errors without roster, display, or file changes.
+1. Run `edit 1 addr/Block A///B`, then `find addr/Block A///B`.
+   Expect the stored address to contain `A//B`; it must not be decoded twice.
+1. Run `edit 1 addr/ /home/coach` and `remark 1 r/ //server/share`.
+   Expect the leading slash and network path to remain intact. `remark 1 r/` should still remove the remark.
+1. Try `delete 0`, `delete -1`, `delete +1`, `delete 1.0`, and a delete index containing thousands of digits.
+   Expect controlled errors without deletion. `edit 0001 p/999` should update the first displayed athlete.
+### Tagging athletes with events
+
+Prerequisite: run `list` so that several athletes are shown. Note the events on the 1st athlete's card.
+
+1. Run `tag 1 t/Javelin t/4x100m`.<br>
+   Expected: `Javelin` and `4x100m` appear on the 1st athlete's card along with the existing events.
+1. Run `tag 1 t/javelin t/Shot Put`.<br>
+   Expected: only `Shot Put` is added; the message says the athlete already had `javelin`.
+1. Run `tag 1 t/JAVELIN`.<br>
+   Expected: an error saying the athlete already has the event; nothing changes.
+1. Run `untag 1 t/Shot Put t/Discus` (assuming the athlete has no `Discus`).<br>
+   Expected: an error naming `Discus`; `Shot Put` is **not** removed.
+1. Run `untag 1 t/shot put`.<br>
+   Expected: `Shot Put` is removed. Restart TrackFlow and check the events are still as last shown.
+1. Try `tag 1`, `tag t/100m`, `tag 0 t/100m`, `tag 1 t/`, `tag 1 t/100m*` and `tag 1 t/` followed by 31 letters.<br>
+   Expected: an error for each; nothing changes.
 
 ### Duplicate identity and complete equality
 
 Duplicate checks use normalized name plus **either** matching phone or matching email, regardless of age category.
 Name normalization ignores case and repeated spaces; email matching ignores case. Complete equality additionally
-compares every stored value, including category, address, remark, and legacy tags. These are separate contracts.
+compares every stored value, including category, address, remark, and events. These are separate contracts.
 
 1. Start with only Avery: run `clear`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`. Attempt to add `AVERY   TAN` with the same phone and a different
    email and category. Expect a duplicate error, with no saved changes. Repeat with a different phone and matching

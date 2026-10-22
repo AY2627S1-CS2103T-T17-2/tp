@@ -31,14 +31,18 @@ public interface Model {
 
     /**
      * Replaces athlete roster data with the data in {@code roster}.
+     * Retains the current display predicate and comparator.
      */
     void setRoster(ReadOnlyRoster roster);
 
-    /** Returns the AthleteRoster */
+    /**
+     * Returns a read-only view of the complete roster, including athletes hidden by the current filter.
+     */
     ReadOnlyRoster getRoster();
 
     /**
-     * Returns true if a person with the same identity as {@code person} exists in the athlete roster.
+     * Returns true if the complete roster contains an athlete matching {@link Person#isSamePerson(Person)}.
+     * Athletes hidden by the current filter are included in the check.
      */
     boolean hasPerson(Person person);
 
@@ -51,6 +55,7 @@ public interface Model {
     /**
      * Adds the given person.
      * {@code person} must not already exist in the athlete roster.
+     * Resets the filter to show all athletes, retaining the current sort order.
      */
     void addPerson(Person person);
 
@@ -62,7 +67,9 @@ public interface Model {
      */
     void setPerson(Person target, Person editedPerson);
 
-    /** Returns an unmodifiable view of the filtered person list */
+    /**
+     * Returns a live, unmodifiable view of the roster after applying the current filter and sort order.
+     */
     ObservableList<Person> getFilteredPersonList();
 
     /**
@@ -80,14 +87,18 @@ public interface Model {
     }
 
     /**
-     * Updates the filter of the filtered person list to filter by the given {@code predicate}.
-     * @throws NullPointerException if {@code predicate} is null.
+     * Replaces the display filter with {@code predicate}, retaining the current sort order.
+     * Does not change roster data or its stored order.
+     *
+     * @throws NullPointerException If {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
 
     /**
-     * Updates the ordering of the displayed person list.
-     * @throws NullPointerException if {@code comparator} is null.
+     * Replaces the display ordering with {@code comparator}, retaining the current filter.
+     * Does not reorder the stored roster.
+     *
+     * @throws NullPointerException If {@code comparator} is null.
      */
     void updateSortedPersonList(Comparator<Person> comparator);
 }

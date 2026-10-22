@@ -16,7 +16,7 @@ import trackflow.model.tag.Tag;
  */
 public class Person {
 
-    // Identity fields
+    // Athlete details; duplicate identity is defined by isSamePerson.
     private final Name name;
     private final AgeCategory ageCategory;
     private final Phone phone;
@@ -28,14 +28,16 @@ public class Person {
     private final Set<Tag> tags = new HashSet<>();
 
     /**
-     * Every field must be present and not null.
+     * Constructs an athlete in the Open age category with the supplied details.
+     * All fields must be non-null; the address and remark may contain empty values.
      */
     public Person(Name name, Phone phone, Email email, Address address, Remark remark, Set<Tag> tags) {
         this(name, new AgeCategory("Open"), phone, email, address, remark, tags);
     }
 
     /**
-     * Constructs a person with an explicit age category and existing optional data.
+     * Constructs an athlete with an explicit age category and a defensive copy of the supplied tags.
+     * All fields must be non-null; the address and remark may contain empty values.
      */
     public Person(Name name, AgeCategory ageCategory, Phone phone, Email email,
             Address address, Remark remark, Set<Tag> tags) {
@@ -82,8 +84,10 @@ public class Person {
     }
 
     /**
-     * Returns true if the normalized name and either phone or email match.
-     * This defines a weaker notion of equality between two persons.
+     * Returns true if the normalized name and either phone or email match, or this is the same object.
+     * Name comparison ignores case and repeated whitespace; contact comparison follows
+     * {@link #hasSameContactDetails(Person)}. Age category and other stored details do not affect duplicate identity.
+     * Returns false for null. Use {@link #equals(Object)} to compare all stored values exactly.
      */
     public boolean isSamePerson(Person otherPerson) {
         if (otherPerson == this) {
@@ -96,7 +100,8 @@ public class Person {
     }
 
     /**
-     * Returns true if either the normalized phone number or email matches.
+     * Returns true if either the phone's digits or the email matches those of {@code otherPerson}.
+     * Email comparison ignores case and surrounding whitespace. Names are not compared; null returns false.
      */
     public boolean hasSameContactDetails(Person otherPerson) {
         return otherPerson != null
@@ -109,8 +114,8 @@ public class Person {
     }
 
     /**
-     * Returns true if both persons have the same identity and all stored data fields, including remarks.
-     * This defines a stronger notion of equality than {@link #isSamePerson(Person)}.
+     * Returns true if all stored values match exactly, including name, category, contacts, address, remark, and tags.
+     * Unlike {@link #isSamePerson(Person)}, this comparison does not normalize names or email addresses.
      */
     @Override
     public boolean equals(Object other) {

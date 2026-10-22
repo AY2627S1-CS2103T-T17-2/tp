@@ -18,7 +18,8 @@ import trackflow.model.person.Person;
 import trackflow.storage.Storage;
 
 /**
- * The main LogicManager of the app.
+ * Coordinates command parsing, execution, and persistence.
+ * Applies roster-changing commands to a detached model and publishes them only after saving succeeds.
  */
 public class LogicManager implements Logic {
     public static final String FILE_OPS_ERROR_FORMAT = "Could not save data due to the following error: %s";
@@ -41,6 +42,11 @@ public class LogicManager implements Logic {
         trackFlowParser = new TrackFlowParser();
     }
 
+    /**
+     * {@inheritDoc}
+     * Roster changes are staged with the current filter and sort order. A parsing, execution, or save failure
+     * leaves the live roster and display state unchanged.
+     */
     @Override
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");

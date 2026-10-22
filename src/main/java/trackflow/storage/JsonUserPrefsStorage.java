@@ -16,6 +16,9 @@ public class JsonUserPrefsStorage {
 
     private Path filePath;
 
+    /**
+     * Creates storage for user preferences at {@code filePath} without reading or creating the file.
+     */
     public JsonUserPrefsStorage(Path filePath) {
         this.filePath = filePath;
     }
@@ -35,9 +38,11 @@ public class JsonUserPrefsStorage {
     }
 
     /**
-     * Similar to {@link #readUserPrefs()}
-     * @param prefsFilePath location of the data. Cannot be null.
-     * @throws DataLoadingException if the file format is not as expected.
+     * Returns preferences from {@code prefsFilePath}, or an empty optional if that file is absent.
+     *
+     * @param prefsFilePath Location of the preferences; must not be null.
+     * @return The loaded preferences, or an empty optional if the file is absent.
+     * @throws DataLoadingException If the file cannot be read or its JSON cannot be converted to preferences.
      */
     public Optional<UserPrefs> readUserPrefs(Path prefsFilePath) throws DataLoadingException {
         Optional<UserPrefs> userPrefs = JsonUtil.readJsonFile(prefsFilePath, UserPrefs.class);

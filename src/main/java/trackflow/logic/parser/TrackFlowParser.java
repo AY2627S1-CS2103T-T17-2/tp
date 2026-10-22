@@ -22,6 +22,8 @@ import trackflow.logic.commands.HelpCommand;
 import trackflow.logic.commands.ListAthleteCommand;
 import trackflow.logic.commands.RemarkCommand;
 import trackflow.logic.commands.SortCommand;
+import trackflow.logic.commands.TagCommand;
+import trackflow.logic.commands.UntagCommand;
 import trackflow.logic.parser.exceptions.ParseException;
 
 /**
@@ -30,9 +32,11 @@ import trackflow.logic.parser.exceptions.ParseException;
 public class TrackFlowParser {
 
     /**
-     * Used for initial separation of command word and args.
+     * Separates one command word from its arguments, including arguments pasted across lines.
+     * The arguments are passed to one command parser; this does not execute a batch of commands.
      */
-    private static final Pattern BASIC_COMMAND_FORMAT = Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)");
+    private static final Pattern BASIC_COMMAND_FORMAT =
+            Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)", Pattern.DOTALL);
     private static final Logger logger = LogsCenter.getLogger(TrackFlowParser.class);
 
     /**
@@ -70,6 +74,8 @@ public class TrackFlowParser {
             case HelpCommand.COMMAND_WORD -> parseNoArguments(arguments, new HelpCommand(), HelpCommand.MESSAGE_USAGE);
             case RemarkCommand.COMMAND_WORD -> new RemarkCommandParser().parse(arguments);
             case SortCommand.COMMAND_WORD -> new SortCommandParser().parse(arguments);
+            case TagCommand.COMMAND_WORD -> new TagCommandParser().parse(arguments);
+            case UntagCommand.COMMAND_WORD -> new UntagCommandParser().parse(arguments);
             default -> {
                 logger.finer("This user input caused a ParseException: " + userInput);
                 throw new ParseException(String.format(MESSAGE_UNKNOWN_COMMAND, commandWord));
