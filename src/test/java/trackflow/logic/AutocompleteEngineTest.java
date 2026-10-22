@@ -204,6 +204,17 @@ public class AutocompleteEngineTest {
     }
 
     @Test
+    public void getNextPrefix_missingOrNonNumericIndex_doesNotInsertPrefixes() {
+        for (String command : List.of("edit", "remark", "tag", "untag")) {
+            assertEquals("", autocompleteEngine.getNextPrefix(command));
+            assertEquals("", autocompleteEngine.getNextPrefix(command + " "));
+            assertEquals("", autocompleteEngine.getNextPrefix(command + " INDEX"));
+            assertEquals("", autocompleteEngine.getNextPrefix(command + " n/Avery"));
+        }
+        assertEquals(" n/", autocompleteEngine.getNextPrefix("EDIT 0001"));
+    }
+
+    @Test
     public void getNextPrefix_filterCommand_returnsPrefix() {
         assertEquals("a/", autocompleteEngine.getNextPrefix("filter "));
         assertEquals(" a/", autocompleteEngine.getNextPrefix("filter"));

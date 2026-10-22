@@ -3,9 +3,12 @@ package trackflow.ui;
 import java.util.logging.Logger;
 
 import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import trackflow.commons.core.GuiSettings;
 import trackflow.commons.core.LogsCenter;
 import trackflow.logic.commands.HelpCommand;
 
@@ -24,6 +27,8 @@ public class HelpWindow extends UiPart<Stage> {
 
     @FXML
     private VBox commandList;
+
+    private boolean hasBeenShown;
 
     /**
      * Creates a new HelpWindow.
@@ -93,14 +98,28 @@ public class HelpWindow extends UiPart<Stage> {
     }
 
     /**
-     * Shows and centers the help window without waiting for it to close.
+     * Shows the help window without waiting, fitting its bounds to the available screen.
+     * Starts on its owner's screen and preserves later user placement where it remains reachable.
      *
      * @throws IllegalStateException If called outside the JavaFX Application Thread.
      */
     public void show() {
         logger.fine("Showing help page about the application.");
-        getRoot().show();
-        getRoot().centerOnScreen();
+        Stage stage = getRoot();
+        stage.show();
+        var anchor = !hasBeenShown && stage.getOwner() != null ? stage.getOwner() : stage;
+        GuiSettings settings = new GuiSettings(stage.getWidth(), stage.getHeight(),
+                (int) anchor.getX(), (int) anchor.getY());
+        Rectangle2D bounds = WindowPlacement.fit(settings,
+                Screen.getScreens().stream().map(Screen::getVisualBounds).toList(),
+                Screen.getPrimary().getVisualBounds(), stage.getMinWidth(), stage.getMinHeight());
+        stage.setMinWidth(Math.min(stage.getMinWidth(), bounds.getWidth()));
+        stage.setMinHeight(Math.min(stage.getMinHeight(), bounds.getHeight()));
+        stage.setWidth(bounds.getWidth());
+        stage.setHeight(bounds.getHeight());
+        stage.setX(bounds.getMinX());
+        stage.setY(bounds.getMinY());
+        hasBeenShown = true;
     }
 
     /**

@@ -92,6 +92,16 @@ the primary screen. On exit, `MainWindow` writes the current bounds back to `Gui
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/MainWindow.java).
 
+`MainWindow` uses the static `WindowPlacement.fit` helper to fit saved outer bounds, including decorations, inside
+the visual bounds of a connected screen. A reachable saved position selects the screen with the largest overlap;
+an unreachable position falls back to the primary screen's center. Both restoration paths cap dimensions and
+clamp coordinates. The preferred minimum is 450 by 400 pixels, limited by the selected screen's usable area.
+Normal bounds are remembered in preferences in memory as the window moves or resizes, allowing normal bounds to
+survive maximized, minimized, full-screen and OS quit paths. Preference storage writes them on shutdown.
+The roster can shrink and scroll independently of the input and footer; command execution does not resize the stage.
+`HelpWindow` uses the same fitting helper with its own 480 by 320 minimum, starts on its owner's screen, and
+retains later user placement within the session.
+
 The `UI` component,
 
 * executes user commands using the `Logic` component.
@@ -828,7 +838,15 @@ testers are expected to do more *exploratory* testing.
    1. Resize the window to an optimal size. Move the window to a different location. Close the window.
 
    1. Relaunch from the same folder using `java -jar TrackFlow.jar`.<br>
-       Expected: The most recent window size and location are retained.
+       Expected: The most recent normal window size and location are retained, fitted inside the current screen's
+       usable area. Maximized, minimized and full-screen dimensions do not replace normal bounds.
+
+   1. With the app closed, try oversized saved dimensions and coordinates belonging to a disconnected monitor.
+      Relaunch and verify that the whole window fits on an available screen, with input and footer reachable.
+
+   1. Try a 450 by 400 window, long fields and many event tags. Scroll the roster and long feedback, execute commands,
+      and verify that the stage does not grow automatically. Check 1920 by 1080 at 100% and 125% scaling, and
+      usability at 1280 by 720 at 150%. Record the actual display/scaling tested, separately from helper tests.
 
 1. Run `exit`, then relaunch using `java -jar TrackFlow.jar`. Expect the saved roster to reload; session filters and sorting are reset.
 

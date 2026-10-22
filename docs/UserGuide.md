@@ -112,8 +112,22 @@ TrackFlow provides an autocomplete feature to speed up typing and ensure correct
 * Use the **Up** and **Down** arrow keys to navigate the list of suggestions.
 * Press **Tab**, or **Click** on a suggestion, to select it. This will insert the command word (followed by a space) into the command box and close the suggestions dropdown.
 * Pressing **Enter** does **not** select or apply a suggestion; it closes the suggestions dropdown and executes the command currently typed in the command box.
-* After you enter the command word (or select it with **Tab**), press **Tab** again to automatically insert the next prefix in the sequence. After you type the data for a parameter (or an index, if required), press **Tab** again to insert the next prefix. You can keep pressing **Tab** to step through all the prefixes for the command.
+* After you enter the command word (or select it with **Tab**), press **Tab** again to insert the next missing prefix.
+  For `edit`, `remark`, `tag`, and `untag`, type the athlete index first; autocomplete does not insert it for you.
+  After typing a parameter value, press **Tab** to insert the next missing prefix.
 * Prefixes already entered in the command box (even in uppercase or in a different order) are recognized and skipped automatically.
+* Press **Escape** to dismiss suggestions. **Shift+Tab** moves focus backward. When no suggestion or prefix is
+  available, **Tab** moves focus to the next control, allowing keyboard access to feedback and the roster.
+
+### Window size and scrolling
+
+TrackFlow restores its normal window size and position when reopened. If the saved window is too large or its
+monitor is disconnected, TrackFlow fits the window into a connected screen's usable area. The normal minimum is
+450 by 400 pixels, reduced further if the screen has less usable space. Maximizing or minimizing does not replace
+the last normal window bounds. Adding or editing athletes does not automatically enlarge the window.
+
+Resize the window as needed. Athlete details wrap, the roster scrolls, and long command feedback can be scrolled
+within the result area. The command box and status footer remain separate from the scrolling roster.
 
 ### Command feedback and errors
 
@@ -134,7 +148,8 @@ so that it can be corrected.
 ### Viewing help: `help`
 
 Opens a resizable, scrollable help window listing every supported command, its purpose,
-parameters, and examples.
+parameters, and examples. It opens on the main window's screen and fits the available space. Running `help`
+again restores it if minimized. Closing and reopening help retains its position during the current session.
 
 Format: `help`
 

@@ -16,7 +16,7 @@
 <?import javafx.scene.shape.SVGPath?>
 
 <fx:root type="javafx.stage.Stage" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-         title="TrackFlow" minWidth="450" minHeight="600" onCloseRequest="#handleExit">
+         title="TrackFlow" minWidth="450" minHeight="400" onCloseRequest="#handleExit">
   <icons>
     <Image url="@/images/trackflow_32.png" />
     <Image url="@/images/trackflow_256.png" />
@@ -62,18 +62,19 @@
         </StackPane>
 
         <StackPane VBox.vgrow="NEVER" fx:id="resultDisplayPlaceholder" styleClass="pane-with-border"
-                   minHeight="100" prefHeight="100" maxHeight="100">
+                   minHeight="64" prefHeight="100" maxHeight="100">
           <padding>
             <Insets top="0" right="14" bottom="4" left="14" />
           </padding>
         </StackPane>
 
-        <VBox fx:id="personList" styleClass="pane-with-border" minWidth="340" prefWidth="340" VBox.vgrow="ALWAYS">
+        <VBox fx:id="personList" styleClass="pane-with-border" minWidth="340" minHeight="0" prefWidth="340"
+              VBox.vgrow="ALWAYS">
           <padding>
             <Insets top="8" right="14" bottom="12" left="14" />
           </padding>
           <Label text="ROSTER" styleClass="section-label" />
-          <StackPane fx:id="personListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
+          <StackPane fx:id="personListPanelPlaceholder" minHeight="0" VBox.vgrow="ALWAYS"/>
         </VBox>
 
         <StackPane fx:id="statusbarPlaceholder" VBox.vgrow="NEVER" />
