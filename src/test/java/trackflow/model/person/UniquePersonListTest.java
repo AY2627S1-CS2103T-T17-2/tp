@@ -171,6 +171,22 @@ public class UniquePersonListTest {
     }
 
     @Test
+    public void setPersons_sameNameDifferentCaseAndSpacingSharedContact_throwsDuplicatePersonException() {
+        // A name that differs only in case and spacing, sharing a contact detail, is still a duplicate.
+        Person variant = new PersonBuilder(ALICE)
+                .withName(ALICE.getName().fullName.toUpperCase().replace(" ", "  ")).build();
+        assertThrows(DuplicatePersonException.class, () -> uniquePersonList.setPersons(List.of(ALICE, variant)));
+    }
+
+    @Test
+    public void setPersons_sameNameDifferentContacts_allowed() {
+        // Two athletes with the same name but different phone and email are not duplicates.
+        Person sameName = new PersonBuilder(ALICE).withPhone("80008000").withEmail("different@example.com").build();
+        uniquePersonList.setPersons(List.of(ALICE, sameName));
+        assertEquals(List.of(ALICE, sameName), uniquePersonList.asUnmodifiableObservableList());
+    }
+
+    @Test
     public void asUnmodifiableObservableList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, ()
             -> uniquePersonList.asUnmodifiableObservableList().remove(0));
