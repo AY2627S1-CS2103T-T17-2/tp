@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static trackflow.logic.parser.CliSyntax.PREFIX_TAG;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,10 +42,23 @@ public abstract class EventTagCommandParser<T extends EventTagCommand> implement
         if (eventNames.isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, getUsage()));
         }
-        Set<Tag> events = ParserUtil.parseTags(eventNames);
+        Set<Tag> events = new HashSet<>();
+        for (String eventName : eventNames) {
+            events.add(parseEvent(eventName));
+        }
         assert !events.isEmpty();
 
         return createCommand(index, events);
+    }
+
+    /**
+     * Parses a newly entered event using the current name constraints.
+     * Removal parsers may override this to identify preserved legacy names.
+     *
+     * @throws ParseException If the event name is invalid.
+     */
+    protected Tag parseEvent(String eventName) throws ParseException {
+        return ParserUtil.parseTag(eventName);
     }
 
     /**

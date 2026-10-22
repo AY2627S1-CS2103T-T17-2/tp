@@ -290,6 +290,9 @@ Format: `untag INDEX t/EVENT [t/EVENT]...`
   up to 30 characters long, e.g. `100m`, `4x100m`, `Long Jump`, `110m-Hurdles`. Extra spaces inside an event are
   reduced to one.
 * Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalisation it was first added with.
+* Older rosters may contain alphanumeric tags longer than 30 characters. TrackFlow preserves these exactly when
+  loading and saving. They remain searchable and can be removed with `untag INDEX t/EXACT_NAME`, ignoring case.
+  The 30-character limit still applies when adding a new event with `tag`.
 * If the athlete already has some of the events given to `tag`, only the new events are added and the message lists
   the events that were skipped. If the athlete already has all of them, an error is shown.
 * If any event given to `untag` is not one of the athlete's events, an error is shown and **no** events are removed.
@@ -359,7 +362,8 @@ Available fields:
 
 * `name` sorts names alphabetically without considering letter case.
 * `age` sorts competition categories in this order: `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
-* `phone` sorts phone numbers numerically rather than alphabetically.
+* `phone` sorts phone numbers numerically by their digits, ignoring spaces and non-digit formatting characters.
+  Sorting keeps the displayed and saved phone text unchanged.
 * `email` sorts email addresses alphabetically without considering letter case.
 * `address` sorts addresses alphabetically without considering letter case. Empty addresses appear first in ascending
   order and last in descending order.
@@ -437,8 +441,21 @@ available without saving the roster. You do not need to save manually.
 
 ### Editing the data file
 
-TrackFlow saves roster data to `data/trackflow.json`, relative to the folder from which you launch the application.
-Following the quick-start instructions places it beside the JAR in the `data` subfolder. If `data/trackflow.json` does not exist when launched, TrackFlow starts with sample athlete data and creates the file upon the first successful command that changes roster data.
+TrackFlow saves roster data to `data/trackflow.json` inside the folder containing the JAR, even if you launch it
+from another folder. If you launch through a symbolic link to the JAR, it uses the actual JAR's folder.
+Preferences (`preferences.json`) and rotated logs (`trackflow.log.0`, etc.) use that same home folder. Roster backups
+and temporary save files stay beside the roster. When running unpacked classes from an IDE, home is the process
+working directory instead.
+
+If no roster file exists there, TrackFlow starts with sample athletes and creates the file after the first
+successful command that changes roster data. An intentionally saved empty roster remains empty on restart.
+
+If an older version saved your roster in another launch folder, close TrackFlow and back up both locations before
+copying that folder's `data/trackflow.json` into the JAR's `data` folder. Copy `preferences.json` too if you want to
+retain your window settings. Keep a separate copy of any existing destination roster before replacing it.
+
+Missing or unreadable preferences, null window settings, or invalid window dimensions cause TrackFlow to use and
+attempt to save default settings. This recovery does not change athlete data.
 
 Close TrackFlow and make a separate backup before editing this file manually.
 

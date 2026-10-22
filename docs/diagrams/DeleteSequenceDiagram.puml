@@ -1,89 +1,35 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
+skinparam maxMessageSize 180
+
 participant ":LogicManager" as logic LOGIC_COLOR
-participant ":TrackFlowParser" as parser LOGIC_COLOR
-participant ":DeleteCommandParser" as deleteParser LOGIC_COLOR
 participant "command:DeleteCommand" as command LOGIC_COLOR
-participant "live:ModelManager" as live MODEL_COLOR
 participant "staged:ModelManager" as staged MODEL_COLOR
-participant ":StorageManager" as storage STORAGE_COLOR
-[-> logic : execute("delete 1")
+
 activate logic LOGIC_COLOR
-logic -> parser : parseCommand("delete 1")
-activate parser LOGIC_COLOR
-create deleteParser
-parser -> deleteParser : new DeleteCommandParser()
-activate deleteParser LOGIC_COLOR
-deleteParser --> parser
-deactivate deleteParser
-parser -> deleteParser : parse(" 1")
-activate deleteParser LOGIC_COLOR
-create command
-deleteParser -> command : new DeleteCommand(index)
-activate command LOGIC_COLOR
-command --> deleteParser
-deactivate command
-deleteParser --> parser : command
-deactivate deleteParser
-parser --> logic : command
-deactivate parser
-logic -> live : getRoster()
-activate live MODEL_COLOR
-live --> logic : roster
-deactivate live
-logic -> live : getUserPrefs()
-activate live MODEL_COLOR
-live --> logic : prefs
-deactivate live
-create staged
-logic -> staged : new ModelManager(roster, prefs)
-activate staged MODEL_COLOR
-staged --> logic
-deactivate staged
-note right of staged
-  The current predicate and comparator are copied.
-  Their accessor and update calls are omitted.
-end note
 logic -> command : execute(staged)
 activate command LOGIC_COLOR
 command -> staged : getFilteredPersonList()
 activate staged MODEL_COLOR
 staged --> command : displayedAthletes
 deactivate staged
+
+note over command
+  Select the athlete at the
+  displayed index (here, 1).
+end note
+
 command -> staged : deletePerson(athleteToDelete)
 activate staged MODEL_COLOR
 staged --> command
 deactivate staged
 command --> logic : commandResult
 deactivate command
-alt save succeeds
-    logic -> storage : saveRoster(staged.getRoster())
-    activate storage STORAGE_COLOR
-    storage --> logic
-    deactivate storage
-    logic -> live : setRoster(staged.getRoster())
-    activate live MODEL_COLOR
-    live --> logic
-    deactivate live
-    logic -> live : updateFilteredPersonList(staged.getPersonListPredicate())
-    activate live MODEL_COLOR
-    live --> logic
-    deactivate live
-    note right of live: The live sort comparator is retained.
-    [<-- logic : savedResult
-else IOException while saving
-    logic -> storage : saveRoster(staged.getRoster())
-    activate storage STORAGE_COLOR
-    storage --> logic : throws IOException
-    deactivate storage
-    [<-- logic : throws CommandException
-end
 deactivate logic
+
 legend bottom
-  Partial trace: successful parsing and a valid displayed index are assumed.
-  Logging, changesRoster(), list access, result construction, and routine accessors are omitted.
-  On success, withDataSaved() creates savedResult after publication; that call is omitted.
-  Save failure is wrapped in CommandException; the live roster and display stay unchanged.
+  Valid index assumed; the command and staged model already exist.
+  This changes only the staged roster. LogicManager saves it afterwards.
 endlegend
 @enduml

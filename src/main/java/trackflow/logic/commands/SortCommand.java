@@ -31,7 +31,7 @@ public class SortCommand extends Command {
 
     private static final Comparator<String> CASE_INSENSITIVE_TEXT_COMPARATOR = String.CASE_INSENSITIVE_ORDER;
     private static final Comparator<String> NUMERIC_TEXT_COMPARATOR =
-            Comparator.comparing(BigInteger::new);
+            Comparator.comparing(phone -> new BigInteger(phone.replaceAll("\\D", "")));
 
     private final SortField field;
     private final SortOrder order;
