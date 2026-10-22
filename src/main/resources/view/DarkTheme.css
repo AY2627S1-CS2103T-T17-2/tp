@@ -400,14 +400,22 @@
     -fx-padding: 1 0 3 0;
 }
 
-#personListView .list-cell .pb-pill {
+#personListView .list-cell .pb-chip-event {
+    -fx-font-family: "Plus Jakarta Sans SemiBold";
+    -fx-font-size: 10.5px;
+    -fx-text-fill: -tf-muted;
+    -fx-background-color: #262d38;
+    -fx-background-radius: 5 0 0 5;
+    -fx-padding: 2 7 2 9;
+}
+
+#personListView .list-cell .pb-chip-value {
     -fx-font-family: "Plus Jakarta Sans SemiBold";
     -fx-font-size: 10.5px;
     -fx-text-fill: -tf-accent-soft;
-    -fx-background-color: #4a2a22, #241a19;
-    -fx-background-insets: 0, 1;
-    -fx-background-radius: 5, 4;
-    -fx-padding: 2 9 2 9;
+    -fx-background-color: #4a2a22;
+    -fx-background-radius: 0 5 5 0;
+    -fx-padding: 2 9 2 7;
 }
 
 /* ---------- Status bar ---------- */

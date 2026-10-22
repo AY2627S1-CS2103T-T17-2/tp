@@ -78,6 +78,23 @@ public class Performance {
         return result;
     }
 
+    /**
+     * Returns the result formatted for display with its unit: a distance as "{@code <number> m}" and a
+     * plain-seconds time as "{@code <number> s}". A time already written with minutes (containing ':') is
+     * shown unchanged, since its format already identifies it as a time.
+     */
+    public String getDisplayResult() {
+        if (kind == Kind.DISTANCE) {
+            String metres = result.substring(0, result.length() - 1).trim();
+            return metres + " m";
+        }
+        String time = result;
+        if (time.toLowerCase(Locale.ROOT).endsWith("s")) {
+            time = time.substring(0, time.length() - 1).trim();
+        }
+        return time.contains(":") ? time : time + " s";
+    }
+
     /** Returns the recorded date, or {@code null} if none was recorded. */
     public LocalDate getDate() {
         return date;

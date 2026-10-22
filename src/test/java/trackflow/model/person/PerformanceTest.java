@@ -67,6 +67,14 @@ public class PerformanceTest {
     }
 
     @Test
+    public void getDisplayResult_appendsUnit() {
+        assertEquals("12.34 s", new Performance("100m", "12.34", null).getDisplayResult());
+        assertEquals("58.7 s", new Performance("100m", "58.7s", null).getDisplayResult());
+        assertEquals("2:05.4", new Performance("800m", "2:05.4", null).getDisplayResult());
+        assertEquals("6.21 m", new Performance("Long Jump", "6.21m", null).getDisplayResult());
+    }
+
+    @Test
     public void getKind_detectsTimeVersusDistance() {
         assertEquals(Performance.Kind.TIME, new Performance("100m", "12.34", null).getKind());
         assertEquals(Performance.Kind.TIME, new Performance("800m", "2:05.4", null).getKind());
