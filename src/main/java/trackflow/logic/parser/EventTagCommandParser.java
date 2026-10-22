@@ -15,14 +15,14 @@ import trackflow.model.tag.Tag;
 /**
  * Parses arguments of the form {@code INDEX t/EVENT [t/EVENT]...} shared by the event tag commands.
  *
- * @param <T> the type of command created
+ * @param <T> the type of command created.
  */
 public abstract class EventTagCommandParser<T extends EventTagCommand> implements Parser<T> {
 
     /**
      * Parses the given {@code String} of arguments and returns the command for execution.
      *
-     * @throws ParseException if the user input does not conform to the expected format
+     * @throws ParseException if the user input does not conform to the expected format.
      */
     @Override
     public T parse(String args) throws ParseException {

@@ -27,7 +27,7 @@ Interface (GUI).
 1. Copy the file to the folder you want to use as the _home folder_ for TrackFlow.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar TrackFlow.jar`.<br>
-   The GUI opens with sample athletes. The image below is a design mockup: its grade/event fields and command examples do not represent v1.3. Use the commands documented in this guide.<br>
+   The GUI opens with sample athletes. The image below is a design mockup: its layout and command examples differ from v1.4. Use the commands documented in this guide.<br>
    ![TrackFlow design mockup](images/Ui.png)
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
@@ -409,7 +409,8 @@ The command does not accept parameters.
 ### Saving the data
 
 TrackFlow automatically saves after every successful command that changes roster data: `add`, `edit`, `remark`,
-`delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite the data file.
+`tag`, `untag`, `delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite
+the data file.
 TrackFlow writes the complete update to a temporary file before replacing the existing roster, so an interrupted write
 does not leave a partially written roster when atomic replacement is supported by the filesystem. On other
 filesystems, TrackFlow moves the completed temporary file into place without an atomicity guarantee.
@@ -434,7 +435,7 @@ protect the original file. Keep the preserved copy if you need to recover its re
 
 ### Archiving data files [Future]
 
-Archiving and restoring individual athlete records are not available in v1.3. Keep external copies of roster files
+Archiving and restoring individual athlete records are not available in v1.4. Keep external copies of roster files
 when you need a historical snapshot. No release version is committed for in-app archiving.
 
 --------------------------------------------------------------------------------------------------------------------

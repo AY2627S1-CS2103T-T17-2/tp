@@ -1,19 +1,32 @@
 @startuml
-hide circle
-skinparam classAttributeIconSize 0
-
-Class "{abstract}\nCommand" as Command {
-  +execute(Model): CommandResult
+!include ../style.puml
+skinparam ArrowFontStyle plain
+skinparam linetype polyline
+skinparam arrowColor LOGIC_COLOR_T4
+skinparam classBackgroundColor LOGIC_COLOR
+show members
+hide empty members
+abstract class "{abstract}\nCommand" as Command {
+    +changesRoster(): boolean
+    {abstract} +execute(model: Model): CommandResult
 }
-Class RemarkCommand {
-  +COMMAND_WORD: String
-  +MESSAGE_USAGE: String
-  +MESSAGE_NOT_IMPLEMENTED_YET: String
-  +execute(Model): CommandResult
+class RemarkCommand {
+    {static} +COMMAND_WORD: String
+    {static} +MESSAGE_USAGE: String
+    {static} +MESSAGE_ADD_REMARK_SUCCESS: String
+    {static} +MESSAGE_DELETE_REMARK_SUCCESS: String
+    +changesRoster(): boolean
+    +execute(model: Model): CommandResult
 }
-Class CommandException
-
+class CommandException
+interface Model <<interface>> MODEL_COLOR_T1
+class Remark MODEL_COLOR
 RemarkCommand -up-|> Command
-Command ..> CommandException: throws >
-RemarkCommand .right.> CommandException: throws >
+Command ..> CommandException : throws
+RemarkCommand ..> Model : uses during execution
+RemarkCommand --> "1" Remark
+legend bottom
+  Partial view: index, helpers, and result internals are omitted.
+  RemarkCommand changes the roster; an empty remark removes the recorded note.
+endlegend
 @enduml

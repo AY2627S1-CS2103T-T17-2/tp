@@ -10,7 +10,7 @@ import trackflow.commons.core.LogsCenter;
 import trackflow.logic.commands.HelpCommand;
 
 /**
- * Controller for a help page
+ * Controller for a help page.
  */
 public class HelpWindow extends UiPart<Stage> {
 
@@ -93,22 +93,9 @@ public class HelpWindow extends UiPart<Stage> {
     }
 
     /**
-     * Shows the help window.
-     * @throws IllegalStateException
-     *     <ul>
-     *         <li>
-     *             if this method is called on a thread other than the JavaFX Application Thread.
-     *         </li>
-     *         <li>
-     *             if this method is called during animation or layout processing.
-     *         </li>
-     *         <li>
-     *             if this method is called on the primary stage.
-     *         </li>
-     *         <li>
-     *             if {@code dialogStage} is already showing.
-     *         </li>
-     *     </ul>
+     * Shows and centers the help window without waiting for it to close.
+     *
+     * @throws IllegalStateException If called outside the JavaFX Application Thread.
      */
     public void show() {
         logger.fine("Showing help page about the application.");
@@ -131,7 +118,7 @@ public class HelpWindow extends UiPart<Stage> {
     }
 
     /**
-     * Restores the help window if it is minimised, then brings it to the front and focuses on it.
+     * Restores the help window if it is minimized, then brings it to the front and focuses on it.
      */
     public void focus() {
         Stage stage = getRoot();

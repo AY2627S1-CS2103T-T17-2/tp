@@ -62,13 +62,13 @@ public class JsonSerializableRosterTest {
     @Test
     public void toModelType_nullPersonsList_throwsIllegalValueException() {
         JsonSerializableRoster roster = new JsonSerializableRoster((List<JsonAdaptedPerson>) null);
-        assertThrows(IllegalValueException.class, "Persons list is missing!", roster::toModelType);
+        assertThrows(IllegalValueException.class, "Athlete list is missing!", roster::toModelType);
     }
 
     @Test
     public void toModelType_nullPersonElement_throwsIllegalValueException() {
         JsonSerializableRoster roster = new JsonSerializableRoster(Collections.singletonList(null));
-        assertThrows(IllegalValueException.class, "Persons list contains a null athlete!", roster::toModelType);
+        assertThrows(IllegalValueException.class, "Athlete list contains a null athlete!", roster::toModelType);
     }
 
 }

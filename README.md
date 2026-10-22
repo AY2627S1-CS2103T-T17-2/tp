@@ -4,7 +4,7 @@
 
 # TrackFlow
 
-**TrackFlow** is a keyboard-driven roster and contact manager for **track and field head and assistant coaches**. TrackFlow v1.3 stores athlete names, age categories, contact details, addresses, and remarks locally. Coaches can add, edit, search, filter, sort, and delete athletes using short text commands.
+**TrackFlow** is a keyboard-driven roster and contact manager for **track and field head and assistant coaches**. TrackFlow v1.4 stores athlete names, age categories, contact details, addresses, and remarks locally. Coaches can add, edit, search, filter, sort, tag, and delete athletes using short text commands.
 
 While it has a Graphical User Interface (GUI), most user interactions occur using a Command Line Interface (CLI). It is strictly optimized for touch-typist coaches working at a desk between practices and meets who strongly prefer rapid, keyboard-driven text entry over navigating nested GUI drop-downs and bloated sports-management web platforms.
 
@@ -15,12 +15,12 @@ While it has a Graphical User Interface (GUI), most user interactions occur usin
 * **Flexible athlete search**: Search partial keywords across supported fields or scope searches by specific prefixes (e.g., `find ave`, `find n/avery`, or `find r/injured`).
 * **Multi-field sorting**: Sort the displayed roster by name, age category, phone, email, or address in ascending or descending order (e.g., `sort age desc`).
 * **Athlete remarks**: Attach coach notes, status updates, or medical flags directly to athlete profiles with `remark INDEX r/REMARK`.
+* **Track event tags**: Use `tag INDEX t/EVENT` and `untag INDEX t/EVENT` to maintain an athlete's events; search events with `find t/EVENT`.
 
-### Upcoming Features `[coming in v1.4]`
+### Future ideas (not implemented)
 
 * **Guardian & emergency contact linking**: Map student-athlete cards directly to parent/guardian profiles, enabling single-command lookups of emergency numbers during road meets.
 * **Relay squads & event grouping**: Organize athletes into designated relay squads (e.g., `group g/4x100mA c/1,4,7,12`), track specific relay legs, and log alternate runners.
-* **Personal Best (PB) & performance logs**: Track appendable performance milestones and competition results directly on contact profiles.
 
 ### Documentation
 For detailed instructions on how to use and develop this application, refer to our project website:

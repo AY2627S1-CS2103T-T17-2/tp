@@ -153,7 +153,7 @@ public class JsonAdaptedPersonTest {
         List<JsonAdaptedTag> tagsWithNull = Collections.singletonList(null);
         JsonAdaptedPerson person =
                 new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_REMARK, tagsWithNull);
-        assertThrows(IllegalValueException.class, "Person's tags contain a null tag!", person::toModelType);
+        assertThrows(IllegalValueException.class, "Athlete's tags contain a null tag!", person::toModelType);
     }
 
 }

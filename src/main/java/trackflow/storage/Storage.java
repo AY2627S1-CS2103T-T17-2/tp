@@ -29,6 +29,7 @@ public interface Storage {
 
     /**
      * Saves the given {@link trackflow.model.ReadOnlyUserPrefs} to the storage.
+     *
      * @param userPrefs cannot be null.
      * @throws IOException if there was any problem writing to the file.
      */
@@ -50,6 +51,7 @@ public interface Storage {
 
     /**
      * Saves the given {@link ReadOnlyRoster} to the storage.
+     *
      * @param roster cannot be null.
      * @throws IOException if there was any problem writing to the file.
      */
