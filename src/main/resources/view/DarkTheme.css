@@ -389,6 +389,27 @@
     -fx-padding: 2 8 2 8;
 }
 
+.pb-caption {
+    -fx-font-family: "Plus Jakarta Sans SemiBold";
+    -fx-font-size: 9.5px;
+    -fx-text-fill: -tf-dim;
+    -fx-padding: 5 0 1 0;
+}
+
+.pb-pane {
+    -fx-padding: 1 0 3 0;
+}
+
+#personListView .list-cell .pb-pill {
+    -fx-font-family: "Plus Jakarta Sans SemiBold";
+    -fx-font-size: 10.5px;
+    -fx-text-fill: -tf-accent-soft;
+    -fx-background-color: #4a2a22, #241a19;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 5, 4;
+    -fx-padding: 2 9 2 9;
+}
+
 /* ---------- Status bar ---------- */
 
 .status-bar {

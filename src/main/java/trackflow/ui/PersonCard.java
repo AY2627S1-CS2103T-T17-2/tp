@@ -1,10 +1,11 @@
 package trackflow.ui;
 
 import java.util.Comparator;
-import java.util.stream.Collectors;
 
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
@@ -44,7 +45,9 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label remark;
     @FXML
-    private Label performances;
+    private Label performancesCaption;
+    @FXML
+    private FlowPane performances;
     @FXML
     private FlowPane tags;
 
@@ -61,10 +64,12 @@ public class PersonCard extends UiPart<Region> {
         email.setText(person.getEmail().value);
         showIfNotEmpty(address, person.getAddress().value);
         showIfNotEmpty(remark, person.getRemark().value);
-        String performanceText = person.getPerformances().stream()
-                .map(Performance::toString)
-                .collect(Collectors.joining("  ·  "));
-        showIfNotEmpty(performances, performanceText.isEmpty() ? "" : "Personal bests:  " + performanceText);
+        for (Performance performance : person.getPerformances()) {
+            performances.getChildren().add(createPerformancePill(performance));
+        }
+        boolean hasPerformances = !person.getPerformances().isEmpty();
+        setShown(performancesCaption, hasPerformances);
+        setShown(performances, hasPerformances);
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
@@ -79,5 +84,25 @@ public class PersonCard extends UiPart<Region> {
         label.setText(text);
         label.setVisible(!text.isEmpty());
         label.setManaged(label.isVisible());
+    }
+
+    /**
+     * Returns a pill showing a performance's event and result, with its date (if any) shown as a tooltip.
+     */
+    private static Label createPerformancePill(Performance performance) {
+        Label pill = new Label(performance.getEvent() + "  ·  " + performance.getResult());
+        pill.getStyleClass().add("pb-pill");
+        if (performance.getDate() != null) {
+            pill.setTooltip(new Tooltip("Achieved " + performance.getDate()));
+        }
+        return pill;
+    }
+
+    /**
+     * Shows or hides {@code node}, removing it from the layout when hidden.
+     */
+    private static void setShown(Node node, boolean shown) {
+        node.setVisible(shown);
+        node.setManaged(shown);
     }
 }
