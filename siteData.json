@@ -146,6 +146,8 @@
         "editing-an-athlete-edit": "Editing an athlete: edit",
         "adding-or-removing-an-athlete-remark-remark": "Adding or removing an athlete remark: remark",
         "tagging-athletes-with-track-events-tag-untag": "Tagging athletes with track events: tag, untag",
+        "recording-a-personal-best-pb": "Recording a personal best: pb",
+        "removing-a-performance-pbdel": "Removing a performance: pbdel",
         "finding-athletes-across-all-or-selected-fields-find": "Finding athletes across all or selected fields: find",
         "sorting-the-displayed-athletes-sort": "Sorting the displayed athletes: sort",
         "deleting-an-athlete-delete": "Deleting an athlete: delete",
