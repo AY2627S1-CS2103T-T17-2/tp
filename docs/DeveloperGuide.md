@@ -452,7 +452,7 @@ without committing it to a release; **Excluded** records an idea outside this pr
 | US15 | `* *` | [Future] | coach | archive and restore athlete records | keep departed athletes' information without including them in the active roster |
 | US16 | `* *` | [Future] | coach | record guardians and add or remove their links to athletes | find the appropriate family contact and keep those links current |
 | US17 | `* *` | [Future] | coach | organize athletes into relay squads and event groups | review who belongs to each team or event |
-| US18 | `* *` | Implemented | coach | record and review personal bests by event | track an athlete's performance progress |
+| US18 | `* *` | [Future] | coach | record and review personal bests by event | track an athlete's performance progress |
 | US19 | `* *` | [Future] | coach | record and review relevant medical notes | consult recorded considerations when planning training |
 | US20 | `* *` | [Future] | coach | record and review competition eligibility | identify athletes recorded as eligible for an event |
 | US21 | `* *` | [Future] | coach | record and review participation logs | track athletes' involvement in training or competitions |
@@ -696,7 +696,7 @@ These are product requirements and acceptance targets, not claims about the curr
 | Implemented | A feature available in the current v1.4 code. Release targets and future features are identified separately. |
 | Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone comparisons ignore permitted formatting characters and use the digits. Display formatting may be retained. |
 | Participation log | A future record of an athlete's involvement in training or competition. |
-| Personal best | An athlete's best recorded result for a particular event, recorded with the `pb` command. A time's lower value is better; a distance's higher value is better. |
+| Personal best | An athlete's best recorded result for a particular event, intended for a future performance log. |
 | Relay squad / event group | A future grouping of athletes for a relay team or a particular athletics event. |
 | Unrecovered data | Previously saved roster data that TrackFlow could not load, preserved in a separate `.bak` file before starting an empty roster. If preservation fails, startup stops. |
 
