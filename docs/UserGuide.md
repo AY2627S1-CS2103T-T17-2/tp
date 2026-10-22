@@ -6,7 +6,7 @@
 
 # TrackFlow User Guide
 
-TrackFlow is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
+TrackFlow v1.4 is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
 prefer typing commands through a Command Line Interface (CLI), while retaining the benefits of a Graphical User
 Interface (GUI).
 
@@ -420,8 +420,9 @@ available without saving the roster. You do not need to save manually.
 ### Editing the data file
 
 TrackFlow saves roster data to `data/trackflow.json`, relative to the folder from which you launch the application.
-Following the quick-start instructions places it beside the JAR in the `data` subfolder. Close TrackFlow and make a
-separate backup before editing this file manually.
+Following the quick-start instructions places it beside the JAR in the `data` subfolder. If `data/trackflow.json` does not exist when launched, TrackFlow starts with sample athlete data and creates the file upon the first successful command that changes roster data.
+
+Close TrackFlow and make a separate backup before editing this file manually.
 
 <box type="warning" seamless>
 
