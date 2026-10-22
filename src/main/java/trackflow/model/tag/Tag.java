@@ -8,7 +8,8 @@ import java.util.Locale;
 /**
  * Represents a track event tag (e.g. {@code 100m}, {@code Long Jump}) of an athlete in the roster.
  * Tags are compared case-insensitively, but keep the casing they were created with for display.
- * Guarantees: immutable; name is valid as declared in {@link #isValidTagName(String)}
+ * New names satisfy {@link #isValidTagName(String)}; stored legacy names may also be longer alphanumeric strings.
+ * Guarantees: immutable; the original name is preserved.
  */
 public class Tag {
 
@@ -31,9 +32,26 @@ public class Tag {
      * @param tagName A valid tag name.
      */
     public Tag(String tagName) {
+        this(tagName, false);
+    }
+
+    private Tag(String tagName, boolean allowLegacyName) {
         requireNonNull(tagName);
-        checkArgument(isValidTagName(tagName), MESSAGE_CONSTRAINTS);
+        checkArgument(isValidTagName(tagName) || allowLegacyName && tagName.matches("\\p{Alnum}+"),
+                MESSAGE_CONSTRAINTS);
         this.tagName = tagName;
+    }
+
+    /**
+     * Restores a saved name without truncation, accepting current names and the older unlimited alphanumeric format.
+     * Also supports identifying legacy events for removal; new events must use the public constructor.
+     *
+     * @param tagName Saved event name, preserved exactly; must not be null.
+     * @return The restored tag.
+     * @throws IllegalArgumentException If the name satisfies neither the current nor the legacy format.
+     */
+    public static Tag fromStoredName(String tagName) {
+        return new Tag(tagName, true);
     }
 
     /**

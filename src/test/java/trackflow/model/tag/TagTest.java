@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.Test;
 
 public class TagTest {
@@ -45,6 +47,29 @@ public class TagTest {
         assertTrue(Tag.isValidTagName("4x100m"));
         assertTrue(Tag.isValidTagName("Long Jump")); // single space
         assertTrue(Tag.isValidTagName("110m-Hurdles")); // single hyphen
+    }
+
+    @Test
+    public void fromStoredName_legacyAlphanumeric_preservesNameWithoutAllowingNewLongTags() {
+        for (int length : new int[] {Tag.MAX_LENGTH + 1, 1000}) {
+            String legacyName = "A".repeat(length);
+            Tag restored = Tag.fromStoredName(legacyName);
+            assertEquals(legacyName, restored.tagName);
+            assertEquals(restored, Tag.fromStoredName(legacyName.toLowerCase(Locale.ROOT)));
+            assertEquals(restored.hashCode(),
+                    Tag.fromStoredName(legacyName.toLowerCase(Locale.ROOT)).hashCode());
+            assertThrows(IllegalArgumentException.class, () -> new Tag(legacyName));
+        }
+        assertEquals(new Tag("Long Jump"), Tag.fromStoredName("Long Jump"));
+    }
+
+    @Test
+    public void fromStoredName_invalidName_rejectsWithoutTrimmingOrRelaxingLegacyFormat() {
+        assertThrows(NullPointerException.class, () -> Tag.fromStoredName(null));
+        for (String name : new String[] {"", " ", " 100m", "100m ", "100m*", "Long  Jump",
+            "A".repeat(31) + " B", "A".repeat(31) + "-B"}) {
+            assertThrows(IllegalArgumentException.class, () -> Tag.fromStoredName(name));
+        }
     }
 
     @Test

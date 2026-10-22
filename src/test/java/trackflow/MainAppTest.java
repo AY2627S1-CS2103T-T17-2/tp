@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -20,6 +21,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 import trackflow.commons.core.GuiSettings;
 import trackflow.commons.exceptions.DataLoadingException;
+import trackflow.logic.Logic;
+import trackflow.logic.LogicManager;
+import trackflow.logic.parser.exceptions.ParseException;
 import trackflow.model.AthleteRoster;
 import trackflow.model.Model;
 import trackflow.model.ModelManager;
@@ -99,6 +103,44 @@ public class MainAppTest {
         MainApp app = new MainApp();
         app.initModelManager(createStorage(rosterPath), new UserPrefs());
         assertNull(app.getRosterLoadWarning());
+    }
+
+    @Test
+    public void initModelManager_legacyLongTag_preservesRosterAcrossUpdatesAndRemoval() throws Exception {
+        String legacyTag = "A".repeat(31);
+        Path rosterPath = testFolder.resolve("legacy.json");
+        String original = """
+                {"persons":[{"name":"Legacy Athlete","phone":"91234567","email":"legacy@example.com",
+                "address":"Home","remark":"Original note","tags":["%s","100m"],"ageCategory":"Open"}]}
+                """.formatted(legacyTag);
+        Files.writeString(rosterPath, original);
+        Storage storage = createStorage(rosterPath);
+        MainApp app = new MainApp();
+        Model model = app.initModelManager(storage, new UserPrefs());
+        assertEquals(1, model.getRoster().getPersonList().size());
+        assertNull(app.getRosterLoadWarning());
+        assertEquals(original, Files.readString(rosterPath));
+        try (Stream<Path> files = Files.list(testFolder)) {
+            assertFalse(files.anyMatch(path -> path.getFileName().toString().endsWith(".bak")));
+        }
+
+        Logic logic = new LogicManager(model, storage);
+        logic.execute("remark 1 r/Updated note");
+        logic.execute("edit 1 addr/New home");
+        logic.execute("tag 1 t/200m");
+        Model reloaded = new MainApp().initModelManager(storage, new UserPrefs());
+        assertEquals(model.getRoster(), reloaded.getRoster());
+        assertTrue(reloaded.getRoster().getPersonList().getFirst().getTags().stream()
+                .anyMatch(tag -> tag.tagName.equals(legacyTag)));
+        String beforeRejectedTag = Files.readString(rosterPath);
+        assertThrows(ParseException.class, () -> logic.execute("tag 1 t/" + legacyTag));
+        assertEquals(beforeRejectedTag, Files.readString(rosterPath));
+
+        logic.execute("untag 1 t/" + legacyTag.toLowerCase(Locale.ROOT));
+        Model afterRemoval = new MainApp().initModelManager(storage, new UserPrefs());
+        assertEquals(2, afterRemoval.getRoster().getPersonList().getFirst().getTags().size());
+        assertFalse(afterRemoval.getRoster().getPersonList().getFirst().getTags().stream()
+                .anyMatch(tag -> tag.tagName.equals(legacyTag)));
     }
 
     @Test

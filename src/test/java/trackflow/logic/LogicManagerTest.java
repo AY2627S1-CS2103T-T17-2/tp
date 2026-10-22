@@ -211,6 +211,31 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_phoneSortThenFormattedUpdates_preservesOrderAndReloads() throws Exception {
+        logic.execute("add n/Zoe Tan a/Open p/999 e/zoe@example.com addr/Home");
+        logic.execute("add n/Amy Lim a/Open p/1000 e/amy@example.com addr/Home");
+        logic.execute("sort phone");
+
+        logic.execute("edit 1 p/2 000 (HP)");
+        assertEquals(List.of("Amy Lim", "Zoe Tan"), getDisplayedNames(model));
+        logic.execute("add n/Ben Lee a/Open p/(65) 9123-4567 e/ben@example.com addr/Home");
+        assertEquals(List.of("Amy Lim", "Zoe Tan", "Ben Lee"), getDisplayedNames(model));
+        logic.execute("sort phone desc");
+        assertEquals(List.of("Ben Lee", "Zoe Tan", "Amy Lim"), getDisplayedNames(model));
+        logic.execute("edit 1 p/+1 500");
+        assertEquals(List.of("Zoe Tan", "Ben Lee", "Amy Lim"), getDisplayedNames(model));
+
+        JsonRosterStorage rosterStorage = new JsonRosterStorage(temporaryFolder.resolve("roster.json"));
+        Model reloaded = new ModelManager(rosterStorage.readRoster().orElseThrow(), new UserPrefs());
+        Logic reloadedLogic = new LogicManager(reloaded, new StorageManager(rosterStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("reloadedPrefs.json"))));
+        reloadedLogic.execute("sort phone");
+        assertEquals(List.of("Amy Lim", "Ben Lee", "Zoe Tan"), getDisplayedNames(reloaded));
+        assertEquals(List.of("1000", "+1 500", "2 000 (HP)"), reloaded.getFilteredPersonList().stream()
+                .map(person -> person.getPhone().value).toList());
+    }
+
+    @Test
     public void execute_storageThrowsIoException_throwsCommandException() {
         assertCommandFailureForExceptionFromStorage(DUMMY_IO_EXCEPTION, String.format(
                 LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()));

@@ -108,6 +108,20 @@ public class SortCommandTest {
     }
 
     @Test
+    public void execute_formattedPhones_sortsDigitsWithoutChangingStoredValues() {
+        for (String phone : List.of("1 000", "+1-000", "(1) 000", "1000 (HP)", "000 1000")) {
+            Person formattedAmy = new PersonBuilder(AMY).withPhone(phone).build();
+            Person longPhoneMia = new PersonBuilder(MIA).withPhone("9".repeat(100)).build();
+            model = new ModelManager(new AthleteRosterBuilder().withPerson(longPhoneMia)
+                    .withPerson(formattedAmy).withPerson(ZOE).build(), new UserPrefs());
+
+            assertSortSuccess(PHONE, ASCENDING, List.of(ZOE, formattedAmy, longPhoneMia));
+            assertSortSuccess(PHONE, DESCENDING, List.of(longPhoneMia, formattedAmy, ZOE));
+            assertEquals(phone, formattedAmy.getPhone().value);
+        }
+    }
+
+    @Test
     public void execute_emailAscendingAndDescending_sortsAlphabeticallyIgnoringCase() {
         assertSortSuccess(EMAIL, ASCENDING, List.of(AMY, MIA, ZOE));
         assertSortSuccess(EMAIL, DESCENDING, List.of(ZOE, MIA, AMY));

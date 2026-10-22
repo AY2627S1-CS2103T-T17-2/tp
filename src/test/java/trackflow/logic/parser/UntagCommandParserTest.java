@@ -30,6 +30,8 @@ public class UntagCommandParserTest {
         assertParseFailure(parser, "1", MESSAGE_INVALID_FORMAT);
         assertParseFailure(parser, "t/100m", MESSAGE_INVALID_FORMAT);
         assertParseFailure(parser, "1 t/", Tag.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "1 t/100m*", Tag.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "1 t/" + "A".repeat(31) + " B", Tag.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, "1 t/100m n/Alice",
                 String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "n/", UntagCommand.MESSAGE_USAGE));
     }

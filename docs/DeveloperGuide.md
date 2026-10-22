@@ -53,13 +53,24 @@ The bulk of the app's work is done by the following four components:
 
 **How the architecture components interact with each other**
 
-The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete 1`.
+The sequence diagram below follows a successful `delete 1` across the main components. The `ref` frame summarizes
+parsing and execution on a detached model; [delete execution](#logic-component) is expanded separately.
 
-<puml src="diagrams/ArchitectureSequenceDiagram.puml" width="1100" alt="Delete execution on a detached model, saving before live publication, and the save-failure alternative" />
+<puml src="diagrams/ArchitectureSequenceDiagram.puml" width="800" alt="Successful delete: the UI calls Logic, which saves the staged roster before updating the live model" />
 
-[Open the architecture trace at full size](diagrams/ArchitectureSequenceDiagram.png). Parsing, routine accessors,
-and result construction are abbreviated as indicated in the diagram. Unlabelled dashed replies denote return of
-control from void methods or constructors; exception replies show propagation rather than a normal return value.
+`updatedRoster` means `stagedModel.getRoster()`, and `predicate` means `stagedModel.getPersonListPredicate()`.
+Preparing the staged model copies the live roster, preferences, filter, and sort comparator; those accessor calls
+are omitted. After saving and updating the live model, `withDataSaved()` creates `savedResult`; its call is omitted.
+The live sort comparator is retained. JavaFX observes the published change, and `MainWindow` displays the result.
+
+The separate failure trace shows what happens if saving throws an `IOException`, including an
+`AccessDeniedException`. `LogicManager` wraps it in `CommandException` before `MainWindow` displays the error.
+No staged change is published to the live model.
+
+<puml src="diagrams/SaveFailureSequenceDiagram.puml" width="550" alt="Failed save: Storage throws IOException, Logic reports CommandException, and the live model stays unchanged" />
+
+Both traces assume valid input and a valid displayed index. Unlabelled dashed replies return control from void
+methods or constructors; exception replies show propagation rather than a normal return value.
 
 Each of the four main components (also shown in the diagram above),
 
@@ -123,13 +134,15 @@ Here's a (partial) class diagram of the `Logic` component:
 `CommandResult`; `LogicManager` calls `withDataSaved()` only after saving a roster change successfully.
 The other command subclasses and dedicated command parsers are omitted from this overview.
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
+The delete trace focuses on the command's work. Parsing has already created `DeleteCommand`, and `LogicManager`
+has prepared a detached model with the current roster and display state. The command resolves index 1 against the
+staged model's filtered and sorted list, so it selects the same athlete the user sees.
 
-<puml src="diagrams/DeleteSequenceDiagram.puml" width="1100" alt="Delete parser and command creation, staged execution, and successful or failed persistence" />
+<puml src="diagrams/DeleteSequenceDiagram.puml" width="550" alt="DeleteCommand selects the displayed athlete and removes it from the staged model" />
 
-[Open the delete trace at full size](diagrams/DeleteSequenceDiagram.png). Parser and command lifelines begin at
-their constructor messages. The parser is not explicitly destroyed when parsing finishes. This trace assumes valid
-input and a valid index; validation failures, display-state copying, and result construction are abbreviated.
+This excerpt assumes a valid index and omits list access and result construction. An out-of-range index throws
+`CommandException` before deletion. Saving and publication happen after this excerpt, as shown in the
+[architecture traces](#architecture); they are not repeated here.
 
 
 
@@ -165,21 +178,27 @@ How the parsing works:
   duplicate supported prefixes, parses the supplied fields, and requires at least one field before constructing
   an `EditCommand`. Parser and field-validation failures are reported as `ParseException`.
 
-The sequence below traces successful parsing of `edit 1 addr/Block A//B`. `ParserUtil` and `ArgumentTokenizer`
-lifelines marked `«class»` represent static calls. Unlabelled dashed replies return control without displaying
-a return value.
-Optional-field checks for fields absent from this example and repeated accessor
-calls are omitted; argument lists marked `...` abbreviate usage text and prefix arguments.
+The edit-parsing example is split into dispatch and argument validation. First, `TrackFlowParser` separates the
+command word from its arguments, creates `EditCommandParser`, and delegates parsing. The `ref` frame is expanded
+in the next diagram. Created objects' lifelines begin at their constructor messages.
 
-<puml src="diagrams/tracing/LogicSequenceDiagram.puml" width="1400" alt="Successful edit parsing with prefix validation, one-time slash decoding, index and field checks, and command creation" />
+<puml src="diagrams/tracing/LogicSequenceDiagram.puml" width="850" alt="Edit parsing: TrackFlowParser delegates to EditCommandParser, which creates and returns EditCommand" />
 
-[Open the parsing trace at full size](diagrams/tracing/LogicSequenceDiagram.png) to inspect the message labels
-when the diagram is scaled to fit the page.
+Within `EditCommandParser.parse`, validation and tokenization turn `edit 1 addr/Block A//B` into index 1 and address
+`Block A/B`. `ParserUtil` and `ArgumentTokenizer` participants marked `«class»` receive static calls.
 
-The resulting command contains the address `Block A/B`. No athlete is edited and no file is saved during parsing.
-After this trace, `LogicManager` executes the command on a detached model. `EditCommand` resolves the displayed
-index at execution time; `LogicManager` saves the staged roster and publishes the successful change to the live
-model as described above.
+<puml src="diagrams/tracing/EditArgumentsSequenceDiagram.puml" width="550" alt="Edit argument validation: reject unknown prefixes, tokenize and decode once, then parse the index and address" />
+
+This validation excerpt omits `ArgumentMultimap` accessor calls, the duplicate-prefix check after index parsing,
+checks for absent optional fields, and descriptor assembly. The parser puts the parsed address into an
+`EditPersonDescriptor` and checks that at least one field is edited before constructing the command. The command
+constructor copies that descriptor. Argument lists marked `...` abbreviate usage text and supported prefixes.
+Unlabelled dashed replies return control without displaying a return value.
+
+Syntax and field-validation failures throw `ParseException` before command creation. The successful command
+contains the address `Block A/B`, but no athlete has been edited and no file saved. `LogicManager` subsequently
+executes it on a detached model; `EditCommand` resolves the displayed index during execution, and saving precedes
+publication as described above.
 
 ### Model component
 
@@ -360,18 +379,21 @@ delete, including age category, phone, and email. These diagrams omit helpers, t
 
 Coaches record the track events each athlete competes in with `tag INDEX t/EVENT...` and remove them with
 `untag INDEX t/EVENT...`. Events are stored as the athlete's `Tag` set, so no change to `Person` or the JSON format
-was needed. Existing rosters should be backed up before upgrading; support for all previously valid tag values is
-not guaranteed until the legacy-tag compatibility issue is resolved.
+was needed. Existing rosters should be backed up before upgrading. Older alphanumeric tags, including names longer
+than 30 characters, are preserved without truncation and remain removable with `untag`.
 
 #### Implementation details
 
 * `TagCommandParser` and `UntagCommandParser` extend `EventTagCommandParser`, which parses the shared
   `INDEX t/EVENT [t/EVENT]...` format. It rejects a missing or invalid index, a missing `t/`, and unknown prefixes.
-  Each event goes through `ParserUtil.parseTag`, which trims it and reduces repeated inner whitespace to one space.
+  New events go through `ParserUtil.parseTag`, which trims them and reduces repeated inner whitespace to one space.
+  Removal uses the same whitespace normalization but also accepts preserved legacy alphanumeric names.
 * `TagCommand` and `UntagCommand` extend `EventTagCommand`, which holds the index and events, looks up the target
   athlete in the displayed list, and replaces that athlete with a copy that has the updated events.
-* `Tag` accepts letters, digits, single spaces and single hyphens (e.g. `Long Jump`, `110m-Hurdles`), up to 30
-  characters. `Tag#equals` and `Tag#hashCode` ignore case, so normal `Set` operations treat `100m` and `100M` as
+* New `Tag` names accept letters, digits, single spaces and single hyphens (e.g. `Long Jump`, `110m-Hurdles`), up to 30
+  characters. `Tag.fromStoredName` also accepts the older unlimited alphanumeric format without truncation.
+  `JsonAdaptedTag` uses it when loading, so a valid legacy event does not trigger recovery of the entire roster.
+  `Tag#equals` and `Tag#hashCode` ignore case, so normal `Set` operations treat `100m` and `100M` as
   the same event while the first-entered spelling is kept for display.
 
 The class diagram below is a partial view of the event tagging classes. It shows how the two commands share
@@ -386,6 +408,10 @@ set are omitted.
 of events, but uses `Model` only while executing. `EventTagCommand` provides the shared steps:
 `getTargetAthlete(...)` finds the athlete at the index, and the static `replaceEvents(...)` creates and stores an
 updated copy of that athlete. `TagCommand` and `UntagCommand` differ only in how they work out the updated events.
+
+The shared parser's `parseEvent(...)` helper applies current constraints to new events. `UntagCommandParser`
+overrides it to recognize preserved legacy names too, allowing their removal while `tag` still rejects new names
+over 30 characters. These parsing helpers are omitted from the partial diagram.
 
 `TagCommand` adds only the events the athlete does not already have and lists any skipped events in its message.
 It fails only when every given event is already present, so that the coach knows nothing changed. `UntagCommand`
@@ -433,8 +459,10 @@ comparator through `Model.updateSortedPersonList`, changing only the displayed v
 `roster` order. Consequently, sorting composes with `find`, `filter`, and `list`, and indexed commands continue to
 resolve athletes against exactly what the user sees. The comparator is session-only and is not persisted.
 
-Text fields are compared without considering letter case. Phone numbers are converted to arbitrary-precision numeric
-values for comparison, avoiding overflow and lexicographic ordering errors. Age categories use the competition order
+Text fields are compared without considering letter case. Phone numbers have non-digit characters removed before
+conversion to arbitrary-precision numeric values, matching the existing digits-based contact comparison without
+altering their stored text. This avoids formatting errors, overflow, and lexicographic ordering errors.
+Age categories use the competition order
 `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
 
 ### Flexible athlete search

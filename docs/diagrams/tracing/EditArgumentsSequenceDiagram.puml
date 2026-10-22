@@ -1,0 +1,41 @@
+@startuml
+!include ../style.puml
+skinparam ArrowFontStyle plain
+skinparam maxMessageSize 180
+
+participant ":EditCommandParser" as editParser LOGIC_COLOR
+participant "ParserUtil" as util <<class>> LOGIC_COLOR
+participant "ArgumentTokenizer" as tokenizer <<class>> LOGIC_COLOR
+
+activate editParser LOGIC_COLOR
+editParser -> util : verifyNoUnknownPrefixes(args, ...)
+activate util LOGIC_COLOR
+util --> editParser
+deactivate util
+
+editParser -> tokenizer : tokenize(args, ...)
+activate tokenizer LOGIC_COLOR
+tokenizer --> editParser : argMultimap
+deactivate tokenizer
+
+note over editParser
+  Preamble: "1"
+  Decoded address: "Block A/B"
+end note
+
+editParser -> util : parseIndex("1")
+activate util LOGIC_COLOR
+util --> editParser : index
+deactivate util
+
+editParser -> util : parseAddress("Block A/B")
+activate util LOGIC_COLOR
+util --> editParser : address
+deactivate util
+deactivate editParser
+
+legend bottom
+  Excerpt of parse(" 1 addr/Block A~/~/B"); class participants receive static calls.
+  Accessors, duplicate checks, and descriptor assembly are omitted.
+endlegend
+@enduml
