@@ -218,6 +218,32 @@ The `Storage` component,
   filesystem supports it and cleans up the temporary file after success or failure.
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
 
+#### Roster JSON mapping
+
+The following partial class diagram expands the storage overview's model conversion dependencies.
+`JsonSerializableRoster` retains a list of `JsonAdaptedPerson`, each of which retains a list of
+`JsonAdaptedTag`. These are ordinary navigable associations; the adapters do not retain model objects.
+The JSON roster key remains `persons` for compatibility with existing files.
+
+<puml src="diagrams/RosterJsonMappingClassDiagram.puml" width="800" alt="Roster JSON adapters retain person and tag lists, use model objects when saving, and create AthleteRoster, Person and Tag when loading; Person retains an unordered tag set" />
+
+On saving, `JsonRosterStorage` constructs `JsonSerializableRoster` from a `ReadOnlyRoster`.
+Its constructor maps each `Person` to a `JsonAdaptedPerson`, which maps the model's `Set<Tag>` to a
+`List<JsonAdaptedTag>`. `JsonAdaptedTag` serializes as a tag-name string, so the persisted `tags` array
+contains strings. The model tag set has no ordering guarantee.
+
+On loading, Jackson reconstructs the adapters and `toModelType()` validates stored values before creating
+`Tag` and `Person` objects and adding them to a new `AthleteRoster`, which implements `ReadOnlyRoster`.
+Tag conversion checks tag names; person conversion checks required fields and the constraints on name,
+age category, phone, email and address. A missing age category defaults to `Open`, and missing or null
+`tags` become an empty list. The JSON tag list becomes a `HashSet<Tag>`: repeated tags, including
+case variants, collapse according to `Tag.equals` and `hashCode`.
+
+A missing or null `persons` list, null athlete/tag entries, invalid field values, and duplicate athletes
+(according to `Person.isSamePerson`) cause `IllegalValueException`; `JsonRosterStorage` wraps it in
+`DataLoadingException`. File-reading or JSON-decoding failures, including a JSON null root, also produce
+`DataLoadingException` through `JsonUtil`. An absent file instead returns `Optional.empty()`.
+
 ### Common classes
 
 Classes used by multiple components are in the `trackflow.commons` package.
