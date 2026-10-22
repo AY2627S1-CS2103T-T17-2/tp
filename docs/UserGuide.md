@@ -6,7 +6,7 @@
 
 # TrackFlow User Guide
 
-TrackFlow is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
+TrackFlow v1.4 is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
 prefer typing commands through a Command Line Interface (CLI), while retaining the benefits of a Graphical User
 Interface (GUI).
 
@@ -420,18 +420,10 @@ available without saving the roster. You do not need to save manually.
 
 ### Editing the data file
 
-TrackFlow saves roster data to `data/trackflow.json` inside the folder containing the JAR, even if you launch it
-from another folder. Preferences and logs use that same home folder; backups and temporary roster saves stay
-beside the roster. If you launch through a symbolic link to the JAR, home is the actual JAR's folder.
-Close TrackFlow and make a separate backup before editing the roster manually.
+TrackFlow saves roster data to `data/trackflow.json`, relative to the folder from which you launch the application.
+Following the quick-start instructions places it beside the JAR in the `data` subfolder. If `data/trackflow.json` does not exist when launched, TrackFlow starts with sample athlete data and creates the file upon the first successful command that changes roster data.
 
-If an older version saved your roster in another launch folder, close TrackFlow and back up both locations before
-copying that folder's `data/trackflow.json` into the JAR's `data` folder. Copy `preferences.json` too if you want to
-retain your window settings. Do not replace an existing destination roster without keeping a separate copy.
-
-Window settings are stored separately in `preferences.json`. Missing or unreadable preferences, null settings,
-or invalid window sizes cause TrackFlow to use default settings and attempt to save those defaults. This recovery
-does not change athlete data. A valid saved window position remains subject to the available screens.
+Close TrackFlow and make a separate backup before editing this file manually.
 
 <box type="warning" seamless>
 
