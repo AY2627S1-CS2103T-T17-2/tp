@@ -188,12 +188,16 @@ The `Model` component,
 
 The following diagram focuses on stored athlete fields. Each `Tag` is one track event of the athlete (e.g. `100m`);
 see [Event tagging](#event-tagging). `UniqueTagList` is not part of the implementation.
+`AthleteRoster` implements `ReadOnlyRoster`, exposing its athletes through an unmodifiable
+`ObservableList<Person>`. It owns one `UniquePersonList`, which retains athletes in list order and enforces
+uniqueness using `Person.isSamePerson`. The diagram omits the intermediate JavaFX collection classes.
 
-<puml src="diagrams/BetterModelClassDiagram.puml" width="1000" alt="Athlete roster and Person references to name, age category, contact fields, remark, and track event tags" />
+<puml src="diagrams/BetterModelClassDiagram.puml" width="1000" alt="Read-only roster interface, ordered athlete list, stored athlete fields, and unique event tags" />
 
 The value-field links are ordinary associations: immutable value objects can be shared between different `Person`
 instances, such as during an edit. `Person` copies its tag set, while the individual immutable `Tag` objects may
-be shared. Tag equality ignores case and display retains the stored spelling.
+be shared. The tag association is an unordered set: equality ignores case, so differently cased spellings
+represent the same event, while display retains the stored spelling.
 
 ### Storage component
 
