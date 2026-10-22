@@ -33,8 +33,10 @@ public class TagCommand extends EventTagCommand {
     private static final Logger logger = LogsCenter.getLogger(TagCommand.class);
 
     /**
-     * @param index of the athlete in the filtered athlete list
-     * @param eventsToAdd events to add to the athlete; must not be empty
+     * Creates a command that adds the given events to an athlete.
+     *
+     * @param index of the athlete in the filtered athlete list.
+     * @param eventsToAdd events to add to the athlete; must not be empty.
      */
     public TagCommand(Index index, Set<Tag> eventsToAdd) {
         super(index, eventsToAdd);

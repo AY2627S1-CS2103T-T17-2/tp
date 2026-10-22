@@ -10,7 +10,7 @@ import trackflow.model.ReadOnlyUserPrefs;
 import trackflow.model.UserPrefs;
 
 /**
- * A class to access UserPrefs stored on the hard disk as a JSON file
+ * A class to access UserPrefs stored on the hard disk as a JSON file.
  */
 public class JsonUserPrefsStorage {
 
@@ -50,6 +50,7 @@ public class JsonUserPrefsStorage {
 
     /**
      * Saves the given {@link trackflow.model.ReadOnlyUserPrefs} to the storage.
+     *
      * @param userPrefs cannot be null.
      * @throws IOException if there was any problem writing to the file.
      */

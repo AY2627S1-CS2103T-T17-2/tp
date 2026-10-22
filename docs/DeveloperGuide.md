@@ -29,7 +29,7 @@ Refer to the guide [_Setting up and getting started_](SettingUp.md).
 
 ### Architecture
 
-<puml src="diagrams/ArchitectureDiagram.puml" width="280" />
+<puml src="diagrams/ArchitectureDiagram.puml" width="750" alt="Conceptual TrackFlow components and their dependencies, with Main covering Main and MainApp" />
 
 The ***Architecture Diagram*** given above explains the high-level design of the App.
 
@@ -55,7 +55,11 @@ The bulk of the app's work is done by the following four components:
 
 The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete 1`.
 
-<puml src="diagrams/ArchitectureSequenceDiagram.puml" width="1100" />
+<puml src="diagrams/ArchitectureSequenceDiagram.puml" width="1100" alt="Delete execution on a detached model, saving before live publication, and the save-failure alternative" />
+
+[Open the architecture trace at full size](diagrams/ArchitectureSequenceDiagram.png). Parsing, routine accessors,
+and result construction are abbreviated as indicated in the diagram. Unlabelled dashed replies denote return of
+control from void methods or constructors; exception replies show propagation rather than a normal return value.
 
 Each of the four main components (also shown in the diagram above),
 
@@ -64,7 +68,7 @@ Each of the four main components (also shown in the diagram above),
 
 For example, the `Logic` component defines its API in `Logic.java` and implements it in `LogicManager.java`. Other components interact with a component through its interface rather than its concrete class, preventing them from coupling to that component's implementation, as illustrated in the following partial class diagram.
 
-<puml src="diagrams/ComponentManagers.puml" width="300" />
+<puml src="diagrams/ComponentManagers.puml" width="750" alt="UI, Logic, Model, and Storage managers implementing their interfaces and retaining component references" />
 
 The sections below give more details of each component.
 
@@ -72,9 +76,14 @@ The sections below give more details of each component.
 
 The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/Ui.java)
 
-<puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
+<puml src="diagrams/UiClassDiagram.puml" width="1100" alt="UI parts inheriting UiPart, MainWindow references, and CommandBox autocomplete and PersonCard model dependencies" />
 
 The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
+
+`MainWindow` eagerly creates one `HelpWindow`. Its `fillInnerParts()` method creates the remaining parts;
+`CommandBox` is attached to the scene graph without a direct `MainWindow` field. `CommandBox` owns an
+`AutocompleteEngine`, and each `PersonCard` holds the `Person` it displays. Generic JavaFX root parameters and
+toolkit details are omitted from this partial view.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/MainWindow.java).
 
@@ -101,7 +110,11 @@ The other command subclasses and dedicated command parsers are omitted from this
 
 The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
 
-<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete 1` Command" />
+<puml src="diagrams/DeleteSequenceDiagram.puml" width="1100" alt="Delete parser and command creation, staged execution, and successful or failed persistence" />
+
+[Open the delete trace at full size](diagrams/DeleteSequenceDiagram.png). Parser and command lifelines begin at
+their constructor messages. The parser is not explicitly destroyed when parsing finishes. This trace assumes valid
+input and a valid index; validation failures, display-state copying, and result construction are abbreviated.
 
 
 
@@ -157,7 +170,7 @@ model as described above.
 
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/model/Model.java)
 
-<puml src="diagrams/ModelClassDiagram.puml" width="800" />
+<puml src="diagrams/ModelClassDiagram.puml" width="950" alt="ModelManager, roster and preferences ownership, athlete list, and JavaFX filtered and sorted views" />
 
 
 The `Model` component,
@@ -176,13 +189,20 @@ The `Model` component,
 The following diagram focuses on stored athlete fields. Each `Tag` is one track event of the athlete (e.g. `100m`);
 see [Event tagging](#event-tagging). `UniqueTagList` is not part of the implementation.
 
-<puml src="diagrams/BetterModelClassDiagram.puml" width="850" />
+<puml src="diagrams/BetterModelClassDiagram.puml" width="1000" alt="Athlete roster and Person references to name, age category, contact fields, remark, and track event tags" />
+
+The value-field links are ordinary associations: immutable value objects can be shared between different `Person`
+instances, such as during an edit. `Person` copies its tag set, while the individual immutable `Tag` objects may
+be shared. Tag equality ignores case and display retains the stored spelling.
 
 ### Storage component
 
 **API** : [`Storage.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/storage/Storage.java)
 
-<puml src="diagrams/StorageClassDiagram.puml" width="550" />
+<puml src="diagrams/StorageClassDiagram.puml" width="800" alt="StorageManager delegates to JSON preferences and roster storage, with roster and athlete DTOs" />
+
+This partial view shows the storage adapters and DTOs; model conversion and file utilities are omitted. The stored
+JSON roster property remains `persons` so that existing roster files continue to load.
 
 The `Storage` component,
 
@@ -274,6 +294,21 @@ It provides real-time dropdown suggestions for commands based on the user's inpu
     * Pros: Creates a guided, IDE-like snippet experience. Prevents trailing empty prefixes from causing parsing errors.
     * Cons: Requires slightly more complex logic to parse the current text and determine the next missing prefix.
 
+### Athlete remarks
+
+`RemarkCommandParser` implements `Parser<RemarkCommand>` and reports invalid arguments with `ParseException`.
+It requires one `r/` prefix and parses a positive, one-based index before creating the command.
+The command resolves that index against the displayed list during execution.
+
+<puml src="diagrams/add-remark/ParserClass.puml" width="650" alt="RemarkCommandParser realizes Parser of RemarkCommand and reports ParseException" />
+
+`RemarkCommand` retains the new `Remark` and index, replaces the selected athlete with a copy, and restores the
+full roster view. An empty remark removes the note. It declares `changesRoster()` as true, so `LogicManager`
+uses the staged save-before-publication path. Success messages use the same athlete summary as add, edit, and
+delete, including age category, phone, and email. These diagrams omit helpers, the index field, and result internals.
+
+<puml src="diagrams/add-remark/RemarkClass.puml" width="800" alt="RemarkCommand extends abstract Command, retains Remark, and uses Model during execution" />
+
 ### Event tagging
 
 Coaches record the track events each athlete competes in with `tag INDEX t/EVENT...` and remove them with
@@ -344,7 +379,7 @@ values for comparison, avoiding overflow and lexicographic ordering errors. Age 
 ### Future features [Future]
 
 Undo/redo, archiving, guardian links, relay squads, event grouping, and structured performance logs are not
-implemented in v1.3. Their user stories record possible future scope; they do not describe existing classes or
+implemented in v1.4. Their user stories record possible future scope; they do not describe existing classes or
 commit to a release version.
 
 --------------------------------------------------------------------------------------------------------------------
@@ -371,9 +406,9 @@ commit to a release version.
 
 **Value proposition**: TrackFlow helps a coach maintain and retrieve an organized athlete roster through short keyboard commands, reducing the effort of navigating forms and keeping contact information available between training sessions.
 
-**v1.3 scope**: The release supports adding, listing, editing, remarking, searching, filtering, sorting, deleting,
-clearing, built-in help, and exit. New athletes require a name, age category, phone number, email address, and
-nonblank address. Remarks can be added or removed separately. Roster changes are saved locally before being published
+**v1.4 scope**: The release supports adding, listing, editing, remarking, searching, filtering, sorting, tagging and
+untagging events, deleting, clearing, built-in help, and exit. New athletes require a name, age category, phone
+number, email address, and nonblank address. Remarks can be added or removed separately. Roster changes are saved locally before being published
 to the live model; view-only commands do not save roster data.
 
 Future features are marked **[Future]** below. Cloud synchronization and collaborative editing are excluded from
@@ -394,7 +429,7 @@ creation fails, startup stops before commands become available, protecting the o
 
 ### User stories
 
-Priorities: `* * *` = high, `* *` = medium, `*` = low. **Implemented** describes v1.3 behavior;
+Priorities: `* * *` = high, `* *` = medium, `*` = low. **Implemented** describes v1.4 behavior;
 **Release target** identifies a requirement still awaiting integration; **[Future]** records unimplemented scope
 without committing it to a release; **Excluded** records an idea outside this product. Priority does not imply status.
 
@@ -433,7 +468,7 @@ without committing it to a release; **Excluded** records an idea outside this pr
 | US34 | `* *` | [Future] | coach | view an athlete's relay-squad and event-group memberships | review the athlete's assignments before making changes |
 | US35 | `* *` | [Future] | coach | correct an inaccurate personal-best or status log entry | keep the athlete's recorded history reliable |
 | US36 | `*` | [Future] | coach | import and export roster records in bulk | transfer my own records without entering each one manually |
-| US37 | `*` | [Future] | coach | store names with characters beyond v1.3's supported set | preserve athletes' preferred name spellings |
+| US37 | `*` | [Future] | coach | store names with characters beyond v1.4's supported set | preserve athletes' preferred name spellings |
 | US38 | `*` | [Future] | coach | store multiple phone numbers and phone extensions | retain alternative ways of contacting an athlete |
 | US39 | `*` | [Future] | coach | check whether an email address can receive mail | distinguish a structurally valid address from a reachable one |
 | US40 | `*` | Implemented | keyboard-oriented coach | close TrackFlow with a text command | finish a session from the command box |
@@ -565,7 +600,7 @@ Use case ends.
 
 #### UC05: Filter athletes by age category
 
-**Status**: Implemented in v1.3.<br>
+**Status**: Implemented in v1.4.<br>
 **Related stories**: US02, US03, US05, US11.<br>
 **Precondition**: TrackFlow is open.<br>
 **Success postcondition**: Only matching athletes are displayed; stored records are unchanged.
@@ -655,10 +690,10 @@ These are product requirements and acceptance targets, not claims about the curr
 | Displayed index | An athlete's positive, one-based position in the current displayed list. It is not a permanent identifier and may change after roster updates. |
 | Duplicate athlete record | A record with the same normalized name and either the same phone or email as another record, regardless of age category. Differently named records sharing contacts are allowed with a possible-duplicate warning on add or edit. |
 | Eligibility | Whether an athlete meets the recorded participation conditions for a competition or event. Eligibility logs are a future feature, distinct from assigning an age category. |
-| Event specialization | An athletics discipline, such as sprinting or long jump, associated with an athlete through a future tagging feature. |
+| Event specialization | An athletics discipline, such as sprinting or long jump, associated with an athlete through the `tag` and `untag` commands. |
 | Guardian | A parent or other responsible adult whose future contact record may be linked to one or more athletes. |
 | Local persistence | Automatically saving roster changes on the coach's computer and loading them in a later application session. |
-| Implemented | A feature available in the current v1.3 code. Release targets and future features are identified separately. |
+| Implemented | A feature available in the current v1.4 code. Release targets and future features are identified separately. |
 | Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone comparisons ignore permitted formatting characters and use the digits. Display formatting may be retained. |
 | Participation log | A future record of an athlete's involvement in training or competition. |
 | Personal best | An athlete's best recorded result for a particular event, intended for a future performance log. |

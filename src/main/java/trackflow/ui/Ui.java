@@ -3,7 +3,7 @@ package trackflow.ui;
 import javafx.stage.Stage;
 
 /**
- * API of the UI component
+ * API of the UI component.
  */
 public interface Ui {
 

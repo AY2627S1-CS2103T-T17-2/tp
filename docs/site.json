@@ -16,7 +16,10 @@
     ".git/*",
     "node_modules/*"
   ],
-  "pagesExclude": ["node_modules/*"],
+  "pagesExclude": [
+    "node_modules/*",
+    "team/johndoe.md"
+  ],
   "pages": [
     {
       "glob": ["**/index.md", "**/*.md"]

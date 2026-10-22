@@ -5,7 +5,7 @@
 
 # Configuration guide
 
-TrackFlow v1.3 does not read a `config.json` file. It uses these paths relative to the folder from which it is launched:
+TrackFlow v1.4 does not read a `config.json` file. It uses these paths relative to the folder from which it is launched:
 
 | File | Purpose |
 |------|---------|

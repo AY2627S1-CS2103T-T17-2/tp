@@ -15,7 +15,7 @@ final class WindowPlacement {
     /** Height of the window, in pixels, that must be visible below the top edge. */
     static final double MIN_VISIBLE_HEIGHT = 50;
 
-    /** Slack allowed above a screen's top edge (some platforms place maximised windows slightly above it). */
+    /** Slack allowed above a screen's top edge (some platforms place maximized windows slightly above it). */
     private static final double TOP_TOLERANCE = 10;
 
     private WindowPlacement() {

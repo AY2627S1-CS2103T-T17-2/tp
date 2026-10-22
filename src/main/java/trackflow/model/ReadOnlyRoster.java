@@ -4,7 +4,7 @@ import javafx.collections.ObservableList;
 import trackflow.model.person.Person;
 
 /**
- * Unmodifiable view of an athlete roster
+ * Unmodifiable view of an athlete roster.
  */
 public interface ReadOnlyRoster {
 

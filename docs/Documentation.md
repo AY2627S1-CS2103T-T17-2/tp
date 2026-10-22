@@ -141,3 +141,9 @@ Apply these conventions when updating a diagram and keep the corresponding DG ex
 **Converting to PDF**
 
 * See the guide [_se-edu/guides **Saving web documents as PDF files**_](https://se-education.org/guides/tutorials/savingPdf.html).
+
+## Project portfolio pages
+
+`team/johndoe.md` is an unpublished template excluded by `site.json`. Copy it to a file named after your GitHub
+handle, replace the template instructions with your actual contributions, and add working evidence links before
+publishing. Remove unused headings and do not copy example accomplishments as personal claims.

@@ -91,7 +91,7 @@ public class MainWindow extends UiPart<Stage> {
 
     /**
      * Sets the default size based on {@code guiSettings}, and the saved position only if it is still visible
-     * on a connected screen. Otherwise the position is left unset, so JavaFX centres the window on the
+     * on a connected screen. Otherwise the position is left unset, so JavaFX centers the window on the
      * primary screen when it is shown, and the size is capped to that screen.
      */
     private void setWindowDefaultSize(GuiSettings guiSettings) {
@@ -135,7 +135,7 @@ public class MainWindow extends UiPart<Stage> {
     @FXML
     private void handleExit() {
         if (!primaryStage.isIconified()) {
-            // A minimised window can report a meaningless position, so keep the previously saved settings.
+            // A minimized window can report a meaningless position, so keep the previously saved settings.
             GuiSettings guiSettings = new GuiSettings(primaryStage.getWidth(), primaryStage.getHeight(),
                     (int) primaryStage.getX(), (int) primaryStage.getY());
             logic.setGuiSettings(guiSettings);
