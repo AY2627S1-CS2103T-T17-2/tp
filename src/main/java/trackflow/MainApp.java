@@ -45,6 +45,12 @@ public class MainApp extends Application {
     protected Storage storage;
     protected Model model;
 
+    /** Set when the saved roster could not be read but was preserved; shown to the user once the UI is ready. */
+    private String rosterLoadWarning;
+
+    /** Set when the saved roster could not even be preserved; start-up stops with a dialog instead of a model. */
+    private IOException startupFatalError;
+
     @Override
     public void init() throws Exception {
         logger.info("=============================[ Initializing TrackFlow ]===============================");
@@ -55,11 +61,19 @@ public class MainApp extends Application {
         JsonRosterStorage rosterStorage = new JsonRosterStorage(ROSTER_FILE_PATH);
         storage = new StorageManager(rosterStorage, userPrefsStorage);
 
-        model = initModelManager(storage, userPrefs);
+        try {
+            model = initModelManager(storage, userPrefs);
+        } catch (IOException e) {
+            // The saved data could not be read or preserved. Defer to start(), which can show a dialog, rather
+            // than throwing from init() where the failure would be invisible to the user.
+            startupFatalError = e;
+            ui = new UiManager(null, storage.getRosterFilePath());
+            return;
+        }
 
         logic = new LogicManager(model, storage);
 
-        ui = new UiManager(logic, storage.getRosterFilePath());
+        ui = new UiManager(logic, storage.getRosterFilePath(), rosterLoadWarning);
     }
 
     /**
@@ -97,10 +111,21 @@ public class MainApp extends Application {
             }
             logger.warning("Data file at " + storage.getRosterFilePath() + " could not be loaded."
                     + " Original data preserved at " + backupPath + ". Will be starting with an empty athlete roster.");
+            rosterLoadWarning = "TrackFlow could not read your saved data at " + rosterPath
+                    + ". The file was backed up to " + backupPath
+                    + ", and TrackFlow started with an empty roster.";
             initialData = new AthleteRoster();
         }
 
         return new ModelManager(initialData, userPrefs);
+    }
+
+    /**
+     * Returns the warning to show the user when the saved roster could not be read but was preserved, or
+     * {@code null} if the roster loaded normally.
+     */
+    protected String getRosterLoadWarning() {
+        return rosterLoadWarning;
     }
 
     /**
@@ -138,12 +163,20 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         logger.info("Starting TrackFlow " + MainApp.VERSION);
+        if (startupFatalError != null) {
+            ui.startWithError(primaryStage, startupFatalError);
+            return;
+        }
         ui.start(primaryStage);
     }
 
     @Override
     public void stop() {
         logger.info("============================ [ Stopping TrackFlow ] =================================");
+        if (model == null) {
+            // Start-up stopped before a model was built (e.g. unreadable data), so there is nothing to save.
+            return;
+        }
         try {
             storage.saveUserPrefs(model.getUserPrefs());
         } catch (IOException e) {

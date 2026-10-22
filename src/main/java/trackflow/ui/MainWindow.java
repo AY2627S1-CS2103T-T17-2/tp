@@ -90,6 +90,13 @@ public class MainWindow extends UiPart<Stage> {
     }
 
     /**
+     * Shows a start-up warning (for example, that the saved data could not be read) in the result display.
+     */
+    void showStartupWarning(String message) {
+        resultDisplay.showError(message);
+    }
+
+    /**
      * Sets the default size based on {@code guiSettings}, and the saved position only if it is still visible
      * on a connected screen. Otherwise the position is left unset, so JavaFX centres the window on the
      * primary screen when it is shown, and the size is capped to that screen.

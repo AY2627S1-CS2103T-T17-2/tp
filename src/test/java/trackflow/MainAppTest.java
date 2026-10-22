@@ -2,6 +2,8 @@ package trackflow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalPersons.getTypicalRoster;
@@ -77,6 +79,23 @@ public class MainAppTest {
         };
         assertThrows(IOException.class, () -> new MainApp().initModelManager(storage, new UserPrefs()));
         assertEquals("{\"persons\":[null]}", Files.readString(rosterPath));
+    }
+
+    @Test
+    public void initModelManager_unreadableRoster_recordsLoadWarning() throws Exception {
+        Path rosterPath = testFolder.resolve("trackflow.json");
+        Files.writeString(rosterPath, "{invalid JSON");
+        MainApp app = new MainApp();
+        app.initModelManager(createStorage(rosterPath), new UserPrefs());
+        assertNotNull(app.getRosterLoadWarning());
+    }
+
+    @Test
+    public void initModelManager_validRoster_noLoadWarning() throws Exception {
+        Path rosterPath = testFolder.resolve("missing.json");
+        MainApp app = new MainApp();
+        app.initModelManager(createStorage(rosterPath), new UserPrefs());
+        assertNull(app.getRosterLoadWarning());
     }
 
     @Test
