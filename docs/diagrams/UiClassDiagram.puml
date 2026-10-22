@@ -4,6 +4,8 @@ skinparam ArrowFontStyle plain
 skinparam linetype polyline
 skinparam arrowColor UI_COLOR_T4
 skinparam classBackgroundColor UI_COLOR
+show members
+hide empty members
 package "UI" as UIPackage {
     interface Ui <<interface>> UI_COLOR_T1
     abstract class "{abstract}\nUiPart" as UiPart
@@ -15,10 +17,14 @@ package "UI" as UIPackage {
     class PersonListPanel
     class StatusBarFooter
     class PersonCard
+    class WindowPlacement <<utility>> {
+        {static} +isReachable(...): boolean
+    }
 }
 interface Logic <<interface>> LOGIC_COLOR_T1
 class AutocompleteEngine LOGIC_COLOR
 class Person MODEL_COLOR
+class GuiSettings #64748B
 UiManager .up.|> Ui
 UiManager --> "0..1" MainWindow
 UiManager --> "1" Logic
@@ -28,16 +34,20 @@ MainWindow ..> CommandBox : <<create>>
 MainWindow --> "0..1" ResultDisplay
 MainWindow --> "0..1" PersonListPanel
 MainWindow --> "0..1" StatusBarFooter
+MainWindow ..> WindowPlacement : checks saved\nposition reachable
+MainWindow ..> GuiSettings : reads / writes\nsaved bounds
 MainWindow -up-|> UiPart
 CommandBox -up-|> UiPart
 PersonListPanel ..> PersonCard : <<create>>
 PersonCard --> "1" Person
 CommandBox *--> "1" AutocompleteEngine
 legend bottom
-  Partial view; UiPart's generic root type parameter and JavaFX classes are omitted.
+  Partial view; UiPart's generic root type parameter and JavaFX classes (Stage, Screen, Rectangle2D) are omitted.
   All seven GUI part classes extend UiPart; five inheritance links are omitted for clarity.
   MainWindow creates HelpWindow in its constructor; fillInnerParts() creates the other four parts.
   0..1 covers initialization before a retained part is created.
   CommandBox is attached to the scene graph; MainWindow keeps no direct field for it.
+  WindowPlacement is a stateless utility called statically by MainWindow; no instance is retained.
+  GuiSettings (from commons.core) carries the saved window size and position between sessions.
 endlegend
 @enduml

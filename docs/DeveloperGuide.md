@@ -76,7 +76,7 @@ The sections below give more details of each component.
 
 The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/Ui.java)
 
-<puml src="diagrams/UiClassDiagram.puml" width="1100" alt="UI parts inheriting UiPart, MainWindow references, and CommandBox autocomplete and PersonCard model dependencies" />
+<puml src="diagrams/UiClassDiagram.puml" width="1100" alt="UI parts inheriting UiPart, MainWindow references, the WindowPlacement helper and GuiSettings dependencies, and CommandBox autocomplete and PersonCard model dependencies" />
 
 The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
 
@@ -84,6 +84,11 @@ The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDi
 `CommandBox` is attached to the scene graph without a direct `MainWindow` field. `CommandBox` owns an
 `AutocompleteEngine`, and each `PersonCard` holds the `Person` it displays. Generic JavaFX root parameters and
 toolkit details are omitted from this partial view.
+
+When restoring the window, `MainWindow` reads the saved size and position from `GuiSettings` and asks the
+stateless `WindowPlacement` utility, through a static call, whether that position is still reachable on a
+connected screen; it keeps no `WindowPlacement` instance. An unreachable position falls back to a size capped to
+the primary screen. On exit, `MainWindow` writes the current bounds back to `GuiSettings`.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/MainWindow.java).
 
