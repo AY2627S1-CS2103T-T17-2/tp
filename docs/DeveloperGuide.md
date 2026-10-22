@@ -180,6 +180,8 @@ The `Model` component,
   that view in a `SortedList` for display ordering. It exposes the sorted view as an
   `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when filtering, sorting, or roster
   data changes.
+* retains the active `Predicate<Person>` and optional `Comparator<Person>` separately as display state. Changing
+  either updates the corresponding JavaFX view without changing the stored roster order.
 * distinguishes duplicate identity from complete value equality. `Person.isSamePerson` compares the normalized name
   and matching contact details, while `Person.equals` and `hashCode` include every stored field, including the remark.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
