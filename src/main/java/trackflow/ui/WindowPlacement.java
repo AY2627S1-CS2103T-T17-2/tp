@@ -3,11 +3,18 @@ package trackflow.ui;
 import java.util.List;
 
 import javafx.geometry.Rectangle2D;
+import trackflow.commons.core.GuiSettings;
 
 /**
- * Decides whether a saved window position can still be used on the screens that are currently connected.
+ * Fits saved window bounds to usable screens and checks whether a title bar remains reachable.
  */
 final class WindowPlacement {
+
+    /** Preferred minimum outer width where the screen has enough space. */
+    static final double MIN_WINDOW_WIDTH = 450;
+
+    /** Preferred minimum outer height where the screen has enough space. */
+    static final double MIN_WINDOW_HEIGHT = 400;
 
     /** Width of the window, in pixels, that must be visible so that the title bar can still be grabbed. */
     static final double MIN_VISIBLE_WIDTH = 100;
@@ -15,10 +22,62 @@ final class WindowPlacement {
     /** Height of the window, in pixels, that must be visible below the top edge. */
     static final double MIN_VISIBLE_HEIGHT = 50;
 
-    /** Slack allowed above a screen's top edge (some platforms place maximised windows slightly above it). */
+    /** Slack allowed above a screen's top edge (some platforms place maximized windows slightly above it). */
     private static final double TOP_TOLERANCE = 10;
 
     private WindowPlacement() {
+    }
+
+    /**
+     * Returns outer window bounds fitted to a connected screen's usable area, including space for decorations.
+     * Restores reachable positions on the screen with the largest overlap, otherwise centers on the primary screen.
+     * Keeps the preferred minimum size only where the screen has enough usable space.
+     */
+    static Rectangle2D fit(GuiSettings settings, List<Rectangle2D> screens, Rectangle2D primary) {
+        return fit(settings, screens, primary, MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
+    }
+
+    /**
+     * Returns fitted outer bounds using the given window's preferred minimum dimensions.
+     */
+    static Rectangle2D fit(GuiSettings settings, List<Rectangle2D> screens, Rectangle2D primary,
+            double minimumWidth, double minimumHeight) {
+        double width = settings.getWindowWidth();
+        double height = settings.getWindowHeight();
+        var coordinates = settings.getWindowCoordinates();
+        Rectangle2D target = primary;
+        boolean restorePosition = false;
+        double largestOverlap = 0;
+        if (coordinates != null) {
+            for (Rectangle2D screen : screens) {
+                if (!isReachable(coordinates.getX(), coordinates.getY(), width, height, List.of(screen))) {
+                    continue;
+                }
+                double overlapWidth = Math.min(coordinates.getX() + width, screen.getMaxX())
+                        - Math.max(coordinates.getX(), screen.getMinX());
+                double overlapHeight = Math.min(coordinates.getY() + height, screen.getMaxY())
+                        - Math.max(coordinates.getY(), screen.getMinY());
+                double overlap = overlapWidth * overlapHeight;
+                if (overlap > largestOverlap) {
+                    target = screen;
+                    largestOverlap = overlap;
+                    restorePosition = true;
+                }
+            }
+        }
+        width = Math.min(Math.max(width, minimumWidth), target.getWidth());
+        height = Math.min(Math.max(height, minimumHeight), target.getHeight());
+        double x = restorePosition ? coordinates.getX() : target.getMinX() + (target.getWidth() - width) / 2;
+        double y = restorePosition ? coordinates.getY() : target.getMinY() + (target.getHeight() - height) / 2;
+        return new Rectangle2D(clamp(x, target.getMinX(), target.getMaxX() - width),
+                clamp(y, target.getMinY(), target.getMaxY() - height), width, height);
+    }
+
+    /**
+     * Returns the value constrained to the inclusive range.
+     */
+    private static double clamp(double value, double minimum, double maximum) {
+        return Math.max(minimum, Math.min(value, maximum));
     }
 
     /**

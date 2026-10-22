@@ -8,12 +8,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 /**
- * Writes and reads files
+ * Writes and reads files.
  */
 public class FileUtil {
 
     /**
-     * Creates parent directories of file if it has a parent directory
+     * Creates parent directories of file if it has a parent directory.
      */
     private static void createParentDirsOfFile(Path file) throws IOException {
         Path parentDir = file.getParent();
@@ -25,7 +25,9 @@ public class FileUtil {
 
     /**
      * Returns the contents of {@code file} as text. A leading byte order mark (BOM), which some editors add to
-     * UTF-8 files, is removed so that the file can still be parsed. Assumes the file exists.
+     * UTF-8 files, is removed so that the file can still be parsed.
+     *
+     * @throws IOException If the file cannot be read, including when it does not exist.
      */
     public static String readFromFile(Path file) throws IOException {
         String content = Files.readString(file, StandardCharsets.UTF_8);

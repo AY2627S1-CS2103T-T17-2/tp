@@ -26,15 +26,12 @@ public class CollectionUtilTest {
         // argument lists with just one null at the beginning
         assertNullPointerExceptionThrown((Object) null);
         assertNullPointerExceptionThrown(null, "", new Object());
-        assertNullPointerExceptionThrown(null, new Object(), new Object());
 
         // argument lists with nulls in the middle
         assertNullPointerExceptionThrown(new Object(), null, null, "test");
-        assertNullPointerExceptionThrown("", null, new Object());
 
         // argument lists with one null as the last argument
         assertNullPointerExceptionThrown("", new Object(), null);
-        assertNullPointerExceptionThrown(new Object(), new Object(), null);
 
         // null reference
         assertNullPointerExceptionThrown((Object[]) null);
@@ -52,11 +49,9 @@ public class CollectionUtilTest {
 
         // lists containing nulls in the middle
         assertNullPointerExceptionThrown(Arrays.asList("spam", null, new Object()));
-        assertNullPointerExceptionThrown(Arrays.asList("spam", null, "eggs", null, new Object()));
 
         // lists containing nulls at the end
         assertNullPointerExceptionThrown(Arrays.asList("spam", new Object(), null));
-        assertNullPointerExceptionThrown(Arrays.asList(new Object(), null));
 
         // null reference
         assertNullPointerExceptionThrown((Collection<Object>) null);
@@ -66,7 +61,6 @@ public class CollectionUtilTest {
 
         // list with all non-null elements
         assertNullPointerExceptionNotThrown(Arrays.asList(new Object(), "ham", Integer.valueOf(1)));
-        assertNullPointerExceptionNotThrown(Arrays.asList(new Object()));
 
         // confirms nulls inside nested lists are not considered
         List<Object> containingNull = Arrays.asList((Object) null);

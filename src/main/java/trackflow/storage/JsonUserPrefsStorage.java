@@ -10,7 +10,7 @@ import trackflow.model.ReadOnlyUserPrefs;
 import trackflow.model.UserPrefs;
 
 /**
- * A class to access UserPrefs stored on the hard disk as a JSON file
+ * A class to access UserPrefs stored on the hard disk as a JSON file.
  */
 public class JsonUserPrefsStorage {
 
@@ -42,21 +42,25 @@ public class JsonUserPrefsStorage {
      *
      * @param prefsFilePath Location of the preferences; must not be null.
      * @return The loaded preferences, or an empty optional if the file is absent.
-     * @throws DataLoadingException If the file cannot be read or its JSON cannot be converted to preferences.
+     * @throws DataLoadingException If the file cannot be read, its JSON is invalid, or its GUI settings are invalid.
      */
     public Optional<UserPrefs> readUserPrefs(Path prefsFilePath) throws DataLoadingException {
-        Optional<UserPrefs> userPrefs = JsonUtil.readJsonFile(prefsFilePath, UserPrefs.class);
-        if (userPrefs.isPresent() && userPrefs.get().getGuiSettings() == null) {
-            // A preferences file with "guiSettings": null would otherwise crash start-up; treat it as unreadable
-            // so that the caller falls back to the default preferences.
-            throw new DataLoadingException(
-                    new IllegalArgumentException("Preferences file is missing its GUI settings."));
+        Optional<UserPrefs> preferences = JsonUtil.readJsonFile(prefsFilePath, UserPrefs.class);
+        if (preferences.isPresent()) {
+            UserPrefs loaded = preferences.get();
+            if (loaded.getGuiSettings() == null || !loaded.getGuiSettings().isValid()) {
+                // Missing or malformed GUI settings would otherwise crash start-up; treat the file as unreadable
+                // so that the caller falls back to the default preferences.
+                throw new DataLoadingException(new IOException("Saved GUI settings must be present "
+                        + "and have finite, positive window dimensions"));
+            }
         }
-        return userPrefs;
+        return preferences;
     }
 
     /**
      * Saves the given {@link trackflow.model.ReadOnlyUserPrefs} to the storage.
+     *
      * @param userPrefs cannot be null.
      * @throws IOException if there was any problem writing to the file.
      */

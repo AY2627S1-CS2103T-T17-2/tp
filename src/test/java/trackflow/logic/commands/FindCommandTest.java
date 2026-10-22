@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.logic.commands.CommandTestUtil.assertCommandSuccess;
+import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalPersons.CARL;
 import static trackflow.testutil.TypicalPersons.ELLE;
 import static trackflow.testutil.TypicalPersons.FIONA;
@@ -29,6 +30,17 @@ import trackflow.testutil.PersonBuilder;
 public class FindCommandTest {
     private Model model = new ModelManager(getTypicalRoster(), new UserPrefs());
     private Model expectedModel = new ModelManager(getTypicalRoster(), new UserPrefs());
+
+    @Test
+    public void constructor_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new FindCommand(null));
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        FindCommand command = new FindCommand(new PersonContainsKeywordsPredicate(List.of("first")));
+        assertThrows(NullPointerException.class, () -> command.execute(null));
+    }
 
     @Test
     public void equals() {

@@ -24,7 +24,7 @@ import trackflow.model.tag.Tag;
  */
 class JsonAdaptedPerson {
 
-    public static final String MISSING_FIELD_MESSAGE_FORMAT = "Person's %s field is missing!";
+    public static final String MISSING_FIELD_MESSAGE_FORMAT = "Athlete's %s field is missing!";
 
     private final String name;
     private final String ageCategory;
@@ -85,7 +85,7 @@ class JsonAdaptedPerson {
         final List<Tag> personTags = new ArrayList<>();
         for (JsonAdaptedTag tag : tags) {
             if (tag == null) {
-                throw new IllegalValueException("Person's tags contain a null tag!");
+                throw new IllegalValueException("Athlete's tags contain a null tag!");
             }
             personTags.add(tag.toModelType());
         }

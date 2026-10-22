@@ -55,11 +55,16 @@ public class CommandBox extends UiPart<Region> {
                 commandTextField.positionCaret(newText.length());
             }
             autocompletePopup.hide();
+            commandTextField.requestFocus();
         };
 
         suggestionsListView.setOnMouseClicked(event -> applySuggestion.run());
 
         suggestionsListView.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.TAB && event.isShiftDown()) {
+                autocompletePopup.hide();
+                return;
+            }
             if (event.getCode() == KeyCode.TAB) {
                 event.consume();
                 Platform.runLater(applySuggestion);
@@ -103,6 +108,10 @@ public class CommandBox extends UiPart<Region> {
         });
 
         commandTextField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.TAB && event.isShiftDown()) {
+                autocompletePopup.hide();
+                return;
+            }
             if (autocompletePopup.isShowing()) {
                 if (event.getCode() == KeyCode.UP) {
                     event.consume();
@@ -128,10 +137,10 @@ public class CommandBox extends UiPart<Region> {
                 }
             } else {
                 if (event.getCode() == KeyCode.TAB) {
-                    event.consume();
                     String currentText = commandTextField.getText();
                     String nextPrefix = autocompleteEngine.getNextPrefix(currentText);
                     if (!nextPrefix.isEmpty()) {
+                        event.consume();
                         String newText = currentText + nextPrefix;
                         if (!newText.endsWith(" ")) {
                             newText += " ";

@@ -13,7 +13,7 @@ import trackflow.model.person.Person;
 import trackflow.model.person.Remark;
 
 /**
- * Changes the remark of an existing person in the athlete roster.
+ * Changes the remark of an existing athlete in the athlete roster.
  */
 public class RemarkCommand extends Command {
 

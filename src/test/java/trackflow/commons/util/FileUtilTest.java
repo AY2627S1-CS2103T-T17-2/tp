@@ -63,6 +63,16 @@ public class FileUtilTest {
         assertEquals(1, countFilesIn(temporaryFolder));
     }
 
+    @Test
+    public void readFromFile_existingAndMissingFile() throws Exception {
+        Path file = temporaryFolder.resolve("sample.txt");
+        Files.writeString(file, "hello trackflow");
+        assertEquals("hello trackflow", FileUtil.readFromFile(file));
+
+        Path missing = temporaryFolder.resolve("missing.txt");
+        assertThrows(IOException.class, () -> FileUtil.readFromFile(missing));
+    }
+
     private static long countFilesIn(Path folder) throws IOException {
         try (var files = Files.list(folder)) {
             return files.count();

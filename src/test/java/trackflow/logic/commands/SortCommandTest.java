@@ -46,7 +46,7 @@ public class SortCommandTest {
             .withName("Mia Ong")
             .withAgeCategory("Open")
             .withPhone("10000")
-            .withEmail("mike@example.com")
+            .withEmail("MIKE@example.com")
             .withAddress("Main Street")
             .build();
     private static final Person IAN = new PersonBuilder()
@@ -108,8 +108,9 @@ public class SortCommandTest {
     }
 
     @Test
-    public void execute_emailAscending_sortsAlphabeticallyIgnoringCase() {
+    public void execute_emailAscendingAndDescending_sortsAlphabeticallyIgnoringCase() {
         assertSortSuccess(EMAIL, ASCENDING, List.of(AMY, MIA, ZOE));
+        assertSortSuccess(EMAIL, DESCENDING, List.of(ZOE, MIA, AMY));
     }
 
     @Test
@@ -183,6 +184,7 @@ public class SortCommandTest {
     }
 
     private void assertSortSuccess(SortField field, SortOrder order, List<Person> expectedOrder) {
+        List<Person> originalRosterOrder = List.copyOf(model.getRoster().getPersonList());
         SortCommand command = new SortCommand(field, order);
         CommandResult result = command.execute(model);
         String expectedMessage = String.format(SortCommand.MESSAGE_SUCCESS,
@@ -190,6 +192,7 @@ public class SortCommandTest {
                 order == ASCENDING ? "ascending" : "descending");
         assertEquals(expectedMessage, result.getFeedbackToUser());
         assertEquals(expectedOrder, model.getFilteredPersonList());
+        assertEquals(originalRosterOrder, model.getRoster().getPersonList());
     }
 
     private void useModelWithAllAgeCategories() {

@@ -1,14 +1,23 @@
 @startuml
-hide circle
-skinparam classAttributeIconSize 0
-
-Class "<<interface>>\nParser" as Parser
-Class RemarkCommandParser {
-  +parse(): RemarkCommand
+!include ../style.puml
+skinparam ArrowFontStyle plain
+skinparam linetype polyline
+skinparam arrowColor LOGIC_COLOR_T4
+skinparam classBackgroundColor LOGIC_COLOR
+show members
+hide empty members
+interface "Parser<T extends Command>" as Parser <<interface>> LOGIC_COLOR_T1 {
+    +parse(userInput: String): T
 }
-Class ParserException
-
-RemarkCommandParser .up.|> Parser
-Parser .right.> ParserException: throws >
-RemarkCommandParser .right.> ParserException: throws >
+class RemarkCommandParser {
+    +parse(args: String): RemarkCommand
+}
+class ParseException
+RemarkCommandParser .up.|> Parser : T = RemarkCommand
+Parser ..> ParseException : throws
+RemarkCommandParser ..> ParseException : throws
+legend bottom
+  Partial view of remark parsing. ParseException belongs to logic.parser.exceptions.
+  The parser creates RemarkCommand after validating the index and r/ argument.
+endlegend
 @enduml

@@ -6,7 +6,7 @@ import javafx.scene.image.Image;
 import trackflow.MainApp;
 
 /**
- * A container for app-specific utility functions
+ * A container for app-specific utility functions.
  */
 public class AppUtil {
 

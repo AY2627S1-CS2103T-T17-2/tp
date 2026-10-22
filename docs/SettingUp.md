@@ -106,3 +106,7 @@ On Windows, use `gradlew.bat`. Open `build/docs/javadoc/index.html` to inspect t
 The Javadoc tool can also report optional missing tags or comments on simple accessors/constants; those warnings
 are separate from the course standard's documented exceptions. Resolve malformed markup and broken references,
 and manually verify that each changed header describes the current behavior.
+
+Checkstyle enforces only part of the standard. During review, also check comment accuracy, athlete-facing
+vocabulary, American spelling in Java comments, verb-based method names, and wrapped-line indentation
+(8 spaces beyond the original line). Preserve documented storage keys when changing human-readable wording.

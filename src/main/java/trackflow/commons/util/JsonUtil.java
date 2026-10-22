@@ -97,14 +97,14 @@ public class JsonUtil {
 
 
     /**
-     * Converts JSON text to an instance of the requested class.
+     * Converts exactly one JSON value, followed only by whitespace, to the requested class.
      * Unlike {@link #readJsonFile(Path, Class)}, this conversion can return null for a JSON null root.
      *
      * @param <T> Type of object to decode.
      * @param json JSON text to decode.
      * @param instanceClass Class whose fields describe the JSON structure.
      * @return The decoded object, or null for a JSON null root.
-     * @throws IOException If the text is malformed or cannot be converted to the requested class.
+     * @throws IOException If the text is malformed, has extra root values, or cannot be converted to the class.
      */
     public static <T> T fromJsonString(String json, Class<T> instanceClass) throws IOException {
         try (JsonParser parser = objectMapper.getFactory().createParser(json)) {
@@ -112,7 +112,7 @@ public class JsonUtil {
             if (parser.nextToken() != null) {
                 // Content after the first JSON value means the file is malformed; rejecting it lets the caller
                 // preserve the file instead of silently dropping the trailing data on the next save.
-                throw new IOException("Unexpected content after the JSON value.");
+                throw new IOException("JSON input must contain exactly one root value");
             }
             return value;
         }

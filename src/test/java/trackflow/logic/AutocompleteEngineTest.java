@@ -28,21 +28,10 @@ public class AutocompleteEngineTest {
     }
 
     @Test
-    public void getSuggestions_emptyInput_returnsEmptyList() {
-        List<String> suggestions = autocompleteEngine.getSuggestions("");
-        assertTrue(suggestions.isEmpty());
-    }
-
-    @Test
-    public void getSuggestions_whitespaceOnly_returnsEmptyList() {
-        List<String> suggestions = autocompleteEngine.getSuggestions("   ");
-        assertTrue(suggestions.isEmpty());
-
-        suggestions = autocompleteEngine.getSuggestions("\t");
-        assertTrue(suggestions.isEmpty());
-
-        suggestions = autocompleteEngine.getSuggestions("add\t");
-        assertTrue(suggestions.isEmpty());
+    public void getSuggestions_emptyOrWhitespaceOnly_returnsEmptyList() {
+        for (String input : List.of("", "   ", "\t")) {
+            assertTrue(autocompleteEngine.getSuggestions(input).isEmpty());
+        }
     }
 
     @Test
@@ -100,6 +89,9 @@ public class AutocompleteEngineTest {
         List<String> suggestions = autocompleteEngine.getSuggestions("add ");
         assertTrue(suggestions.isEmpty());
 
+        suggestions = autocompleteEngine.getSuggestions("add\t");
+        assertTrue(suggestions.isEmpty());
+
         suggestions = autocompleteEngine.getSuggestions("clear ");
         assertTrue(suggestions.isEmpty());
     }
@@ -148,13 +140,10 @@ public class AutocompleteEngineTest {
     }
 
     @Test
-    public void getNextPrefix_addCommandWithoutTrailingSpace_returnsPrefixedWithSpace() {
+    public void getNextPrefix_addCommandWithAndWithoutTrailingSpace_returnsNextMissingPrefix() {
         assertEquals(" n/", autocompleteEngine.getNextPrefix("add"));
-    }
-
-    @Test
-    public void getNextPrefix_addCommandWithTrailingSpace_returnsPrefixWithoutLeadingSpace() {
         assertEquals("n/", autocompleteEngine.getNextPrefix("add "));
+        assertEquals("n/", autocompleteEngine.getNextPrefix("ADD "));
     }
 
     @Test
@@ -177,13 +166,22 @@ public class AutocompleteEngineTest {
     }
 
     @Test
-    public void getNextPrefix_uppercasePrefixes_matchesCaseInsensitively() {
+    public void getNextPrefix_uppercaseCommandAndPrefixes_matchesCaseInsensitively() {
         // Issue 1B fix: Uppercase prefixes should be recognized so that already entered prefixes are not repeated
+        assertEquals("n/", autocompleteEngine.getNextPrefix("EDIT 1 "));
         assertEquals(" a/", autocompleteEngine.getNextPrefix("add N/John"));
         assertEquals(" p/", autocompleteEngine.getNextPrefix("add N/John A/Under 20"));
         assertEquals(" e/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 P/91234567"));
         assertEquals(" addr/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567 E/j@e.com"));
         assertEquals("", autocompleteEngine.getNextPrefix("add N/John A/Under 20 P/91234567 E/j@e.com ADDR/NUS"));
+    }
+
+    @Test
+    public void getNextPrefix_escapedPrefixes_notCountedAsParameters() {
+        assertEquals(" n/", autocompleteEngine.getNextPrefix("add n//literal"));
+        assertEquals(" r/", autocompleteEngine.getNextPrefix("remark 1 r//literal"));
+        assertEquals(" a/", autocompleteEngine.getNextPrefix("filter a//Open"));
+        assertEquals(" e/", autocompleteEngine.getNextPrefix("add n/Alice a/Open p/91234567 addr/Block A//B"));
     }
 
     @Test
@@ -203,6 +201,17 @@ public class AutocompleteEngineTest {
         assertEquals(" n/", autocompleteEngine.getNextPrefix("edit 1"));
         assertEquals(" a/", autocompleteEngine.getNextPrefix("edit 1 n/Alex"));
         assertEquals("", autocompleteEngine.getNextPrefix("edit 1 n/Alex a/Under 20 p/91234567 e/a@b.com addr/NUS"));
+    }
+
+    @Test
+    public void getNextPrefix_missingOrNonNumericIndex_doesNotInsertPrefixes() {
+        for (String command : List.of("edit", "remark", "tag", "untag")) {
+            assertEquals("", autocompleteEngine.getNextPrefix(command));
+            assertEquals("", autocompleteEngine.getNextPrefix(command + " "));
+            assertEquals("", autocompleteEngine.getNextPrefix(command + " INDEX"));
+            assertEquals("", autocompleteEngine.getNextPrefix(command + " n/Avery"));
+        }
+        assertEquals(" n/", autocompleteEngine.getNextPrefix("EDIT 0001"));
     }
 
     @Test

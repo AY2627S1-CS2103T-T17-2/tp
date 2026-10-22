@@ -1,6 +1,7 @@
 package trackflow.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.logic.Messages.MESSAGE_EMPTY_COMMAND;
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
@@ -18,10 +19,12 @@ import org.junit.jupiter.api.Test;
 
 import trackflow.logic.commands.AddCommand;
 import trackflow.logic.commands.ClearCommand;
+import trackflow.logic.commands.Command;
 import trackflow.logic.commands.DeleteCommand;
 import trackflow.logic.commands.EditCommand;
 import trackflow.logic.commands.EditCommand.EditPersonDescriptor;
 import trackflow.logic.commands.ExitCommand;
+import trackflow.logic.commands.FilterCommand;
 import trackflow.logic.commands.FindCommand;
 import trackflow.logic.commands.HelpCommand;
 import trackflow.logic.commands.ListAthleteCommand;
@@ -32,6 +35,8 @@ import trackflow.logic.commands.SortCommand.SortOrder;
 import trackflow.logic.commands.TagCommand;
 import trackflow.logic.commands.UntagCommand;
 import trackflow.logic.parser.exceptions.ParseException;
+import trackflow.model.ModelManager;
+import trackflow.model.person.AgeCategory;
 import trackflow.model.person.Person;
 import trackflow.model.person.PersonContainsKeywordsPredicate;
 import trackflow.model.person.Remark;
@@ -87,7 +92,8 @@ public class TrackFlowParserTest {
         assertThrows(NullPointerException.class, () -> parser.parseCommand(null));
         List<Parser<?>> commandParsers = List.of(new AddCommandParser(), new EditCommandParser(),
                 new DeleteCommandParser(), new RemarkCommandParser(), new FindCommandParser(),
-                new FilterCommandParser(), new SortCommandParser(), new ListAthleteCommandParser());
+                new FilterCommandParser(), new SortCommandParser(), new ListAthleteCommandParser(),
+                new TagCommandParser(), new UntagCommandParser());
         for (Parser<?> commandParser : commandParsers) {
             assertThrows(NullPointerException.class, () -> commandParser.parse(null));
         }
@@ -95,7 +101,9 @@ public class TrackFlowParserTest {
 
     @Test
     public void parseCommand_clear() throws Exception {
-        assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD) instanceof ClearCommand);
+        Command command = parser.parseCommand(ClearCommand.COMMAND_WORD);
+        assertTrue(command instanceof ClearCommand);
+        assertTrue(command.changesRoster());
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ClearCommand.MESSAGE_USAGE);
         assertThrows(ParseException.class, expectedMessage, () ->
                 parser.parseCommand(ClearCommand.COMMAND_WORD + " 3"));
@@ -120,10 +128,19 @@ public class TrackFlowParserTest {
 
     @Test
     public void parseCommand_exit() throws Exception {
-        assertTrue(parser.parseCommand(ExitCommand.COMMAND_WORD) instanceof ExitCommand);
+        Command command = parser.parseCommand(ExitCommand.COMMAND_WORD);
+        assertTrue(command instanceof ExitCommand);
+        assertFalse(command.changesRoster());
+        assertTrue(command.execute(new ModelManager()).isExit());
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ExitCommand.MESSAGE_USAGE);
         assertThrows(ParseException.class, expectedMessage, () ->
                 parser.parseCommand(ExitCommand.COMMAND_WORD + " 3"));
+    }
+
+    @Test
+    public void parseCommand_filter() throws Exception {
+        FilterCommand command = (FilterCommand) parser.parseCommand("filter a/Under 18");
+        assertEquals(new FilterCommand(new AgeCategory("Under 18")), command);
     }
 
     @Test
@@ -136,7 +153,10 @@ public class TrackFlowParserTest {
 
     @Test
     public void parseCommand_help() throws Exception {
-        assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD) instanceof HelpCommand);
+        Command command = parser.parseCommand(HelpCommand.COMMAND_WORD);
+        assertTrue(command instanceof HelpCommand);
+        assertFalse(command.changesRoster());
+        assertTrue(command.execute(new ModelManager()).isShowHelp());
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, HelpCommand.MESSAGE_USAGE);
         assertThrows(ParseException.class, expectedMessage, () ->
                 parser.parseCommand(HelpCommand.COMMAND_WORD + " 3"));
@@ -144,9 +164,13 @@ public class TrackFlowParserTest {
 
     @Test
     public void parseCommand_list() throws Exception {
-        assertTrue(parser.parseCommand(ListAthleteCommand.COMMAND_WORD) instanceof ListAthleteCommand);
-        assertTrue(parser.parseCommand("LIST") instanceof ListAthleteCommand);
-        assertTrue(parser.parseCommand("  LiSt  ") instanceof ListAthleteCommand);
+        for (String input : List.of(ListAthleteCommand.COMMAND_WORD, "LIST", "  LiSt  ")) {
+            Command command = parser.parseCommand(input);
+            assertTrue(command instanceof ListAthleteCommand);
+            assertFalse(command.changesRoster());
+            assertEquals(ListAthleteCommand.MESSAGE_EMPTY_ROSTER,
+                    command.execute(new ModelManager()).getFeedbackToUser());
+        }
         assertThrows(ParseException.class, ListAthleteCommand.MESSAGE_USAGE, () -> parser.parseCommand("LiSt 3"));
     }
 

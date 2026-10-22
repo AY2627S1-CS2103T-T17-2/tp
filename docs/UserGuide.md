@@ -6,7 +6,7 @@
 
 # TrackFlow User Guide
 
-TrackFlow is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
+TrackFlow v1.4 is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
 prefer typing commands through a Command Line Interface (CLI), while retaining the benefits of a Graphical User
 Interface (GUI).
 
@@ -27,7 +27,7 @@ Interface (GUI).
 1. Copy the file to the folder you want to use as the _home folder_ for TrackFlow.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar TrackFlow.jar`.<br>
-   The GUI opens with sample athletes. The image below is a design mockup: its grade/event fields and command examples do not represent v1.3. Use the commands documented in this guide.<br>
+   The GUI opens with sample athletes. The image below is a design mockup: its layout and command examples differ from v1.4. Use the commands documented in this guide.<br>
    ![TrackFlow design mockup](images/Ui.png)
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
@@ -112,8 +112,22 @@ TrackFlow provides an autocomplete feature to speed up typing and ensure correct
 * Use the **Up** and **Down** arrow keys to navigate the list of suggestions.
 * Press **Tab**, or **Click** on a suggestion, to select it. This will insert the command word (followed by a space) into the command box and close the suggestions dropdown.
 * Pressing **Enter** does **not** select or apply a suggestion; it closes the suggestions dropdown and executes the command currently typed in the command box.
-* After you enter the command word (or select it with **Tab**), press **Tab** again to automatically insert the next prefix in the sequence. After you type the data for a parameter (or an index, if required), press **Tab** again to insert the next prefix. You can keep pressing **Tab** to step through all the prefixes for the command.
+* After you enter the command word (or select it with **Tab**), press **Tab** again to insert the next missing prefix.
+  For `edit`, `remark`, `tag`, and `untag`, type the athlete index first; autocomplete does not insert it for you.
+  After typing a parameter value, press **Tab** to insert the next missing prefix.
 * Prefixes already entered in the command box (even in uppercase or in a different order) are recognized and skipped automatically.
+* Press **Escape** to dismiss suggestions. **Shift+Tab** moves focus backward. When no suggestion or prefix is
+  available, **Tab** moves focus to the next control, allowing keyboard access to feedback and the roster.
+
+### Window size and scrolling
+
+TrackFlow restores its normal window size and position when reopened. If the saved window is too large or its
+monitor is disconnected, TrackFlow fits the window into a connected screen's usable area. The normal minimum is
+450 by 400 pixels, reduced further if the screen has less usable space. Maximizing or minimizing does not replace
+the last normal window bounds. Adding or editing athletes does not automatically enlarge the window.
+
+Resize the window as needed. Athlete details wrap, the roster scrolls, and long command feedback can be scrolled
+within the result area. The command box and status footer remain separate from the scrolling roster.
 
 ### Command feedback and errors
 
@@ -134,7 +148,8 @@ so that it can be corrected.
 ### Viewing help: `help`
 
 Opens a resizable, scrollable help window listing every supported command, its purpose,
-parameters, and examples.
+parameters, and examples. It opens on the main window's screen and fits the available space. Running `help`
+again restores it if minimized. Closing and reopening help retains its position during the current session.
 
 Format: `help`
 
@@ -411,7 +426,8 @@ The command does not accept parameters.
 ### Saving the data
 
 TrackFlow automatically saves after every successful command that changes roster data: `add`, `edit`, `remark`,
-`delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite the data file.
+`tag`, `untag`, `delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite
+the data file.
 TrackFlow writes the complete update to a temporary file before replacing the existing roster, so an interrupted write
 does not leave a partially written roster when atomic replacement is supported by the filesystem. On other
 filesystems, TrackFlow moves the completed temporary file into place without an atomicity guarantee.
@@ -422,8 +438,9 @@ available without saving the roster. You do not need to save manually.
 ### Editing the data file
 
 TrackFlow saves roster data to `data/trackflow.json`, relative to the folder from which you launch the application.
-Following the quick-start instructions places it beside the JAR in the `data` subfolder. Close TrackFlow and make a
-separate backup before editing this file manually.
+Following the quick-start instructions places it beside the JAR in the `data` subfolder. If `data/trackflow.json` does not exist when launched, TrackFlow starts with sample athlete data and creates the file upon the first successful command that changes roster data.
+
+Close TrackFlow and make a separate backup before editing this file manually.
 
 <box type="warning" seamless>
 
@@ -436,7 +453,7 @@ protect the original file. Keep the preserved copy if you need to recover its re
 
 ### Archiving data files [Future]
 
-Archiving and restoring individual athlete records are not available in v1.3. Keep external copies of roster files
+Archiving and restoring individual athlete records are not available in v1.4. Keep external copies of roster files
 when you need a historical snapshot. No release version is committed for in-app archiving.
 
 --------------------------------------------------------------------------------------------------------------------
@@ -446,7 +463,7 @@ when you need a historical snapshot. No release version is committed for in-app 
 **Q**: How do I transfer my data to another computer?<br>
 **A**: Install TrackFlow on the other computer and overwrite the data file it creates with the data file from your
 previous TrackFlow home folder. Close TrackFlow on both computers first and back up any destination roster before
-replacing it. Launch from the destination home folder so TrackFlow reads the copied `data/trackflow.json`.
+replacing it. Put the JAR in the destination home folder so TrackFlow reads its `data/trackflow.json`.
 
 --------------------------------------------------------------------------------------------------------------------
 

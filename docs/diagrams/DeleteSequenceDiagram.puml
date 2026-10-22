@@ -1,47 +1,89 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
-
 participant ":LogicManager" as logic LOGIC_COLOR
 participant ":TrackFlowParser" as parser LOGIC_COLOR
 participant ":DeleteCommandParser" as deleteParser LOGIC_COLOR
-participant "d:DeleteCommand" as command LOGIC_COLOR
-participant "staged:Model" as model MODEL_COLOR
-participant ":Storage" as storage STORAGE_COLOR
-participant "live:Model" as live MODEL_COLOR
-
+participant "command:DeleteCommand" as command LOGIC_COLOR
+participant "live:ModelManager" as live MODEL_COLOR
+participant "staged:ModelManager" as staged MODEL_COLOR
+participant ":StorageManager" as storage STORAGE_COLOR
 [-> logic : execute("delete 1")
-activate logic
+activate logic LOGIC_COLOR
 logic -> parser : parseCommand("delete 1")
-activate parser
+activate parser LOGIC_COLOR
 create deleteParser
+parser -> deleteParser : new DeleteCommandParser()
+activate deleteParser LOGIC_COLOR
+deleteParser --> parser
+deactivate deleteParser
 parser -> deleteParser : parse(" 1")
-activate deleteParser
+activate deleteParser LOGIC_COLOR
 create command
 deleteParser -> command : new DeleteCommand(index)
-deleteParser --> parser : d
-deactivate deleteParser
-destroy deleteParser
-parser --> logic : d
-deactivate parser
-logic -> live : read roster and display state
-live --> logic : snapshot
-logic -> model : create detached copy
-logic -> command : execute(staged)
-activate command
-command -> model : getFilteredPersonList()
-model --> command : displayed athletes
-command -> model : deletePerson(personToDelete)
-command --> logic : CommandResult
+activate command LOGIC_COLOR
+command --> deleteParser
 deactivate command
-logic -> storage : saveRoster(staged.getRoster())
+deleteParser --> parser : command
+deactivate deleteParser
+parser --> logic : command
+deactivate parser
+logic -> live : getRoster()
+activate live MODEL_COLOR
+live --> logic : roster
+deactivate live
+logic -> live : getUserPrefs()
+activate live MODEL_COLOR
+live --> logic : prefs
+deactivate live
+create staged
+logic -> staged : new ModelManager(roster, prefs)
+activate staged MODEL_COLOR
+staged --> logic
+deactivate staged
+note right of staged
+  The current predicate and comparator are copied.
+  Their accessor and update calls are omitted.
+end note
+logic -> command : execute(staged)
+activate command LOGIC_COLOR
+command -> staged : getFilteredPersonList()
+activate staged MODEL_COLOR
+staged --> command : displayedAthletes
+deactivate staged
+command -> staged : deletePerson(athleteToDelete)
+activate staged MODEL_COLOR
+staged --> command
+deactivate staged
+command --> logic : commandResult
+deactivate command
 alt save succeeds
-    storage --> logic : saved
-    logic -> live : setRoster(staged.getRoster())\nupdateFilteredPersonList(staged predicate)
-    [<-- logic : result.withDataSaved()
-else save fails
-    storage --> logic : IOException
-    [<-- logic : CommandException (live model unchanged)
+    logic -> storage : saveRoster(staged.getRoster())
+    activate storage STORAGE_COLOR
+    storage --> logic
+    deactivate storage
+    logic -> live : setRoster(staged.getRoster())
+    activate live MODEL_COLOR
+    live --> logic
+    deactivate live
+    logic -> live : updateFilteredPersonList(staged.getPersonListPredicate())
+    activate live MODEL_COLOR
+    live --> logic
+    deactivate live
+    note right of live: The live sort comparator is retained.
+    [<-- logic : savedResult
+else IOException while saving
+    logic -> storage : saveRoster(staged.getRoster())
+    activate storage STORAGE_COLOR
+    storage --> logic : throws IOException
+    deactivate storage
+    [<-- logic : throws CommandException
 end
 deactivate logic
+legend bottom
+  Partial trace: successful parsing and a valid displayed index are assumed.
+  Logging, changesRoster(), list access, result construction, and routine accessors are omitted.
+  On success, withDataSaved() creates savedResult after publication; that call is omitted.
+  Save failure is wrapped in CommandException; the live roster and display stay unchanged.
+endlegend
 @enduml

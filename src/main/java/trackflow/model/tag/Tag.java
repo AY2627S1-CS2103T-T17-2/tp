@@ -44,7 +44,7 @@ public class Tag {
         return test.length() <= MAX_LENGTH && test.matches(VALIDATION_REGEX);
     }
 
-    private String normalizedName() {
+    private String getNormalizedName() {
         return tagName.toLowerCase(Locale.ROOT);
     }
 
@@ -59,12 +59,12 @@ public class Tag {
             return false;
         }
 
-        return normalizedName().equals(otherTag.normalizedName());
+        return getNormalizedName().equals(otherTag.getNormalizedName());
     }
 
     @Override
     public int hashCode() {
-        return normalizedName().hashCode();
+        return getNormalizedName().hashCode();
     }
 
     /**

@@ -41,18 +41,22 @@ public class FindCommandParserTest {
         PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of(), Map.of(
                 SearchField.NAME, List.of("und"),
                 SearchField.AGE_CATEGORY, List.of("Open"),
+                SearchField.PHONE, List.of("9123"),
+                SearchField.ADDRESS, List.of("Main Street"),
                 SearchField.REMARK, List.of("injured")));
 
-        assertParseSuccess(parser, " n/und a/Open r/injured", new FindCommand(predicate));
-        assertParseSuccess(parser, " N/und A/Open R/injured", new FindCommand(predicate));
+        assertParseSuccess(parser, " n/und a/Open p/9123 addr/Main Street r/injured", new FindCommand(predicate));
+        assertParseSuccess(parser, " N/und A/Open P/9123 ADDR/Main Street R/injured", new FindCommand(predicate));
     }
 
     @Test
     public void parse_broadAndFieldScopedArgs_returnsFindCommand() {
         PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(
-                List.of("avery", "9123"), Map.of(SearchField.EMAIL, List.of("example.com")));
+                List.of("avery", "9123"), Map.of(
+                        SearchField.NAME, List.of("Avery"),
+                        SearchField.EMAIL, List.of("example.com")));
 
-        assertParseSuccess(parser, " avery 9123 e/example.com", new FindCommand(predicate));
+        assertParseSuccess(parser, " avery 9123 n/Avery e/example.com", new FindCommand(predicate));
     }
 
     @Test

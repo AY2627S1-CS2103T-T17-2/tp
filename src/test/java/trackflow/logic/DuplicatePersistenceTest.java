@@ -8,10 +8,13 @@ import static trackflow.testutil.Assert.assertThrows;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import trackflow.logic.commands.AddCommand;
+import trackflow.logic.commands.EditCommand;
 import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.model.Model;
 import trackflow.model.ModelManager;
@@ -44,11 +47,15 @@ public class DuplicatePersistenceTest {
         List<Person> originalDisplay = List.copyOf(reloaded.getFilteredPersonList());
         String originalFile = Files.readString(rosterStorage.getRosterFilePath());
 
-        for (String command : List.of(
+        Map<String, String> duplicateCommands = Map.of(
                 "add n/AVERY   TAN a/Under 16 p/91234567 e/other@example.com addr/Elsewhere",
+                String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "AVERY   TAN"),
                 "add n/avery tan a/Open p/93456789 e/AVERY@example.com addr/Elsewhere",
-                "edit 1 n/AVERY   TAN e/AVERY@example.com")) {
-            assertThrows(CommandException.class, () -> logic.execute(command));
+                String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "avery tan"),
+                "edit 1 n/AVERY   TAN e/AVERY@example.com",
+                EditCommand.MESSAGE_DUPLICATE_PERSON);
+        for (var entry : duplicateCommands.entrySet()) {
+            assertThrows(CommandException.class, entry.getValue(), () -> logic.execute(entry.getKey()));
             assertEquals(originalDisplay, reloaded.getFilteredPersonList());
             assertEquals(originalFile, Files.readString(rosterStorage.getRosterFilePath()));
         }
@@ -68,11 +75,13 @@ public class DuplicatePersistenceTest {
         logic.execute("find n/Nobody");
         String addFeedback = logic.execute(
                 "add n/Jordan Lee a/Open p/91234567 e/jordan@example.com addr/School").getFeedbackToUser();
-        assertTrue(addFeedback.contains(String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, "Avery Tan")));
+        assertEquals("New athlete added: Jordan Lee; Age category: Open; Phone: 91234567; Email: jordan@example.com"
+                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, "Avery Tan"), addFeedback);
 
         logic.execute("find n/Jordan");
         String editFeedback = logic.execute("edit 1 p/92345678 e/AVERY@example.com").getFeedbackToUser();
-        assertTrue(editFeedback.contains(String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, "Avery Tan")));
+        assertEquals("Edited athlete: Jordan Lee; Age category: Open; Phone: 92345678; Email: AVERY@example.com"
+                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, "Avery Tan"), editFeedback);
 
         Model restarted = new ModelManager(rosterStorage.readRoster().orElseThrow(), new UserPrefs());
         assertEquals(reloaded.getRoster(), restarted.getRoster());
