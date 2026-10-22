@@ -42,10 +42,18 @@ public class JsonUserPrefsStorage {
      *
      * @param prefsFilePath Location of the preferences; must not be null.
      * @return The loaded preferences, or an empty optional if the file is absent.
-     * @throws DataLoadingException If the file cannot be read or its JSON cannot be converted to preferences.
+     * @throws DataLoadingException If the file cannot be read, its JSON is invalid, or its GUI settings are invalid.
      */
     public Optional<UserPrefs> readUserPrefs(Path prefsFilePath) throws DataLoadingException {
-        return JsonUtil.readJsonFile(prefsFilePath, UserPrefs.class);
+        Optional<UserPrefs> preferences = JsonUtil.readJsonFile(prefsFilePath, UserPrefs.class);
+        if (preferences.isPresent()) {
+            UserPrefs loaded = preferences.get();
+            if (loaded.getGuiSettings() == null || !loaded.getGuiSettings().isValid()) {
+                throw new DataLoadingException(new IOException("Saved GUI settings must be present "
+                        + "and have finite, positive window dimensions"));
+            }
+        }
+        return preferences;
     }
 
     /**

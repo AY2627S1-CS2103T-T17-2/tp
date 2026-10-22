@@ -20,6 +20,7 @@ import trackflow.commons.core.GuiSettings;
 import trackflow.commons.exceptions.DataLoadingException;
 import trackflow.model.AthleteRoster;
 import trackflow.model.Model;
+import trackflow.model.ModelManager;
 import trackflow.model.ReadOnlyRoster;
 import trackflow.model.UserPrefs;
 import trackflow.model.util.SampleDataUtil;
@@ -36,7 +37,12 @@ public class MainAppTest {
     public void initModelManager_unreadableRoster_preservesEachOriginalBeforeReplacement() throws Exception {
         Path rosterPath = testFolder.resolve("trackflow.json");
         Storage storage = createStorage(rosterPath);
-        List<String> invalidRosters = List.of("{invalid JSON", "{\"persons\":[null]}");
+        List<String> invalidRosters = List.of("{invalid JSON", "null", "{}", "{\"persons\":null}",
+                "{\"persons\":[]} GARBAGE", "{\"persons\":[]} {\"persons\":[{}]}",
+                "{\"persons\":[null]}", """
+                {"persons": [{"name": "Avery Tan", "phone": "91234567",
+                "email": "avery.tan@example.com", "address": "", "remark": "", "tags": [null]}]}
+                """);
         for (String invalidRoster : invalidRosters) {
             Files.writeString(rosterPath, invalidRoster);
             Model model = new MainApp().initModelManager(storage, new UserPrefs());
@@ -95,30 +101,41 @@ public class MainAppTest {
         }
     }
 
-    @Test
-    public void initPrefs_missingOrCorruptedOrValidFile_returnsExpectedPrefsAndSaves() throws Exception {
-        Path prefsPath = testFolder.resolve("preferences.json");
-        JsonUserPrefsStorage prefsStorage = new JsonUserPrefsStorage(prefsPath);
-
-        // Missing file -> creates default prefs file
-        UserPrefs defaultPrefs = new MainApp().initPrefs(prefsStorage);
-        assertEquals(new UserPrefs(), defaultPrefs);
-        assertTrue(Files.exists(prefsPath));
-
-        // Valid saved prefs -> loads saved prefs
-        UserPrefs customPrefs = new UserPrefs();
-        customPrefs.setGuiSettings(new GuiSettings(1024, 768, 50, 60));
-        prefsStorage.saveUserPrefs(customPrefs);
-        assertEquals(customPrefs, new MainApp().initPrefs(prefsStorage));
-
-        // Corrupted prefs file -> falls back to default prefs and overwrites file
-        Files.writeString(prefsPath, "{corrupted json");
-        assertEquals(new UserPrefs(), new MainApp().initPrefs(prefsStorage));
-        assertEquals(new UserPrefs(), prefsStorage.readUserPrefs().orElseThrow());
-    }
-
     private Storage createStorage(Path rosterPath) {
         return new StorageManager(new JsonRosterStorage(rosterPath),
                 new JsonUserPrefsStorage(testFolder.resolve("preferences.json")));
+    }
+
+    @Test
+    public void initPrefs_invalidSettings_recoversDefaultsWithoutChangingRoster() throws Exception {
+        Path prefsPath = testFolder.resolve("preferences.json");
+        Path rosterPath = testFolder.resolve("trackflow.json");
+        String originalRoster = "roster bytes must stay untouched by preference recovery";
+        Files.writeString(rosterPath, originalRoster);
+        JsonUserPrefsStorage prefsStorage = new JsonUserPrefsStorage(prefsPath);
+        List<String> invalidPreferences = List.of("null", "{invalid JSON", "{\"guiSettings\":null}",
+                "{\"guiSettings\":{\"windowWidth\":0}}", "{\"guiSettings\":{\"windowHeight\":-1}}",
+                "{\"guiSettings\":{\"windowWidth\":1e309}}", "{} {}", "{} GARBAGE");
+        for (String json : invalidPreferences) {
+            Files.writeString(prefsPath, json);
+            UserPrefs loaded = new MainApp().initPrefs(prefsStorage);
+            assertEquals(new UserPrefs(), loaded, json);
+            assertEquals(new UserPrefs(), prefsStorage.readUserPrefs().orElseThrow(), json);
+            assertEquals(originalRoster, Files.readString(rosterPath), json);
+            new ModelManager(new AthleteRoster(), loaded);
+        }
+    }
+
+    @Test
+    public void initPrefs_missingOrValidPreferences_createsDefaultsOrRetainsCustomSettings() throws Exception {
+        Path prefsPath = testFolder.resolve("preferences.json");
+        JsonUserPrefsStorage prefsStorage = new JsonUserPrefsStorage(prefsPath);
+        assertEquals(new UserPrefs(), new MainApp().initPrefs(prefsStorage));
+        assertTrue(Files.exists(prefsPath));
+        UserPrefs custom = new UserPrefs();
+        custom.setGuiSettings(new GuiSettings(900, 450, -300, 100));
+        prefsStorage.saveUserPrefs(custom);
+        assertEquals(custom, new MainApp().initPrefs(prefsStorage));
+        assertEquals(custom, prefsStorage.readUserPrefs().orElseThrow());
     }
 }

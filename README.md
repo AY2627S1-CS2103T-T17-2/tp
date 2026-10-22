@@ -12,15 +12,10 @@ While it has a Graphical User Interface (GUI), most user interactions occur usin
 
 * **Command autocomplete**: Real-time dropdown suggestions for commands and incremental prefix completion using `Tab` to guide rapid, error-free command entry.
 * **Age-category filtering**: Use `filter a/AGE_CATEGORY` (e.g., `filter a/Under 14`) to filter athletes by competition category; `list` restores the full roster.
-* **Flexible athlete search**: Search partial keywords across supported fields or scope searches by specific prefixes (e.g., `find ave`, `find n/avery`, or `find r/injured`).
+* **Flexible athlete search**: Search partial keywords broadly across all athlete fields (name, age category, phone, email, address, remark, and track events) or target specific fields with prefixes (e.g., `find ave`, `find n/avery`, `find a/Under 14`, `find t/100m`, or `find r/injured`).
 * **Multi-field sorting**: Sort the displayed roster by name, age category, phone, email, or address in ascending or descending order (e.g., `sort age desc`).
 * **Athlete remarks**: Attach coach notes, status updates, or medical flags directly to athlete profiles with `remark INDEX r/REMARK`.
-* **Track event tags**: Use `tag INDEX t/EVENT` and `untag INDEX t/EVENT` to maintain an athlete's events; search events with `find t/EVENT`.
-
-### Future ideas (not implemented)
-
-* **Guardian & emergency contact linking**: Map student-athlete cards directly to parent/guardian profiles, enabling single-command lookups of emergency numbers during road meets.
-* **Relay squads & event grouping**: Organize athletes into designated relay squads (e.g., `group g/4x100mA c/1,4,7,12`), track specific relay legs, and log alternate runners.
+* **Track event tags**: Maintain athletes' track event specializations using `tag INDEX t/EVENT [t/EVENT]...` and `untag INDEX t/EVENT [t/EVENT]...` (e.g., `tag 1 t/100m t/Long Jump`); locate athletes by event with `find t/EVENT`.
 
 ### Documentation
 For detailed instructions on how to use and develop this application, refer to our project website:

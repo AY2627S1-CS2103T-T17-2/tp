@@ -6,7 +6,7 @@
 
 # TrackFlow User Guide
 
-TrackFlow is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
+TrackFlow v1.4 is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
 prefer typing commands through a Command Line Interface (CLI), while retaining the benefits of a Graphical User
 Interface (GUI).
 
@@ -421,8 +421,9 @@ available without saving the roster. You do not need to save manually.
 ### Editing the data file
 
 TrackFlow saves roster data to `data/trackflow.json`, relative to the folder from which you launch the application.
-Following the quick-start instructions places it beside the JAR in the `data` subfolder. Close TrackFlow and make a
-separate backup before editing this file manually.
+Following the quick-start instructions places it beside the JAR in the `data` subfolder. If `data/trackflow.json` does not exist when launched, TrackFlow starts with sample athlete data and creates the file upon the first successful command that changes roster data.
+
+Close TrackFlow and make a separate backup before editing this file manually.
 
 <box type="warning" seamless>
 
@@ -445,7 +446,7 @@ when you need a historical snapshot. No release version is committed for in-app 
 **Q**: How do I transfer my data to another computer?<br>
 **A**: Install TrackFlow on the other computer and overwrite the data file it creates with the data file from your
 previous TrackFlow home folder. Close TrackFlow on both computers first and back up any destination roster before
-replacing it. Launch from the destination home folder so TrackFlow reads the copied `data/trackflow.json`.
+replacing it. Put the JAR in the destination home folder so TrackFlow reads its `data/trackflow.json`.
 
 --------------------------------------------------------------------------------------------------------------------
 

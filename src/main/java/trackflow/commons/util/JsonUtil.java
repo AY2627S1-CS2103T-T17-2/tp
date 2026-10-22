@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -93,17 +94,23 @@ public class JsonUtil {
 
 
     /**
-     * Converts JSON text to an instance of the requested class.
+     * Converts exactly one JSON value, followed only by whitespace, to the requested class.
      * Unlike {@link #readJsonFile(Path, Class)}, this conversion can return null for a JSON null root.
      *
      * @param <T> Type of object to decode.
      * @param json JSON text to decode.
      * @param instanceClass Class whose fields describe the JSON structure.
      * @return The decoded object, or null for a JSON null root.
-     * @throws IOException If the text is malformed or cannot be converted to the requested class.
+     * @throws IOException If the text is malformed, has extra root values, or cannot be converted to the class.
      */
     public static <T> T fromJsonString(String json, Class<T> instanceClass) throws IOException {
-        return objectMapper.readValue(json, instanceClass);
+        try (JsonParser parser = objectMapper.getFactory().createParser(json)) {
+            T value = objectMapper.readValue(parser, instanceClass);
+            if (parser.nextToken() != null) {
+                throw new IOException("JSON input must contain exactly one root value");
+            }
+            return value;
+        }
     }
 
     /**

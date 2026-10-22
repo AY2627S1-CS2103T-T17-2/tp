@@ -1,12 +1,15 @@
 package trackflow.commons.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -74,5 +77,20 @@ public class JsonUtilTest {
         Files.writeString(malformedFile, "{invalid json");
         assertThrows(DataLoadingException.class, () ->
                 JsonUtil.readJsonFile(malformedFile, SerializableTestClass.class));
+    }
+
+    @Test
+    public void fromJsonString_singleRootWithWhitespace_preservesValueAndNullContract() throws IOException {
+        assertEquals(Map.of("message", "literal } { text"),
+                JsonUtil.fromJsonString(" {\"message\":\"literal } { text\"} \t\r\n", Map.class));
+        assertEquals(42, JsonUtil.fromJsonString("42 \n", Integer.class));
+        assertNull(JsonUtil.fromJsonString("null \t", Object.class));
+    }
+
+    @Test
+    public void fromJsonString_extraRootsGarbageOrTruncation_throwsIoException() {
+        for (String json : List.of("{} GARBAGE", "{} {}", "[] []", "42 43", "null {}", "{\"a\":1")) {
+            assertThrows(IOException.class, () -> JsonUtil.fromJsonString(json, Object.class));
+        }
     }
 }

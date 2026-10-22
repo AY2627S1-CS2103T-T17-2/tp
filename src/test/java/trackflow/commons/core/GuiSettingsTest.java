@@ -3,12 +3,22 @@ package trackflow.commons.core;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static trackflow.testutil.Assert.assertThrows;
 
 import java.awt.Point;
 
 import org.junit.jupiter.api.Test;
 
 public class GuiSettingsTest {
+    @Test
+    public void constructor_invalidDimensions_throwsIllegalArgumentException() {
+        for (double dimension : new double[] {0, -1, Double.NaN, Double.POSITIVE_INFINITY,
+            Double.NEGATIVE_INFINITY}) {
+            assertThrows(IllegalArgumentException.class, () -> new GuiSettings(dimension, 600, 0, 0));
+            assertThrows(IllegalArgumentException.class, () -> new GuiSettings(740, dimension, 0, 0));
+        }
+    }
+
     @Test
     public void getWindowCoordinates_defensiveCopy_doesNotMutateInternalState() {
         GuiSettings guiSettings = new GuiSettings(800, 600, 10, 20);

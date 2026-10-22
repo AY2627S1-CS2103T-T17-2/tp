@@ -1,0 +1,62 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam linetype polyline
+skinparam arrowColor STORAGE_COLOR_T4
+show members
+hide empty members
+
+package "Storage" {
+    class JsonSerializableRoster STORAGE_COLOR {
+        +JsonSerializableRoster(source: ReadOnlyRoster)
+        +toModelType(): AthleteRoster
+    }
+    class JsonAdaptedPerson STORAGE_COLOR {
+        +JsonAdaptedPerson(source: Person)
+        +toModelType(): Person
+    }
+    class JsonAdaptedTag STORAGE_COLOR {
+        +JsonAdaptedTag(tagName: String)
+        +JsonAdaptedTag(source: Tag)
+        +toModelType(): Tag
+    }
+}
+
+package "Model" {
+    interface ReadOnlyRoster <<interface>> MODEL_COLOR_T1 {
+        +getPersonList(): ObservableList<Person>
+    }
+    class AthleteRoster MODEL_COLOR {
+        +AthleteRoster()
+    }
+    class Person MODEL_COLOR {
+        +getTags(): Set<Tag>
+    }
+    class Tag MODEL_COLOR {
+        +Tag(tagName: String)
+    }
+}
+
+JsonSerializableRoster -down-> "0..*" JsonAdaptedPerson : -persons: List<JsonAdaptedPerson>\n{ordered, nonunique}
+JsonAdaptedPerson -down-> "0..*" JsonAdaptedTag : -tags: List<JsonAdaptedTag>\n{ordered, nonunique}
+Person -down-> "0..*" Tag : -tags: Set<Tag>\n{unordered, unique}
+
+JsonSerializableRoster .right.> ReadOnlyRoster : save: reads source\nin constructor
+JsonSerializableRoster .right.> AthleteRoster : <<create>>\nload: toModelType()
+AthleteRoster .up.|> ReadOnlyRoster
+JsonAdaptedPerson .right.> Person : save: constructor reads source\nload: toModelType() creates
+JsonAdaptedTag .right.> Tag : save: constructor reads source\nload: toModelType() creates
+
+'Layout constraints only; these do not represent UML relationships.
+ReadOnlyRoster -[hidden]down-> Person
+AthleteRoster -[hidden]down-> Person
+
+legend bottom
+  Partial mapping view; Person's value fields and other constructors are omitted.
+  Solid arrows: retained references, navigable towards the elements; no ownership implied.
+  Dashed arrows: temporary model use / creation; adapters do not retain model objects.
+  JSON lists may contain duplicates; loading converts tags to a HashSet (case-insensitive equality).
+  A missing/null persons list is rejected on conversion; missing/null tags become an empty list.
+  Each toModelType() declares throws IllegalValueException.
+endlegend
+@enduml
