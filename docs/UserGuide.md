@@ -409,7 +409,8 @@ The command does not accept parameters.
 ### Saving the data
 
 TrackFlow automatically saves after every successful command that changes roster data: `add`, `edit`, `remark`,
-`delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite the data file.
+`tag`, `untag`, `delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite
+the data file.
 TrackFlow writes the complete update to a temporary file before replacing the existing roster, so an interrupted write
 does not leave a partially written roster when atomic replacement is supported by the filesystem. On other
 filesystems, TrackFlow moves the completed temporary file into place without an atomicity guarantee.
