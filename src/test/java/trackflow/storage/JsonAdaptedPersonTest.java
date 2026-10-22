@@ -43,6 +43,23 @@ public class JsonAdaptedPersonTest {
     }
 
     @Test
+    public void toModelType_withPerformances_roundTripsSuccessfully() throws Exception {
+        Person withPerformances = new PersonBuilder(BENSON)
+                .withPerformances("100m|12.34|2026-10-22", "Long Jump|6.21m").build();
+        JsonAdaptedPerson person = new JsonAdaptedPerson(withPerformances);
+        assertEquals(withPerformances, person.toModelType());
+    }
+
+    @Test
+    public void toModelType_invalidPerformanceResult_throwsIllegalValueException() {
+        List<JsonAdaptedPerformance> performances =
+                List.of(new JsonAdaptedPerformance("100m", "not-a-time", null));
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                VALID_ADDRESS, VALID_REMARK, VALID_TAGS, null, performances);
+        assertThrows(IllegalValueException.class, person::toModelType);
+    }
+
+    @Test
     public void toModelType_legacyCategory_defaultsToOpen() throws Exception {
         JsonAdaptedPerson legacy = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL,
                 VALID_ADDRESS, VALID_REMARK, VALID_TAGS);

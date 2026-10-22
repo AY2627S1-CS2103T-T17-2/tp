@@ -64,7 +64,8 @@ public abstract class EventTagCommand extends Command {
      */
     protected static Person replaceEvents(Model model, Person athlete, Set<Tag> updatedEvents) {
         Person updatedAthlete = new Person(athlete.getName(), athlete.getAgeCategory(), athlete.getPhone(),
-                athlete.getEmail(), athlete.getAddress(), athlete.getRemark(), updatedEvents);
+                athlete.getEmail(), athlete.getAddress(), athlete.getRemark(), updatedEvents,
+                athlete.getPerformances());
         model.setPerson(athlete, updatedAthlete);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
         return updatedAthlete;

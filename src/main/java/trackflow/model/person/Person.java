@@ -2,8 +2,10 @@ package trackflow.model.person;
 
 import static trackflow.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -26,9 +28,10 @@ public class Person {
     private final Address address;
     private final Remark remark;
     private final Set<Tag> tags = new HashSet<>();
+    private final List<Performance> performances = new ArrayList<>();
 
     /**
-     * Constructs an athlete in the Open age category with the supplied details.
+     * Constructs an athlete in the Open age category with the supplied details and no recorded performances.
      * All fields must be non-null; the address and remark may contain empty values.
      */
     public Person(Name name, Phone phone, Email email, Address address, Remark remark, Set<Tag> tags) {
@@ -36,12 +39,22 @@ public class Person {
     }
 
     /**
-     * Constructs an athlete with an explicit age category and a defensive copy of the supplied tags.
+     * Constructs an athlete with an explicit age category and no recorded performances.
      * All fields must be non-null; the address and remark may contain empty values.
      */
     public Person(Name name, AgeCategory ageCategory, Phone phone, Email email,
             Address address, Remark remark, Set<Tag> tags) {
-        requireAllNonNull(name, ageCategory, phone, email, address, remark, tags);
+        this(name, ageCategory, phone, email, address, remark, tags, List.of());
+    }
+
+    /**
+     * Constructs an athlete with an explicit age category and recorded performances.
+     * Takes a defensive copy of the supplied tags and performances. All fields must be non-null;
+     * the address and remark may contain empty values.
+     */
+    public Person(Name name, AgeCategory ageCategory, Phone phone, Email email,
+            Address address, Remark remark, Set<Tag> tags, List<Performance> performances) {
+        requireAllNonNull(name, ageCategory, phone, email, address, remark, tags, performances);
         this.ageCategory = ageCategory;
         this.name = name;
         this.phone = phone;
@@ -49,6 +62,7 @@ public class Person {
         this.address = address;
         this.remark = remark;
         this.tags.addAll(tags);
+        this.performances.addAll(performances);
     }
 
     public Name getName() {
@@ -81,6 +95,14 @@ public class Person {
      */
     public Set<Tag> getTags() {
         return Collections.unmodifiableSet(tags);
+    }
+
+    /**
+     * Returns an immutable list of recorded performances, in the order they are stored, which throws
+     * {@code UnsupportedOperationException} if modification is attempted.
+     */
+    public List<Performance> getPerformances() {
+        return Collections.unmodifiableList(performances);
     }
 
     /**
@@ -134,13 +156,14 @@ public class Person {
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
                 && remark.equals(otherPerson.remark)
-                && tags.equals(otherPerson.tags);
+                && tags.equals(otherPerson.tags)
+                && performances.equals(otherPerson.performances);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, ageCategory, phone, email, address, remark, tags);
+        return Objects.hash(name, ageCategory, phone, email, address, remark, tags, performances);
     }
 
     @Override
@@ -153,6 +176,7 @@ public class Person {
                 .add("address", address)
                 .add("remark", remark)
                 .add("tags", tags)
+                .add("performances", performances)
                 .toString();
     }
 
