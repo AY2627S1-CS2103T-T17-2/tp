@@ -1,6 +1,7 @@
 package trackflow.ui;
 
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -8,6 +9,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
+import trackflow.model.person.Performance;
 import trackflow.model.person.Person;
 
 /**
@@ -42,6 +44,8 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label remark;
     @FXML
+    private Label performances;
+    @FXML
     private FlowPane tags;
 
     /**
@@ -57,6 +61,10 @@ public class PersonCard extends UiPart<Region> {
         email.setText(person.getEmail().value);
         showIfNotEmpty(address, person.getAddress().value);
         showIfNotEmpty(remark, person.getRemark().value);
+        String performanceText = person.getPerformances().stream()
+                .map(Performance::toString)
+                .collect(Collectors.joining("  ·  "));
+        showIfNotEmpty(performances, performanceText.isEmpty() ? "" : "Personal bests:  " + performanceText);
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
