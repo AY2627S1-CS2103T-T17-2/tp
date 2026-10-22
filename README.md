@@ -21,7 +21,6 @@ While it has a Graphical User Interface (GUI), most user interactions occur usin
 
 * **Guardian & emergency contact linking**: Map student-athlete cards directly to parent/guardian profiles, enabling single-command lookups of emergency numbers during road meets.
 * **Relay squads & event grouping**: Organize athletes into designated relay squads (e.g., `group g/4x100mA c/1,4,7,12`), track specific relay legs, and log alternate runners.
-* **Personal Best (PB) & performance logs**: Track appendable performance milestones and competition results directly on contact profiles.
 
 ### Documentation
 For detailed instructions on how to use and develop this application, refer to our project website:

@@ -382,7 +382,7 @@ values for comparison, avoiding overflow and lexicographic ordering errors. Age 
 
 ### Future features [Future]
 
-Undo/redo, archiving, guardian links, relay squads, event grouping, and structured performance logs are not
+Undo/redo, archiving, guardian links, relay squads, and event grouping are not
 implemented in v1.4. Their user stories record possible future scope; they do not describe existing classes or
 commit to a release version.
 
@@ -415,8 +415,9 @@ untagging events, deleting, clearing, built-in help, and exit. New athletes requ
 number, email address, and nonblank address. Remarks can be added or removed separately. Roster changes are saved locally before being published
 to the live model; view-only commands do not save roster data.
 
-Future features are marked **[Future]** below. Cloud synchronization and collaborative editing are excluded from
-this single-user, local product. Athletes and guardians are records, not application users.
+Future features are marked **[Future]** below. Structured personal-best tracking and performance logs, cloud
+synchronization, and collaborative editing are excluded from this single-user, local product. Athletes and guardians
+are records, not application users.
 
 ### Persistence and recovery status
 
@@ -456,7 +457,7 @@ without committing it to a release; **Excluded** records an idea outside this pr
 | US15 | `* *` | [Future] | coach | archive and restore athlete records | keep departed athletes' information without including them in the active roster |
 | US16 | `* *` | [Future] | coach | record guardians and add or remove their links to athletes | find the appropriate family contact and keep those links current |
 | US17 | `* *` | [Future] | coach | organize athletes into relay squads and event groups | review who belongs to each team or event |
-| US18 | `* *` | [Future] | coach | record and review personal bests by event | track an athlete's performance progress |
+| US18 | `* *` | Excluded | coach | record and review personal bests by event | track an athlete's performance progress |
 | US19 | `* *` | [Future] | coach | record and review relevant medical notes | consult recorded considerations when planning training |
 | US20 | `* *` | [Future] | coach | record and review competition eligibility | identify athletes recorded as eligible for an event |
 | US21 | `* *` | [Future] | coach | record and review participation logs | track athletes' involvement in training or competitions |
@@ -470,7 +471,7 @@ without committing it to a release; **Excluded** records an idea outside this pr
 | US31 | `* *` | [Future] | relay coach | assign or replace athletes on specific relay legs | maintain a clear running order and adjust the lineup when availability changes |
 | US32 | `* *` | [Future] | relay coach | designate alternate runners for a relay squad | record replacements before a meet |
 | US34 | `* *` | [Future] | coach | view an athlete's relay-squad and event-group memberships | review the athlete's assignments before making changes |
-| US35 | `* *` | [Future] | coach | correct an inaccurate personal-best or status log entry | keep the athlete's recorded history reliable |
+| US35 | `* *` | [Future] | coach | correct an inaccurate status log entry | keep the athlete's recorded history reliable |
 | US36 | `*` | [Future] | coach | import and export roster records in bulk | transfer my own records without entering each one manually |
 | US37 | `*` | [Future] | coach | store names with characters beyond v1.4's supported set | preserve athletes' preferred name spellings |
 | US38 | `*` | [Future] | coach | store multiple phone numbers and phone extensions | retain alternative ways of contacting an athlete |
@@ -700,7 +701,6 @@ These are product requirements and acceptance targets, not claims about the curr
 | Implemented | A feature available in the current v1.4 code. Release targets and future features are identified separately. |
 | Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone comparisons ignore permitted formatting characters and use the digits. Display formatting may be retained. |
 | Participation log | A future record of an athlete's involvement in training or competition. |
-| Personal best | An athlete's best recorded result for a particular event, intended for a future performance log. |
 | Relay squad / event group | A future grouping of athletes for a relay team or a particular athletics event. |
 | Unrecovered data | Previously saved roster data that TrackFlow could not load, preserved in a separate `.bak` file before starting an empty roster. If preservation fails, startup stops. |
 
