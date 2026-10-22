@@ -58,6 +58,7 @@
         "event-tagging": "Event tagging",
         "age-category-filtering": "Age-category filtering",
         "multi-field-sorting": "Multi-field sorting",
+        "flexible-athlete-search": "Flexible athlete search",
         "future-features-future": "Future features [Future]",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
         "appendix-requirements": "Appendix: Requirements",
@@ -74,8 +75,10 @@
         "sorting-the-displayed-roster": "Sorting the displayed roster",
         "command-autocomplete-2": "Command autocomplete",
         "saving-data": "Saving data",
+        "missing-or-corrupted-data-file-recovery": "Missing or corrupted data file recovery",
         "adding-editing-and-remarks": "Adding, editing, and remarks",
         "parser-robustness": "Parser robustness",
+        "finding-athletes": "Finding athletes",
         "tagging-athletes-with-events": "Tagging athletes with events",
         "duplicate-identity-and-complete-equality": "Duplicate identity and complete equality"
       },
