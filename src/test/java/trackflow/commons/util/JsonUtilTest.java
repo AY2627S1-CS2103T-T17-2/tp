@@ -1,9 +1,13 @@
 package trackflow.commons.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static trackflow.testutil.Assert.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +43,18 @@ public class JsonUtilTest {
         assertEquals(serializableTestClass.getMapOfIntegerToString(), SerializableTestClass.getHashMapTestValues());
     }
 
-    //TODO: @Test jsonUtil_readJsonStringToObjectInstance_correctObject()
+    @Test
+    public void fromJsonString_singleRootWithWhitespace_preservesValueAndNullContract() throws IOException {
+        assertEquals(Map.of("message", "literal } { text"),
+                JsonUtil.fromJsonString(" {\"message\":\"literal } { text\"} \t\r\n", Map.class));
+        assertEquals(42, JsonUtil.fromJsonString("42 \n", Integer.class));
+        assertNull(JsonUtil.fromJsonString("null \t", Object.class));
+    }
 
-    //TODO: @Test jsonUtil_writeThenReadObjectToJson_correctObject()
+    @Test
+    public void fromJsonString_extraRootsGarbageOrTruncation_throwsIoException() {
+        for (String json : List.of("{} GARBAGE", "{} {}", "[] []", "42 43", "null {}", "{\"a\":1")) {
+            assertThrows(IOException.class, () -> JsonUtil.fromJsonString(json, Object.class));
+        }
+    }
 }

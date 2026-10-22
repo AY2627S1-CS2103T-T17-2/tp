@@ -420,9 +420,18 @@ available without saving the roster. You do not need to save manually.
 
 ### Editing the data file
 
-TrackFlow saves roster data to `data/trackflow.json`, relative to the folder from which you launch the application.
-Following the quick-start instructions places it beside the JAR in the `data` subfolder. Close TrackFlow and make a
-separate backup before editing this file manually.
+TrackFlow saves roster data to `data/trackflow.json` inside the folder containing the JAR, even if you launch it
+from another folder. Preferences and logs use that same home folder; backups and temporary roster saves stay
+beside the roster. If you launch through a symbolic link to the JAR, home is the actual JAR's folder.
+Close TrackFlow and make a separate backup before editing the roster manually.
+
+If an older version saved your roster in another launch folder, close TrackFlow and back up both locations before
+copying that folder's `data/trackflow.json` into the JAR's `data` folder. Copy `preferences.json` too if you want to
+retain your window settings. Do not replace an existing destination roster without keeping a separate copy.
+
+Window settings are stored separately in `preferences.json`. Missing or unreadable preferences, null settings,
+or invalid window sizes cause TrackFlow to use default settings and attempt to save those defaults. This recovery
+does not change athlete data. A valid saved window position remains subject to the available screens.
 
 <box type="warning" seamless>
 
@@ -445,7 +454,7 @@ when you need a historical snapshot. No release version is committed for in-app 
 **Q**: How do I transfer my data to another computer?<br>
 **A**: Install TrackFlow on the other computer and overwrite the data file it creates with the data file from your
 previous TrackFlow home folder. Close TrackFlow on both computers first and back up any destination roster before
-replacing it. Launch from the destination home folder so TrackFlow reads the copied `data/trackflow.json`.
+replacing it. Put the JAR in the destination home folder so TrackFlow reads its `data/trackflow.json`.
 
 --------------------------------------------------------------------------------------------------------------------
 
