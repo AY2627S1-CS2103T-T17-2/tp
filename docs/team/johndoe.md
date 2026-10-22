@@ -1,46 +1,29 @@
 ---
   layout: default.md
-  title: "John Doe's Project Portfolio Page"
+  title: "Project portfolio template (unpublished)"
 ---
+
+This template is excluded from the published site. Copy it to `team/YOUR_GITHUB_HANDLE.md`, replace this notice
+and the title with your own details, and record only work you actually contributed. Add working links to the
+relevant pull requests, reviews, or other evidence before publishing.
 
 ### Project: TrackFlow
 
-TrackFlow is a lightning-fast, keyboard-driven roster and contact manager designed specifically for track and field coaches. The user interacts with it using a CLI, and it has a GUI created with JavaFX. It is written in Java, and has about 10 kLoC.
+Describe the product briefly, then explain your contributions under the relevant headings below.
+Remove unused headings.
 
-Given below are my contributions to the project.
+### Code contributions
 
-* **New Feature**: Added the ability to undo/redo previous commands.
-  * What it does: allows the user to undo all previous commands one at a time. Preceding undo commands can be reversed by using the redo command.
-  * Justification: This feature improves the product significantly because a user can make mistakes in commands and the app should provide a convenient way to rectify them.
-  * Highlights: This enhancement affects existing commands and commands to be added in future. It required an in-depth analysis of design alternatives. The implementation too was challenging as it required changes to existing commands.
-  * Credits: *{mention here if you reused any code/ideas from elsewhere or if a third-party library is heavily used in the feature so that a reader can make a more accurate judgement of how much effort went into the feature}*
+Describe implemented features or fixes, your design decisions, and links to the merged changes.
 
-* **New Feature**: Added a history command that allows the user to navigate to previous commands using up/down keys.
+### Testing
 
-* **Code contributed**: [RepoSense link]()
+Explain the meaningful test cases or testing improvements you contributed and link to evidence.
 
-* **Project management**:
-  * Managed releases `v1.3` - `v1.5rc` (3 releases) on GitHub
+### Documentation
 
-* **Enhancements to existing features**:
-  * Updated the GUI color scheme (Pull requests [\#33](), [\#34]())
-  * Wrote additional tests for existing features to increase coverage from 88% to 92% (Pull requests [\#36](), [\#38]())
+Describe your User Guide, Developer Guide, and diagram changes with links to the corresponding changes.
 
-* **Documentation**:
-  * User Guide:
-    * Added documentation for the features `delete` and `find` [\#72]()
-    * Did cosmetic tweaks to existing documentation of features `clear`, `exit`: [\#74]()
-  * Developer Guide:
-    * Added implementation details of the `delete` feature.
+### Project management and team contributions
 
-* **Community**:
-  * PRs reviewed (with non-trivial review comments): [\#12](), [\#32](), [\#19](), [\#42]()
-  * Contributed to forum discussions (examples: [1](), [2](), [3](), [4]())
-  * Reported bugs and suggestions for other teams in the class (examples: [1](), [2](), [3]())
-  * Some parts of the history feature I added was adopted by several other class mates ([1](), [2]())
-
-* **Tools**:
-  * Integrated a third party library (Natty) to the project ([\#42]())
-  * Integrated a new Github plugin (CircleCI) to the team repo
-
-* _{you can add/remove categories in the list above}_
+Record releases, reviews, or coordination you actually performed, with supporting links.

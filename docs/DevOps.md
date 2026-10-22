@@ -83,12 +83,12 @@ Any warnings or errors will be printed out to the console.
 
 Here are the steps to create a new release.
 
-1. Ensure `MainApp.VERSION` is `v1.3` and the Gradle project version is `1.3`.
+1. Ensure `MainApp.VERSION` is `v1.4` and the Gradle project version is `1.4`.
 1. Run `./gradlew clean check coverage shadowJar` and the repository checks. Build the documentation using the
    [documentation guide](Documentation.md).
 1. Run `java -jar TrackFlow.jar` from a disposable folder containing a copy of `build/libs/TrackFlow.jar`.
    Follow the [manual testing instructions](DeveloperGuide.md#appendix-instructions-for-manual-testing),
    including saving changes and restarting with the runtime from the [setup guide](SettingUp.md#runtime-and-build-requirements).
 1. Confirm Java CI and MarkBind Action have passed for the final `master` commit. Resolve any failed or missing runs.
-1. Tag that verified commit `v1.3` and create the GitHub release. Upload `TrackFlow.jar` and state the exact tested
+1. Tag that verified commit `v1.4` and create the GitHub release. Upload `TrackFlow.jar` and state the exact tested
    runtime requirements and any remaining limitations in the release notes.

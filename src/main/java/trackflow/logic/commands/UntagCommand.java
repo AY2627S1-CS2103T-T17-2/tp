@@ -33,8 +33,10 @@ public class UntagCommand extends EventTagCommand {
     private static final Logger logger = LogsCenter.getLogger(UntagCommand.class);
 
     /**
-     * @param index of the athlete in the filtered athlete list
-     * @param eventsToRemove events to remove from the athlete; must not be empty
+     * Creates a command that removes the given events from an athlete.
+     *
+     * @param index of the athlete in the filtered athlete list.
+     * @param eventsToRemove events to remove from the athlete; must not be empty.
      */
     public UntagCommand(Index index, Set<Tag> eventsToRemove) {
         super(index, eventsToRemove);

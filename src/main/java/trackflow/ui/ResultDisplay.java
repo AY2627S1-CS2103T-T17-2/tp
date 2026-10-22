@@ -59,7 +59,7 @@ public class ResultDisplay extends UiPart<Region> {
 
     /**
      * Kinds of feedback, each with the style class and icon shape used to present it.
-     * The message text itself always states the outcome, so colour is never the only cue.
+     * The message text itself always states the outcome, so color is never the only cue.
      * Before the first command, no icon is shown.
      */
     private enum FeedbackType {

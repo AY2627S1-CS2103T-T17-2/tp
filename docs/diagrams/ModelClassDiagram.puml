@@ -1,25 +1,23 @@
 @startuml
 !include style.puml
-skinparam arrowThickness 1.1
-skinparam arrowColor MODEL_COLOR
+skinparam ArrowFontStyle plain
+skinparam linetype polyline
+skinparam arrowColor MODEL_COLOR_T4
 skinparam classBackgroundColor MODEL_COLOR
-
-package Model {
-    interface Model
-    interface ReadOnlyRoster
-    interface ReadOnlyUserPrefs
+package "Model" as ModelPackage {
+    interface Model <<interface>> MODEL_COLOR_T1
+    interface ReadOnlyRoster <<interface>> MODEL_COLOR_T1
+    interface ReadOnlyUserPrefs <<interface>> MODEL_COLOR_T1
     class ModelManager
     class AthleteRoster
     class UserPrefs
     class UniquePersonList
     class Person
 }
-
 package "JavaFX views" {
-    class "FilteredList<Person>" as FilteredList
-    class "SortedList<Person>" as SortedList
+    class FilteredList MODEL_COLOR_T2
+    class SortedList MODEL_COLOR_T2
 }
-
 ModelManager .up.|> Model
 AthleteRoster .up.|> ReadOnlyRoster
 UserPrefs .up.|> ReadOnlyUserPrefs
@@ -27,12 +25,12 @@ ModelManager *--> "1" AthleteRoster
 ModelManager *--> "1" UserPrefs
 AthleteRoster *--> "1" UniquePersonList
 UniquePersonList --> "*" Person
-ModelManager --> FilteredList
-ModelManager --> SortedList
-SortedList --> FilteredList : wraps
-FilteredList ..> UniquePersonList : views its observable list
-note bottom of SortedList
-  getFilteredPersonList() exposes this view.
-  Indexed commands use its displayed order.
-end note
+ModelManager --> "1" FilteredList
+ModelManager --> "1" SortedList
+SortedList --> "1" FilteredList : source
+legend bottom
+  Partial view. JavaFX lists contain Person; generic parameters are omitted.
+  FilteredList observes UniquePersonList's observable list, not the wrapper object.
+  getFilteredPersonList() exposes SortedList, preserving displayed index order.
+endlegend
 @enduml

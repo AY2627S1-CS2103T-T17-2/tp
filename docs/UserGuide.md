@@ -27,7 +27,7 @@ Interface (GUI).
 1. Copy the file to the folder you want to use as the _home folder_ for TrackFlow.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar TrackFlow.jar`.<br>
-   The GUI opens with sample athletes. The image below is a design mockup: its grade/event fields and command examples do not represent v1.3. Use the commands documented in this guide.<br>
+   The GUI opens with sample athletes. The image below is a design mockup: its layout and command examples differ from v1.4. Use the commands documented in this guide.<br>
    ![TrackFlow design mockup](images/Ui.png)
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
@@ -434,7 +434,7 @@ protect the original file. Keep the preserved copy if you need to recover its re
 
 ### Archiving data files [Future]
 
-Archiving and restoring individual athlete records are not available in v1.3. Keep external copies of roster files
+Archiving and restoring individual athlete records are not available in v1.4. Keep external copies of roster files
 when you need a historical snapshot. No release version is committed for in-app archiving.
 
 --------------------------------------------------------------------------------------------------------------------

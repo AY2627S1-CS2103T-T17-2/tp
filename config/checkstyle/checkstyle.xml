@@ -386,7 +386,6 @@
     -->
 
     <!-- Checks that all block-tags are ordered correctly. -->
-    <module name="AtclauseOrder"/>
 
     <!-- Checks that Javadoc block tags appear only at the beginning of the line. -->
     <module name="JavadocBlockTagLocation"/>

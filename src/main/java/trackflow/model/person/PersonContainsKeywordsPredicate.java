@@ -14,7 +14,7 @@ import trackflow.commons.util.ToStringBuilder;
 
 /**
  * Tests whether any broad or field-specific keyword matches an athlete, ignoring case.
- * Broad keywords search name, age category, phone, email, address, and remark; field keywords search only their
+ * Broad keywords search name, age category, phone, email, address, remark, and events; field keywords search only their
  * selected field. The two kinds of matches are combined with OR, and empty keyword collections match no athletes.
  */
 public class PersonContainsKeywordsPredicate implements Predicate<Person> {

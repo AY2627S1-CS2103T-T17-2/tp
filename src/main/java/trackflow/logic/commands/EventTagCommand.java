@@ -27,8 +27,10 @@ public abstract class EventTagCommand extends Command {
     protected final Set<Tag> events;
 
     /**
-     * @param index of the athlete in the filtered athlete list
-     * @param events the events this command acts on; must not be empty
+     * Creates an event command for the athlete at the displayed index.
+     *
+     * @param index of the athlete in the filtered athlete list.
+     * @param events the events this command acts on; must not be empty.
      */
     protected EventTagCommand(Index index, Set<Tag> events) {
         requireAllNonNull(index, events);

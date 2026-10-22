@@ -19,7 +19,7 @@ import trackflow.model.person.Person;
 @JsonRootName(value = "trackflow")
 class JsonSerializableRoster {
 
-    public static final String MESSAGE_DUPLICATE_PERSON = "Persons list contains duplicate person(s).";
+    public static final String MESSAGE_DUPLICATE_PERSON = "Athlete list contains duplicate athletes.";
 
     private final List<JsonAdaptedPerson> persons;
 
@@ -47,12 +47,12 @@ class JsonSerializableRoster {
      */
     public AthleteRoster toModelType() throws IllegalValueException {
         if (persons == null) {
-            throw new IllegalValueException("Persons list is missing!");
+            throw new IllegalValueException("Athlete list is missing!");
         }
         AthleteRoster roster = new AthleteRoster();
         for (JsonAdaptedPerson jsonAdaptedPerson : persons) {
             if (jsonAdaptedPerson == null) {
-                throw new IllegalValueException("Persons list contains a null athlete!");
+                throw new IllegalValueException("Athlete list contains a null athlete!");
             }
             Person person = jsonAdaptedPerson.toModelType();
             if (roster.hasPerson(person)) {
