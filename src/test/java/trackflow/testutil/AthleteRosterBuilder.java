@@ -16,10 +16,6 @@ public class AthleteRosterBuilder {
         roster = new AthleteRoster();
     }
 
-    public AthleteRosterBuilder(AthleteRoster roster) {
-        this.roster = roster;
-    }
-
     /**
      * Adds a new {@code Person} to the {@code AthleteRoster} that we are building.
      */

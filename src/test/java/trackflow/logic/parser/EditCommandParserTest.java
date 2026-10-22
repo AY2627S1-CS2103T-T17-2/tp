@@ -1,12 +1,14 @@
 package trackflow.logic.parser;
 
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static trackflow.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static trackflow.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static trackflow.logic.commands.CommandTestUtil.INVALID_EMAIL_DESC;
 import static trackflow.logic.commands.CommandTestUtil.INVALID_NAME_DESC;
 import static trackflow.logic.commands.CommandTestUtil.INVALID_PHONE_DESC;
 import static trackflow.logic.commands.CommandTestUtil.NAME_DESC_AMY;
 import static trackflow.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
+import static trackflow.logic.commands.CommandTestUtil.VALID_ADDRESS_AMY;
 import static trackflow.logic.commands.CommandTestUtil.VALID_EMAIL_AMY;
 import static trackflow.logic.commands.CommandTestUtil.VALID_NAME_AMY;
 import static trackflow.logic.commands.CommandTestUtil.VALID_PHONE_AMY;
@@ -70,10 +72,11 @@ public class EditCommandParserTest {
 
     @Test
     public void parse_allFieldsSpecified_success() {
-        String input = "1" + PHONE_DESC_AMY + " a/Under 16" + EMAIL_DESC_AMY + NAME_DESC_AMY;
+        String input = "1" + PHONE_DESC_AMY + " a/Under 16" + EMAIL_DESC_AMY + ADDRESS_DESC_AMY + NAME_DESC_AMY;
         EditCommand expected = new EditCommand(INDEX_FIRST_PERSON, new EditPersonDescriptorBuilder()
                 .withName(VALID_NAME_AMY).withAgeCategory("Under 16")
-                .withPhone(VALID_PHONE_AMY).withEmail(VALID_EMAIL_AMY).build());
+                .withPhone(VALID_PHONE_AMY).withEmail(VALID_EMAIL_AMY)
+                .withAddress(VALID_ADDRESS_AMY).build());
         assertParseSuccess(parser, input, expected);
     }
 

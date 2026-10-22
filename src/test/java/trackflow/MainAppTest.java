@@ -131,6 +131,7 @@ public class MainAppTest {
         Path prefsPath = testFolder.resolve("preferences.json");
         JsonUserPrefsStorage prefsStorage = new JsonUserPrefsStorage(prefsPath);
         assertEquals(new UserPrefs(), new MainApp().initPrefs(prefsStorage));
+        assertTrue(Files.exists(prefsPath));
         UserPrefs custom = new UserPrefs();
         custom.setGuiSettings(new GuiSettings(900, 450, -300, 100));
         prefsStorage.saveUserPrefs(custom);

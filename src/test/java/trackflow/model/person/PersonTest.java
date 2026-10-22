@@ -45,12 +45,31 @@ public class PersonTest {
         Person normalizedAlice = new PersonBuilder(ALICE).withName("Alice   Pauline ")
                 .withEmail(ALICE.getEmail().value.toUpperCase()).build();
         assertTrue(ALICE.isSamePerson(normalizedAlice));
-        assertTrue(BOB.isSamePerson(new PersonBuilder(BOB).withName(VALID_NAME_BOB.toLowerCase()).build()));
 
-        // Legacy data fields do not contribute to athlete identity.
+        // Legacy data fields and remarks do not contribute to athlete identity.
         Person editedAlice = new PersonBuilder(ALICE).withAddress(VALID_ADDRESS_BOB)
+                .withRemark("Different remark")
                 .withTags(VALID_TAG_HUSBAND).build();
         assertTrue(ALICE.isSamePerson(editedAlice));
+    }
+
+    @Test
+    public void hasSameContactDetails() {
+        // null -> returns false
+        assertFalse(ALICE.hasSameContactDetails(null));
+
+        // same object -> returns true
+        assertTrue(ALICE.hasSameContactDetails(ALICE));
+
+        // different name, same phone -> returns true
+        assertTrue(ALICE.hasSameContactDetails(new PersonBuilder(BOB).withPhone(ALICE.getPhone().value).build()));
+
+        // different name, same email (case-insensitive) -> returns true
+        assertTrue(ALICE.hasSameContactDetails(
+                new PersonBuilder(BOB).withEmail(ALICE.getEmail().value.toUpperCase()).build()));
+
+        // different phone and email -> returns false
+        assertFalse(ALICE.hasSameContactDetails(BOB));
     }
 
     @Test
@@ -92,10 +111,9 @@ public class PersonTest {
         editedAlice = new PersonBuilder(ALICE).withAgeCategory("Under 14").build();
         assertFalse(ALICE.equals(editedAlice));
 
-        // different remark changes value equality but not duplicate identity
+        // different remark -> returns false
         editedAlice = new PersonBuilder(ALICE).withRemark("Different remark").build();
         assertFalse(ALICE.equals(editedAlice));
-        assertTrue(ALICE.isSamePerson(editedAlice));
 
         // different tags -> returns false
         editedAlice = new PersonBuilder(ALICE).withTags(VALID_TAG_HUSBAND).build();

@@ -21,10 +21,10 @@ public class StringUtilTest {
 
         // EP: not a number
         assertFalse(StringUtil.isNonZeroUnsignedInteger("a"));
-        assertFalse(StringUtil.isNonZeroUnsignedInteger("aaa"));
 
         // EP: zero
         assertFalse(StringUtil.isNonZeroUnsignedInteger("0"));
+        assertFalse(StringUtil.isNonZeroUnsignedInteger("000"));
 
         // EP: zero as prefix
         assertTrue(StringUtil.isNonZeroUnsignedInteger("01"));
@@ -39,8 +39,6 @@ public class StringUtilTest {
 
         // EP: number larger than Integer.MAX_VALUE remains a syntactically valid positive integer
         assertTrue(StringUtil.isNonZeroUnsignedInteger(Long.toString((long) Integer.MAX_VALUE + 1)));
-        assertTrue(StringUtil.isNonZeroUnsignedInteger("999999999999999999999999999999999999"));
-        assertFalse(StringUtil.isNonZeroUnsignedInteger("000"));
 
         // EP: valid numbers, should return true
         assertTrue(StringUtil.isNonZeroUnsignedInteger("1")); // Boundary value

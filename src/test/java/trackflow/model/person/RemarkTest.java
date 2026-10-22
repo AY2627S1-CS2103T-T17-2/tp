@@ -1,11 +1,18 @@
 package trackflow.model.person;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static trackflow.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 public class RemarkTest {
+
+    @Test
+    public void constructor_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new Remark(null));
+    }
 
     @Test
     public void equals() {
@@ -17,6 +24,8 @@ public class RemarkTest {
         // same values -> returns true
         Remark remarkCopy = new Remark(remark.value);
         assertTrue(remark.equals(remarkCopy));
+        assertEquals(remark.hashCode(), remarkCopy.hashCode());
+        assertEquals("Hello", remark.toString());
 
         // different types -> returns false
         assertFalse(remark.equals(1));

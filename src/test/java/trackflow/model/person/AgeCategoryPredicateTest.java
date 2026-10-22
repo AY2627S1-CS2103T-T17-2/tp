@@ -33,4 +33,11 @@ public class AgeCategoryPredicateTest {
     public void constructor_nullCategory_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new AgeCategoryPredicate(null));
     }
+
+    @Test
+    public void toStringMethod() {
+        AgeCategoryPredicate predicate = new AgeCategoryPredicate(new AgeCategory("Open"));
+        String expected = AgeCategoryPredicate.class.getCanonicalName() + "{ageCategory=Open}";
+        assertEquals(expected, predicate.toString());
+    }
 }

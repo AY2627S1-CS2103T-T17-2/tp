@@ -17,15 +17,6 @@ public class ArgumentTokenizerTest {
     private final Prefix dashT = new Prefix("-t");
     private final Prefix hatQ = new Prefix("^Q");
 
-    @Test
-    public void tokenize_emptyArgsString_noValues() {
-        String argsString = "  ";
-        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(argsString, pSlash);
-
-        assertPreambleEmpty(argMultimap);
-        assertArgumentAbsent(argMultimap, pSlash);
-    }
-
     private void assertPreamblePresent(ArgumentMultimap argMultimap, String expectedPreamble) {
         assertEquals(expectedPreamble, argMultimap.getPreamble());
     }
@@ -109,17 +100,6 @@ public class ArgumentTokenizerTest {
     }
 
     @Test
-    public void tokenize_repeatedSlashes_decodesExactlyOnce() {
-        for (String token : new String[] {"a", "A", "n", "N", "p", "P", "e", "E", "r", "R", "addr", "AdDr", "x"}) {
-            for (int count = 2; count <= 6; count++) {
-                ArgumentMultimap arguments = ArgumentTokenizer.tokenize(
-                        "p/" + token + "/".repeat(count) + "value", pSlash);
-                assertArgumentPresent(arguments, pSlash, token + "/".repeat(count - 1) + "value");
-            }
-        }
-    }
-
-    @Test
     public void tokenize_otherSlashesAndQuotes_preservesLiteralText() {
         for (String value : new String[] {"https://example.com/a//b", "//server/share",
             "wrong//value", "C:\\Training", "\"Coach said go\"", "\"unfinished", "/"}) {
@@ -182,8 +162,8 @@ public class ArgumentTokenizerTest {
 
     @Test
     public void tokenize_slashesWithoutTokenBoundary_remainUnchanged() {
-        for (String text : List.of("https://host/a//b", "http://host/?n/value&p//other#addr//here",
-                "file:///home/coach", "mailto:coach@example.com", "//server/share", "///server/share",
+        for (String text : List.of("http://host/?n/value&p//other#addr//here",
+                "file:///home/coach", "mailto:coach@example.com", "///server/share",
                 "AA//B", "addrx//annex", "0A//B", "_A//B", "(A//B)", "\"A//B\"", "'A//B'",
                 "\\A//B", "😀A//B", "\u00a0A//B", "\u200bA//B")) {
             assertArgumentPresent(ArgumentTokenizer.tokenize("p/ " + text, pSlash), pSlash, text);

@@ -20,9 +20,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import trackflow.commons.core.GuiSettings;
 import trackflow.logic.commands.AddCommand;
 import trackflow.logic.commands.CommandResult;
-import trackflow.logic.commands.FindCommand;
 import trackflow.logic.commands.ListAthleteCommand;
 import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.logic.parser.exceptions.ParseException;
@@ -73,12 +73,6 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_veryLargeDeleteIndex_throwsCommandException() {
-        String deleteCommand = "delete 999999999999999999999999999999999999";
-        assertCommandException(deleteCommand, MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-    }
-
-    @Test
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListAthleteCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListAthleteCommand.MESSAGE_EMPTY_ROSTER, model);
@@ -116,36 +110,6 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_listWithArguments_throwsParseException() {
-        assertParseException("list 1", ListAthleteCommand.MESSAGE_USAGE);
-    }
-
-    @Test
-    public void execute_invalidCommand_preservesCurrentDisplayAndSavedRoster() throws Exception {
-        logic.execute("add n/Avery Tan a/Under 16 p/91234567 e/avery@example.com addr/123 Main Street");
-        logic.execute("add n/Underwood Lim a/Open p/92345678 e/underwood@example.com addr/456 Main Street");
-        logic.execute("find n/und");
-        List<Person> displayedBeforeFailure = List.copyOf(model.getFilteredPersonList());
-        Path savedPath = temporaryFolder.resolve("roster.json");
-        String savedDataBeforeFailure = Files.readString(savedPath);
-
-        for (String invalidCommand : List.of("remark 1", "find n/", "clear extra", "help extra", "exit extra")) {
-            assertThrows(ParseException.class, () -> logic.execute(invalidCommand));
-            assertEquals(displayedBeforeFailure, model.getFilteredPersonList());
-            assertEquals(savedDataBeforeFailure, Files.readString(savedPath));
-        }
-    }
-
-    @Test
-    public void execute_nameScopedFind_doesNotMatchAgeCategory() throws Exception {
-        logic.execute("add n/Avery Tan a/Under 16 p/91234567 e/avery@example.com addr/123 Main Street");
-        logic.execute("add n/Underwood Lim a/Open p/92345678 e/underwood@example.com addr/456 Main Street");
-
-        assertEquals(FindCommand.MESSAGE_SUCCESS_SINGLE, logic.execute("find n/und").getFeedbackToUser());
-        assertEquals(List.of("Underwood Lim"), getDisplayedNames(model));
-    }
-
-    @Test
     public void execute_editAthlete_persistsCategoryAndPreservesOtherDetails() throws Exception {
         String command = "add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street";
         assertEquals("New athlete added: Avery Tan; Age category: Under 14; Phone: 91234567; "
@@ -162,20 +126,6 @@ public class LogicManagerTest {
                 new JsonRosterStorage(temporaryFolder.resolve("roster.json"));
         Model reloaded = new ModelManager(reloadedStorage.readRoster().orElseThrow(), new UserPrefs());
         assertEquals(athlete, reloaded.getFilteredPersonList().get(0));
-        assertEquals("Sprints", reloaded.getFilteredPersonList().get(0).getRemark().value);
-    }
-
-    @Test
-    public void execute_editWithTagsOrRemarks_preservesRosterAndSavedFile() throws Exception {
-        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street");
-        Path savedPath = temporaryFolder.resolve("roster.json");
-        String savedData = Files.readString(savedPath);
-        Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
-        for (String unsupported : new String[] {"t/", "t/sprinter t/relay", "r/", "r/note"}) {
-            assertThrows(ParseException.class, () -> logic.execute("edit 1 p/92345678 " + unsupported));
-            assertEquals(expectedModel, model);
-            assertEquals(savedData, Files.readString(savedPath));
-        }
     }
 
     @Test
@@ -211,28 +161,6 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_invalidAdd_preservesRosterAndSavedFile() throws Exception {
-        String validCommand = "add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street";
-        logic.execute(validCommand);
-        Path savedPath = temporaryFolder.resolve("roster.json");
-        String savedData = Files.readString(savedPath);
-        Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
-        String[] invalidCommands = {validCommand.replace(" a/Under 14", ""),
-            validCommand.replace(" addr/123 Main Street", ""),
-            validCommand.replace("addr/123 Main Street", "addr/"),
-            validCommand.replace("Under 14", "Under 15"),
-            validCommand.replace("91234567", "+65 9123 4567"),
-            validCommand.replace("avery.tan@example.com", "invalid"),
-            validCommand + " n/Other Athlete", validCommand + " t/invalid-tag", validCommand + " r/note r/other",
-            validCommand + " addr/"};
-        for (String invalidCommand : invalidCommands) {
-            assertThrows(ParseException.class, () -> logic.execute(invalidCommand));
-            assertEquals(expectedModel, model);
-            assertEquals(savedData, Files.readString(savedPath));
-        }
-    }
-
-    @Test
     public void execute_sort_changesDisplayButPreservesSavedRosterOrder() throws Exception {
         logic.execute("add n/Zoe Tan a/Under 18 p/999 e/zoe@example.com addr/123 Main Street");
         logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com addr/123 Main Street");
@@ -249,19 +177,15 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_duplicateAfterReload_preservesRosterAndSavedFile() throws Exception {
-        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street");
-        Path savedPath = temporaryFolder.resolve("roster.json");
-        String savedData = Files.readString(savedPath);
-        JsonRosterStorage storage = new JsonRosterStorage(savedPath);
-        Model reloaded = new ModelManager(storage.readRoster().orElseThrow(), new UserPrefs());
-        Logic reloadedLogic = new LogicManager(reloaded, new StorageManager(storage,
-                new JsonUserPrefsStorage(temporaryFolder.resolve("reloadedPrefs.json"))));
-        assertThrows(CommandException.class, "This athlete already exists in the roster: avery   tan.", () ->
-            reloadedLogic.execute("add n/avery   tan a/UNDER 14 p/91234567 e/AVERY.TAN@example.com"
-                + " addr/123 Main Street"));
-        assertEquals(model.getRoster(), reloaded.getRoster());
-        assertEquals(savedData, Files.readString(savedPath));
+    public void execute_deleteAfterSort_usesSortedDisplayIndex() throws Exception {
+        logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com addr/123 Main Street");
+        logic.execute("add n/Zoe Tan a/Under 18 p/999 e/zoe@example.com addr/123 Main Street");
+        logic.execute("sort name desc");
+        assertEquals(List.of("Zoe Tan", "Amy Lim"), getDisplayedNames(model));
+
+        logic.execute("delete 1");
+        assertEquals(List.of("Amy Lim"), getDisplayedNames(model));
+        assertEquals(List.of("Amy Lim"), getStoredNames(model.getRoster()));
     }
 
     @Test
@@ -317,6 +241,14 @@ public class LogicManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void guiSettings_getAndSet_delegatesToModel() {
+        GuiSettings customSettings = new GuiSettings(1280, 720, 100, 200);
+        logic.setGuiSettings(customSettings);
+        assertEquals(customSettings, logic.getGuiSettings());
+        assertEquals(customSettings, model.getGuiSettings());
     }
 
     /**

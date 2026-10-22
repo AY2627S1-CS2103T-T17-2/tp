@@ -23,21 +23,11 @@ public class HelpCommandTest {
     }
 
     @Test
-    public void helpMessage_containsEveryCommandWithExamples() {
-        for (String commandWord : List.of("add", "edit", "delete", "list", "find", "filter",
-                "sort", "remark", "clear", "help", "exit")) {
-            assertTrue(HelpCommand.HELP_MESSAGE.contains(commandWord + ":"), commandWord);
-            assertTrue(HelpCommand.HELP_MESSAGE.contains("Example: " + commandWord), commandWord);
-        }
-    }
-
-    @Test
-    public void helpMessage_containsParameterInstructions() {
-        for (String usage : List.of(AddCommand.MESSAGE_USAGE, EditCommand.MESSAGE_USAGE,
-                DeleteCommand.MESSAGE_USAGE, FindCommand.MESSAGE_USAGE, FilterCommand.MESSAGE_USAGE,
-                SortCommand.MESSAGE_USAGE, RemarkCommand.MESSAGE_USAGE)) {
+    public void helpMessage_containsEveryCommandUsageAndInstructions() {
+        for (String usage : HelpCommand.COMMAND_USAGES) {
             assertTrue(HelpCommand.HELP_MESSAGE.contains(usage));
         }
+        assertTrue(HelpCommand.HELP_MESSAGE.startsWith(HelpCommand.HELP_INTRODUCTION));
         assertTrue(HelpCommand.HELP_MESSAGE.contains("square brackets mark optional fields"));
         assertTrue(HelpCommand.HELP_MESSAGE.contains("remark 1 r/"));
     }

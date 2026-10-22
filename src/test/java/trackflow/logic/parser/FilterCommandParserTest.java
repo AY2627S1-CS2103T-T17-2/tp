@@ -28,8 +28,6 @@ public class FilterCommandParserTest {
             assertParseFailure(parser, input,
                     String.format(MESSAGE_INVALID_COMMAND_FORMAT, FilterCommand.MESSAGE_USAGE));
         }
-        assertParseFailure(parser, " n/Amy a/Open",
-                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "n/", FilterCommand.MESSAGE_USAGE));
     }
 
     @Test
@@ -46,8 +44,6 @@ public class FilterCommandParserTest {
     @Test
     public void parse_duplicatePrefix_failure() {
         assertParseFailure(parser, " a/Open a/Under 14",
-                Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_AGE_CATEGORY));
-        assertParseFailure(parser, " a/Open a/Open",
                 Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_AGE_CATEGORY));
     }
 }

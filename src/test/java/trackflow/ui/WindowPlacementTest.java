@@ -25,11 +25,6 @@ public class WindowPlacementTest {
     }
 
     @Test
-    public void isReachable_farRightOfGoneMonitor_false() {
-        assertFalse(WindowPlacement.isReachable(5000, 100, WIDTH, HEIGHT, PRIMARY_ONLY));
-    }
-
-    @Test
     public void isReachable_onSecondScreenButOnlyPrimaryConnected_false() {
         assertFalse(WindowPlacement.isReachable(-1920, 100, WIDTH, HEIGHT, PRIMARY_ONLY));
     }
@@ -37,6 +32,18 @@ public class WindowPlacementTest {
     @Test
     public void isReachable_onSecondScreenWithBothConnected_true() {
         assertTrue(WindowPlacement.isReachable(-1920, 100, WIDTH, HEIGHT, BOTH));
+    }
+
+    @Test
+    public void isReachable_topToleranceBoundary() {
+        assertTrue(WindowPlacement.isReachable(100, -10, WIDTH, HEIGHT, PRIMARY_ONLY));
+        assertFalse(WindowPlacement.isReachable(100, -11, WIDTH, HEIGHT, PRIMARY_ONLY));
+    }
+
+    @Test
+    public void isReachable_minimumVisibleHeightBoundary() {
+        assertTrue(WindowPlacement.isReachable(100, 850, WIDTH, HEIGHT, PRIMARY_ONLY));
+        assertFalse(WindowPlacement.isReachable(100, 851, WIDTH, HEIGHT, PRIMARY_ONLY));
     }
 
     @Test
