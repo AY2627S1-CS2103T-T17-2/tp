@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static trackflow.testutil.Assert.assertThrows;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -68,6 +70,22 @@ public class JsonUserPrefsStorageTest {
         UserPrefs actual = readUserPrefs("ExtraValuesUserPref.json").get();
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void readUserPrefs_invalidSettings_throwsWithoutRewritingFile() throws Exception {
+        Path prefsPath = testFolder.resolve("invalid-settings.json");
+        JsonUserPrefsStorage storage = new JsonUserPrefsStorage(prefsPath);
+        List<String> invalidSettings = List.of("{\"guiSettings\":null}",
+                "{\"guiSettings\":{\"windowWidth\":null}}", "{\"guiSettings\":{\"windowHeight\":0}}",
+                "{\"guiSettings\":{\"windowWidth\":-1}}", "{\"guiSettings\":{\"windowHeight\":1e309}}",
+                "{\"guiSettings\":{\"windowWidth\":\"NaN\"}}",
+                "{\"guiSettings\":{\"windowCoordinates\":{\"x\":1e20,\"y\":0}}}");
+        for (String json : invalidSettings) {
+            Files.writeString(prefsPath, json);
+            assertThrows(DataLoadingException.class, storage::readUserPrefs);
+            assertEquals(json, Files.readString(prefsPath), json);
+        }
     }
 
     private UserPrefs getTypicalUserPrefs() {

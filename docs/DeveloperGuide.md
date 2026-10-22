@@ -180,6 +180,8 @@ The `Model` component,
   that view in a `SortedList` for display ordering. It exposes the sorted view as an
   `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when filtering, sorting, or roster
   data changes.
+* retains the active `Predicate<Person>` and optional `Comparator<Person>` separately as display state. Changing
+  either updates the corresponding JavaFX view without changing the stored roster order.
 * distinguishes duplicate identity from complete value equality. `Person.isSamePerson` compares the normalized name
   and matching contact details, while `Person.equals` and `hashCode` include every stored field, including the remark.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
@@ -331,6 +333,19 @@ not guaranteed until the legacy-tag compatibility issue is resolved.
   characters. `Tag#equals` and `Tag#hashCode` ignore case, so normal `Set` operations treat `100m` and `100M` as
   the same event while the first-entered spelling is kept for display.
 
+The class diagram below is a partial view of the event tagging classes. It shows how the two commands share
+parsing and execution steps; message constants, parser helpers such as `ParserUtil`, and the athlete's own event
+set are omitted.
+
+<puml src="diagrams/EventTagClassDiagram.puml" width="725" alt="Tag and untag parsers extend generic EventTagCommandParser and create TagCommand and UntagCommand, which extend EventTagCommand; EventTagCommand keeps its events, uses Model during execution, and creates an updated Person" />
+
+`EventTagCommandParser` implements `Parser<T>` with its own type parameter `T`. `TagCommandParser` and
+`UntagCommandParser` bind `T` to their command and implement `getUsage()` and `createCommand(...)`, so the shared
+`parse(...)` method returns the correct command. Each command keeps the displayed-list `Index` and its non-empty set
+of events, but uses `Model` only while executing. `EventTagCommand` provides the shared steps:
+`getTargetAthlete(...)` finds the athlete at the index, and the static `replaceEvents(...)` creates and stores an
+updated copy of that athlete. `TagCommand` and `UntagCommand` differ only in how they work out the updated events.
+
 `TagCommand` adds only the events the athlete does not already have and lists any skipped events in its message.
 It fails only when every given event is already present, so that the coach knows nothing changed. `UntagCommand`
 fails without removing anything if any given event is not one of the athlete's events, as that usually signals a
@@ -422,7 +437,7 @@ field-specific prefixes: `n/` name, `a/` age category, `p/` phone, `e/` email, `
 
 ### Future features [Future]
 
-Undo/redo, archiving, guardian links, relay squads, event grouping, and structured performance logs are not
+Undo/redo, archiving, guardian links, relay squads, and event grouping are not
 implemented in v1.4. Their user stories record possible future scope; they do not describe existing classes or
 commit to a release version.
 
@@ -460,10 +475,23 @@ this single-user, local product. Athletes are records, not application users.
 
 ### Persistence and recovery status
 
-`MainApp` loads `data/trackflow.json` relative to the process working directory. If no file exists, it supplies the
-sample roster; the first successful roster change creates the file. An intentionally saved empty roster remains
-empty on restart. `preferences.json` stores window settings separately.
+`ApplicationHome` resolves the real location of the code archive. For a packaged JAR, its parent directory is home,
+including when launched through a symbolic link or from another working directory. An IDE/test launch from
+unpacked class files uses the process working directory. Resolution does not log because `LogsCenter` needs the
+same home before normal application startup. An unresolvable code location stops initialization instead of
+silently choosing another folder.
 
+`MainApp` loads `data/trackflow.json` inside that home. If no file exists, it supplies the sample roster; the first
+successful roster change creates the file. An intentionally saved empty roster remains empty on restart.
+`preferences.json` and rotated logs share the same home. Backups and temporary roster saves use roster-file siblings.
+
+`JsonUserPrefsStorage` rejects null GUI settings and dimensions that are nonpositive or nonfinite, including values
+Jackson assigns directly to fields. Missing properties retain their defaults. Coordinates may be null (automatic
+placement) or integer positions; the UI handles actual screen visibility. `MainApp.initPrefs` recovers from invalid
+preferences with defaults and attempts to save them without changing the roster.
+
+`JsonUtil` requires exactly one JSON root followed only by whitespace, for both rosters and preferences. Extra roots,
+garbage and truncation cause a loading error; reading never silently accepts just the first root.
 `JsonRosterStorage` converts malformed JSON, null roots, missing or null persons lists, null athletes, null tag
 entries, invalid saved field values, and duplicate athletes into `DataLoadingException`. `MainApp` preserves the
 original bytes in a sibling file named `trackflow.json.unreadable-<UUID>.bak`, logs its path, and starts an empty
@@ -496,7 +524,7 @@ without committing it to a release; **Excluded** records an idea outside this pr
 | US15 | `* *` | [Future] | coach | archive and restore athlete records | keep departed athletes' information without including them in the active roster |
 | US16 | `* *` | [Future] | coach | record guardians and add or remove their links to athletes | find the appropriate family contact and keep those links current |
 | US17 | `* *` | [Future] | coach | organize athletes into relay squads and event groups | review who belongs to each team or event |
-| US18 | `* *` | [Future] | coach | record and review personal bests by event | track an athlete's performance progress |
+| US18 | `* *` | Excluded | coach | record and review personal bests by event | track an athlete's performance progress |
 | US19 | `* *` | [Future] | coach | record and review relevant medical notes | consult recorded considerations when planning training |
 | US20 | `* *` | [Future] | coach | record and review competition eligibility | identify athletes recorded as eligible for an event |
 | US21 | `* *` | [Future] | coach | record and review participation logs | track athletes' involvement in training or competitions |
@@ -510,7 +538,7 @@ without committing it to a release; **Excluded** records an idea outside this pr
 | US31 | `* *` | [Future] | relay coach | assign or replace athletes on specific relay legs | maintain a clear running order and adjust the lineup when availability changes |
 | US32 | `* *` | [Future] | relay coach | designate alternate runners for a relay squad | record replacements before a meet |
 | US34 | `* *` | [Future] | coach | view an athlete's relay-squad and event-group memberships | review the athlete's assignments before making changes |
-| US35 | `* *` | [Future] | coach | correct an inaccurate personal-best or status log entry | keep the athlete's recorded history reliable |
+| US35 | `* *` | [Future] | coach | correct an inaccurate status log entry | keep the athlete's recorded history reliable |
 | US36 | `*` | [Future] | coach | import and export roster records in bulk | transfer my own records without entering each one manually |
 | US37 | `*` | [Future] | coach | store names with characters beyond v1.4's supported set | preserve athletes' preferred name spellings |
 | US38 | `*` | [Future] | coach | store multiple phone numbers and phone extensions | retain alternative ways of contacting an athlete |
@@ -740,7 +768,6 @@ These are product requirements and acceptance targets, not claims about the curr
 | Implemented | A feature available in the current v1.4 code. Release targets and future features are identified separately. |
 | Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone comparisons ignore permitted formatting characters and use the digits. Display formatting may be retained. |
 | Participation log | A future record of an athlete's involvement in training or competition. |
-| Personal best | An athlete's best recorded result for a particular event, intended for a future performance log. |
 | Relay squad / event group | A future grouping of athletes for a relay team or a particular athletics event. |
 | Unrecovered data | Previously saved roster data that TrackFlow could not load, preserved in a separate `.bak` file before starting an empty roster. If preservation fails, startup stops. |
 

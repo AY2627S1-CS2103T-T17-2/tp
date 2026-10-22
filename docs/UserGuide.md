@@ -409,7 +409,8 @@ The command does not accept parameters.
 ### Saving the data
 
 TrackFlow automatically saves after every successful command that changes roster data: `add`, `edit`, `remark`,
-`delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite the data file.
+`tag`, `untag`, `delete`, and `clear`. Commands that only change the displayed view or open a window do not rewrite
+the data file.
 TrackFlow writes the complete update to a temporary file before replacing the existing roster, so an interrupted write
 does not leave a partially written roster when atomic replacement is supported by the filesystem. On other
 filesystems, TrackFlow moves the completed temporary file into place without an atomicity guarantee.
@@ -445,7 +446,7 @@ when you need a historical snapshot. No release version is committed for in-app 
 **Q**: How do I transfer my data to another computer?<br>
 **A**: Install TrackFlow on the other computer and overwrite the data file it creates with the data file from your
 previous TrackFlow home folder. Close TrackFlow on both computers first and back up any destination roster before
-replacing it. Launch from the destination home folder so TrackFlow reads the copied `data/trackflow.json`.
+replacing it. Put the JAR in the destination home folder so TrackFlow reads its `data/trackflow.json`.
 
 --------------------------------------------------------------------------------------------------------------------
 

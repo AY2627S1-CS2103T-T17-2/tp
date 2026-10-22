@@ -1,5 +1,7 @@
 package trackflow.commons.core;
 
+import static trackflow.commons.util.AppUtil.checkArgument;
+
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.Objects;
@@ -30,8 +32,11 @@ public class GuiSettings implements Serializable {
 
     /**
      * Constructs a {@code GuiSettings} with the specified height, width and position.
+     *
+     * @throws IllegalArgumentException If a dimension is nonpositive or nonfinite.
      */
     public GuiSettings(double windowWidth, double windowHeight, int xPosition, int yPosition) {
+        checkArgument(isValidSize(windowWidth, windowHeight), "Window dimensions must be finite and positive");
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
         windowCoordinates = new Point(xPosition, yPosition);
@@ -47,6 +52,20 @@ public class GuiSettings implements Serializable {
 
     public Point getWindowCoordinates() {
         return windowCoordinates != null ? new Point(windowCoordinates) : null;
+    }
+
+    /**
+     * Checks dimensions after deserialization, which can bypass constructor validation.
+     * Null coordinates request automatic placement; integer coordinates are fitted to actual screens by the UI.
+     *
+     * @return Whether both dimensions are finite and positive.
+     */
+    public boolean isValid() {
+        return isValidSize(windowWidth, windowHeight);
+    }
+
+    private static boolean isValidSize(double width, double height) {
+        return Double.isFinite(width) && width > 0 && Double.isFinite(height) && height > 0;
     }
 
     @Override
