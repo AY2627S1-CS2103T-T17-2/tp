@@ -3,8 +3,12 @@ package trackflow.model.person;
 import static java.util.Objects.requireNonNull;
 import static trackflow.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -134,15 +138,22 @@ public class UniquePersonList implements Iterable<Person> {
     }
 
     /**
-     * Returns true if {@code persons} contains only unique persons.
+     * Returns true if {@code persons} contains only unique persons, using {@code Person#isSamePerson}.
+     * Two persons can only be the same if their names match (ignoring case and repeated spaces), so persons are
+     * grouped by that normalized name and only compared within a group. This gives linear behaviour for the
+     * common case of distinct names while keeping exactly the same notion of duplicates as a full pairwise check.
      */
     private boolean personsAreUnique(List<Person> persons) {
-        for (int i = 0; i < persons.size() - 1; i++) {
-            for (int j = i + 1; j < persons.size(); j++) {
-                if (persons.get(i).isSamePerson(persons.get(j))) {
+        Map<String, List<Person>> personsByName = new HashMap<>();
+        for (Person person : persons) {
+            String nameKey = person.getName().fullName.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
+            List<Person> sameNamePersons = personsByName.computeIfAbsent(nameKey, key -> new ArrayList<>());
+            for (Person other : sameNamePersons) {
+                if (person.isSamePerson(other)) {
                     return false;
                 }
             }
+            sameNamePersons.add(person);
         }
         return true;
     }

@@ -108,6 +108,37 @@ public class PersonContainsKeywordsPredicateTest {
     }
 
     @Test
+    public void test_multipleFields_requiresAllToMatch() {
+        // n/avery a/Under 16 -> both field criteria must hold.
+        PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of(), Map.of(
+                SearchField.NAME, List.of("avery"),
+                SearchField.AGE_CATEGORY, List.of("Under 16")));
+        assertTrue(predicate.test(ATHLETE));
+
+        // Same name but a different age category -> the age criterion fails, so no match.
+        Person openAvery = new PersonBuilder(ATHLETE).withAgeCategory("Open").build();
+        assertFalse(predicate.test(openAvery));
+    }
+
+    @Test
+    public void test_broadKeywordOrField_matchesEither() {
+        // avery e/other.com -> the broad keyword matches even though the email field does not (OR).
+        PersonContainsKeywordsPredicate broadMatches = new PersonContainsKeywordsPredicate(List.of("avery"),
+                Map.of(SearchField.EMAIL, List.of("other.com")));
+        assertTrue(broadMatches.test(ATHLETE));
+
+        // zzznomatch e/example.com -> the email field matches even though the broad keyword does not (OR).
+        PersonContainsKeywordsPredicate fieldMatches = new PersonContainsKeywordsPredicate(List.of("zzznomatch"),
+                Map.of(SearchField.EMAIL, List.of("example.com")));
+        assertTrue(fieldMatches.test(ATHLETE));
+
+        // Neither the broad keyword nor the field matches -> no match.
+        PersonContainsKeywordsPredicate neither = new PersonContainsKeywordsPredicate(List.of("zzznomatch"),
+                Map.of(SearchField.EMAIL, List.of("other.com")));
+        assertFalse(neither.test(ATHLETE));
+    }
+
+    @Test
     public void test_scopedKeywordInWrongField_returnsFalse() {
         assertFalse(new PersonContainsKeywordsPredicate(List.of(),
                 Map.of(SearchField.NAME, List.of("9123"))).test(ATHLETE));

@@ -26,6 +26,22 @@ public class FileUtilTest {
     }
 
     @Test
+    public void readFromFile_stripsByteOrderMark() throws Exception {
+        Path target = temporaryFolder.resolve("roster.json");
+        Files.writeString(target, "\uFEFF{ \"persons\" : [ ] }");
+
+        assertEquals("{ \"persons\" : [ ] }", FileUtil.readFromFile(target));
+    }
+
+    @Test
+    public void readFromFile_noByteOrderMark_returnsContentUnchanged() throws Exception {
+        Path target = temporaryFolder.resolve("roster.json");
+        Files.writeString(target, "{ \"persons\" : [ ] }");
+
+        assertEquals("{ \"persons\" : [ ] }", FileUtil.readFromFile(target));
+    }
+
+    @Test
     public void writeToFile_missingParents_createsFile() throws Exception {
         Path target = temporaryFolder.resolve("nested/data/roster.json");
 

@@ -161,6 +161,28 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_invalidAdd_preservesRosterAndSavedFile() throws Exception {
+        String validCommand = "add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street";
+        logic.execute(validCommand);
+        Path savedPath = temporaryFolder.resolve("roster.json");
+        String savedData = Files.readString(savedPath);
+        Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
+        String[] invalidCommands = {validCommand.replace(" a/Under 14", ""),
+            validCommand.replace(" addr/123 Main Street", ""),
+            validCommand.replace("addr/123 Main Street", "addr/"),
+            validCommand.replace("Under 14", "Under 15"),
+            validCommand.replace("91234567", "911a"),
+            validCommand.replace("avery.tan@example.com", "invalid"),
+            validCommand + " n/Other Athlete", validCommand + " t/invalid-tag", validCommand + " r/note r/other",
+            validCommand + " addr/"};
+        for (String invalidCommand : invalidCommands) {
+            assertThrows(ParseException.class, () -> logic.execute(invalidCommand));
+            assertEquals(expectedModel, model);
+            assertEquals(savedData, Files.readString(savedPath));
+        }
+    }
+
+    @Test
     public void execute_sort_changesDisplayButPreservesSavedRosterOrder() throws Exception {
         logic.execute("add n/Zoe Tan a/Under 18 p/999 e/zoe@example.com addr/123 Main Street");
         logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com addr/123 Main Street");
@@ -196,8 +218,10 @@ public class LogicManagerTest {
 
     @Test
     public void execute_storageThrowsAdException_throwsCommandException() {
+        // The permission error names the roster file, not the internal temporary file.
+        Path rosterPath = temporaryFolder.resolve("ExceptionUserPrefs.json");
         assertCommandFailureForExceptionFromStorage(DUMMY_AD_EXCEPTION, String.format(
-                LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, DUMMY_AD_EXCEPTION.getMessage()));
+                LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, rosterPath));
     }
 
     @Test

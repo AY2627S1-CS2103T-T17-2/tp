@@ -96,6 +96,13 @@ public class MainWindow extends UiPart<Stage> {
     }
 
     /**
+     * Shows a start-up warning (for example, that the saved data could not be read) in the result display.
+     */
+    void showStartupWarning(String message) {
+        resultDisplay.showError(message);
+    }
+
+    /**
      * Fits saved outer bounds to a connected screen's usable area, including window decorations.
      * Centers on the primary screen when the saved position is no longer reachable.
      */

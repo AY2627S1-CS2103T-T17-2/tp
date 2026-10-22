@@ -24,12 +24,17 @@ public class FileUtil {
     }
 
     /**
-     * Reads the contents of {@code file} as UTF-8 text.
+     * Returns the contents of {@code file} as text. A leading byte order mark (BOM), which some editors add to
+     * UTF-8 files, is removed so that the file can still be parsed.
      *
      * @throws IOException If the file cannot be read, including when it does not exist.
      */
     public static String readFromFile(Path file) throws IOException {
-        return Files.readString(file, StandardCharsets.UTF_8);
+        String content = Files.readString(file, StandardCharsets.UTF_8);
+        if (!content.isEmpty() && content.charAt(0) == '\uFEFF') {
+            content = content.substring(1);
+        }
+        return content;
     }
 
     /**

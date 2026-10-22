@@ -29,6 +29,9 @@ public class JsonUtil {
     private static ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules()
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            // Reject files with repeated keys so that a corrupted or hand-edited file is treated as unreadable
+            // (and preserved) instead of silently keeping only one of the duplicated values.
+            .configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true)
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
@@ -107,6 +110,8 @@ public class JsonUtil {
         try (JsonParser parser = objectMapper.getFactory().createParser(json)) {
             T value = objectMapper.readValue(parser, instanceClass);
             if (parser.nextToken() != null) {
+                // Content after the first JSON value means the file is malformed; rejecting it lets the caller
+                // preserve the file instead of silently dropping the trailing data on the next save.
                 throw new IOException("JSON input must contain exactly one root value");
             }
             return value;

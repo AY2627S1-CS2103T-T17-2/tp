@@ -21,12 +21,12 @@ public class RemarkCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Edits the remark of the athlete identified "
-            + "by the index number used in the displayed athlete list. "
-            + "Existing remark will be overwritten by the input.\n"
+            + "by the index number shown in the displayed athlete list. "
+            + "The existing remark is overwritten by the input.\n"
             + "Parameters: INDEX (must be a positive integer) "
-            + "r/ [REMARK]\n"
+            + "r/[REMARK]\n"
             + "Example: " + COMMAND_WORD + " 1 "
-            + "r/ Training for 100m.";
+            + "r/100m PB 12.34s";
 
     public static final String MESSAGE_ADD_REMARK_SUCCESS = "Added remark to athlete: %1$s";
     public static final String MESSAGE_DELETE_REMARK_SUCCESS = "Removed remark from athlete: %1$s";

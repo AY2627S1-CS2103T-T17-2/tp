@@ -67,7 +67,7 @@ Interface (GUI).
   For example, `find KEYWORD [MORE_KEYWORDS]...` can include `Avery` or `Avery Tan`.
 
 * Field prefixes can be in any order. For `find`, put unprefixed keywords before field prefixes.<br>
-  For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
+  For example, if the command specifies `n/NAME p/PHONE`, `p/PHONE n/NAME` is also acceptable.
 
 * Command words and parameter prefixes are case-insensitive. For example, `LIST`, `List`, and `list` invoke the same
   command, while `n/Avery` and `N/Avery` supply the same name parameter.
@@ -158,13 +158,13 @@ Format: `help`
 
 Adds an athlete with a name, age category, phone number, email address, and address.
 
-Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS`
+Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
 
 * All five fields are required.
 * Fields may appear in any order. Each parameter may appear only once.
 * Age category must be `Under 14`, `Under 16`, `Under 18`, `Under 20`, or `Open`. Category input ignores case and normalizes repeated spaces.
-* Names must be nonblank and contain only alphanumeric characters and spaces.
-* Phone numbers must contain only digits, with at least three digits. Formatted numbers such as `+65 9123 4567` are not supported in this version.
+* Names must be nonblank and contain only alphanumeric characters, spaces, hyphens, and apostrophes (for example, `Mary-Jane` or `O'Brien`).
+* Phone numbers must contain at least three digits. They may also include spaces, the characters `+`, `-`, `(`, `)`, and notes in brackets such as `(HP)` (for example, `+65 9123 4567` or `9123 4567 (HP)`). Two numbers with the same digits are treated as the same number, so the brackets and spaces are ignored when checking for duplicates.
 * Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` to supply the required nonblank address.
@@ -174,12 +174,12 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS`
 
 Examples:
 
-* `add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street`
-* `add e/jordan.lee@example.com p/92345678 a/open n/Jordan Lee addr/123 Main Street`
+* `add n/Kaylee Teo a/Under 14 p/61234567 e/kaylee.teo@example.com addr/123 Main Street`
+* `add e/jordan.lee@example.com p/62345678 a/open n/Jordan Lee addr/123 Main Street`
 
 Successful output:
 
-`New athlete added: Avery Tan; Age category: Under 14; Phone: 91234567; Email: avery.tan@example.com`
+`New athlete added: Kaylee Teo; Age category: Under 14; Phone: 61234567; Email: kaylee.teo@example.com`
 
 A duplicate produces `This athlete already exists in the roster: Avery Tan.` Failed validation leaves the command text available for correction.
 
@@ -320,8 +320,10 @@ Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/A
   searchable field (an `OR` search). This broad form remains useful when the field is unknown.
 * Prefix a value to restrict it to one field: `n/` name, `a/` age category, `p/` phone, `e/` email, `addr/` address,
   `r/` remark, or `t/` event. For example, `find n/und` searches names without matching every `Under` age category.
-* Broad and field-specific criteria can be combined. An athlete is returned when any broad keyword or field-specific
-  value matches. Each field prefix may appear at most once and cannot have an empty value.
+* When several field prefixes are given, an athlete must match **every** one (an `AND` search). For example,
+  `find n/avery a/Under 16` returns only athletes named like `avery` **and** in the `Under 16` category.
+* Broad and field-specific criteria can be combined. An athlete is returned when at least one broad keyword matches
+  **or** every field-specific value matches. Each field prefix may appear at most once and cannot have an empty value.
 * Broad keyword order does not matter: `find Avery Tan` and `find Tan Avery` return the same results. A prefixed value is matched as one phrase, so `find n/Avery Tan` matches that name but `find n/Tan Avery` does not. Put broad keywords before any field prefixes. Each athlete appears at most once.
 * Each `find` searches the entire roster and replaces any previous `find` or `filter`. Matching athletes retain the
   current displayed ordering, including any active sort, and receive indexes starting from 1. Use `list` to restore the complete roster.
@@ -345,7 +347,7 @@ Examples:
 * `find r/injured` searches only remarks.
 * `find t/hurdles` searches only events, returning athletes with an event such as `Hurdles` or `110m-Hurdles`.
 * `find avery 9123 under` returns athletes matching any of the three keywords.
-* `find n/avery r/relay` returns athletes whose name contains `avery` or whose remark contains `relay`.
+* `find n/rachel r/relay` returns only athletes whose name contains `rachel` **and** whose remark contains `relay`.
 
 ### Sorting the displayed athletes: `sort`
 
@@ -403,7 +405,7 @@ Format: `delete INDEX`
 Examples:
 
 * `list` followed by `delete 2` deletes the 2nd athlete in the roster.
-* `find Betsy` followed by `delete 1` deletes the 1st athlete in the results of the `find` command.
+* `find Avery` followed by `delete 1` deletes the 1st athlete in the results of the `find` command.
 
 ### Clearing all entries: `clear`
 
@@ -478,12 +480,12 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com addr/123 Main Street`
+**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com addr/123 Main Street`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`
-**Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK] [t/EVENT]`<br> e.g., `find n/avery r/relay`, `find t/100m`
+**Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK] [t/EVENT]`<br> e.g., `find n/rachel r/relay`, `find t/100m`
 **List**   | `list`
 **Remark** | `remark INDEX r/[REMARK]`<br> e.g., `remark 1 r/100m personal best: 12.34s`
 **Sort**   | `sort FIELD [ORDER]`<br> e.g., `sort age desc`

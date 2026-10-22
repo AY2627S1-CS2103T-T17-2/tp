@@ -49,6 +49,8 @@ public class JsonUserPrefsStorage {
         if (preferences.isPresent()) {
             UserPrefs loaded = preferences.get();
             if (loaded.getGuiSettings() == null || !loaded.getGuiSettings().isValid()) {
+                // Missing or malformed GUI settings would otherwise crash start-up; treat the file as unreadable
+                // so that the caller falls back to the default preferences.
                 throw new DataLoadingException(new IOException("Saved GUI settings must be present "
                         + "and have finite, positive window dimensions"));
             }

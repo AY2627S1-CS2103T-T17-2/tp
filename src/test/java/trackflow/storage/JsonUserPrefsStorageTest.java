@@ -45,6 +45,21 @@ public class JsonUserPrefsStorageTest {
         assertThrows(DataLoadingException.class, () -> readUserPrefs("NotJsonFormatUserPrefs.json"));
     }
 
+    @Test
+    public void readUserPrefs_nullGuiSettings_exceptionThrown() {
+        assertThrows(DataLoadingException.class, () -> readUserPrefs("NullGuiSettingsUserPref.json"));
+    }
+
+    @Test
+    public void readUserPrefs_trailingContent_exceptionThrown() {
+        assertThrows(DataLoadingException.class, () -> readUserPrefs("TrailingContentUserPref.json"));
+    }
+
+    @Test
+    public void readUserPrefs_duplicateKeys_exceptionThrown() {
+        assertThrows(DataLoadingException.class, () -> readUserPrefs("DuplicateKeysUserPref.json"));
+    }
+
     private Path addToTestDataPathIfNotNull(String userPrefsFileInTestDataFolder) {
         return userPrefsFileInTestDataFolder != null
                 ? TEST_DATA_FOLDER.resolve(userPrefsFileInTestDataFolder)

@@ -13,9 +13,12 @@ import java.util.stream.Collectors;
 import trackflow.commons.util.ToStringBuilder;
 
 /**
- * Tests whether any broad or field-specific keyword matches an athlete, ignoring case.
- * Broad keywords search name, age category, phone, email, address, remark, and events; field keywords search only their
- * selected field. The two kinds of matches are combined with OR, and empty keyword collections match no athletes.
+ * Tests a {@code Person} against find keywords using case-insensitive substring matching. An unprefixed keyword
+ * matches when it occurs in any searchable field (name, age category, phone, email, address, remark, or event).
+ * A prefixed keyword is matched only against its field, and different field prefixes are combined with AND, so a
+ * person must satisfy every field criterion. When both unprefixed keywords and field criteria are given, a person
+ * matches if any unprefixed keyword matches or every field criterion matches. Empty keyword collections match no
+ * athletes.
  */
 public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     private final List<String> keywords;
@@ -47,10 +50,17 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     @Override
     public boolean test(Person person) {
         requireNonNull(person);
-        boolean broadMatch = containsAnyKeyword(getSearchableText(person), keywords);
-        boolean fieldMatch = fieldKeywords.entrySet().stream()
-                .anyMatch(entry -> containsAnyKeyword(getFieldText(person, entry.getKey()), entry.getValue()));
-        return broadMatch || fieldMatch;
+        if (keywords.isEmpty() && fieldKeywords.isEmpty()) {
+            return false;
+        }
+        boolean matchesBroadKeywords = !keywords.isEmpty()
+                && containsAnyKeyword(getSearchableText(person), keywords);
+        boolean matchesEveryField = !fieldKeywords.isEmpty()
+                && fieldKeywords.entrySet().stream()
+                        .allMatch(entry -> containsAnyKeyword(getFieldText(person, entry.getKey()), entry.getValue()));
+        // Field criteria are combined with AND among themselves; broad keywords and field criteria are combined
+        // with OR, so an athlete matches if any broad keyword matches or every field criterion matches.
+        return matchesBroadKeywords || matchesEveryField;
     }
 
     private static boolean containsAnyKeyword(String text, List<String> keywords) {
