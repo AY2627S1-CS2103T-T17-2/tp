@@ -188,7 +188,7 @@ index range to an out-of-range displayed index, avoiding numeric-overflow errors
 `FindCommandParser` supports unprefixed broad keywords and the field prefixes `n/`, `a/`, `p/`, `e/`, `addr/`, and
 `r/`. It rejects empty or repeated supported field parameters and unsupported reserved prefixes. `PersonContainsKeywordsPredicate` stores broad keywords
 separately from field-specific criteria. Broad keywords search the combined athlete text, while a prefixed value is
-tested as a single phrase only against its selected field. Broad keywords must precede the first field prefix. The criteria use case-insensitive partial matching and OR semantics.
+tested as a single phrase only against its selected field. Broad keywords must precede the first field prefix. Matching is case-insensitive and partial. Broad keywords are combined with OR, but different field prefixes are combined with AND, so an athlete must satisfy every field criterion (and at least one broad keyword, when any are given).
 This allows `find n/und` to match a name such as `Underwood` without matching athletes merely because their age
 category starts with `Under`.
 
@@ -294,12 +294,15 @@ this single-user, local product. Athletes and guardians are records, not applica
 sample roster; the first successful roster change creates the file. An intentionally saved empty roster remains
 empty on restart. `preferences.json` stores window settings separately.
 
-`JsonRosterStorage` converts malformed JSON, null roots, missing or null persons lists, null athletes, null tag
-entries, invalid saved field values, and duplicate athletes into `DataLoadingException`. `MainApp` preserves the
-original bytes in a sibling file named `trackflow.json.unreadable-<UUID>.bak`, logs its path, and starts an empty
-roster. Each failed load creates a separate backup without overwriting earlier backups. Subsequent successful
-roster changes can replace the active file while the backup remains available for manual recovery. If backup
-creation fails, startup stops before commands become available, protecting the original from being overwritten.
+`JsonRosterStorage` converts malformed JSON, trailing content after the JSON value, repeated keys, null roots,
+missing or null persons lists, null athletes, null tag entries, invalid saved field values, and duplicate athletes
+into `DataLoadingException`. A leading UTF-8 byte order mark is tolerated, and an athlete whose `address` or `remark`
+is absent loads with an empty value rather than failing the whole file. When loading fails, `MainApp` preserves the
+original bytes in a sibling file named `trackflow.json.unreadable-<UUID>.bak`, logs its path, shows the path in the
+result display at start-up, and starts an empty roster. Each failed load creates a separate backup without
+overwriting earlier backups. Subsequent successful roster changes can replace the active file while the backup
+remains available for manual recovery. If backup creation fails, TrackFlow shows an error dialog and stops before
+commands become available, protecting the original from being overwritten.
 
 ### User stories
 
@@ -665,7 +668,7 @@ When a step asks you to type a new command below, replace the previous input rat
 
 ### Saving data
 
-1. Run `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home` and restart TrackFlow.<br>
+1. Run `clear`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home` and restart TrackFlow.<br>
    Expected: Avery remains in the roster after the restart.
 1. Temporarily remove write permission from the folder containing the roster data file, then attempt each
    roster-changing command separately:

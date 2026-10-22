@@ -67,7 +67,7 @@ Interface (GUI).
   For example, `find KEYWORD [MORE_KEYWORDS]...` can include `Avery` or `Avery Tan`.
 
 * Field prefixes can be in any order. For `find`, put unprefixed keywords before field prefixes.<br>
-  For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
+  For example, if the command specifies `n/NAME p/PHONE`, `p/PHONE n/NAME` is also acceptable.
 
 * Command words and parameter prefixes are case-insensitive. For example, `LIST`, `List`, and `list` invoke the same
   command, while `n/Avery` and `N/Avery` supply the same name parameter.
@@ -117,7 +117,7 @@ Format: `help`
 
 Adds an athlete with a name, age category, phone number, email address, and address.
 
-Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS`
+Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
 
 * All five fields are required.
 * Fields may appear in any order. Each parameter may appear only once.
@@ -133,12 +133,12 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS`
 
 Examples:
 
-* `add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street`
-* `add e/jordan.lee@example.com p/92345678 a/open n/Jordan Lee addr/123 Main Street`
+* `add n/Kaylee Teo a/Under 14 p/61234567 e/kaylee.teo@example.com addr/123 Main Street`
+* `add e/jordan.lee@example.com p/62345678 a/open n/Jordan Lee addr/123 Main Street`
 
 Successful output:
 
-`New athlete added: Avery Tan; Age category: Under 14; Phone: 91234567; Email: avery.tan@example.com`
+`New athlete added: Kaylee Teo; Age category: Under 14; Phone: 61234567; Email: kaylee.teo@example.com`
 
 A duplicate produces `This athlete already exists in the roster: Avery Tan.` Failed validation leaves the command text available for correction.
 
@@ -270,7 +270,7 @@ Examples:
 * `find tan@exam` searches partial email addresses.
 * `find r/injured` searches only remarks.
 * `find avery 9123 under` returns athletes matching any of the three keywords.
-* `find n/avery r/relay` returns athletes whose name contains `avery` or whose remark contains `relay`.
+* `find n/rachel r/relay` returns only athletes whose name contains `rachel` **and** whose remark contains `relay`.
 
 ### Sorting the displayed athletes: `sort`
 
@@ -328,7 +328,7 @@ Format: `delete INDEX`
 Examples:
 
 * `list` followed by `delete 2` deletes the 2nd athlete in the roster.
-* `find Betsy` followed by `delete 1` deletes the 1st athlete in the results of the `find` command.
+* `find Avery` followed by `delete 1` deletes the 1st athlete in the results of the `find` command.
 
 ### Clearing all entries: `clear`
 
@@ -405,12 +405,12 @@ replacing it. Launch from the destination home folder so TrackFlow reads the cop
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE_NUMBER e/EMAIL addr/ADDRESS` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com addr/123 Main Street`
+**Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com addr/123 Main Street`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE_NUMBER] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`
-**Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK]`<br> e.g., `find n/avery r/relay`
+**Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK]`<br> e.g., `find n/rachel r/relay`
 **List**   | `list`
 **Remark** | `remark INDEX r/[REMARK]`<br> e.g., `remark 1 r/100m personal best: 12.34s`
 **Sort**   | `sort FIELD [ORDER]`<br> e.g., `sort age desc`
