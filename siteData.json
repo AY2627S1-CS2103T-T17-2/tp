@@ -85,7 +85,14 @@
       "title": "Documentation guide",
       "headings": {
         "documentation-guide": "Documentation Guide",
-        "building-and-checking-the-site": "Building and checking the site"
+        "building-and-checking-the-site": "Building and checking the site",
+        "uml-diagram-conventions": "UML diagram conventions",
+        "shared-appearance": "Shared appearance",
+        "class-diagram-notation": "Class diagram notation",
+        "sequence-diagram-notation": "Sequence diagram notation",
+        "layout-and-readability": "Layout and readability",
+        "before-opening-or-updating-a-pr": "Before opening or updating a PR",
+        "picking-up-the-shared-uml-changes": "Picking up the shared UML changes"
       },
       "headingKeywords": {}
     },
