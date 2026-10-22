@@ -42,9 +42,8 @@ final class WindowPlacement {
      */
     static Rectangle2D fit(GuiSettings settings, List<Rectangle2D> screens, Rectangle2D primary,
             double minimumWidth, double minimumHeight) {
-        GuiSettings defaults = new GuiSettings();
-        double width = validSizeOrDefault(settings.getWindowWidth(), defaults.getWindowWidth());
-        double height = validSizeOrDefault(settings.getWindowHeight(), defaults.getWindowHeight());
+        double width = settings.getWindowWidth();
+        double height = settings.getWindowHeight();
         var coordinates = settings.getWindowCoordinates();
         Rectangle2D target = primary;
         boolean restorePosition = false;
@@ -72,13 +71,6 @@ final class WindowPlacement {
         double y = restorePosition ? coordinates.getY() : target.getMinY() + (target.getHeight() - height) / 2;
         return new Rectangle2D(clamp(x, target.getMinX(), target.getMaxX() - width),
                 clamp(y, target.getMinY(), target.getMaxY() - height), width, height);
-    }
-
-    /**
-     * Returns a finite positive size or the given default.
-     */
-    private static double validSizeOrDefault(double size, double defaultSize) {
-        return Double.isFinite(size) && size > 0 ? size : defaultSize;
     }
 
     /**

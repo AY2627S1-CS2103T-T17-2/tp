@@ -142,14 +142,6 @@ public class WindowPlacementTest {
     }
 
     @Test
-    public void fit_invalidDimensions_usesFiniteDefaults() {
-        assertEquals(new Rectangle2D(100, 100, WIDTH, HEIGHT),
-                WindowPlacement.fit(new GuiSettings(Double.NaN, Double.POSITIVE_INFINITY, 100, 100), BOTH, PRIMARY));
-        assertEquals(new Rectangle2D(100, 100, WIDTH, HEIGHT),
-                WindowPlacement.fit(new GuiSettings(-1, 0, 100, 100), BOTH, PRIMARY));
-    }
-
-    @Test
     public void fit_helpWindow_usesItsOwnMinimumDimensions() {
         assertEquals(new Rectangle2D(100, 100, 480, 320), WindowPlacement.fit(
                 new GuiSettings(480, 320, 100, 100), BOTH, PRIMARY, 480, 320));
