@@ -1,38 +1,45 @@
 @startuml
 !include style.puml
-skinparam arrowThickness 1.1
 skinparam arrowColor LOGIC_COLOR_T4
 skinparam classBackgroundColor LOGIC_COLOR
+skinparam ArrowFontStyle plain
+skinparam linetype polyline
 
-Class "{abstract}\nCommand" as Command
-Class XYZCommand
-
-package "Parser classes"{
-Class "<<interface>>\nParser" as Parser
-Class TrackFlowParser
-Class XYZCommandParser
-Class CliSyntax
-Class ParserUtil
-Class ArgumentMultimap
-Class ArgumentTokenizer
-Class Prefix
+package "Parsing" {
+    class TrackFlowParser
+    interface "Parser<T extends Command>" as Parser <<interface>> LOGIC_COLOR_T1 {
+        +parse(userInput: String): T
+    }
+    class EditCommandParser
+    class ParserUtil
+    class ArgumentTokenizer
+    class ArgumentMultimap
+    class CliSyntax
+    class Prefix
 }
 
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> TrackFlowParser
+show Parser members
+class EditCommand LOGIC_COLOR
 
-TrackFlowParser .down.> XYZCommandParser: <<create>>
+TrackFlowParser .right.> EditCommandParser : <<create>>
+EditCommandParser .up.|> Parser : T = EditCommand
+EditCommandParser .right.> EditCommand : <<create>>
+EditCommandParser .down.> ParserUtil : validates
+EditCommandParser .down.> ArgumentTokenizer : tokenizes
+EditCommandParser .down.> ArgumentMultimap : checks duplicates;\nreads values
+EditCommandParser .down.> CliSyntax : uses constants
+ArgumentTokenizer .right.> ArgumentMultimap : <<create>>
+ArgumentTokenizer .down.> Prefix : recognizes
+ArgumentMultimap -down-> "*" Prefix : keys
+CliSyntax .down.> Prefix : <<create>>
+ParserUtil .down.> Prefix : checks allowed prefixes
 
-XYZCommandParser ..> XYZCommand : <<create>>
-TrackFlowParser ..> Command : <<use>>
-XYZCommandParser .up.|> Parser
-XYZCommandParser ..> ArgumentMultimap
-XYZCommandParser ..> ArgumentTokenizer
-ArgumentTokenizer .left.> ArgumentMultimap
-XYZCommandParser ..> CliSyntax
-CliSyntax ..> Prefix
-XYZCommandParser ..> ParserUtil
-ParserUtil .down.> Prefix
-ArgumentTokenizer .down.> Prefix
-XYZCommand -up-|> Command
+'Invisible links constrain layout only; they are not UML relationships.
+ParserUtil -[hidden]right-> CliSyntax
+CliSyntax -[hidden]right-> ArgumentTokenizer
+
+legend bottom
+  Partial view: EditCommandParser represents dedicated command parsers.
+  See the DG and parsing trace for validation and escaping details.
+endlegend
 @enduml

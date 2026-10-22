@@ -91,7 +91,13 @@ The `UI` component,
 
 Here's a (partial) class diagram of the `Logic` component:
 
-<puml src="diagrams/LogicClassDiagram.puml" width="550"/>
+<puml src="diagrams/LogicClassDiagram.puml" width="800" alt="Logic interfaces, parser ownership, representative commands, and model and storage dependencies" />
+
+`LogicManager` implements `Logic`, owns its `TrackFlowParser`, and holds references to the live `Model` and
+`Storage`. The diagram shows `EditCommand` and `FindCommand` as representative subclasses of `Command`:
+`changesRoster()` determines whether execution needs a detached model and persistence. Commands return a
+`CommandResult`; `LogicManager` calls `withDataSaved()` only after saving a roster change successfully.
+The other command subclasses and dedicated command parsers are omitted from this overview.
 
 The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
 
@@ -101,7 +107,9 @@ The sequence diagram below illustrates the interactions within the `Logic` compo
 
 How the `Logic` component works:
 
-1. When `Logic` is called upon to execute a command, the command is passed to a `TrackFlowParser` object, which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
+1. When `Logic` is called upon to execute a command, `LogicManager` passes its text to `TrackFlowParser`.
+   Parameterized commands are delegated to a dedicated parser (e.g., `DeleteCommandParser`); `clear`, `help`, and
+   `exit` are validated and constructed directly by `TrackFlowParser`.
 1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteCommand`) which is executed by the `LogicManager`.
 1. The command can communicate with the `Model` when it is executed (e.g. to delete a person).<br>
    Note that although this is shown as a single step in the diagram above for simplicity, the code can require several interactions between the command object and the `Model` to complete the operation.
@@ -111,14 +119,39 @@ How the `Logic` component works:
    commands such as `list`, `find`, `filter`, `sort`, `help`, and `exit` execute directly and do not write the roster.
 1. The result of the command execution is encapsulated as a `CommandResult` object which is returned from `Logic`.
 
-Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
+The following partial class diagram expands the parsing helpers, using the concrete `EditCommandParser` as an
+example. The other dedicated parsers, including the shared tag/untag parser hierarchy, are omitted for clarity.
 
-<puml src="diagrams/ParserClasses.puml" width="600"/>
+<puml src="diagrams/ParserClasses.puml" width="800" alt="Edit command parser and its validation, tokenization, argument-map, and prefix dependencies" />
 
 How the parsing works:
 
-* When called upon to parse a user command, the `TrackFlowParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `TrackFlowParser` returns that object as a `Command` object.
-* All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
+* `TrackFlowParser` recognizes command words without considering letter case. For parameterized commands such as
+  `edit`, it creates the dedicated parser and returns the resulting command. The no-argument commands `clear`,
+  `help`, and `exit` are validated and constructed directly instead.
+* `EditCommandParser` implements `Parser<EditCommand>`. It uses prefix constants from `CliSyntax`, calls
+  `ParserUtil.verifyNoUnknownPrefixes`, and tokenizes arguments through `ArgumentTokenizer`.
+* `ArgumentTokenizer` recognizes supported prefixes at whitespace boundaries without considering letter case.
+  Escaped prefix-like text stays within a value, and exactly one extra slash is removed after arguments are split.
+* `ArgumentMultimap` retains every supplied value for a prefix. `EditCommandParser` validates the index, rejects
+  duplicate supported prefixes, parses the supplied fields, and requires at least one field before constructing
+  an `EditCommand`. Parser and field-validation failures are reported as `ParseException`.
+
+The sequence below traces successful parsing of `edit 1 addr/Block A//B`. `ParserUtil` and `ArgumentTokenizer`
+lifelines marked `«class»` represent static calls. Unlabelled dashed replies return control without displaying
+a return value.
+Optional-field checks for fields absent from this example and repeated accessor
+calls are omitted; argument lists marked `...` abbreviate usage text and prefix arguments.
+
+<puml src="diagrams/tracing/LogicSequenceDiagram.puml" width="1400" alt="Successful edit parsing with prefix validation, one-time slash decoding, index and field checks, and command creation" />
+
+[Open the parsing trace at full size](diagrams/tracing/LogicSequenceDiagram.png) to inspect the message labels
+when the diagram is scaled to fit the page.
+
+The resulting command contains the address `Block A/B`. No athlete is edited and no file is saved during parsing.
+After this trace, `LogicManager` executes the command on a detached model. `EditCommand` resolves the displayed
+index at execution time; `LogicManager` saves the staged roster and publishes the successful change to the live
+model as described above.
 
 ### Model component
 
