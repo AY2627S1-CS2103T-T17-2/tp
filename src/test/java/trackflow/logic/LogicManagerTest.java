@@ -272,8 +272,10 @@ public class LogicManagerTest {
 
     @Test
     public void execute_storageThrowsAdException_throwsCommandException() {
+        // The permission error names the roster file, not the internal temporary file.
+        Path rosterPath = temporaryFolder.resolve("ExceptionUserPrefs.json");
         assertCommandFailureForExceptionFromStorage(DUMMY_AD_EXCEPTION, String.format(
-                LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, DUMMY_AD_EXCEPTION.getMessage()));
+                LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, rosterPath));
     }
 
     @Test
