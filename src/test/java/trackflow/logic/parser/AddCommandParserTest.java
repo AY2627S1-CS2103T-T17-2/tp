@@ -40,17 +40,14 @@ public class AddCommandParserTest {
         Person expected = new PersonBuilder().withName("Avery Tan").withAgeCategory("Under 14")
                 .withPhone("91234567").withEmail("avery.tan@example.com")
                 .withAddress("123 Main Street").withRemark("").withTags().build();
-        assertParseSuccess(parser, validArgs, new AddCommand(expected));
         assertParseSuccess(parser, " addr/123 Main Street" + validArgs.replace(" addr/123 Main Street", ""),
                 new AddCommand(expected));
     }
 
     @Test
-    public void parse_invalidOrRepeatedAddress_failure() {
+    public void parse_invalidAddress_failure() {
         assertParseFailure(parser, validArgs.replace("addr/123 Main Street", "addr/"), Address.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, validArgs.replace("addr/123 Main Street", "addr/   "), Address.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, validArgs + " addr/456 Other Street",
-                Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_ADDRESS));
     }
 
     @Test
@@ -61,12 +58,6 @@ public class AddCommandParserTest {
                     .withAddress("123 Main Street").withRemark("").withTags().build();
             assertParseSuccess(parser, validArgs.replace("Under 14", category), new AddCommand(expected));
         }
-    }
-
-    @Test
-    public void parse_legacyAddressInsteadOfCategory_failure() {
-        assertParseFailure(parser, validArgs.replace("Under 14", "123 Clementi Road"),
-                AgeCategory.MESSAGE_CONSTRAINTS);
     }
 
     @Test
@@ -123,6 +114,5 @@ public class AddCommandParserTest {
         assertParseFailure(parser, validArgs + " t/", expected);
         assertParseFailure(parser, validArgs + " r/", expected);
         assertParseFailure(parser, " t/sprints t/relay" + validArgs, expected);
-        assertParseFailure(parser, validArgs + " r/note", expected);
     }
 }

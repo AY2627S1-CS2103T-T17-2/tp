@@ -8,6 +8,7 @@ import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
 import org.junit.jupiter.api.Test;
 
+import trackflow.logic.Messages;
 import trackflow.logic.commands.UntagCommand;
 import trackflow.model.tag.Tag;
 
@@ -29,5 +30,7 @@ public class UntagCommandParserTest {
         assertParseFailure(parser, "1", MESSAGE_INVALID_FORMAT);
         assertParseFailure(parser, "t/100m", MESSAGE_INVALID_FORMAT);
         assertParseFailure(parser, "1 t/", Tag.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "1 t/100m n/Alice",
+                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "n/", UntagCommand.MESSAGE_USAGE));
     }
 }

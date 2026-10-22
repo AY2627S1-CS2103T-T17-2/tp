@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import trackflow.commons.core.index.Index;
 import trackflow.logic.parser.exceptions.ParseException;
 import trackflow.model.person.Address;
+import trackflow.model.person.AgeCategory;
 import trackflow.model.person.Email;
 import trackflow.model.person.Name;
 import trackflow.model.person.Phone;
@@ -25,26 +26,40 @@ public class ParserUtilTest {
     private static final String INVALID_PHONE = "+651234";
     private static final String INVALID_ADDRESS = " ";
     private static final String INVALID_EMAIL = "example.com";
+    private static final String INVALID_AGE_CATEGORY = "Under 15";
     private static final String INVALID_TAG = "#friend";
 
     private static final String VALID_NAME = "Rachel Walker";
     private static final String VALID_PHONE = "123456";
     private static final String VALID_ADDRESS = "123 Main Street #0505";
     private static final String VALID_EMAIL = "rachel@example.com";
+    private static final String VALID_AGE_CATEGORY = "Under 16";
     private static final String VALID_TAG_1 = "friend";
     private static final String VALID_TAG_2 = "neighbour";
 
     private static final String WHITESPACE = " \t\r\n";
 
     @Test
-    public void parseIndex_invalidInput_throwsParseException() {
-        assertThrows(ParseException.class, () -> ParserUtil.parseIndex("10 a"));
+    public void parseAgeCategory_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseAgeCategory(null));
     }
 
     @Test
-    public void parseIndex_outOfRangeInput_returnsMaximumRepresentableIndex() throws Exception {
-        assertEquals(Index.fromOneBased(Integer.MAX_VALUE),
-                ParserUtil.parseIndex("999999999999999999999999999999999999"));
+    public void parseAgeCategory_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, AgeCategory.MESSAGE_CONSTRAINTS, () ->
+                ParserUtil.parseAgeCategory(INVALID_AGE_CATEGORY));
+    }
+
+    @Test
+    public void parseAgeCategory_validValue_returnsNormalizedAgeCategory() throws Exception {
+        AgeCategory expected = new AgeCategory(VALID_AGE_CATEGORY);
+        assertEquals(expected, ParserUtil.parseAgeCategory(VALID_AGE_CATEGORY));
+        assertEquals(expected, ParserUtil.parseAgeCategory(WHITESPACE + "under   16" + WHITESPACE));
+    }
+
+    @Test
+    public void parseIndex_invalidInput_throwsParseException() {
+        assertThrows(ParseException.class, ParserUtil.MESSAGE_INVALID_INDEX, () -> ParserUtil.parseIndex("10 a"));
     }
 
     @Test
@@ -64,7 +79,8 @@ public class ParserUtilTest {
         assertEquals(Index.fromOneBased(Integer.MAX_VALUE), ParserUtil.parseIndex("2147483648"));
         assertEquals(Index.fromOneBased(Integer.MAX_VALUE), ParserUtil.parseIndex("2147483647"));
         for (String invalid : new String[] {"0".repeat(10000), "9".repeat(10000) + "x", "-1", "+1", "1.0"}) {
-            assertThrows(ParseException.class, () -> ParserUtil.parseIndex(invalid));
+            assertThrows(ParseException.class, ParserUtil.MESSAGE_INVALID_INDEX, () ->
+                    ParserUtil.parseIndex(invalid));
         }
     }
 
@@ -132,7 +148,8 @@ public class ParserUtilTest {
         assertThrows(NullPointerException.class, () -> ParserUtil.parseIndex(null));
         for (String input : List.of("", "null", "NaN", "Infinity", "\u0661", "\uff11", "1\u0000", "1\u200b",
                 "1 0", "1\t0", "9".repeat(10000) + "\uff11")) {
-            assertThrows(ParseException.class, () -> ParserUtil.parseIndex(input));
+            assertThrows(ParseException.class, ParserUtil.MESSAGE_INVALID_INDEX, () ->
+                    ParserUtil.parseIndex(input));
         }
     }
 
@@ -143,7 +160,7 @@ public class ParserUtilTest {
 
     @Test
     public void parseName_invalidValue_throwsParseException() {
-        assertThrows(ParseException.class, () -> ParserUtil.parseName(INVALID_NAME));
+        assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseName(INVALID_NAME));
     }
 
     @Test
@@ -166,7 +183,7 @@ public class ParserUtilTest {
 
     @Test
     public void parsePhone_invalidValue_throwsParseException() {
-        assertThrows(ParseException.class, () -> ParserUtil.parsePhone(INVALID_PHONE));
+        assertThrows(ParseException.class, Phone.MESSAGE_CONSTRAINTS, () -> ParserUtil.parsePhone(INVALID_PHONE));
     }
 
     @Test
@@ -189,7 +206,8 @@ public class ParserUtilTest {
 
     @Test
     public void parseAddress_invalidValue_throwsParseException() {
-        assertThrows(ParseException.class, () -> ParserUtil.parseAddress(INVALID_ADDRESS));
+        assertThrows(ParseException.class, Address.MESSAGE_CONSTRAINTS, () ->
+                ParserUtil.parseAddress(INVALID_ADDRESS));
     }
 
     @Test
@@ -212,7 +230,7 @@ public class ParserUtilTest {
 
     @Test
     public void parseEmail_invalidValue_throwsParseException() {
-        assertThrows(ParseException.class, () -> ParserUtil.parseEmail(INVALID_EMAIL));
+        assertThrows(ParseException.class, Email.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseEmail(INVALID_EMAIL));
     }
 
     @Test
@@ -235,7 +253,7 @@ public class ParserUtilTest {
 
     @Test
     public void parseTag_invalidValue_throwsParseException() {
-        assertThrows(ParseException.class, () -> ParserUtil.parseTag(INVALID_TAG));
+        assertThrows(ParseException.class, Tag.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseTag(INVALID_TAG));
     }
 
     @Test
@@ -263,7 +281,8 @@ public class ParserUtilTest {
 
     @Test
     public void parseTags_collectionWithInvalidTags_throwsParseException() {
-        assertThrows(ParseException.class, () -> ParserUtil.parseTags(List.of(VALID_TAG_1, INVALID_TAG)));
+        assertThrows(ParseException.class, Tag.MESSAGE_CONSTRAINTS, () ->
+                ParserUtil.parseTags(List.of(VALID_TAG_1, INVALID_TAG)));
     }
 
     @Test

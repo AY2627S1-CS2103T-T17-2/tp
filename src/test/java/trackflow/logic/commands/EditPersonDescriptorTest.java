@@ -18,10 +18,28 @@ import org.junit.jupiter.api.Test;
 import trackflow.logic.commands.EditCommand.EditPersonDescriptor;
 import trackflow.model.person.Address;
 import trackflow.model.person.AgeCategory;
+import trackflow.model.person.Email;
+import trackflow.model.person.Name;
+import trackflow.model.person.Phone;
 import trackflow.model.tag.Tag;
 import trackflow.testutil.EditPersonDescriptorBuilder;
 
 public class EditPersonDescriptorTest {
+
+    @Test
+    public void isAnyFieldEdited_individualFields_returnsTrue() {
+        EditPersonDescriptor nameOnly = new EditPersonDescriptor();
+        nameOnly.setName(new Name(VALID_NAME_BOB));
+        assertTrue(nameOnly.isAnyFieldEdited());
+
+        EditPersonDescriptor phoneOnly = new EditPersonDescriptor();
+        phoneOnly.setPhone(new Phone(VALID_PHONE_BOB));
+        assertTrue(phoneOnly.isAnyFieldEdited());
+
+        EditPersonDescriptor emailOnly = new EditPersonDescriptor();
+        emailOnly.setEmail(new Email(VALID_EMAIL_BOB));
+        assertTrue(emailOnly.isAnyFieldEdited());
+    }
 
     @Test
     public void equals() {

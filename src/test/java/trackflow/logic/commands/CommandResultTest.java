@@ -4,10 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static trackflow.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 public class CommandResultTest {
+    @Test
+    public void constructor_nullFeedbackToUser_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new CommandResult(null));
+    }
+
     @Test
     public void equals() {
         CommandResult commandResult = new CommandResult("feedback");

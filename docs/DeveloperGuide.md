@@ -76,7 +76,7 @@ The sections below give more details of each component.
 
 The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/Ui.java)
 
-<puml src="diagrams/UiClassDiagram.puml" width="1100" alt="UI parts inheriting UiPart, MainWindow references, and CommandBox autocomplete and PersonCard model dependencies" />
+<puml src="diagrams/UiClassDiagram.puml" width="1100" alt="UI parts inheriting UiPart, MainWindow references, the WindowPlacement helper and GuiSettings dependencies, and CommandBox autocomplete and PersonCard model dependencies" />
 
 The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
 
@@ -84,6 +84,11 @@ The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDi
 `CommandBox` is attached to the scene graph without a direct `MainWindow` field. `CommandBox` owns an
 `AutocompleteEngine`, and each `PersonCard` holds the `Person` it displays. Generic JavaFX root parameters and
 toolkit details are omitted from this partial view.
+
+When restoring the window, `MainWindow` reads the saved size and position from `GuiSettings` and asks the
+stateless `WindowPlacement` utility, through a static call, whether that position is still reachable on a
+connected screen; it keeps no `WindowPlacement` instance. An unreachable position falls back to a size capped to
+the primary screen. On exit, `MainWindow` writes the current bounds back to `GuiSettings`.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/MainWindow.java).
 
@@ -190,6 +195,8 @@ The `Model` component,
   that view in a `SortedList` for display ordering. It exposes the sorted view as an
   `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when filtering, sorting, or roster
   data changes.
+* retains the active `Predicate<Person>` and optional `Comparator<Person>` separately as display state. Changing
+  either updates the corresponding JavaFX view without changing the stored roster order.
 * distinguishes duplicate identity from complete value equality. `Person.isSamePerson` compares the normalized name
   and matching contact details, while `Person.equals` and `hashCode` include every stored field, including the remark.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
@@ -225,6 +232,32 @@ The `Storage` component,
 * writes JSON to a temporary sibling file before replacing the destination. `FileUtil` uses an atomic move when the
   filesystem supports it and cleans up the temporary file after success or failure.
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
+
+#### Roster JSON mapping
+
+The following partial class diagram expands the storage overview's model conversion dependencies.
+`JsonSerializableRoster` retains a list of `JsonAdaptedPerson`, each of which retains a list of
+`JsonAdaptedTag`. These are ordinary navigable associations; the adapters do not retain model objects.
+The JSON roster key remains `persons` for compatibility with existing files.
+
+<puml src="diagrams/RosterJsonMappingClassDiagram.puml" width="800" alt="Roster JSON adapters retain person and tag lists, use model objects when saving, and create AthleteRoster, Person and Tag when loading; Person retains an unordered tag set" />
+
+On saving, `JsonRosterStorage` constructs `JsonSerializableRoster` from a `ReadOnlyRoster`.
+Its constructor maps each `Person` to a `JsonAdaptedPerson`, which maps the model's `Set<Tag>` to a
+`List<JsonAdaptedTag>`. `JsonAdaptedTag` serializes as a tag-name string, so the persisted `tags` array
+contains strings. The model tag set has no ordering guarantee.
+
+On loading, Jackson reconstructs the adapters and `toModelType()` validates stored values before creating
+`Tag` and `Person` objects and adding them to a new `AthleteRoster`, which implements `ReadOnlyRoster`.
+Tag conversion checks tag names; person conversion checks required fields and the constraints on name,
+age category, phone, email and address. A missing age category defaults to `Open`, and missing or null
+`tags` become an empty list. The JSON tag list becomes a `HashSet<Tag>`: repeated tags, including
+case variants, collapse according to `Tag.equals` and `hashCode`.
+
+A missing or null `persons` list, null athlete/tag entries, invalid field values, and duplicate athletes
+(according to `Person.isSamePerson`) cause `IllegalValueException`; `JsonRosterStorage` wraps it in
+`DataLoadingException`. File-reading or JSON-decoding failures, including a JSON null root, also produce
+`DataLoadingException` through `JsonUtil`. An absent file instead returns `Optional.empty()`.
 
 ### Common classes
 
@@ -327,7 +360,8 @@ delete, including age category, phone, and email. These diagrams omit helpers, t
 
 Coaches record the track events each athlete competes in with `tag INDEX t/EVENT...` and remove them with
 `untag INDEX t/EVENT...`. Events are stored as the athlete's `Tag` set, so no change to `Person` or the JSON format
-was needed, and rosters saved by earlier versions still load.
+was needed. Existing rosters should be backed up before upgrading; support for all previously valid tag values is
+not guaranteed until the legacy-tag compatibility issue is resolved.
 
 #### Implementation details
 
@@ -339,6 +373,19 @@ was needed, and rosters saved by earlier versions still load.
 * `Tag` accepts letters, digits, single spaces and single hyphens (e.g. `Long Jump`, `110m-Hurdles`), up to 30
   characters. `Tag#equals` and `Tag#hashCode` ignore case, so normal `Set` operations treat `100m` and `100M` as
   the same event while the first-entered spelling is kept for display.
+
+The class diagram below is a partial view of the event tagging classes. It shows how the two commands share
+parsing and execution steps; message constants, parser helpers such as `ParserUtil`, and the athlete's own event
+set are omitted.
+
+<puml src="diagrams/EventTagClassDiagram.puml" width="725" alt="Tag and untag parsers extend generic EventTagCommandParser and create TagCommand and UntagCommand, which extend EventTagCommand; EventTagCommand keeps its events, uses Model during execution, and creates an updated Person" />
+
+`EventTagCommandParser` implements `Parser<T>` with its own type parameter `T`. `TagCommandParser` and
+`UntagCommandParser` bind `T` to their command and implement `getUsage()` and `createCommand(...)`, so the shared
+`parse(...)` method returns the correct command. Each command keeps the displayed-list `Index` and its non-empty set
+of events, but uses `Model` only while executing. `EventTagCommand` provides the shared steps:
+`getTargetAthlete(...)` finds the athlete at the index, and the static `replaceEvents(...)` creates and stores an
+updated copy of that athlete. `TagCommand` and `UntagCommand` differ only in how they work out the updated events.
 
 `TagCommand` adds only the events the athlete does not already have and lists any skipped events in its message.
 It fails only when every given event is already present, so that the coach knows nothing changed. `UntagCommand`
@@ -390,9 +437,48 @@ Text fields are compared without considering letter case. Phone numbers are conv
 values for comparison, avoiding overflow and lexicographic ordering errors. Age categories use the competition order
 `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
 
+### Flexible athlete search
+
+`TrackFlowParser` dispatches `find` to `FindCommandParser`. The parser recognizes broad preamble keywords and
+field-specific prefixes: `n/` name, `a/` age category, `p/` phone, `e/` email, `addr/` address, `r/` remark, and
+`t/` event.
+
+#### Implementation details
+
+* `ParserUtil.verifyNoUnknownPrefixes` checks that no unrecognized parameter prefix forms are present.
+* `ArgumentTokenizer.tokenize` splits input into the preamble and prefixed arguments.
+* `arguments.verifyNoDuplicatePrefixesFor` enforces that each supported field prefix appears at most once.
+* Empty prefix values (e.g. `find n/`) are rejected with an actionable error.
+* `FindCommandParser` constructs a `PersonContainsKeywordsPredicate` containing:
+  * A list of broad keywords parsed from the whitespace-separated preamble.
+  * A map of `SearchField` to field-specific keyword strings.
+* When evaluated against an athlete, `PersonContainsKeywordsPredicate` combines broad matches and field-specific
+  matches using logical `OR`. An athlete matches if at least one broad keyword matches any searchable field
+  (name, age category, phone, email, address, remark, or events) or if any field-specific keyword matches its designated field.
+* Matching is case-insensitive and checks for substring presence, so partial words and numbers match (e.g., `find ave` matches `Avery Tan`).
+* `FindCommand` updates the display by calling `Model#updateFilteredPersonList(predicate)`. Like `filter`, it operates
+  as an unpersisted view filter over the full roster, preserves active sorting, and starts displayed indexes from 1.
+
+#### Design considerations
+
+* **Aspect: Search criteria combination**
+  * **Alternative 1 (current choice):** Disjunctive matching (`OR`). An athlete matching any broad keyword or field prefix is included.
+    * Pros: Maximizes recall when searching with multiple hints or finding athletes matching alternative criteria.
+    * Cons: Users wanting strict conjunction (`AND`) must search consecutively or narrow results with specific field prefixes.
+  * **Alternative 2:** Conjunctive matching (`AND`).
+    * Pros: Allows narrowing down large rosters with multiple required criteria.
+    * Cons: Less forgiving for broad exploratory searches where the exact field or term is uncertain.
+* **Aspect: Matching granularity**
+  * **Alternative 1 (current choice):** Substring matching.
+    * Pros: Allows partial searches (e.g. partial phone numbers, names, or events like `hurdles`).
+    * Cons: Can match unintended substrings if keywords are very short.
+  * **Alternative 2:** Full-word matching.
+    * Pros: Prevents accidental substring matches.
+    * Cons: Requires remembering exact full words or names.
+
 ### Future features [Future]
 
-Undo/redo, archiving, guardian links, relay squads, event grouping, and structured performance logs are not
+Undo/redo, archiving, guardian links, relay squads, and event grouping are not
 implemented in v1.4. Their user stories record possible future scope; they do not describe existing classes or
 commit to a release version.
 
@@ -426,14 +512,27 @@ number, email address, and nonblank address. Remarks can be added or removed sep
 to the live model; view-only commands do not save roster data.
 
 Future features are marked **[Future]** below. Cloud synchronization and collaborative editing are excluded from
-this single-user, local product. Athletes and guardians are records, not application users.
+this single-user, local product. Athletes are records, not application users.
 
 ### Persistence and recovery status
 
-`MainApp` loads `data/trackflow.json` relative to the process working directory. If no file exists, it supplies the
-sample roster; the first successful roster change creates the file. An intentionally saved empty roster remains
-empty on restart. `preferences.json` stores window settings separately.
+`ApplicationHome` resolves the real location of the code archive. For a packaged JAR, its parent directory is home,
+including when launched through a symbolic link or from another working directory. An IDE/test launch from
+unpacked class files uses the process working directory. Resolution does not log because `LogsCenter` needs the
+same home before normal application startup. An unresolvable code location stops initialization instead of
+silently choosing another folder.
 
+`MainApp` loads `data/trackflow.json` inside that home. If no file exists, it supplies the sample roster; the first
+successful roster change creates the file. An intentionally saved empty roster remains empty on restart.
+`preferences.json` and rotated logs share the same home. Backups and temporary roster saves use roster-file siblings.
+
+`JsonUserPrefsStorage` rejects null GUI settings and dimensions that are nonpositive or nonfinite, including values
+Jackson assigns directly to fields. Missing properties retain their defaults. Coordinates may be null (automatic
+placement) or integer positions; the UI handles actual screen visibility. `MainApp.initPrefs` recovers from invalid
+preferences with defaults and attempts to save them without changing the roster.
+
+`JsonUtil` requires exactly one JSON root followed only by whitespace, for both rosters and preferences. Extra roots,
+garbage and truncation cause a loading error; reading never silently accepts just the first root.
 `JsonRosterStorage` converts malformed JSON, null roots, missing or null persons lists, null athletes, null tag
 entries, invalid saved field values, and duplicate athletes into `DataLoadingException`. `MainApp` preserves the
 original bytes in a sibling file named `trackflow.json.unreadable-<UUID>.bak`, logs its path, and starts an empty
@@ -466,7 +565,7 @@ without committing it to a release; **Excluded** records an idea outside this pr
 | US15 | `* *` | [Future] | coach | archive and restore athlete records | keep departed athletes' information without including them in the active roster |
 | US16 | `* *` | [Future] | coach | record guardians and add or remove their links to athletes | find the appropriate family contact and keep those links current |
 | US17 | `* *` | [Future] | coach | organize athletes into relay squads and event groups | review who belongs to each team or event |
-| US18 | `* *` | [Future] | coach | record and review personal bests by event | track an athlete's performance progress |
+| US18 | `* *` | Excluded | coach | record and review personal bests by event | track an athlete's performance progress |
 | US19 | `* *` | [Future] | coach | record and review relevant medical notes | consult recorded considerations when planning training |
 | US20 | `* *` | [Future] | coach | record and review competition eligibility | identify athletes recorded as eligible for an event |
 | US21 | `* *` | [Future] | coach | record and review participation logs | track athletes' involvement in training or competitions |
@@ -480,7 +579,7 @@ without committing it to a release; **Excluded** records an idea outside this pr
 | US31 | `* *` | [Future] | relay coach | assign or replace athletes on specific relay legs | maintain a clear running order and adjust the lineup when availability changes |
 | US32 | `* *` | [Future] | relay coach | designate alternate runners for a relay squad | record replacements before a meet |
 | US34 | `* *` | [Future] | coach | view an athlete's relay-squad and event-group memberships | review the athlete's assignments before making changes |
-| US35 | `* *` | [Future] | coach | correct an inaccurate personal-best or status log entry | keep the athlete's recorded history reliable |
+| US35 | `* *` | [Future] | coach | correct an inaccurate status log entry | keep the athlete's recorded history reliable |
 | US36 | `*` | [Future] | coach | import and export roster records in bulk | transfer my own records without entering each one manually |
 | US37 | `*` | [Future] | coach | store names with characters beyond v1.4's supported set | preserve athletes' preferred name spellings |
 | US38 | `*` | [Future] | coach | store multiple phone numbers and phone extensions | retain alternative ways of contacting an athlete |
@@ -710,7 +809,6 @@ These are product requirements and acceptance targets, not claims about the curr
 | Implemented | A feature available in the current v1.4 code. Release targets and future features are identified separately. |
 | Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone comparisons ignore permitted formatting characters and use the digits. Display formatting may be retained. |
 | Participation log | A future record of an athlete's involvement in training or competition. |
-| Personal best | An athlete's best recorded result for a particular event, intended for a future performance log. |
 | Relay squad / event group | A future grouping of athletes for a relay team or a particular athletics event. |
 | Unrecovered data | Previously saved roster data that TrackFlow could not load, preserved in a separate `.bak` file before starting an empty roster. If preservation fails, startup stops. |
 
@@ -840,15 +938,35 @@ When a step asks you to type a new command below, replace the previous input rat
 
 1. Run `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home` and restart TrackFlow.<br>
    Expected: Avery remains in the roster after the restart.
-1. Temporarily remove write permission from the folder containing the roster data file, then attempt each
-   roster-changing command separately:
-   `add`, `edit`, `remark`, `delete`, and `clear`.<br>
+1. With a disposable roster whose first athlete has `100m` but not `400m`, temporarily remove write permission from
+   the folder containing the roster data file. Then attempt each roster-changing command separately:
+   `add n/Blake Tan a/Open p/81234567 e/blake@example.com addr/Home`, `edit 1 p/999`, `remark 1 r/Test`,
+   `tag 1 t/400m`, `untag 1 t/100m`, `delete 1`, and `clear`.<br>
    Expected: TrackFlow reports that it could not save. The roster, displayed athletes, filter, sort order, and data file
    remain unchanged after every attempt.
 1. While storage is unwritable, run `list`, `find`, `filter`, `sort`, `help`, and `exit` separately.<br>
    Expected: Each command succeeds because it does not need to rewrite roster data.
 1. Restore write permission and run a roster-changing command.<br>
    Expected: The command succeeds, the status indicates that all changes are saved, and the change survives restart.
+
+### Missing or corrupted data file recovery
+
+1. Missing data file
+   1. Delete `data/trackflow.json` in a test directory (or launch TrackFlow in a fresh folder without a `data` directory).
+   2. Launch TrackFlow with `java -jar TrackFlow.jar`.<br>
+      Expected: TrackFlow detects the absent file, logs that it is starting with the sample roster, and opens with sample athletes displayed.
+   3. Run a roster-changing command (e.g., `remark 1 r/Test`).<br>
+      Expected: `data/trackflow.json` is created containing the updated roster data.
+2. Corrupted data file with writable folder
+   1. Open `data/trackflow.json` in a text editor and corrupt its contents (e.g. introduce malformed JSON or remove required fields).
+   2. Launch TrackFlow.<br>
+      Expected: TrackFlow preserves the corrupted file by copying it to `data/trackflow.json.unreadable-<UUID>.bak`, logs the backup path in `trackflow.log.0`, and launches with an empty roster.
+   3. Inspect the `data` folder.<br>
+      Expected: The `.bak` file contains the exact unreadable data. Any new roster modifications write to `data/trackflow.json` without modifying or deleting the backup.
+3. Corrupted data file with read-only folder
+   1. Corrupt `data/trackflow.json` as above, and make the `data` folder read-only so that creating a backup file fails.
+   2. Launch TrackFlow.<br>
+      Expected: TrackFlow logs a severe error and shuts down immediately before any commands can execute, preventing unreadable data from being overwritten.
 
 ### Adding, editing, and remarks
 
@@ -885,6 +1003,32 @@ Use a disposable roster with at least one athlete. Check the roster and saved fi
    Expect the leading slash and network path to remain intact. `remark 1 r/` should still remove the remark.
 1. Try `delete 0`, `delete -1`, `delete +1`, `delete 1.0`, and a delete index containing thousands of digits.
    Expect controlled errors without deletion. `edit 0001 p/999` should update the first displayed athlete.
+
+### Finding athletes
+
+Prerequisite: ensure multiple athletes with varied names, age categories, contact details, remarks, and events are loaded.
+
+1. Broad keyword search
+   1. Run `find Avery`.<br>
+      Expected: All athletes matching `Avery` (case-insensitively) in any searchable field (name, category, phone, email, address, remark, or events) are displayed.
+   2. Run `find ave under`.<br>
+      Expected: Athletes matching either `ave` or `under` in any searchable field are displayed.
+2. Field-specific search
+   1. Run `find n/Avery`.<br>
+      Expected: Only athletes whose name contains `Avery` are displayed; matches occurring only in remarks, addresses, or other fields are excluded.
+   2. Run `find a/Under 14`.<br>
+      Expected: Athletes in the `Under 14` category are displayed.
+   3. Run `find t/100m`.<br>
+      Expected: Athletes tagged with `100m` (or containing `100m`) are displayed.
+   4. Run `find r/injured`.<br>
+      Expected: Athletes with remarks containing `injured` are displayed.
+3. Combined broad and field search
+   1. Run `find Tan t/100m`.<br>
+      Expected: Athletes whose searchable fields match `Tan` OR who are tagged with `100m` are displayed.
+4. Error cases
+   1. Try `find`, `find n/`, and `find x/keyword`.<br>
+      Expected: Each returns an actionable error message indicating invalid command format, empty field prefix, or unknown prefix, without changing the displayed list.
+
 ### Tagging athletes with events
 
 Prerequisite: run `list` so that several athletes are shown. Note the events on the 1st athlete's card.

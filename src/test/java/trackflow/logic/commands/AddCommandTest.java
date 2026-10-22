@@ -55,6 +55,25 @@ public class AddCommandTest {
     }
 
     @Test
+    public void execute_sharedContactWithDifferentNames_addsWithWarning() throws Exception {
+        Person firstMatch = new PersonBuilder().withName("First Match")
+                .withPhone("91234567").withEmail("first@example.com").build();
+        Person secondMatch = new PersonBuilder().withName("Second Match")
+                .withPhone("81112222").withEmail("SECOND@example.com").build();
+        ModelStubAcceptingPersonAdded modelStub = new ModelStubAcceptingPersonAdded();
+        modelStub.addPerson(firstMatch);
+        modelStub.addPerson(secondMatch);
+
+        Person added = new PersonBuilder().withName("New Athlete")
+                .withPhone("91234567").withEmail("second@example.com").build();
+        CommandResult result = new AddCommand(added).execute(modelStub);
+
+        assertEquals(String.format(AddCommand.MESSAGE_SUCCESS, Messages.formatAthlete(added))
+                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, "First Match, Second Match"),
+                result.getFeedbackToUser());
+    }
+
+    @Test
     public void equals() {
         Person alice = new PersonBuilder().withName("Alice").build();
         Person bob = new PersonBuilder().withName("Bob").build();
@@ -188,7 +207,11 @@ public class AddCommandTest {
 
         @Override
         public ReadOnlyRoster getRoster() {
-            return new AthleteRoster();
+            AthleteRoster roster = new AthleteRoster();
+            for (Person person : personsAdded) {
+                roster.addPerson(person);
+            }
+            return roster;
         }
     }
 

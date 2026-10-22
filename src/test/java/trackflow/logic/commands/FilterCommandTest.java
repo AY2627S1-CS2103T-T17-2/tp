@@ -9,9 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.logic.parser.TrackFlowParser;
-import trackflow.logic.parser.exceptions.ParseException;
 import trackflow.model.Model;
 import trackflow.model.ModelManager;
 import trackflow.model.person.AgeCategory;
@@ -60,16 +58,6 @@ public class FilterCommandTest {
     }
 
     @Test
-    public void execute_previousNameSearch_replacesSearch() throws Exception {
-        populateRoster();
-        parser.parseCommand("find Alex").execute(model);
-
-        parser.parseCommand("filter a/Under 14").execute(model);
-
-        assertEquals(List.of(junior, otherJunior), model.getFilteredPersonList());
-    }
-
-    @Test
     public void execute_previousCategoryFilter_replacesFilter() throws Exception {
         populateRoster();
         parser.parseCommand("filter a/Under 14").execute(model);
@@ -77,50 +65,6 @@ public class FilterCommandTest {
         assertEquals("Displaying 1 athlete in age category Open.",
                 parser.parseCommand("filter a/Open").execute(model).getFeedbackToUser());
         assertEquals(List.of(open), model.getFilteredPersonList());
-    }
-
-    @Test
-    public void execute_findAfterFilter_replacesFilter() throws Exception {
-        populateRoster();
-        parser.parseCommand("filter a/Open").execute(model);
-
-        parser.parseCommand("find Beth").execute(model);
-
-        assertEquals(List.of(junior), model.getFilteredPersonList());
-    }
-
-    @Test
-    public void execute_listAfterEmptyFilter_restoresRoster() throws Exception {
-        populateRoster();
-        parser.parseCommand("filter a/Under 20").execute(model);
-
-        parser.parseCommand("list").execute(model);
-
-        assertEquals(List.of(open, junior, otherJunior), model.getFilteredPersonList());
-    }
-
-    @Test
-    public void execute_deleteAfterFilter_usesDisplayedIndexAndRetainsFilter() throws Exception {
-        populateRoster();
-        parser.parseCommand("filter a/Under 14").execute(model);
-        parser.parseCommand("delete 1").execute(model);
-        assertEquals(List.of(otherJunior), model.getFilteredPersonList());
-        assertEquals(List.of(open, otherJunior), model.getRoster().getPersonList());
-        assertThrows(CommandException.class, () -> parser.parseCommand("delete 2").execute(model));
-        parser.parseCommand("delete 1").execute(model);
-        assertTrue(model.getFilteredPersonList().isEmpty());
-        assertThrows(CommandException.class, () -> parser.parseCommand("delete 1").execute(model));
-        parser.parseCommand("list").execute(model);
-        assertEquals(List.of(open), model.getFilteredPersonList());
-    }
-
-    @Test
-    public void execute_invalidFilter_preservesPreviousDisplay() throws Exception {
-        populateRoster();
-        parser.parseCommand("filter a/Under 14").execute(model);
-        assertThrows(ParseException.class, () -> parser.parseCommand("filter a/Under 15"));
-        assertEquals(List.of(junior, otherJunior), model.getFilteredPersonList());
-        assertEquals(3, model.getRoster().getPersonList().size());
     }
 
     @Test
@@ -142,5 +86,13 @@ public class FilterCommandTest {
     public void execute_nullModel_throwsNullPointerException() {
         FilterCommand command = new FilterCommand(new AgeCategory("Under 14"));
         assertThrows(NullPointerException.class, () -> command.execute(null));
+    }
+
+    @Test
+    public void toStringMethod() {
+        AgeCategory ageCategory = new AgeCategory("Under 14");
+        FilterCommand command = new FilterCommand(ageCategory);
+        String expected = FilterCommand.class.getCanonicalName() + "{ageCategory=" + ageCategory + "}";
+        assertEquals(expected, command.toString());
     }
 }

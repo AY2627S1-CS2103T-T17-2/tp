@@ -1,7 +1,6 @@
 package trackflow.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static trackflow.testutil.TypicalPersons.getTypicalRoster;
 
 import java.nio.file.Path;
@@ -62,7 +61,8 @@ public class StorageManagerTest {
 
     @Test
     public void getRosterFilePath() {
-        assertNotNull(storageManager.getRosterFilePath());
+        assertEquals(getTempFilePath("ab"), storageManager.getRosterFilePath());
+        assertEquals(getTempFilePath("prefs"), storageManager.getUserPrefsFilePath());
     }
 
 }

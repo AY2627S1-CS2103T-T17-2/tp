@@ -59,20 +59,20 @@ public class UntagCommandTest {
     @Test
     public void execute_eventNotPresent_failureAndNothingRemoved() {
         Person athlete = model.getFilteredPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
-        UntagCommand command = new UntagCommand(INDEX_SECOND_PERSON, getTagSet("friends", "100m"));
+        UntagCommand command = new UntagCommand(INDEX_SECOND_PERSON, getTagSet("friends", "100m", "200m"));
 
         assertCommandFailure(command, model,
-                String.format(UntagCommand.MESSAGE_EVENT_NOT_FOUND, athlete.getName(), "100m"));
+                String.format(UntagCommand.MESSAGE_EVENT_NOT_FOUND, athlete.getName(), "100m, 200m"));
     }
 
     @Test
     public void execute_filteredList_untagsDisplayedAthlete() {
-        showPersonAtIndex(model, INDEX_FIRST_PERSON);
+        showPersonAtIndex(model, INDEX_SECOND_PERSON);
         Person athlete = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
-        UntagCommand command = new UntagCommand(INDEX_FIRST_PERSON, getTagSet("friends"));
-        Person untaggedAthlete = new PersonBuilder(athlete).withTags().build();
+        UntagCommand command = new UntagCommand(INDEX_FIRST_PERSON, getTagSet("owesMoney"));
+        Person untaggedAthlete = new PersonBuilder(athlete).withTags("friends").build();
 
-        String expectedMessage = String.format(UntagCommand.MESSAGE_SUCCESS, "friends", athlete.getName());
+        String expectedMessage = String.format(UntagCommand.MESSAGE_SUCCESS, "owesMoney", athlete.getName());
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
         expectedModel.setPerson(athlete, untaggedAthlete);
 
@@ -88,17 +88,31 @@ public class UntagCommandTest {
     }
 
     @Test
+    public void execute_invalidIndexFilteredList_failure() {
+        showPersonAtIndex(model, INDEX_FIRST_PERSON);
+        UntagCommand command = new UntagCommand(INDEX_SECOND_PERSON, getTagSet("friends"));
+
+        assertCommandFailure(command, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+    }
+
+    @Test
     public void equals() {
         UntagCommand standardCommand = new UntagCommand(INDEX_FIRST_PERSON, getTagSet("100m"));
 
         // same values -> returns true
         assertTrue(standardCommand.equals(new UntagCommand(INDEX_FIRST_PERSON, getTagSet("100m"))));
 
+        // same events in different case -> returns true
+        assertTrue(standardCommand.equals(new UntagCommand(INDEX_FIRST_PERSON, getTagSet("100M"))));
+
         // same object -> returns true
         assertTrue(standardCommand.equals(standardCommand));
 
         // null -> returns false
         assertFalse(standardCommand.equals(null));
+
+        // tag command with same values -> returns false
+        assertFalse(standardCommand.equals(new TagCommand(INDEX_FIRST_PERSON, getTagSet("100m"))));
 
         // different index -> returns false
         assertFalse(standardCommand.equals(new UntagCommand(INDEX_SECOND_PERSON, getTagSet("100m"))));
