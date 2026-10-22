@@ -1,82 +1,45 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
+skinparam maxMessageSize 180
+skinparam SequenceReferenceBackgroundColor #F8FAFC
+
 actor Coach as coach
 participant ":MainWindow" as ui UI_COLOR
 participant ":LogicManager" as logic LOGIC_COLOR
-participant "command:DeleteCommand" as command LOGIC_COLOR
 participant "live:ModelManager" as live MODEL_COLOR
-participant "staged:ModelManager" as staged MODEL_COLOR
 participant ":StorageManager" as storage STORAGE_COLOR
+
 coach -> ui : submits "delete 1"
 activate ui UI_COLOR
 ui -> logic : execute("delete 1")
 activate logic LOGIC_COLOR
-note over logic, command
-  TrackFlowParser parses the input and creates command.
-  Parsing is expanded in the Logic component trace.
-end note
-logic -> live : getRoster()
+
+ref over logic
+  Parse command and execute delete
+  on a staged model
+end ref
+
+logic -> storage : saveRoster(updatedRoster)
+activate storage STORAGE_COLOR
+storage --> logic
+deactivate storage
+
+logic -> live : setRoster(updatedRoster)
 activate live MODEL_COLOR
-live --> logic : roster
+live --> logic
 deactivate live
-logic -> live : getUserPrefs()
+logic -> live : updateFilteredPersonList(predicate)
 activate live MODEL_COLOR
-live --> logic : prefs
+live --> logic
 deactivate live
-create staged
-logic -> staged : new ModelManager(roster, prefs)
-activate staged MODEL_COLOR
-staged --> logic
-deactivate staged
-note right of staged
-  The current predicate and comparator are copied.
-  Their accessor and update calls are omitted.
-end note
-logic -> command : execute(staged)
-activate command LOGIC_COLOR
-command -> staged : getFilteredPersonList()
-activate staged MODEL_COLOR
-staged --> command : displayedAthletes
-deactivate staged
-command -> staged : deletePerson(athleteToDelete)
-activate staged MODEL_COLOR
-staged --> command
-deactivate staged
-command --> logic : commandResult
-deactivate command
-alt save succeeds
-    logic -> storage : saveRoster(staged.getRoster())
-    activate storage STORAGE_COLOR
-    storage --> logic
-    deactivate storage
-    logic -> live : setRoster(staged.getRoster())
-    activate live MODEL_COLOR
-    live --> logic
-    deactivate live
-    logic -> live : updateFilteredPersonList(staged.getPersonListPredicate())
-    activate live MODEL_COLOR
-    live --> logic
-    deactivate live
-    note right of live: The live sort comparator is retained.
-    logic --> ui : savedResult
-else IOException while saving
-    logic -> storage : saveRoster(staged.getRoster())
-    activate storage STORAGE_COLOR
-    storage --> logic : throws IOException
-    deactivate storage
-    logic --> ui : throws CommandException
-end
+
+logic --> ui : savedResult
 deactivate logic
 deactivate ui
-note over coach, ui
-  MainWindow displays the command result or error.
-  JavaFX observes roster changes after successful publication.
-end note
+
 legend bottom
-  Partial trace: successful parsing and a valid displayed index are assumed.
-  Logging, changesRoster(), list access, result construction, and routine accessors are omitted.
-  On success, withDataSaved() creates savedResult after publication; that call is omitted.
-  Save failure is wrapped in CommandException; the live roster and display stay unchanged.
+  Success path: save the staged change before updating the live model.
+  See the delete-execution and save-failure diagrams for those details.
 endlegend
 @enduml

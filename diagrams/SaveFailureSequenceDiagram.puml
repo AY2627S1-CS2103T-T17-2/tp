@@ -1,0 +1,32 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam maxMessageSize 180
+skinparam SequenceReferenceBackgroundColor #F8FAFC
+
+participant ":MainWindow" as ui UI_COLOR
+participant ":LogicManager" as logic LOGIC_COLOR
+participant ":StorageManager" as storage STORAGE_COLOR
+
+activate ui UI_COLOR
+ui -> logic : execute("delete 1")
+activate logic LOGIC_COLOR
+
+ref over logic
+  Parse command and execute delete
+  on a staged model
+end ref
+
+logic -> storage : saveRoster(updatedRoster)
+activate storage STORAGE_COLOR
+storage --> logic : throws IOException
+deactivate storage
+logic --> ui : throws CommandException
+deactivate logic
+deactivate ui
+
+legend bottom
+  Failure path: MainWindow displays the save error.
+  The live roster, filter, and sort order remain unchanged.
+endlegend
+@enduml

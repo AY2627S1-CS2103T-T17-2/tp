@@ -1,89 +1,33 @@
 @startuml
 !include ../style.puml
 skinparam ArrowFontStyle plain
-skinparam maxMessageSize 260
-skinparam ParticipantPadding 5
+skinparam maxMessageSize 180
+skinparam SequenceReferenceBackgroundColor #F8FAFC
 
 participant ":LogicManager" as logic LOGIC_COLOR
 participant ":TrackFlowParser" as parser LOGIC_COLOR
 participant ":EditCommandParser" as editParser LOGIC_COLOR
-participant "ParserUtil" as util <<class>> LOGIC_COLOR
-participant "ArgumentTokenizer" as tokenizer <<class>> LOGIC_COLOR
-participant "argMultimap:ArgumentMultimap" as arguments LOGIC_COLOR
 participant "command:EditCommand" as command LOGIC_COLOR
 
-activate logic
+activate logic LOGIC_COLOR
 logic -> parser : parseCommand("edit 1 addr/Block A~/~/B")
-activate parser
-note over parser
-  Separate command word and arguments.
-  Dispatch without considering letter case.
-end note
+activate parser LOGIC_COLOR
 create editParser
 parser -> editParser : new EditCommandParser()
-activate editParser
+activate editParser LOGIC_COLOR
 editParser --> parser
 deactivate editParser
+
 parser -> editParser : parse(" 1 addr/Block A~/~/B")
-activate editParser
-
-editParser -> util : verifyNoUnknownPrefixes(args, ...)
-activate util
-util --> editParser
-deactivate util
-
-editParser -> tokenizer : tokenize(args, ...)
-activate tokenizer
-create arguments
-tokenizer -> arguments : new ArgumentMultimap()
-activate arguments
-arguments --> tokenizer
-deactivate arguments
-note over tokenizer, arguments
-  Store preamble "1" and address "Block A/B".
-  A~/~/B is literal text, decoded once after splitting.
-end note
-tokenizer --> editParser : argMultimap
-deactivate tokenizer
-
-editParser -> arguments : getPreamble()
-activate arguments
-arguments --> editParser : "1"
-deactivate arguments
-editParser -> util : parseIndex("1")
-activate util
-util --> editParser : index
-deactivate util
-editParser -> arguments : verifyNoDuplicatePrefixesFor(...)
-activate arguments
-arguments --> editParser
-deactivate arguments
-
-note over editParser
-  Create an EditPersonDescriptor.
-  Absent n/, p/, e/ and a/ checks
-  are omitted.
-end note
-editParser -> arguments : getValue(PREFIX_ADDRESS)
-activate arguments
-arguments --> editParser : Optional.of("Block A/B")
-deactivate arguments
-editParser -> util : parseAddress("Block A/B")
-activate util
-util --> editParser : address
-deactivate util
-note over editParser
-  Set the address in the descriptor.
-  Verify at least one field is edited.
-end note
+activate editParser LOGIC_COLOR
+ref over editParser
+  Validate edit arguments
+  (next diagram)
+end ref
 
 create command
 editParser -> command : new EditCommand(index, descriptor)
-activate command
-note over command
-  The constructor copies
-  the descriptor.
-end note
+activate command LOGIC_COLOR
 command --> editParser
 deactivate command
 editParser --> parser : command
@@ -93,10 +37,7 @@ deactivate parser
 deactivate logic
 
 legend bottom
-  Parsing excerpt of LogicManager.execute; execution continues after this trace.
-  Argument lists are abbreviated with ...; <<class>> participants receive static calls.
-  Unlabelled dashed replies return control without displaying a return value.
-  Syntax and field validation failures throw ParseException before command creation.
-  Execution and persistence happen after this trace, in LogicManager.
+  Successful parsing only; the descriptor contains address "Block A/B".
+  The command has not executed or saved any data yet.
 endlegend
 @enduml
