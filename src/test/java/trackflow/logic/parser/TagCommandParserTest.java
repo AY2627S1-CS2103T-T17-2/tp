@@ -80,6 +80,10 @@ public class TagCommandParserTest {
 
         // too long
         assertParseFailure(parser, "1 t/" + "a".repeat(Tag.MAX_LENGTH + 1), Tag.MESSAGE_CONSTRAINTS);
+
+        // separators that are not a single space or a single hyphen
+        assertParseFailure(parser, "1 t/Long - Jump", Tag.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "1 t/Long--Jump", Tag.MESSAGE_CONSTRAINTS);
     }
 
     @Test

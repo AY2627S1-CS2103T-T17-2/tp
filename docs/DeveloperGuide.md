@@ -390,8 +390,8 @@ than 30 characters, are preserved without truncation and remain removable with `
   Removal uses the same whitespace normalization but also accepts preserved legacy alphanumeric names.
 * `TagCommand` and `UntagCommand` extend `EventTagCommand`, which holds the index and events, looks up the target
   athlete in the displayed list, and replaces that athlete with a copy that has the updated events.
-* New `Tag` names accept letters, digits, single spaces and single hyphens (e.g. `Long Jump`, `110m-Hurdles`), up to 30
-  characters. `Tag.fromStoredName` also accepts the older unlimited alphanumeric format without truncation.
+* New `Tag` names are words of letters or digits separated by exactly one space or one hyphen (e.g. `Long Jump`,
+  `110m-Hurdles`, but not `Long - Jump`), up to 30 characters; `MESSAGE_CONSTRAINTS` states the same rule. `Tag.fromStoredName` also accepts the older unlimited alphanumeric format without truncation.
   `JsonAdaptedTag` uses it when loading, so a valid legacy event does not trigger recovery of the entire roster.
   `Tag#equals` and `Tag#hashCode` ignore case, so normal `Set` operations treat `100m` and `100M` as
   the same event while the first-entered spelling is kept for display.

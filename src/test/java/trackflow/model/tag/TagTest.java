@@ -36,6 +36,10 @@ public class TagTest {
         assertFalse(Tag.isValidTagName("Long  Jump")); // repeated space
         assertFalse(Tag.isValidTagName("-100m")); // leading hyphen
         assertFalse(Tag.isValidTagName("100m-")); // trailing hyphen
+        assertFalse(Tag.isValidTagName("Long - Jump")); // spaces around a hyphen
+        assertFalse(Tag.isValidTagName("Long -Jump")); // space before a hyphen
+        assertFalse(Tag.isValidTagName("Long- Jump")); // space after a hyphen
+        assertFalse(Tag.isValidTagName("Long--Jump")); // repeated hyphen
         assertFalse(Tag.isValidTagName("4x100m/relay")); // slash
         assertFalse(Tag.isValidTagName("100m*")); // other symbol
         assertFalse(Tag.isValidTagName("a".repeat(Tag.MAX_LENGTH + 1))); // just over the length limit
@@ -70,6 +74,13 @@ public class TagTest {
             "A".repeat(31) + " B", "A".repeat(31) + "-B"}) {
             assertThrows(IllegalArgumentException.class, () -> Tag.fromStoredName(name));
         }
+    }
+
+    @Test
+    public void messageConstraints_describesSeparatorRule() {
+        // the message must state the rule that rejects spaced or repeated hyphens
+        assertTrue(Tag.MESSAGE_CONSTRAINTS.contains("single space or a single hyphen"));
+        assertTrue(Tag.MESSAGE_CONSTRAINTS.contains("not Long - Jump"));
     }
 
     @Test
