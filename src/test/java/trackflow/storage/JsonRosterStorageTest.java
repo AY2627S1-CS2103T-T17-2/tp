@@ -1,3 +1,5 @@
+// @@author -
+// Unassigned sections are adapted from SE-EDU AddressBook-Level3.
 package trackflow.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,10 +11,14 @@ import static trackflow.testutil.TypicalPersons.IDA;
 import static trackflow.testutil.TypicalPersons.getTypicalRoster;
 
 import java.io.IOException;
+// @@author qiyuannn
 import java.nio.file.Files;
+// @@author -
 import java.nio.file.Path;
 import java.nio.file.Paths;
+// @@author qiyuannn
 import java.util.List;
+// @@author -
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -57,6 +63,7 @@ public class JsonRosterStorageTest {
         assertThrows(DataLoadingException.class, () -> readRoster("invalidPersonAthleteRoster.json"));
     }
 
+    // @@author qiyuannn
     @Test
     public void readRoster_malformedStructure_throwsDataLoadingException() throws Exception {
         Path filePath = testFolder.resolve("malformed.json");
@@ -72,6 +79,7 @@ public class JsonRosterStorageTest {
         }
     }
 
+    // @@author -
     @Test
     public void readAndSaveAthleteRoster_allInOrder_success() throws Exception {
         Path filePath = testFolder.resolve("TempAthleteRoster.json");
@@ -120,3 +128,4 @@ public class JsonRosterStorageTest {
         assertThrows(NullPointerException.class, () -> saveRoster(new AthleteRoster(), null));
     }
 }
+// @@author

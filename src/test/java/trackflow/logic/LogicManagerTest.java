@@ -30,7 +30,9 @@ import trackflow.model.Model;
 import trackflow.model.ModelManager;
 import trackflow.model.ReadOnlyRoster;
 import trackflow.model.UserPrefs;
+// @@author qiyuannn
 import trackflow.model.person.AgeCategory;
+// @@author
 import trackflow.model.person.Person;
 import trackflow.storage.JsonRosterStorage;
 import trackflow.storage.JsonUserPrefsStorage;
@@ -109,6 +111,7 @@ public class LogicManagerTest {
         assertCommandSuccess("LiSt", ListAthleteCommand.MESSAGE_SUCCESS_SINGLE_ATHLETE, expectedModel);
     }
 
+    // @@author qiyuannn
     @Test
     public void execute_editAthlete_persistsCategoryAndPreservesOtherDetails() throws Exception {
         String command = "add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street";
@@ -123,12 +126,15 @@ public class LogicManagerTest {
         assertEquals(0, athlete.getTags().size());
         assertEquals("92345678", athlete.getPhone().value);
         JsonRosterStorage reloadedStorage =
+                // @@author
                 new JsonRosterStorage(temporaryFolder.resolve("roster.json"));
+        // @@author qiyuannn
         Model reloaded = new ModelManager(reloadedStorage.readRoster().orElseThrow(), new UserPrefs());
         assertEquals(athlete, reloaded.getFilteredPersonList().get(0));
     }
 
     @Test
+    // @@author
     public void execute_sameNameMatchingContact_rejectsDuplicates() throws Exception {
         logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street");
         String[] variants = {"a/Under 16 p/91234567 e/avery.tan@example.com",
@@ -142,6 +148,7 @@ public class LogicManagerTest {
         assertThrows(CommandException.class, "This athlete already exists in the roster: AVERY   TAN.", () ->
             logic.execute("add n/AVERY   TAN a/under 14 p/91234567 e/AVERY.TAN@example.com addr/123 Main Street"));
         assertEquals(1, model.getFilteredPersonList().size());
+        // @@author qiyuannn
     }
 
     @Test
@@ -166,6 +173,7 @@ public class LogicManagerTest {
         logic.execute(validCommand);
         Path savedPath = temporaryFolder.resolve("roster.json");
         String savedData = Files.readString(savedPath);
+        // @@author
         Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
         String[] invalidCommands = {validCommand.replace(" a/Under 14", ""),
             validCommand.replace(" addr/123 Main Street", ""),

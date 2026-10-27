@@ -10,7 +10,9 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import trackflow.commons.core.GuiSettings;
 import trackflow.commons.core.LogsCenter;
+// @@author qiyuannn
 import trackflow.logic.commands.HelpCommand;
+// @@author
 
 /**
  * Controller for a help page.

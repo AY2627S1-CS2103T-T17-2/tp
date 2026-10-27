@@ -26,13 +26,16 @@ public class AddCommandIntegrationTest {
         model = new ModelManager(getTypicalRoster(), new UserPrefs());
     }
 
+    // @@author Austin-Chia
     @Test
     public void execute_sharedContactOutsideFilteredList_succeedsWithWarning() {
         Person existing = model.getRoster().getPersonList().get(0);
         model.updateFilteredPersonList(person -> false);
         Person candidate = new PersonBuilder(existing).withName("Different Athlete")
                 .withEmail("new@example.com").build();
+        // @@author
         Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
+        // @@author Austin-Chia
         expectedModel.updateFilteredPersonList(person -> false);
         expectedModel.addPerson(candidate);
         String expected = String.format(AddCommand.MESSAGE_SUCCESS, Messages.formatAthlete(candidate))
@@ -44,6 +47,7 @@ public class AddCommandIntegrationTest {
     public void execute_sameNameDifferentContacts_succeedsWithoutWarning() {
         Person existing = model.getRoster().getPersonList().get(0);
         Person candidate = new PersonBuilder(existing).withPhone("81112222").withEmail("new@example.com").build();
+        // @@author
         Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
         expectedModel.addPerson(candidate);
         assertCommandSuccess(new AddCommand(candidate), model,

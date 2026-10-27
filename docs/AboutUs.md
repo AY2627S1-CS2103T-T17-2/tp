@@ -27,7 +27,9 @@ You can reach us through our [project repository](https://github.com/AY2627S1-CS
 [[github](http://github.com/qiyuannn)]
 
 * Role: Testing
+<!-- @@author qiyuannn -->
 * Responsibilities: Ensures the testing of the project is done properly and on time.
+<!-- @@author -->
 
 ### Chetan
 
@@ -43,8 +45,10 @@ You can reach us through our [project repository](https://github.com/AY2627S1-CS
 
 [[github](https://github.com/austin-chia)]
 
+<!-- @@author Austin-Chia -->
 * Role: Documentation
 * Responsibilities: Decides how documentation work is divided and ensures that project documents use the correct format and remain consistent.
+<!-- @@author -->
 
 ### Antony Dennis Chakola
 

@@ -1,3 +1,4 @@
+// @@author antonydchakola-hub
 package trackflow.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,6 +29,7 @@ public class AutocompleteEngineTest {
     }
 
     @Test
+    // @@author
     public void getSuggestions_emptyOrWhitespaceOnly_returnsEmptyList() {
         for (String input : List.of("", "   ", "\t")) {
             assertTrue(autocompleteEngine.getSuggestions(input).isEmpty());

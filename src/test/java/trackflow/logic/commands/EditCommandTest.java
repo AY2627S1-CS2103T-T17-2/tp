@@ -25,8 +25,10 @@ import trackflow.model.AthleteRoster;
 import trackflow.model.Model;
 import trackflow.model.ModelManager;
 import trackflow.model.UserPrefs;
+// @@author qiyuannn
 import trackflow.model.person.AgeCategory;
 import trackflow.model.person.AgeCategoryPredicate;
+// @@author
 import trackflow.model.person.Person;
 import trackflow.testutil.EditPersonDescriptorBuilder;
 import trackflow.testutil.PersonBuilder;
@@ -38,6 +40,7 @@ public class EditCommandTest {
 
     private Model model = new ModelManager(getTypicalRoster(), new UserPrefs());
 
+    // @@author Austin-Chia
     @Test
     public void execute_sharedContactWithDifferentName_successWithWarning() {
         Person original = new PersonBuilder().withName("Avery Tan").build();
@@ -57,6 +60,7 @@ public class EditCommandTest {
         assertCommandSuccess(command, model, expected, expectedModel);
     }
 
+    // @@author
     @Test
     public void execute_allFieldsSpecifiedUnfilteredList_success() {
         Person editedPerson = new PersonBuilder(model.getFilteredPersonList().get(0))

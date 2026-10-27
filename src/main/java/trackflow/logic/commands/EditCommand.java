@@ -2,7 +2,9 @@ package trackflow.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 import static trackflow.logic.parser.CliSyntax.PREFIX_ADDRESS;
+// @@author qiyuannn
 import static trackflow.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
+// @@author
 import static trackflow.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static trackflow.logic.parser.CliSyntax.PREFIX_NAME;
 import static trackflow.logic.parser.CliSyntax.PREFIX_PHONE;
@@ -22,7 +24,9 @@ import trackflow.logic.Messages;
 import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.model.Model;
 import trackflow.model.person.Address;
+// @@author qiyuannn
 import trackflow.model.person.AgeCategory;
+// @@author
 import trackflow.model.person.Email;
 import trackflow.model.person.Name;
 import trackflow.model.person.Person;
@@ -89,9 +93,11 @@ public class EditCommand extends Command {
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
+        // @@author Austin-Chia
         List<Person> otherPersons = model.getRoster().getPersonList().stream()
                 .filter(person -> person != personToEdit).toList();
         if (otherPersons.stream().anyMatch(editedPerson::isSamePerson)) {
+            // @@author
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
 

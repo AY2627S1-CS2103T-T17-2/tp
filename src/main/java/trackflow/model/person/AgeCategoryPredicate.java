@@ -1,3 +1,4 @@
+// @@author Austin-Chia
 package trackflow.model.person;
 
 import static java.util.Objects.requireNonNull;
@@ -37,3 +38,4 @@ public class AgeCategoryPredicate implements Predicate<Person> {
         return new ToStringBuilder(this).add("ageCategory", ageCategory).toString();
     }
 }
+// @@author

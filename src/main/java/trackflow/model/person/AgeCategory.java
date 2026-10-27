@@ -1,3 +1,4 @@
+// @@author qiyuannn
 package trackflow.model.person;
 
 import static java.util.Objects.requireNonNull;
@@ -15,6 +16,7 @@ public final class AgeCategory {
 
     public final String value;
 
+    // @@author
     /**
      * Constructs a supported category in its canonical display form, ignoring case and normalizing whitespace.
      *

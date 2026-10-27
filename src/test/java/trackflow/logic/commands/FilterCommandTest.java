@@ -1,3 +1,4 @@
+// @@author Austin-Chia
 package trackflow.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,6 +88,7 @@ public class FilterCommandTest {
         FilterCommand command = new FilterCommand(new AgeCategory("Under 14"));
         assertThrows(NullPointerException.class, () -> command.execute(null));
     }
+    // @@author
 
     @Test
     public void toStringMethod() {

@@ -1,3 +1,5 @@
+// @@author -
+// Unassigned sections are adapted from SE-EDU AddressBook-Level3.
 package trackflow.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -5,16 +7,21 @@ import static trackflow.testutil.Assert.assertThrows;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+// @@author qiyuannn
 import java.util.Collections;
+// @@author Austin-Chia
 import java.util.List;
+// @@author -
 
 import org.junit.jupiter.api.Test;
 
 import trackflow.commons.exceptions.IllegalValueException;
 import trackflow.commons.util.JsonUtil;
 import trackflow.model.AthleteRoster;
+// @@author Austin-Chia
 import trackflow.model.person.Person;
 import trackflow.testutil.PersonBuilder;
+// @@author -
 import trackflow.testutil.TypicalPersons;
 
 public class JsonSerializableRosterTest {
@@ -24,6 +31,7 @@ public class JsonSerializableRosterTest {
     private static final Path INVALID_PERSON_FILE = TEST_DATA_FOLDER.resolve("invalidPersonAthleteRoster.json");
     private static final Path DUPLICATE_PERSON_FILE = TEST_DATA_FOLDER.resolve("duplicatePersonAthleteRoster.json");
 
+    // @@author Austin-Chia
     @Test
     public void toModelType_sameNameSharedContact_throwsIllegalValueException() {
         Person original = new PersonBuilder().build();
@@ -35,6 +43,7 @@ public class JsonSerializableRosterTest {
                 saved::toModelType);
     }
 
+    // @@author -
     @Test
     public void toModelType_typicalPersonsFile_success() throws Exception {
         JsonSerializableRoster dataFromFile = JsonUtil.readJsonFile(TYPICAL_PERSONS_FILE,
@@ -59,6 +68,7 @@ public class JsonSerializableRosterTest {
                 dataFromFile::toModelType);
     }
 
+    // @@author qiyuannn
     @Test
     public void toModelType_nullPersonsList_throwsIllegalValueException() {
         JsonSerializableRoster roster = new JsonSerializableRoster((List<JsonAdaptedPerson>) null);
@@ -71,4 +81,6 @@ public class JsonSerializableRosterTest {
         assertThrows(IllegalValueException.class, "Athlete list contains a null athlete!", roster::toModelType);
     }
 
+    // @@author -
 }
+// @@author

@@ -1,3 +1,5 @@
+// @@author -
+// Unassigned sections are adapted from SE-EDU AddressBook-Level3.
 package trackflow.storage;
 
 import static java.util.Objects.requireNonNull;
@@ -22,10 +24,12 @@ public class JsonRosterStorage {
 
     private Path filePath;
 
+    // @@author chetangent
     /**
      * Creates storage that reads and writes roster data at {@code filePath}.
      * The file is not read or created until a read or save operation is requested.
      */
+    // @@author -
     public JsonRosterStorage(Path filePath) {
         this.filePath = filePath;
     }
@@ -34,16 +38,19 @@ public class JsonRosterStorage {
         return filePath;
     }
 
+    // @@author chetangent
     /**
      * Returns validated roster data from the configured file without changing the file.
      * An absent file returns {@code Optional.empty()}; an existing empty roster returns a present roster.
      *
      * @throws DataLoadingException If reading, JSON conversion, field validation, or duplicate checks fail.
      */
+    // @@author -
     public Optional<ReadOnlyRoster> readRoster() throws DataLoadingException {
         return readRoster(filePath);
     }
 
+    // @@author chetangent
     /**
      * Returns validated roster data from {@code filePath}, following the same rules as {@link #readRoster()}.
      *
@@ -51,6 +58,7 @@ public class JsonRosterStorage {
      * @return The loaded roster, or an empty optional if the file is absent.
      * @throws DataLoadingException If reading, JSON conversion, field validation, or duplicate checks fail.
      */
+    // @@author -
     public Optional<ReadOnlyRoster> readRoster(Path filePath) throws DataLoadingException {
         requireNonNull(filePath);
 
@@ -68,16 +76,19 @@ public class JsonRosterStorage {
         }
     }
 
+    // @@author chetangent
     /**
      * Saves the given {@link ReadOnlyRoster} to the storage.
      *
      * @param roster Roster to save; must not be null.
      * @throws IOException If there is a problem writing or replacing the file.
      */
+    // @@author -
     public void saveRoster(ReadOnlyRoster roster) throws IOException {
         saveRoster(roster, filePath);
     }
 
+    // @@author chetangent
     /**
      * Saves the roster as JSON at {@code filePath}, creating parent directories as needed.
      * Writes to a temporary sibling before replacing the destination; replacement is atomic when supported.
@@ -86,6 +97,7 @@ public class JsonRosterStorage {
      * @param filePath Destination of the data; must not be null.
      * @throws IOException If there is a problem writing or replacing the file.
      */
+    // @@author -
     public void saveRoster(ReadOnlyRoster roster, Path filePath) throws IOException {
         requireNonNull(roster);
         requireNonNull(filePath);
@@ -94,3 +106,4 @@ public class JsonRosterStorage {
     }
 
 }
+// @@author

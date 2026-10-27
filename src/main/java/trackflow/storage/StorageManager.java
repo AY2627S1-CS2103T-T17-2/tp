@@ -1,3 +1,5 @@
+// @@author -
+// Unassigned sections are adapted from SE-EDU AddressBook-Level3.
 package trackflow.storage;
 
 import java.io.IOException;
@@ -66,3 +68,4 @@ public class StorageManager implements Storage {
     }
 
 }
+// @@author
