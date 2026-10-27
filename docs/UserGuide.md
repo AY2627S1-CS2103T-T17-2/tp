@@ -286,9 +286,10 @@ Format: `untag INDEX t/EVENT [t/EVENT]...`
 * `untag` removes the given events from the athlete at `INDEX`.
 * `INDEX` refers to the index number shown in the displayed athlete list and must be a positive integer.
 * At least one `t/EVENT` is required. Give `t/` once per event to add or remove several events at once.
-* An event can contain letters, digits, spaces and hyphens, must start and end with a letter or digit, and can be
-  up to 30 characters long, e.g. `100m`, `4x100m`, `Long Jump`, `110m-Hurdles`. Extra spaces inside an event are
-  reduced to one.
+* An event is made of words of letters or digits, separated by a single space or a single hyphen, and can be up to
+  30 characters long, e.g. `100m`, `4x100m`, `Long Jump`, `110m-Hurdles`. Extra spaces between words are reduced to
+  one, but a hyphen cannot have spaces around it or be repeated: use `Long-Jump` or `Long Jump`, not `Long - Jump`
+  or `Long--Jump`.
 * Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalisation it was first added with.
 * Older rosters may contain alphanumeric tags longer than 30 characters. TrackFlow preserves these exactly when
   loading and saving. They remain searchable and can be removed with `untag INDEX t/EXACT_NAME`, ignoring case.
