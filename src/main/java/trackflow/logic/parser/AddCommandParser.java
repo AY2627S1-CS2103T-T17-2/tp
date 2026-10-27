@@ -1,32 +1,32 @@
+// @@author qiyuannn
 package trackflow.logic.parser;
+// @@author
 
+// @@author qiyuannn
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static trackflow.logic.parser.CliSyntax.PREFIX_ADDRESS;
-// @@author qiyuannn
 import static trackflow.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
-// @@author
 import static trackflow.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static trackflow.logic.parser.CliSyntax.PREFIX_NAME;
 import static trackflow.logic.parser.CliSyntax.PREFIX_PHONE;
-// @@author qiyuannn
 import static trackflow.logic.parser.CliSyntax.PREFIX_REMARK;
-// @@author
 import static trackflow.logic.parser.CliSyntax.PREFIX_TAG;
+// @@author
 
 import java.util.Set;
 import java.util.stream.Stream;
 
+// @@author qiyuannn
 import trackflow.logic.commands.AddCommand;
 import trackflow.logic.parser.exceptions.ParseException;
 import trackflow.model.person.Address;
-// @@author qiyuannn
 import trackflow.model.person.AgeCategory;
-// @@author
 import trackflow.model.person.Email;
 import trackflow.model.person.Name;
 import trackflow.model.person.Person;
 import trackflow.model.person.Phone;
 import trackflow.model.person.Remark;
+// @@author
 
 /**
  * Parses input arguments and creates a new AddCommand object.

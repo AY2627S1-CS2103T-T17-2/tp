@@ -1,23 +1,32 @@
+// @@author qiyuannn
 package trackflow.logic.commands;
+// @@author
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+// @@author qiyuannn
 import static trackflow.logic.commands.CommandTestUtil.DESC_AMY;
 import static trackflow.logic.commands.CommandTestUtil.DESC_BOB;
+// @@author
 import static trackflow.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
+// @@author qiyuannn
 import static trackflow.logic.commands.CommandTestUtil.VALID_NAME_BOB;
 import static trackflow.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
+// @@author
 import static trackflow.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
+// @@author qiyuannn
 import static trackflow.logic.commands.CommandTestUtil.assertCommandFailure;
 import static trackflow.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static trackflow.logic.commands.CommandTestUtil.showPersonAtIndex;
 import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static trackflow.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static trackflow.testutil.TypicalPersons.getTypicalRoster;
+// @@author
 
 import org.junit.jupiter.api.Test;
 
+// @@author qiyuannn
 import trackflow.commons.core.index.Index;
 import trackflow.logic.Messages;
 import trackflow.logic.commands.EditCommand.EditPersonDescriptor;
@@ -25,20 +34,21 @@ import trackflow.model.AthleteRoster;
 import trackflow.model.Model;
 import trackflow.model.ModelManager;
 import trackflow.model.UserPrefs;
-// @@author qiyuannn
 import trackflow.model.person.AgeCategory;
 import trackflow.model.person.AgeCategoryPredicate;
-// @@author
 import trackflow.model.person.Person;
 import trackflow.testutil.EditPersonDescriptorBuilder;
 import trackflow.testutil.PersonBuilder;
+// @@author
 
 /**
  * Contains integration tests (interaction with the Model) and unit tests for EditCommand.
  */
 public class EditCommandTest {
 
+    // @@author qiyuannn
     private Model model = new ModelManager(getTypicalRoster(), new UserPrefs());
+    // @@author
 
     // @@author Austin-Chia
     @Test
@@ -73,7 +83,9 @@ public class EditCommandTest {
         String expectedMessage = String.format(
                 EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson));
 
+        // @@author qiyuannn
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
+        // @@author
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
 
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
@@ -94,7 +106,9 @@ public class EditCommandTest {
         String expectedMessage = String.format(
                 EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson));
 
+        // @@author qiyuannn
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
+        // @@author
         expectedModel.setPerson(lastPerson, editedPerson);
 
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
@@ -108,7 +122,9 @@ public class EditCommandTest {
         String expectedMessage = String.format(
                 EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson));
 
+        // @@author qiyuannn
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
+        // @@author
 
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
     }
@@ -125,7 +141,9 @@ public class EditCommandTest {
         String expectedMessage = String.format(
                 EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson));
 
+        // @@author qiyuannn
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
+        // @@author
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
 
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
@@ -145,7 +163,9 @@ public class EditCommandTest {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
 
         // edit person in filtered list into a duplicate in athlete roster
+        // @@author qiyuannn
         Person personInList = model.getRoster().getPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
+        // @@author
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON,
                 new EditPersonDescriptorBuilder(personInList).build());
 
@@ -170,7 +190,9 @@ public class EditCommandTest {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
         Index outOfBoundIndex = INDEX_SECOND_PERSON;
         // ensures that outOfBoundIndex is still in bounds of athlete roster list
+        // @@author qiyuannn
         assertTrue(outOfBoundIndex.getZeroBased() < model.getRoster().getPersonList().size());
+        // @@author
 
         EditCommand editCommand = new EditCommand(outOfBoundIndex,
                 new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).build());

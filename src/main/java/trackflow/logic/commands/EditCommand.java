@@ -1,14 +1,16 @@
+// @@author qiyuannn
 package trackflow.logic.commands;
+// @@author
 
 import static java.util.Objects.requireNonNull;
-import static trackflow.logic.parser.CliSyntax.PREFIX_ADDRESS;
 // @@author qiyuannn
+import static trackflow.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static trackflow.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
-// @@author
 import static trackflow.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static trackflow.logic.parser.CliSyntax.PREFIX_NAME;
 import static trackflow.logic.parser.CliSyntax.PREFIX_PHONE;
 import static trackflow.model.Model.PREDICATE_SHOW_ALL_PERSONS;
+// @@author
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -17,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+// @@author qiyuannn
 import trackflow.commons.core.index.Index;
 import trackflow.commons.util.CollectionUtil;
 import trackflow.commons.util.ToStringBuilder;
@@ -24,14 +27,13 @@ import trackflow.logic.Messages;
 import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.model.Model;
 import trackflow.model.person.Address;
-// @@author qiyuannn
 import trackflow.model.person.AgeCategory;
-// @@author
 import trackflow.model.person.Email;
 import trackflow.model.person.Name;
 import trackflow.model.person.Person;
 import trackflow.model.person.Phone;
 import trackflow.model.tag.Tag;
+// @@author
 
 /**
  * Edits the details of an existing athlete in the roster.

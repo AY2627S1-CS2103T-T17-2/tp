@@ -1,8 +1,11 @@
+// @@author qiyuannn
 package trackflow.model.person;
+// @@author
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+// @@author qiyuannn
 import static trackflow.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
 import static trackflow.logic.commands.CommandTestUtil.VALID_EMAIL_BOB;
 import static trackflow.logic.commands.CommandTestUtil.VALID_NAME_BOB;
@@ -11,10 +14,13 @@ import static trackflow.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalPersons.ALICE;
 import static trackflow.testutil.TypicalPersons.BOB;
+// @@author
 
 import org.junit.jupiter.api.Test;
 
+// @@author qiyuannn
 import trackflow.testutil.PersonBuilder;
+// @@author
 
 public class PersonTest {
 

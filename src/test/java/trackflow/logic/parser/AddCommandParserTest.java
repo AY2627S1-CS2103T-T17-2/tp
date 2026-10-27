@@ -1,22 +1,26 @@
+// @@author qiyuannn
 package trackflow.logic.parser;
+// @@author
 
+// @@author qiyuannn
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static trackflow.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static trackflow.logic.parser.CommandParserTestUtil.assertParseSuccess;
+// @@author
 
 import org.junit.jupiter.api.Test;
 
+// @@author qiyuannn
 import trackflow.logic.Messages;
 import trackflow.logic.commands.AddCommand;
 import trackflow.model.person.Address;
-// @@author qiyuannn
 import trackflow.model.person.AgeCategory;
-// @@author
 import trackflow.model.person.Email;
 import trackflow.model.person.Name;
 import trackflow.model.person.Person;
 import trackflow.model.person.Phone;
 import trackflow.testutil.PersonBuilder;
+// @@author
 
 public class AddCommandParserTest {
     private final AddCommandParser parser = new AddCommandParser();

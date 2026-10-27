@@ -1,7 +1,10 @@
+// @@author qiyuannn
 package trackflow.logic;
+// @@author
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+// @@author qiyuannn
 import static trackflow.logic.Messages.MESSAGE_EMPTY_COMMAND;
 import static trackflow.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static trackflow.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
@@ -9,6 +12,7 @@ import static trackflow.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static trackflow.logic.commands.CommandTestUtil.NAME_DESC_AMY;
 import static trackflow.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
 import static trackflow.testutil.Assert.assertThrows;
+// @@author
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -21,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import trackflow.commons.core.GuiSettings;
+// @@author qiyuannn
 import trackflow.logic.commands.AddCommand;
 import trackflow.logic.commands.CommandResult;
 import trackflow.logic.commands.ListAthleteCommand;
@@ -30,13 +35,12 @@ import trackflow.model.Model;
 import trackflow.model.ModelManager;
 import trackflow.model.ReadOnlyRoster;
 import trackflow.model.UserPrefs;
-// @@author qiyuannn
 import trackflow.model.person.AgeCategory;
-// @@author
 import trackflow.model.person.Person;
 import trackflow.storage.JsonRosterStorage;
 import trackflow.storage.JsonUserPrefsStorage;
 import trackflow.storage.StorageManager;
+// @@author
 
 /**
  * Exercises command execution across model and storage boundaries, including persistence and failed-save isolation.
@@ -54,10 +58,14 @@ public class LogicManagerTest {
 
     @BeforeEach
     public void setUp() {
+        // @@author qiyuannn
         JsonRosterStorage rosterStorage =
                 new JsonRosterStorage(temporaryFolder.resolve("roster.json"));
+        // @@author
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
+        // @@author qiyuannn
         StorageManager storage = new StorageManager(rosterStorage, userPrefsStorage);
+        // @@author
         logic = new LogicManager(model, storage);
     }
 
@@ -111,7 +119,9 @@ public class LogicManagerTest {
     @Test
     public void execute_mixedCaseListWithAthlete_returnsAthleteCount() throws Exception {
         logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com addr/123 Main Street");
+        // @@author qiyuannn
         Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
+        // @@author
         assertCommandSuccess("LiSt", ListAthleteCommand.MESSAGE_SUCCESS_SINGLE_ATHLETE, expectedModel);
     }
 
@@ -130,9 +140,7 @@ public class LogicManagerTest {
         assertEquals(0, athlete.getTags().size());
         assertEquals("92345678", athlete.getPhone().value);
         JsonRosterStorage reloadedStorage =
-                // @@author
                 new JsonRosterStorage(temporaryFolder.resolve("roster.json"));
-        // @@author qiyuannn
         Model reloaded = new ModelManager(reloadedStorage.readRoster().orElseThrow(), new UserPrefs());
         assertEquals(athlete, reloaded.getFilteredPersonList().get(0));
     }
@@ -177,8 +185,8 @@ public class LogicManagerTest {
         logic.execute(validCommand);
         Path savedPath = temporaryFolder.resolve("roster.json");
         String savedData = Files.readString(savedPath);
-        // @@author
         Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
+        // @@author
         String[] invalidCommands = {validCommand.replace(" a/Under 14", ""),
             validCommand.replace(" addr/123 Main Street", ""),
             validCommand.replace("addr/123 Main Street", "addr/"),
@@ -202,12 +210,16 @@ public class LogicManagerTest {
         assertEquals("Sorted the displayed athlete list by name in ascending order.",
                 logic.execute("sort name").getFeedbackToUser());
         assertEquals(List.of("Amy Lim", "Zoe Tan"), getDisplayedNames(model));
+        // @@author qiyuannn
         assertEquals(List.of("Zoe Tan", "Amy Lim"), getStoredNames(model.getRoster()));
+        // @@author
 
+        // @@author qiyuannn
         JsonRosterStorage storage =
                 new JsonRosterStorage(temporaryFolder.resolve("roster.json"));
         ReadOnlyRoster reloadedRoster = storage.readRoster().orElseThrow();
         assertEquals(List.of("Zoe Tan", "Amy Lim"), getStoredNames(reloadedRoster));
+        // @@author
     }
 
     @Test
@@ -348,7 +360,9 @@ public class LogicManagerTest {
      */
     private void assertCommandFailure(String inputCommand, Class<? extends Throwable> expectedException,
             String expectedMessage) {
+        // @@author qiyuannn
         Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
+        // @@author
         assertCommandFailure(inputCommand, expectedException, expectedMessage, expectedModel);
     }
 
@@ -374,21 +388,29 @@ public class LogicManagerTest {
     private void assertCommandFailureForExceptionFromStorage(IOException e, String expectedMessage) {
         Path prefPath = temporaryFolder.resolve("ExceptionUserPrefs.json");
 
+        // @@author qiyuannn
         // Inject LogicManager with a JsonRosterStorage that throws the IOException e when saving
         JsonRosterStorage rosterStorage = new JsonRosterStorage(prefPath) {
+            // @@author
             @Override
+            // @@author qiyuannn
             public void saveRoster(ReadOnlyRoster roster) throws IOException {
+                // @@author
                 throw e;
             }
         };
 
         JsonUserPrefsStorage userPrefsStorage =
                 new JsonUserPrefsStorage(temporaryFolder.resolve("ExceptionUserPrefs.json"));
+        // @@author qiyuannn
         StorageManager storage = new StorageManager(rosterStorage, userPrefsStorage);
+        // @@author
 
         logic = new LogicManager(model, storage);
 
+        // @@author qiyuannn
         // Triggers the saveRoster method by executing an add command
+        // @@author
         String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
                 + EMAIL_DESC_AMY + " a/Open addr/123 Main Street";
         ModelManager expectedModel = new ModelManager();
@@ -401,8 +423,10 @@ public class LogicManagerTest {
                 .toList();
     }
 
+    // @@author qiyuannn
     private static List<String> getStoredNames(ReadOnlyRoster roster) {
         return roster.getPersonList().stream()
+                // @@author
                 .map(person -> person.getName().fullName)
                 .toList();
     }

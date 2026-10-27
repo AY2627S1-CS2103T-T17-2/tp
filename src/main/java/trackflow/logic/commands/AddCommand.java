@@ -1,19 +1,23 @@
+// @@author qiyuannn
 package trackflow.logic.commands;
+// @@author
 
 import static java.util.Objects.requireNonNull;
-import static trackflow.logic.parser.CliSyntax.PREFIX_ADDRESS;
 // @@author qiyuannn
+import static trackflow.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static trackflow.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
-// @@author
 import static trackflow.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static trackflow.logic.parser.CliSyntax.PREFIX_NAME;
 import static trackflow.logic.parser.CliSyntax.PREFIX_PHONE;
+// @@author
 
+// @@author qiyuannn
 import trackflow.commons.util.ToStringBuilder;
 import trackflow.logic.Messages;
 import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.model.Model;
 import trackflow.model.person.Person;
+// @@author
 
 /**
  * Adds an athlete to the roster.
