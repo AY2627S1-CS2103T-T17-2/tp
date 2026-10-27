@@ -1,7 +1,11 @@
+// @@author Austin-Chia
 package trackflow.model.person;
+// @@author
 
 import static java.util.Objects.requireNonNull;
+// @@author Austin-Chia
 import static trackflow.commons.util.CollectionUtil.requireAllNonNull;
+// @@author
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,8 +16,10 @@ import java.util.Map;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+// @@author Austin-Chia
 import trackflow.model.person.exceptions.DuplicatePersonException;
 import trackflow.model.person.exceptions.PersonNotFoundException;
+// @@author
 
 /**
  * A list of persons that enforces uniqueness between its elements and does not allow nulls.
