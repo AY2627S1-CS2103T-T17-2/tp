@@ -318,16 +318,38 @@ an arbitrary-precision number. It continues validating the remaining characters 
 oversized number followed by text is still rejected. Leading zeroes are accepted; all-zero and malformed indexes are
 rejected. Oversized positive numbers reach the command's normal invalid-displayed-index check.
 
-### Broad and field-scoped finding
+<span id="broad-and-field-scoped-finding"></span>
+<span id="flexible-athlete-search"></span>
 
-`FindCommandParser` supports unprefixed broad keywords and the field prefixes `n/`, `a/`, `p/`, `e/`, `addr/`,
-`r/`, and `t/` (event). It rejects empty or repeated supported field parameters and unsupported reserved prefixes. `PersonContainsKeywordsPredicate` stores broad keywords
-separately from field-specific criteria. Broad keywords search the combined athlete text, while a prefixed value is
-tested as a single phrase only against its selected field. Broad keywords must precede the first field prefix. Matching is case-insensitive and partial. Broad keywords are combined with OR, and different field prefixes are combined with AND (an athlete must satisfy every field criterion). When both broad keywords and field criteria are given, an athlete matches if any broad keyword matches or every field criterion matches.
-This allows `find n/und` to match a name such as `Underwood` without matching athletes merely because their age
-category starts with `Under`.
-Events are tested one at a time rather than as one combined string, so a keyword cannot match across the end of one
-event and the start of the next.
+### Finding athletes
+
+`TrackFlowParser` dispatches `find` to `FindCommandParser`. The parser recognizes broad preamble keywords and
+`n/`, `a/`, `p/`, `e/`, `addr/`, `r/`, and `t/` criteria. Broad keywords must precede the first field prefix.
+Unknown reserved prefixes, duplicate field prefixes, empty field values, and an empty search are rejected before
+the model is changed. `ArgumentTokenizer` decodes escaped prefix-like text once, before predicate construction.
+
+`PersonContainsKeywordsPredicate` combines the two groups as follows:
+
+* **Broad keywords:** any keyword may occur in any searchable field (OR).
+* **Scoped fields:** every supplied field must match its own value (AND). Each prefixed value is one phrase;
+  `find n/Avery Tan` does not behave like the two broad keywords in `find Avery Tan`.
+* **Both groups present:** an athlete matches a broad keyword OR satisfies all supplied field criteria.
+* **No criteria:** matches no athletes. The nonempty-field guard prevents an empty `allMatch` from making a broad
+  search match the entire roster.
+
+Matching is case-insensitive substring matching. Thus `find n/avery a/Under 14` requires both the name and category,
+while `find Blake n/avery a/Under 14` additionally includes athletes matching the broad keyword `Blake`.
+`find t/100m` also matches an event such as `4x100m`; exact-event matching is not implemented. Event names are joined
+with line breaks, which keeps ordinary single-line keywords from spanning two names.
+
+`FindCommand` replaces the active predicate through `Model.updateFilteredPersonList`. It searches the full roster,
+preserves the active sort, and starts displayed indexes at 1. Consecutive `find` commands do not narrow earlier
+results: put all required fields in one command. `find` and `filter` replace one another; `list` removes the filter.
+None of these view changes saves the roster.
+
+**Design choices:** broad OR matching helps when the relevant field is unknown; AND between named fields allows
+precise searches without adding another command. Substring matching supports partial names, contacts and events,
+with the tradeoff that short terms can produce extra matches. `filter` remains the exact age-category operation.
 
 ### Command autocomplete
 
@@ -459,50 +481,12 @@ comparator through `Model.updateSortedPersonList`, changing only the displayed v
 `roster` order. Consequently, sorting composes with `find`, `filter`, and `list`, and indexed commands continue to
 resolve athletes against exactly what the user sees. The comparator is session-only and is not persisted.
 
-Text fields are compared without considering letter case. Phone numbers have non-digit characters removed before
-conversion to arbitrary-precision numeric values, matching the existing digits-based contact comparison without
-altering their stored text. This avoids formatting errors, overflow, and lexicographic ordering errors.
+Text fields are compared without considering letter case. Phone sorting removes all non-digit characters before
+converting the stored text to an arbitrary-precision numeric value. Stored text is unchanged and large values do
+not overflow. The current key includes digits inside phone notes, matching the current contact comparison; this
+known limitation is described in the UG and remains a separate phone-normalization fix.
 Age categories use the competition order
 `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
-
-### Flexible athlete search
-
-`TrackFlowParser` dispatches `find` to `FindCommandParser`. The parser recognizes broad preamble keywords and
-field-specific prefixes: `n/` name, `a/` age category, `p/` phone, `e/` email, `addr/` address, `r/` remark, and
-`t/` event.
-
-#### Implementation details
-
-* `ParserUtil.verifyNoUnknownPrefixes` checks that no unrecognized parameter prefix forms are present.
-* `ArgumentTokenizer.tokenize` splits input into the preamble and prefixed arguments.
-* `arguments.verifyNoDuplicatePrefixesFor` enforces that each supported field prefix appears at most once.
-* Empty prefix values (e.g. `find n/`) are rejected with an actionable error.
-* `FindCommandParser` constructs a `PersonContainsKeywordsPredicate` containing:
-  * A list of broad keywords parsed from the whitespace-separated preamble.
-  * A map of `SearchField` to field-specific keyword strings.
-* When evaluated against an athlete, `PersonContainsKeywordsPredicate` combines broad matches and field-specific
-  matches using logical `OR`. An athlete matches if at least one broad keyword matches any searchable field
-  (name, age category, phone, email, address, remark, or events) or if any field-specific keyword matches its designated field.
-* Matching is case-insensitive and checks for substring presence, so partial words and numbers match (e.g., `find ave` matches `Avery Tan`).
-* `FindCommand` updates the display by calling `Model#updateFilteredPersonList(predicate)`. Like `filter`, it operates
-  as an unpersisted view filter over the full roster, preserves active sorting, and starts displayed indexes from 1.
-
-#### Design considerations
-
-* **Aspect: Search criteria combination**
-  * **Alternative 1 (current choice):** Disjunctive matching (`OR`). An athlete matching any broad keyword or field prefix is included.
-    * Pros: Maximizes recall when searching with multiple hints or finding athletes matching alternative criteria.
-    * Cons: Users wanting strict conjunction (`AND`) must search consecutively or narrow results with specific field prefixes.
-  * **Alternative 2:** Conjunctive matching (`AND`).
-    * Pros: Allows narrowing down large rosters with multiple required criteria.
-    * Cons: Less forgiving for broad exploratory searches where the exact field or term is uncertain.
-* **Aspect: Matching granularity**
-  * **Alternative 1 (current choice):** Substring matching.
-    * Pros: Allows partial searches (e.g. partial phone numbers, names, or events like `hurdles`).
-    * Cons: Can match unintended substrings if keywords are very short.
-  * **Alternative 2:** Full-word matching.
-    * Pros: Prevents accidental substring matches.
-    * Cons: Requires remembering exact full words or names.
 
 ### Future features [Future]
 
@@ -574,8 +558,8 @@ overwritten.
 ### User stories
 
 Priorities: `* * *` = high, `* *` = medium, `*` = low. **Implemented** describes v1.4 behavior;
-**Release target** identifies a requirement still awaiting integration; **[Future]** records unimplemented scope
-without committing it to a release; **Excluded** records an idea outside this product. Priority does not imply status.
+**[Future]** records unimplemented scope without committing it to a release; **Excluded** records an idea outside
+this product. Priority does not imply implementation status.
 
 | ID | Priority | Status | As a ... | I want to ... | So that I can ... |
 |----|----------|-------|----------|---------------|------------------|
@@ -624,7 +608,7 @@ Email reachability checking (US39) is a future enhancement beyond structural ema
 ### Use cases
 
 For every use case below, the **system** is TrackFlow and the **primary actor** is the coach. **MSS** means main
-success scenario. UC01–UC06 describe implemented workflows. Future requirements remain in the user stories.
+success scenario. UC01–UC07 describe implemented workflows. Future requirements remain in the user stories.
 
 #### UC01: Register an athlete
 
@@ -837,7 +821,7 @@ These are product requirements and acceptance targets, not claims about the curr
 | Event specialization | An athletics discipline, such as sprinting or long jump, associated with an athlete through the `tag` and `untag` commands. |
 | Guardian | A parent or other responsible adult whose future contact record may be linked to one or more athletes. |
 | Local persistence | Automatically saving roster changes on the coach's computer and loading them in a later application session. |
-| Implemented | A feature available in the current v1.4 code. Release targets and future features are identified separately. |
+| Implemented | A feature available in the current v1.4 code. Future features are identified separately. |
 | Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone comparisons ignore permitted formatting characters and use the digits. Display formatting may be retained. |
 | Participation log | A future record of an athlete's involvement in training or competition. |
 | Relay squad / event group | A future grouping of athletes for a relay team or a particular athletics event. |
@@ -854,6 +838,28 @@ Given below are instructions to test the app manually.
 **Note:** These instructions only provide a starting point for testers to work on;
 testers are expected to do more *exploratory* testing.
 </box>
+
+### Before testing
+
+Use a disposable, writable folder containing a copy of the release JAR. These procedures add, replace and delete
+saved records. Keep real rosters elsewhere, and use only one running instance for each test folder.
+Record the release tag/JAR filename, `java -version`, operating system, and display scaling when reporting results.
+Use the runtime from the [setup guide](SettingUp.md#runtime-and-build-requirements).
+
+Enter **one command at a time**, even in the command blocks below: the GUI input is one line and removes pasted
+line breaks. The steps test the packaged JAR. Automated classes mentioned separately require the source checkout.
+
+When a procedure asks for the **three-athlete fixture**, restart TrackFlow first to reset session sorting, then run:
+
+```text
+clear
+add n/Blake Lee a/Open p/92222222 e/blake@example.com addr/20 Stadium Road
+add n/Avery Tan a/Under 14 p/91111111 e/avery@example.com addr/10 Stadium Road
+add n/Casey Lim a/Under 14 p/93333333 e/casey@example.com addr/30 Stadium Road
+```
+
+Expected saved order: Blake, Avery, Casey. No filter or sort is active. Preparing this fixture replaces all records
+in that disposable roster; it is not a command to use on real athlete data.
 
 ### Launch and shutdown
 
@@ -902,7 +908,7 @@ testers are expected to do more *exploratory* testing.
 
 Use a separate test roster for this procedure. The deletion steps test compatibility with the existing delete command and permanently remove test records.
 
-1. Prepare an empty test roster with one `Open` athlete followed by two distinct `Under 14` athletes. Restart to reset any active sorting.
+1. Prepare the [three-athlete fixture](#before-testing). Blake is `Open`; Avery and Casey are `Under 14`.
 1. Run `filter a/under   14`. Expect the two `Under 14` athletes in roster order, numbered 1 and 2, and `Displaying 2 athletes in age category Under 14.`
 1. Run `delete 3`. Expect an invalid-index error and no changes, even though the full roster has three athletes.
 1. Run `delete 1`. Expect the first `Under 14` athlete to be deleted and the other to appear at index 1.
@@ -911,27 +917,34 @@ Use a separate test roster for this procedure. The deletion steps test compatibi
 1. Run `list`. Expect both remaining athletes.
 1. Run `filter a/Open`. Expect one match and `Displaying 1 athlete in age category Open.`
 1. Try each invalid command separately: `filter`, `filter a/Under 15`, `filter a/`, and `filter a/Open a/Under 14`. Expect an error after each command and no change to the display.
-1. Run `find` with the remaining `Under 14` athlete's name. Expect that athlete in the results.
+1. Run `find n/Casey`. Expect Casey, the remaining `Under 14` athlete.
 1. Run `filter a/Open`. Expect the `Open` athlete, confirming that filtering searches the full roster.
 1. Restart TrackFlow. Expect both remaining athletes. The filter is not saved between sessions.
 
 ### Sorting the displayed roster
 
-Use a test roster containing athletes from several age categories with names, phones, emails, and addresses that are
-not already in sorted order.
+Prepare the [three-athlete fixture](#before-testing), then add the following athletes one command at a time so all
+five age categories can be tested:
+
+```text
+add n/Dan Ho a/Under 16 p/94444444 e/dan@example.com addr/40 Stadium Road
+add n/Eve Ng a/Under 18 p/95555555 e/eve@example.com addr/50 Stadium Road
+add n/Faye Teo a/Under 20 p/96666666 e/faye@example.com addr/60 Stadium Road
+```
 
 1. Run `sort name`. Expect case-insensitive alphabetical name order and the ascending success message.
 1. Run `sort name desc`. Expect the reverse name order.
 1. Run `sort age`. Expect `Under 14`, `Under 16`, `Under 18`, `Under 20`, then `Open`.
 1. Run `sort age descending`. Expect the reverse category order.
-1. Repeat with `phone`, `email`, and `address`. Verify numeric phone ordering and that empty addresses come first only
-   in ascending order.
-1. Run `find` or `filter`, then sort the results. Expect only the matching athletes, in the selected order.
+1. Run `sort phone`, `sort email`, and `sort address` separately, then repeat each with `desc`. Verify numeric phone
+   ordering and case-insensitive text ordering. This fixture has no empty addresses; if testing an older roster
+   containing one, it should appear first in ascending address order and last in descending order.
+1. Run `filter a/Under 14`, then `sort name desc`. Expect only Casey and Avery, in that order.
 1. Run `list`. Expect the full roster while retaining the selected order.
 1. Run `delete 1` on a sorted list. Expect the athlete visibly shown at index 1 to be deleted.
 1. Try `sort`, `sort height`, `sort name upwards`, and `sort name asc extra`. Expect actionable errors and no display
    change.
-1. Restart TrackFlow. Expect the original saved roster order because sorting is not persisted.
+1. Restart TrackFlow. Expect the remaining athletes in saved roster order; the deletion persists but sorting does not.
 
 ### Command autocomplete
 
@@ -967,17 +980,18 @@ When a step asks you to type a new command below, replace the previous input rat
 
 ### Saving data
 
-1. Run `clear`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home` and restart TrackFlow.<br>
-   Expected: Avery remains in the roster after the restart.
-1. With a disposable roster whose first athlete has `100m` but not `400m`, temporarily remove write permission from
+1. Run `clear`, `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`, and `tag 1 t/100m`
+   separately, then restart TrackFlow.<br>
+   Expected: Avery and the `100m` event remain after the restart.
+1. On this disposable roster, temporarily remove write permission from
    the folder containing the roster data file. Then attempt each roster-changing command separately:
    `add n/Blake Tan a/Open p/81234567 e/blake@example.com addr/Home`, `edit 1 p/999`, `remark 1 r/Test`,
    `tag 1 t/400m`, `untag 1 t/100m`, `delete 1`, and `clear`.<br>
    Expected: TrackFlow reports that it could not save. The roster, displayed athletes, filter, sort order, and data file
    remain unchanged after every attempt.
-1. While storage is unwritable, run `list`, `find`, `filter`, `sort`, `help`, and `exit` separately.<br>
+1. While storage is unwritable, run `list`, `find n/Avery`, `filter a/Under 14`, `sort name`, `help`, and `exit` separately.<br>
    Expected: Each command succeeds because it does not need to rewrite roster data.
-1. Restore write permission and run a roster-changing command.<br>
+1. Restore write permission, relaunch the app if you used `exit`, and run a roster-changing command.<br>
    Expected: The command succeeds, the status indicates that all changes are saved, and the change survives restart.
 
 ### Missing or corrupted data file recovery
@@ -989,13 +1003,13 @@ When a step asks you to type a new command below, replace the previous input rat
    3. Run a roster-changing command (e.g., `remark 1 r/Test`).<br>
       Expected: `data/trackflow.json` is created containing the updated roster data.
 2. Corrupted data file with writable folder
-   1. Open `data/trackflow.json` in a text editor and corrupt its contents (e.g. introduce malformed JSON or remove required fields).
+   1. Close TrackFlow. Back up the disposable `data/trackflow.json`, then replace its contents with `{` and save.
    2. Launch TrackFlow.<br>
-      Expected: TrackFlow preserves the corrupted file by copying it to `data/trackflow.json.unreadable-<UUID>.bak`, logs the backup path in `trackflow.log.0`, and launches with an empty roster.
+      Expected: TrackFlow copies the corrupted file to `data/trackflow.json.unreadable-<UUID>.bak`, logs the backup path, displays a recovery warning with that path, and launches with an empty roster.
    3. Inspect the `data` folder.<br>
       Expected: The `.bak` file contains the exact unreadable data. Any new roster modifications write to `data/trackflow.json` without modifying or deleting the backup.
 3. Corrupted data file with read-only folder
-   1. Corrupt `data/trackflow.json` as above, and make the `data` folder read-only so that creating a backup file fails.
+   1. Close TrackFlow. Replace `data/trackflow.json` with `{` as above, and use folder permissions to block creation of a backup file. Verify that the operating system actually denies a write in that folder.
    2. Launch TrackFlow.<br>
       Expected: TrackFlow logs a severe error and shuts down immediately before any commands can execute, preventing unreadable data from being overwritten.
 
@@ -1020,12 +1034,11 @@ Use a disposable roster with at least one athlete. Check the roster and saved fi
 1. Run `edit 1 addr/Block A//B addr//Annex`, followed by `remark 1 r/Practise r//relay x//y Mon/Tue`.
    Expect address `Block A/B addr/Annex` and remark `Practise r/relay x/y Mon/Tue`. Restart and verify both values.
 1. Run `find A//B`, `find addr/Block A//B`, and `find r/r//relay` separately.
-   Expect the athlete in each result, with the extra escape slash removed from the saved fields.
+   Expect the athlete in each result. Search decodes its input once; the saved address and remark remain unchanged.
 1. Run `edit 1 addr/C:\Training`. Expect the ordinary backslash to remain in the stored address.
-1. Run `ParserRobustnessTest` using the focused command in the testing guide. It supplies multiline commands
-   directly to the logic layer, checks that one edit is applied, and verifies that `clear` followed by a line break
-   and `exit` is rejected without deletion. In the GUI, replace pasted tabs and line breaks with spaces first,
-   because its single-line command box removes them.
+1. Paste commands only as single lines, replacing tabs and line breaks with ordinary spaces. The GUI removes these
+   characters; it does not run a multiline script. Developer-only multiline parser checks are in
+   `ParserRobustnessTest`, described in the [testing guide](Testing.md#build-and-focused-tests).
 1. Try `edit 1 p/999 P/888`, `remark 1 r/first R/second`, `find n/`, and `edit 1 x/value`.
    Expect errors without roster, display, or file changes.
 1. Run `edit 1 addr/Block A///B`, then `find addr/Block A///B`.
@@ -1037,45 +1050,51 @@ Use a disposable roster with at least one athlete. Check the roster and saved fi
 
 ### Finding athletes
 
-Prerequisite: ensure multiple athletes with varied names, age categories, contact details, remarks, and events are loaded.
+Prepare the [three-athlete fixture](#before-testing), then run these setup commands separately:
 
-1. Broad keyword search
-   1. Run `find Avery`.<br>
-      Expected: All athletes matching `Avery` (case-insensitively) in any searchable field (name, category, phone, email, address, remark, or events) are displayed.
-   2. Run `find ave under`.<br>
-      Expected: Athletes matching either `ave` or `under` in any searchable field are displayed.
-2. Field-specific search
-   1. Run `find n/Avery`.<br>
-      Expected: Only athletes whose name contains `Avery` are displayed; matches occurring only in remarks, addresses, or other fields are excluded.
-   2. Run `find a/Under 14`.<br>
-      Expected: Athletes in the `Under 14` category are displayed.
-   3. Run `find t/100m`.<br>
-      Expected: Athletes tagged with `100m` (or containing `100m`) are displayed.
-   4. Run `find r/injured`.<br>
-      Expected: Athletes with remarks containing `injured` are displayed.
-3. Combined broad and field search
-   1. Run `find Tan t/100m`.<br>
-      Expected: Athletes whose searchable fields match `Tan` OR who are tagged with `100m` are displayed.
-4. Error cases
-   1. Try `find`, `find n/`, and `find x/keyword`.<br>
-      Expected: Each returns an actionable error message indicating invalid command format, empty field prefix, or unknown prefix, without changing the displayed list.
+```text
+remark 2 r/Injured sprinter
+remark 1 r/Relay captain
+tag 2 t/100m
+tag 1 t/4x100m
+```
+
+1. Run `find ave under`. Expect Avery and Casey: broad keywords are combined with OR and may match any field.
+1. Run `find n/Avery`. Expect only Avery; matching text in another field does not satisfy a name criterion.
+1. Run `find a/Under 14`. Expect Avery and Casey.
+1. Run `find t/100m`. Expect Avery and Blake because event matching is partial, so `4x100m` also matches.
+1. Run `find r/injured`. Expect only Avery.
+1. Run `find n/Avery a/Open`. Expect no matches, because different scoped fields are combined with AND.
+1. Run `find n/Avery a/Under 14`. Expect only Avery.
+1. Run `find Blake n/Avery a/Under 14`. Expect Blake OR an athlete satisfying both scoped fields: Blake and Avery.
+1. Run `find n/Avery`, followed by `find a/Open`. Expect Blake after the second command; consecutive searches replace
+   the previous selection rather than intersecting it.
+1. Try `find`, `find n/`, and `find x/keyword` separately. Expect errors and the previous display to remain unchanged.
+1. Run `list`. Expect all three athletes again.
 
 ### Tagging athletes with events
 
-Prerequisite: run `list` so that several athletes are shown. Note the events on the 1st athlete's card.
+Use a disposable roster. Run `clear`, then the following commands separately to ensure a known starting state:
 
-1. Run `tag 1 t/Javelin t/4x100m`.<br>
-   Expected: `Javelin` and `4x100m` appear on the 1st athlete's card along with the existing events.
-1. Run `tag 1 t/javelin t/Shot Put`.<br>
-   Expected: only `Shot Put` is added; the message says the athlete already had `javelin`.
-1. Run `tag 1 t/JAVELIN`.<br>
-   Expected: an error saying the athlete already has the event; nothing changes.
-1. Run `untag 1 t/Shot Put t/Discus` (assuming the athlete has no `Discus`).<br>
-   Expected: an error naming `Discus`; `Shot Put` is **not** removed.
-1. Run `untag 1 t/shot put`.<br>
-   Expected: `Shot Put` is removed. Restart TrackFlow and check the events are still as last shown.
-1. Try `tag 1`, `tag t/100m`, `tag 0 t/100m`, `tag 1 t/`, `tag 1 t/100m*` and `tag 1 t/` followed by 31 letters.<br>
-   Expected: an error for each; nothing changes.
+```text
+add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home
+tag 1 t/100m
+```
+
+1. Run `tag 1 t/Javelin t/4x100m`. Expect both new labels alongside `100m`.
+1. Run `tag 1 t/javelin t/Shot Put`. Expect only `Shot Put` to be added, with `javelin` reported as already present.
+1. Run `tag 1 t/JAVELIN`. Expect an already-present error and no changes.
+1. Run `untag 1 t/Shot Put t/Discus`. Expect an error naming `Discus`; `Shot Put` must remain.
+1. Run `untag 1 t/shot put`. Expect `Shot Put` to be removed. Restart and verify the remaining labels persist.
+1. Try `tag 1`, `tag t/100m`, `tag 0 t/100m`, `tag 1 t/`, `tag 1 t/100m*`, `tag 1 t/Long - Jump`,
+   and `tag 1 t/` followed by 31 letters. Expect an error after each command and no changes.
+
+### Help and clearing a test roster
+
+1. Run `help`. Expect a scrollable command guide. Resize it and check that command descriptions remain reachable.
+1. Close help, then run `help` again. Expect it to reopen without changing the roster or losing the current filter.
+1. On the disposable roster only, run `clear`. Expect an immediate successful deletion of all athletes, without a
+   confirmation prompt or undo. Restart and verify the roster remains empty rather than repopulating samples.
 
 ### Duplicate identity and complete equality
 
@@ -1093,5 +1112,6 @@ compares every stored value, including category, address, remark, and events. Th
 1. With Jordan displayed, attempt to edit the name to `AVERY TAN` while retaining Avery's phone. Expect rejection
    because duplicate checks search the complete roster. The previous filter and roster remain unchanged.
 1. Restart and repeat the duplicate attempts. Expect the same decisions after reloading.
-1. Run the automated `PersonTest` and `DuplicatePersistenceTest` checks described in the testing guide. Address-only
-   and remark-only changes must affect full equality without changing duplicate identity.
+Developer-only check: the automated `PersonTest` and `DuplicatePersistenceTest` checks in the
+[testing guide](Testing.md#build-and-focused-tests) verify complete equality separately from duplicate identity.
+Address-only and remark-only changes affect full equality without changing duplicate identity.

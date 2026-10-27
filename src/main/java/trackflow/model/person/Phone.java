@@ -59,8 +59,8 @@ public class Phone {
     }
 
     /**
-     * Returns only the digits of this phone number, ignoring spaces, bracketed notes, and formatting characters.
-     * Two phone numbers that share the same digits are treated as equal.
+     * Returns all digits in the stored phone text, discarding non-digit characters.
+     * Digits inside parenthesized notes currently participate in equality as well as the numeric phone sort key.
      */
     private String digitsOnly() {
         return value.replaceAll("\\D", "");

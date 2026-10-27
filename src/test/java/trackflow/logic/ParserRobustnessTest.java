@@ -26,6 +26,11 @@ import trackflow.storage.JsonRosterStorage;
 import trackflow.storage.JsonUserPrefsStorage;
 import trackflow.storage.StorageManager;
 
+/**
+ * Checks parser-to-storage boundaries with a real JSON file in a disposable directory.
+ * Direct logic calls intentionally bypass the JavaFX text field, which removes pasted tabs and line breaks.
+ * These tests therefore complement, rather than replace, keyboard checks on the packaged application.
+ */
 public class ParserRobustnessTest {
 
     @TempDir

@@ -5,7 +5,9 @@
 
 # Configuration guide
 
-TrackFlow v1.4 does not read a `config.json` file. It uses these paths relative to the folder from which it is launched:
+TrackFlow does not read a `config.json` file. For a packaged JAR, its home folder is the folder containing the actual
+JAR, even when it is launched from another directory or through a symbolic link. The following paths are relative
+to that home folder:
 
 | File | Purpose |
 |------|---------|
@@ -13,6 +15,7 @@ TrackFlow v1.4 does not read a `config.json` file. It uses these paths relative 
 | `preferences.json` | Window size and position |
 | `trackflow.log.*` | Application logs |
 
-The roster and preference paths are constants in `trackflow.MainApp`. The log level is the `LOG_LEVEL` constant
+An IDE or test run from unpacked class files uses the process working directory instead. `ApplicationHome` resolves
+this location; the roster and preference paths are defined in `trackflow.MainApp`. The log level is the `LOG_LEVEL` constant
 in `trackflow.commons.core.LogsCenter`. Changing those defaults requires rebuilding the application. See the
 [User Guide](UserGuide.md#editing-the-data-file) before moving or editing roster data.

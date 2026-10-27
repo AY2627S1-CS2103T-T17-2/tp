@@ -13,6 +13,10 @@ import org.junit.jupiter.api.Test;
 import trackflow.model.person.PersonContainsKeywordsPredicate.SearchField;
 import trackflow.testutil.PersonBuilder;
 
+/**
+ * Distinguishes broad-keyword OR matching from AND across scoped fields using a fixed athlete fixture.
+ * Each field-specific case also guards against a match leaking in from another searchable field.
+ */
 public class PersonContainsKeywordsPredicateTest {
 
     private static final Person ATHLETE = new PersonBuilder()

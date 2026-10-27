@@ -38,6 +38,10 @@ import trackflow.storage.JsonRosterStorage;
 import trackflow.storage.JsonUserPrefsStorage;
 import trackflow.storage.StorageManager;
 
+/**
+ * Exercises command execution across model and storage boundaries, including persistence and failed-save isolation.
+ * Temporary files verify reload behaviour; failing storage doubles verify that unsuccessful saves are not published.
+ */
 public class LogicManagerTest {
     private static final IOException DUMMY_IO_EXCEPTION = new IOException("dummy IO exception");
     private static final IOException DUMMY_AD_EXCEPTION = new AccessDeniedException("dummy access denied exception");
