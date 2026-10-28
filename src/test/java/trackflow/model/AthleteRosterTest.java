@@ -1,3 +1,5 @@
+// @@author -
+// Unassigned sections are adapted from SE-EDU AddressBook-Level3.
 package trackflow.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,3 +106,4 @@ public class AthleteRosterTest {
     }
 
 }
+// @@author

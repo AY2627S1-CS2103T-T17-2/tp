@@ -41,6 +41,30 @@ This project has three types of tests:
 1. *Hybrid tests* combine unit and integration testing. These tests check both the individual units and how they work together.<br>
    For example: `trackflow.logic.LogicManagerTest`
 
+## Reading and reviewing tests
+
+Test names describe the operation, scenario and expected outcome. Read the fixture setup first: each `@BeforeEach`
+or `@TempDir` establishes the starting roster and isolates saved files from a real installation. An assertion on the
+displayed list checks the view; it does not by itself establish that the complete roster or saved JSON is correct.
+
+| Area | Useful starting points | What the checks establish |
+| --- | --- | --- |
+| Command syntax and escaping | `TrackFlowParserTest`, `ArgumentTokenizerTest`, `ParserRobustnessTest` | Accepted/rejected input, one-time slash decoding, and unchanged state after rejection |
+| Search and indexed commands | `PersonContainsKeywordsPredicateTest`, `FilterCommandTest`, `SortCommandTest` | Broad OR versus scoped AND, replacement of filters, and indexes in the displayed order |
+| Identity and saved records | `PersonTest`, `DuplicatePersistenceTest`, `JsonSerializableRosterTest` | Duplicate identity, complete equality, and decisions after reloading |
+| Save failures and startup | `LogicManagerTest`, `MainAppTest`, `StartupProcessTest` | Publication only after saving, preservation of unreadable data, and application-home paths |
+| Screen placement | `WindowPlacementTest` | Bounds calculations for screens and saved preferences; actual rendering still needs manual checks |
+
+For failure tests, check the expected exception or feedback as well as the unchanged roster, view and saved file.
+For persistence tests, look for a fresh storage read or model reconstruction rather than an assertion against only
+the original in-memory object. Comments explain unusual inputs, isolation decisions and regression risks; ordinary
+setup and self-explanatory assertions do not need a comment on every line.
+
+The automated suite does not drive the complete JavaFX interface. Follow the DG's
+[manual testing appendix](DeveloperGuide.md#appendix-instructions-for-manual-testing) on the final packaged JAR for
+keyboard behaviour, rendering, scrolling, screen scaling and platform/runtime compatibility. Record the exact build
+and environment tested; passing helper tests alone is not evidence of those UI properties.
+
 ## Build and focused tests
 
 Run `./gradlew clean check coverage shadowJar` to build `build/libs/TrackFlow.jar`, run the automated tests,

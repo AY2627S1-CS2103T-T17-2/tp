@@ -1,3 +1,4 @@
+// @@author Austin-Chia
 package trackflow.model.person;
 
 import static java.util.Objects.requireNonNull;
@@ -33,7 +34,8 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     }
 
     /**
-     * Creates a predicate that matches any broad keyword or any keyword in its specified field.
+     * Creates a predicate that matches any broad keyword or requires a match in every specified field.
+     * Multiple alternatives within one field are combined with OR; distinct fields are combined with AND.
      * Defensively copies both collections and their nested lists. Null collections, keys, or elements are rejected.
      * Keywords are trimmed before case-insensitive substring matching; blank keywords do not match.
      */
@@ -55,6 +57,7 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
         }
         boolean matchesBroadKeywords = !keywords.isEmpty()
                 && containsAnyKeyword(getSearchableText(person), keywords);
+        // An absent field group must not make a broad-only search match everything through an empty allMatch.
         boolean matchesEveryField = !fieldKeywords.isEmpty()
                 && fieldKeywords.entrySet().stream()
                         .allMatch(entry -> containsAnyKeyword(getFieldText(person, entry.getKey()), entry.getValue()));
@@ -98,7 +101,7 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     }
 
     /**
-     * Returns the athlete's events on separate lines, so that a keyword cannot match across two events.
+     * Separates event names with line breaks, preventing ordinary single-line keywords from spanning events.
      */
     private static String getEventsText(Person person) {
         return person.getTags().stream()

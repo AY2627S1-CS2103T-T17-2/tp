@@ -24,11 +24,13 @@ Interface (GUI).
 1. Download the latest `.jar` file from
    [the TrackFlow releases page](https://github.com/AY2627S1-CS2103T-T17-2/tp/releases).
 
-1. Copy the file to the folder you want to use as the _home folder_ for TrackFlow.
+1. Copy the file to a writable folder you want to use as the _home folder_ for TrackFlow. Its data and settings
+   will be stored beside the JAR. Use a separate copy in an empty folder when experimenting with test data.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar TrackFlow.jar`.<br>
-   The GUI opens with sample athletes. The image below is a design mockup: its layout and command examples differ from v1.4. Use the commands documented in this guide.<br>
-   ![TrackFlow design mockup](images/Ui.png)
+   On first launch, the GUI opens with sample athletes. On later launches, it opens your saved roster instead.
+   This screenshot shows the running application after `list`:<br>
+   ![TrackFlow displaying sample athletes with age categories, event labels, and command feedback](images/Ui.png)
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
@@ -41,9 +43,7 @@ Interface (GUI).
 
    * `sort name`: Sorts the displayed athletes by name in ascending order.
 
-   * Run `list`, then `delete 3`: Displays the complete roster and deletes the athlete shown at index 3. This requires at least three athletes in the roster.
-
-   * `clear` : Deletes all athletes.
+   * `find n/John`: Shows athletes whose names contain `John`. Run `list` to show everyone again.
 
    * `exit` : Exits the app.
 
@@ -74,7 +74,8 @@ Interface (GUI).
 
 * The `list`, `help`, `clear`, and `exit` commands do not accept parameters.
 
-* Leading and trailing whitespace around a command is ignored.
+* Leading and trailing ordinary spaces around a command are ignored. Use ordinary spaces between the command
+  word and its arguments; pasted Unicode spaces can be treated differently. See [Known issues](#known-issues).
 
 * Enter one command per submission, using spaces to separate its word and parameters. The command box is a
   single-line field: pasted tabs and line breaks can be removed, joining adjacent text. Replace them with spaces
@@ -85,6 +86,16 @@ Interface (GUI).
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
+
+### Working with the displayed list
+
+`find` and `filter` select athletes from the full roster. Each replaces the previous selection; they do not narrow
+the results of the preceding command. `sort` orders the selected athletes, and `list` shows everyone while retaining
+that order. Sorting and filtering are reset when TrackFlow restarts.
+
+For `edit`, `remark`, `tag`, `untag`, and `delete`, always use the index currently shown beside the athlete.
+Indexes can change after another command. A successful add, edit, remark, tag, or untag shows the full roster again;
+deleting an athlete keeps the current filter. Check the displayed names before your next indexed command.
 
 ### Addresses and remarks containing slashes
 
@@ -163,8 +174,13 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
 * All five fields are required.
 * Fields may appear in any order. Each parameter may appear only once.
 * Age category must be `Under 14`, `Under 16`, `Under 18`, `Under 20`, or `Open`. Category input ignores case and normalizes repeated spaces.
-* Names must be nonblank and contain only alphanumeric characters, spaces, hyphens, and apostrophes (for example, `Mary-Jane` or `O'Brien`).
-* Phone numbers must contain at least three digits. They may also include spaces, the characters `+`, `-`, `(`, `)`, and notes in brackets such as `(HP)` (for example, `+65 9123 4567` or `9123 4567 (HP)`). Two numbers with the same digits are treated as the same number, so the brackets and spaces are ignored when checking for duplicates.
+* Names must start with a letter or digit and contain only ASCII letters (`A`–`Z`, `a`–`z`), digits, ordinary spaces,
+  hyphens, and apostrophes (for example, `Mary-Jane` or `O'Brien`). Accented letters and other writing systems are
+  not currently supported.
+* Phone numbers must contain at least three digits outside parenthesized notes. They may also include spaces,
+  `+`, `-`, `(`, `)`, and notes such as `(HP)` (for example, `+65 9123 4567` or `9123 4567 (HP)`). Duplicate comparison
+  currently uses all digits in the stored text, including digits in notes. Keep the number outside parentheses
+  and use notes without digits; see [Known issues](#known-issues).
 * Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` to supply the required nonblank address.
@@ -242,7 +258,8 @@ Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
 * Omitted fields retain their current values. Track events and remarks are preserved.
-* `a/` now means age category, replacing the old address syntax. Supported categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`; case and extra whitespace are normalized.
+* `a/` means age category. Supported categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`;
+  case and repeated ordinary spaces are normalized. Addresses use the separate `addr/` prefix.
 * Use `addr/ADDRESS` to edit the address. An empty or whitespace-only address is rejected.
 * Repeated field prefixes, empty or invalid values, and `t/` or `r/` parameters are rejected. Use `tag`/`untag` for events and `remark` for remarks.
 * Edits that create a duplicate athlete are rejected using the same normalized name and contact comparison as `add`.
@@ -290,6 +307,7 @@ Format: `untag INDEX t/EVENT [t/EVENT]...`
   30 characters long, e.g. `100m`, `4x100m`, `Long Jump`, `110m-Hurdles`. Extra spaces between words are reduced to
   one, but a hyphen cannot have spaces around it or be repeated: use `Long-Jump` or `Long Jump`, not `Long - Jump`
   or `Long--Jump`.
+  Event words use ASCII letters and digits; accented letters and other writing systems are not currently supported.
 * Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalisation it was first added with.
 * Older rosters may contain alphanumeric tags longer than 30 characters. TrackFlow preserves these exactly when
   loading and saving. They remain searchable and can be removed with `untag INDEX t/EXACT_NAME`, ignoring case.
@@ -363,8 +381,9 @@ Available fields:
 
 * `name` sorts names alphabetically without considering letter case.
 * `age` sorts competition categories in this order: `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
-* `phone` sorts phone numbers numerically by their digits, ignoring spaces and non-digit formatting characters.
-  Sorting keeps the displayed and saved phone text unchanged.
+* `phone` sorts phone numbers numerically by all digits in the stored text, ignoring non-digit characters.
+  Sorting keeps the displayed and saved phone text unchanged. Digits inside notes currently affect ordering;
+  see [Known issues](#known-issues).
 * `email` sorts email addresses alphabetically without considering letter case.
 * `address` sorts addresses alphabetically without considering letter case. Empty addresses appear first in ascending
   order and last in descending order.
@@ -420,6 +439,10 @@ Format: `clear`
 
 The command does not accept parameters.
 
+**This action is permanent:** `clear` immediately saves an empty roster, with no confirmation or undo. Close the app
+and back up `data/trackflow.json` in the JAR's home folder before clearing data you may need later. `delete` also saves
+its deletion immediately.
+
 ### Exiting the program: `exit`
 
 Exits the program.
@@ -469,11 +492,6 @@ Later roster changes leave the backup intact. If the backup cannot be created, T
 protect the original file. Keep the preserved copy if you need to recover its records manually.
 </box>
 
-### Archiving data files [Future]
-
-Archiving and restoring individual athlete records are not available in v1.4. Keep external copies of roster files
-when you need a historical snapshot. No release version is committed for in-app archiving.
-
 --------------------------------------------------------------------------------------------------------------------
 
 ## FAQ
@@ -490,6 +508,14 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
 * **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
   JDK 25 FX runtime on macOS and verify the packaged JAR on your machine. See the
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
+* **Phone formatting:** numbers wholly inside parentheses can be rejected, and digits inside notes can change
+  duplicate checks and phone sorting. Keep the number outside parentheses and use notes such as `(HP)` without digits.
+* **Pasted whitespace:** use ordinary spaces at command boundaries. Some Unicode space characters are not handled
+  consistently by the command parser.
+* **Long stored event names:** a legacy event label may be clipped in a narrow window. The complete value remains
+  in `data/trackflow.json`; close the app and inspect a backup copy when you need the exact name for `untag`.
+* **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do
+  not coordinate edits and a later save can overwrite changes from the other instance.
 
 
 --------------------------------------------------------------------------------------------------------------------

@@ -10,6 +10,17 @@
 * The `docs/` folder contains the source files for the documentation website.
 * To learn how set it up and maintain the project website, follow the guide [[se-edu/guides] Working with Forked MarkBind sites](https://se-education.org/guides/tutorials/markbind-forked-sites.html) for project documentation.
 
+## Keeping the guides current
+
+The MarkBind workflow rebuilds and deploys the website after a push or merge to `master`; it can also be run
+manually. It renders the files in `docs/`. It does not generate command descriptions or update explanations when
+Java code changes, and a local edit or an unmerged pull request does not update the published site.
+
+For each behaviour change, review the corresponding UG command description, examples and command summary; the
+DG implementation explanation, diagrams and manual tests; and any affected code/test comments. Keep them together
+in the same pull request where practical. Verify examples on the built application and check the rendered pages
+before merging. Check that the deployment succeeds before relying on the published guide.
+
 ## Building and checking the site
 
 Use the dependency versions recorded in `docs/package-lock.json` for a reproducible local build:

@@ -22,6 +22,11 @@ import trackflow.storage.JsonRosterStorage;
 import trackflow.testutil.PersonBuilder;
 import trackflow.testutil.ProcessTestUtil;
 
+/**
+ * Runs startup in child JVMs so application-home and logging state cannot leak between scenarios.
+ * The temporary JAR contains application classes and uses the test runtime dependencies; it does not open JavaFX
+ * windows or establish that the final release JAR works on every supported platform.
+ */
 public class StartupProcessTest {
     @TempDir
     public Path testFolder;

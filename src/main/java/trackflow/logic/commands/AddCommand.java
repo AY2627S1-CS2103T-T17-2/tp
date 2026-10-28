@@ -1,17 +1,23 @@
+// @@author qiyuannn
 package trackflow.logic.commands;
+// @@author
 
 import static java.util.Objects.requireNonNull;
+// @@author qiyuannn
 import static trackflow.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static trackflow.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
 import static trackflow.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static trackflow.logic.parser.CliSyntax.PREFIX_NAME;
 import static trackflow.logic.parser.CliSyntax.PREFIX_PHONE;
+// @@author
 
+// @@author qiyuannn
 import trackflow.commons.util.ToStringBuilder;
 import trackflow.logic.Messages;
 import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.model.Model;
 import trackflow.model.person.Person;
+// @@author
 
 /**
  * Adds an athlete to the roster.
@@ -52,7 +58,9 @@ public class AddCommand extends Command {
             throw new CommandException(String.format(MESSAGE_DUPLICATE_PERSON, toAdd.getName()));
         }
 
+        // @@author Austin-Chia
         String warning = Messages.getPossibleDuplicateWarning(toAdd, model.getRoster().getPersonList());
+        // @@author
         model.addPerson(toAdd);
         return new CommandResult(String.format(MESSAGE_SUCCESS, Messages.formatAthlete(toAdd)) + warning);
     }

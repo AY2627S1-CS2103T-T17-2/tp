@@ -8,7 +8,9 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
+// @@author ken2k7
 import trackflow.model.person.Person;
+// @@author
 
 /**
  * A UI for the status bar that is displayed at the footer of the application.

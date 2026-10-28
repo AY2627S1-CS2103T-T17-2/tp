@@ -1,3 +1,4 @@
+// @@author Austin-Chia
 package trackflow.logic.parser;
 
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
@@ -19,6 +20,7 @@ public class FilterCommandParserTest {
             assertParseSuccess(parser, " a/" + category, new FilterCommand(new AgeCategory(category)));
         }
         assertParseSuccess(parser, "  a/uNdEr   14  ", new FilterCommand(new AgeCategory("Under 14")));
+        // @@author
         assertParseSuccess(parser, "  A/OPEN  ", new FilterCommand(new AgeCategory("Open")));
     }
 

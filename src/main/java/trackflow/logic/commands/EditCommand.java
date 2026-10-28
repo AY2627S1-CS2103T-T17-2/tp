@@ -1,12 +1,16 @@
+// @@author qiyuannn
 package trackflow.logic.commands;
+// @@author
 
 import static java.util.Objects.requireNonNull;
+// @@author qiyuannn
 import static trackflow.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static trackflow.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
 import static trackflow.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static trackflow.logic.parser.CliSyntax.PREFIX_NAME;
 import static trackflow.logic.parser.CliSyntax.PREFIX_PHONE;
 import static trackflow.model.Model.PREDICATE_SHOW_ALL_PERSONS;
+// @@author
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -15,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+// @@author qiyuannn
 import trackflow.commons.core.index.Index;
 import trackflow.commons.util.CollectionUtil;
 import trackflow.commons.util.ToStringBuilder;
@@ -28,6 +33,7 @@ import trackflow.model.person.Name;
 import trackflow.model.person.Person;
 import trackflow.model.person.Phone;
 import trackflow.model.tag.Tag;
+// @@author
 
 /**
  * Edits the details of an existing athlete in the roster.
@@ -89,9 +95,11 @@ public class EditCommand extends Command {
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
+        // @@author Austin-Chia
         List<Person> otherPersons = model.getRoster().getPersonList().stream()
                 .filter(person -> person != personToEdit).toList();
         if (otherPersons.stream().anyMatch(editedPerson::isSamePerson)) {
+            // @@author
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
 

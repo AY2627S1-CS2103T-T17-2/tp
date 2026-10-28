@@ -1,3 +1,5 @@
+// @@author -
+// Unassigned sections are adapted from SE-EDU AddressBook-Level3.
 package trackflow.logic.commands;
 
 import static trackflow.logic.commands.CommandTestUtil.assertCommandSuccess;
@@ -30,3 +32,4 @@ public class ClearCommandTest {
     }
 
 }
+// @@author

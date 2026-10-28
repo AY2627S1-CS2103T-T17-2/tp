@@ -1,3 +1,4 @@
+// @@author Austin-Chia
 package trackflow.model.person;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +34,7 @@ public class AgeCategoryPredicateTest {
     public void constructor_nullCategory_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new AgeCategoryPredicate(null));
     }
+    // @@author
 
     @Test
     public void toStringMethod() {

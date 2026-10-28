@@ -8,9 +8,9 @@
 [![Java CI](https://github.com/AY2627S1-CS2103T-T17-2/tp/actions/workflows/gradle.yml/badge.svg)](https://github.com/AY2627S1-CS2103T-T17-2/tp/actions/workflows/gradle.yml)
 [![codecov](https://codecov.io/gh/AY2627S1-CS2103T-T17-2/tp/branch/master/graph/badge.svg)](https://codecov.io/gh/AY2627S1-CS2103T-T17-2/tp)
 
-![TrackFlow design mockup](images/Ui.png)
+![TrackFlow showing the athlete roster, age categories, and event labels](images/Ui.png)
 
-_Design mockup: the layout and command examples differ from v1.4. See the [User Guide](UserGuide.md) for current commands._
+_The running application with sample athletes. See the [User Guide](UserGuide.md) to get started._
 
 **TrackFlow v1.4** is a lightning-fast, keyboard-driven roster and contact manager designed specifically for **track and field head and assistant coaches**. While it has a GUI, most of the user interactions happen using a CLI (Command Line Interface).
 

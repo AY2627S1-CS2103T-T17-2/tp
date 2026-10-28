@@ -1,14 +1,20 @@
+// @@author qiyuannn
 package trackflow.model.person;
+// @@author
 
+// @@author qiyuannn
 import static trackflow.commons.util.CollectionUtil.requireAllNonNull;
+// @@author
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+// @@author qiyuannn
 import trackflow.commons.util.ToStringBuilder;
 import trackflow.model.tag.Tag;
+// @@author
 
 /**
  * Represents a Person in the athlete roster.

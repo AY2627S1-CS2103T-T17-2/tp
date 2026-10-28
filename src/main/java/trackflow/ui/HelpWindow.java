@@ -1,4 +1,6 @@
+// @@author qiyuannn
 package trackflow.ui;
+// @@author
 
 import java.util.logging.Logger;
 
@@ -9,8 +11,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import trackflow.commons.core.GuiSettings;
+// @@author qiyuannn
 import trackflow.commons.core.LogsCenter;
 import trackflow.logic.commands.HelpCommand;
+// @@author
 
 /**
  * Controller for a help page.
