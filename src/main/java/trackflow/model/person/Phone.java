@@ -10,14 +10,18 @@ import static trackflow.commons.util.AppUtil.checkArgument;
 public class Phone {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Phone numbers must contain at least 3 digits. They may also include spaces, the characters + - ( ), "
-                    + "and notes in brackets such as (HP).";
+            "Phone numbers must contain at least 3 digits. They may also include spaces and the characters + - ( ). "
+                    + "A bracketed country code such as (+65) counts as part of the number; other bracketed text "
+                    + "such as (HP) is treated as a note and is ignored.";
 
-    /** Minimum number of digits a phone number must contain. */
+    /** Minimum number of significant digits a phone number must contain. */
     private static final int MINIMUM_DIGITS = 3;
 
-    /** A bracketed note such as "(HP)" or "(Office)". */
-    private static final String BRACKETED_NOTE_REGEX = "\\([^)]*\\)";
+    /**
+     * A bracketed note such as "(HP)", "(Office)" or "(5)": any bracket group that is not a country code.
+     * A bracket containing "+", such as "(+65)", is a country code and is deliberately excluded here.
+     */
+    private static final String BRACKETED_NOTE_REGEX = "\\([^+)]*\\)";
 
     /** The characters allowed once bracketed notes are set aside: digits, spaces, and + - ( ). */
     private static final String ALLOWED_CHARACTERS_REGEX = "[0-9 +\\-()]*";
@@ -36,8 +40,9 @@ public class Phone {
     }
 
     /**
-     * Returns true if a given string is a valid phone number: it has at least three digits and, apart from
-     * bracketed notes such as "(HP)", contains only digits, spaces, and the characters + - ( ).
+     * Returns true if a given string is a valid phone number: setting aside bracketed notes such as "(HP)",
+     * it contains only digits, spaces, and the characters + - ( ), and has at least three significant digits.
+     * A bracketed country code such as "(+65)" is kept, so its digits count towards the minimum.
      */
     public static boolean isValidPhone(String test) {
         requireNonNull(test);
@@ -59,11 +64,13 @@ public class Phone {
     }
 
     /**
-     * Returns all digits in the stored phone text, discarding non-digit characters.
-     * Digits inside parenthesized notes currently participate in equality as well as the numeric phone sort key.
+     * Returns the significant digits of this phone number: the digits of the number itself and of a bracketed
+     * country code such as "(+65)", but not the digits of a bracketed note such as "(HP)" or "(5)". This is the
+     * canonical key for comparing phone numbers; two numbers with the same significant digits are treated as
+     * equal, and callers (such as the phone sort) should order numbers by this value rather than the raw text.
      */
-    private String digitsOnly() {
-        return value.replaceAll("\\D", "");
+    public String getSignificantDigits() {
+        return value.replaceAll(BRACKETED_NOTE_REGEX, "").replaceAll("\\D", "");
     }
 
     @Override
@@ -82,12 +89,12 @@ public class Phone {
             return false;
         }
 
-        return digitsOnly().equals(otherPhone.digitsOnly());
+        return getSignificantDigits().equals(otherPhone.getSignificantDigits());
     }
 
     @Override
     public int hashCode() {
-        return digitsOnly().hashCode();
+        return getSignificantDigits().hashCode();
     }
 
 }
