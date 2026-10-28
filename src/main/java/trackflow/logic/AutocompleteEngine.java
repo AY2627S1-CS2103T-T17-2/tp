@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 // @@author
 import trackflow.logic.parser.ArgumentMultimap;
@@ -53,7 +52,7 @@ public class AutocompleteEngine {
         String query = trimmed.toLowerCase(Locale.ROOT);
         return COMMAND_TEMPLATES.stream()
                 .filter(template -> template.toLowerCase(Locale.ROOT).startsWith(query))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

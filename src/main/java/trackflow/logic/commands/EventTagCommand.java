@@ -74,7 +74,8 @@ public abstract class EventTagCommand extends Command {
     }
 
     /**
-     * Formats events as a comma-separated list, sorted alphabetically ignoring case, e.g. {@code 100m, Long Jump}.
+     * Formats events as a comma-separated list, sorted alphabetically ignoring case,
+     * e.g. {@code 100m, Long Jump}.
      */
     protected static String formatEvents(Collection<Tag> events) {
         return events.stream()

@@ -27,7 +27,10 @@ public class CommandBox extends UiPart<Region> {
     public static final String ERROR_STYLE_CLASS = "error";
     private static final String FXML = "CommandBox.fxml";
 
-    /** Inline style for the suggestions list; the popup has its own scene, so the main stylesheet does not apply. */
+    /**
+     * Inline style for the suggestions list.
+     * The popup has its own scene, so the main stylesheet does not apply to it.
+     */
     private static final String SUGGESTIONS_STYLE = "-fx-font-family: 'Consolas'; -fx-font-size: 11pt;";
     /** Approximate height of one suggestion row, in pixels. */
     private static final double SUGGESTION_ROW_HEIGHT = 24;
@@ -145,7 +148,8 @@ public class CommandBox extends UiPart<Region> {
     }
 
     /**
-     * Replaces the command text with the command word of the selected suggestion, then closes the suggestions.
+     * Replaces the command text with the command word of the selected suggestion,
+     * then closes the suggestions.
      */
     private void applySelectedSuggestion() {
         String selected = suggestionsListView.getSelectionModel().getSelectedItem();

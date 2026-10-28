@@ -62,9 +62,9 @@ public class PersonListPanel extends UiPart<Region> {
      */
     private void recordListChange(ListChangeListener.Change<? extends Person> change) {
         // Clean up dead references to prevent memory leaks
-        knownPersons.values().removeIf(bucket -> {
-            bucket.removeIf(ref -> ref.get() == null);
-            return bucket.isEmpty();
+        knownPersons.values().removeIf(references -> {
+            references.removeIf(ref -> ref.get() == null);
+            return references.isEmpty();
         });
 
         while (change.next()) {
@@ -88,14 +88,14 @@ public class PersonListPanel extends UiPart<Region> {
      */
     private boolean addToKnownPersonsIfNew(Person person) {
         int hash = System.identityHashCode(person);
-        List<WeakReference<Person>> bucket = knownPersons.computeIfAbsent(hash, k -> new ArrayList<>());
+        List<WeakReference<Person>> references = knownPersons.computeIfAbsent(hash, k -> new ArrayList<>());
 
-        for (WeakReference<Person> ref : bucket) {
+        for (WeakReference<Person> ref : references) {
             if (ref.get() == person) {
                 return false;
             }
         }
-        bucket.add(new WeakReference<>(person));
+        references.add(new WeakReference<>(person));
         return true;
     }
 
