@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 // @@author
 import trackflow.logic.parser.ArgumentMultimap;
@@ -17,7 +16,7 @@ import trackflow.logic.parser.Prefix;
  */
 public class AutocompleteEngine {
 
-    private final List<String> commandTemplates = List.of(
+    private static final List<String> COMMAND_TEMPLATES = List.of(
             "add n/ a/ p/ e/ addr/",
             "clear",
             "delete INDEX",
@@ -34,12 +33,6 @@ public class AutocompleteEngine {
     );
 
     /**
-     * Constructs an {@code AutocompleteEngine}.
-     */
-    public AutocompleteEngine() {
-    }
-
-    /**
      * Returns a list of autocomplete suggestions based on the current input text.
      * Only suggests command templates when typing the initial command word.
      *
@@ -52,14 +45,14 @@ public class AutocompleteEngine {
         }
 
         String trimmed = inputText.stripLeading();
-        if (trimmed.isEmpty() || trimmed.contains(" ") || trimmed.contains("\t")) {
+        if (trimmed.isEmpty() || trimmed.chars().anyMatch(Character::isWhitespace)) {
             return List.of();
         }
 
         String query = trimmed.toLowerCase(Locale.ROOT);
-        return commandTemplates.stream()
+        return COMMAND_TEMPLATES.stream()
                 .filter(template -> template.toLowerCase(Locale.ROOT).startsWith(query))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -76,7 +69,7 @@ public class AutocompleteEngine {
         String[] parts = currentText.trim().split("\\s+");
         String commandWord = parts[0].toLowerCase(Locale.ROOT);
 
-        String template = commandTemplates.stream()
+        String template = COMMAND_TEMPLATES.stream()
                 .filter(t -> t.toLowerCase(Locale.ROOT).startsWith(commandWord + " ")
                         || t.equalsIgnoreCase(commandWord))
                 .findFirst()

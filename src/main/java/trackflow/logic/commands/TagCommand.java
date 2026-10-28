@@ -14,15 +14,16 @@ import trackflow.model.person.Person;
 import trackflow.model.tag.Tag;
 
 /**
- * Adds one or more track events to an existing athlete in the roster. Events the athlete already has are kept.
+ * Adds one or more track events to an existing athlete in the roster.
+ * Events the athlete already has are kept.
  */
 public class TagCommand extends EventTagCommand {
 
     public static final String COMMAND_WORD = "tag";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Adds track events to the athlete identified by the index number used in the displayed athlete "
-            + "list. Existing events are kept.\n"
+            + ": Adds track events to the athlete identified by the index number used in the "
+            + "displayed athlete list. Existing events are kept.\n"
             + "Parameters: INDEX (must be a positive integer) t/EVENT [t/EVENT]...\n"
             + "Example: " + COMMAND_WORD + " 1 t/100m t/Long Jump";
 
@@ -49,8 +50,9 @@ public class TagCommand extends EventTagCommand {
 
         Set<Tag> newEvents = new HashSet<>(events);
         newEvents.removeAll(athlete.getTags());
-        Set<Tag> skippedEvents = new HashSet<>(events);
-        skippedEvents.retainAll(athlete.getTags());
+        // Report skipped events as stored on the athlete, which may differ in case from the user's input
+        Set<Tag> skippedEvents = new HashSet<>(athlete.getTags());
+        skippedEvents.retainAll(events);
 
         if (newEvents.isEmpty()) {
             throw new CommandException(String.format(MESSAGE_ALREADY_TAGGED,

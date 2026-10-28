@@ -28,7 +28,8 @@ public class UntagCommand extends EventTagCommand {
             + "Example: " + COMMAND_WORD + " 1 t/100m";
 
     public static final String MESSAGE_SUCCESS = "Removed event(s) %1$s from %2$s.";
-    public static final String MESSAGE_EVENT_NOT_FOUND = "%1$s does not have event(s): %2$s. No events were removed.";
+    public static final String MESSAGE_EVENT_NOT_FOUND =
+            "%1$s does not have event(s): %2$s. No events were removed.";
 
     private static final Logger logger = LogsCenter.getLogger(UntagCommand.class);
 

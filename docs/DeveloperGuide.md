@@ -1088,7 +1088,8 @@ tag 1 t/100m
 ```
 
 1. Run `tag 1 t/Javelin t/4x100m`. Expect both new labels alongside `100m`.
-1. Run `tag 1 t/javelin t/Shot Put`. Expect only `Shot Put` to be added, with `javelin` reported as already present.
+1. Run `tag 1 t/javelin t/Shot Put`. Expect only `Shot Put` to be added, with `Javelin` (the stored name) reported
+   as already present.
 1. Run `tag 1 t/JAVELIN`. Expect an already-present error and no changes.
 1. Run `untag 1 t/Shot Put t/Discus`. Expect an error naming `Discus`; `Shot Put` must remain.
 1. Run `untag 1 t/shot put`. Expect `Shot Put` to be removed. Restart and verify the remaining labels persist.

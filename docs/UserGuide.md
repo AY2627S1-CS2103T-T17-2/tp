@@ -309,28 +309,27 @@ Format: `untag INDEX t/EVENT [t/EVENT]...`
   30 characters long, e.g. `100m`, `4x100m`, `Long Jump`, `110m-Hurdles`. Extra spaces between words are reduced to
   one, but a hyphen cannot have spaces around it or be repeated: use `Long-Jump` or `Long Jump`, not `Long - Jump`
   or `Long--Jump`.
-  Event words use ASCII letters and digits; accented letters and other writing systems are not currently supported.
+  Letters include accented and non-English letters, e.g. `Saut-Élan`.
 * Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalisation it was first added with.
 * Older rosters may contain alphanumeric tags longer than 30 characters. TrackFlow preserves these exactly when
   loading and saving. They remain searchable and can be removed with `untag INDEX t/EXACT_NAME`, ignoring case.
   The 30-character limit still applies when adding a new event with `tag`.
 * If the athlete already has some of the events given to `tag`, only the new events are added and the message lists
-  the events that were skipped. If the athlete already has all of them, an error is shown.
+  the events that were skipped, as stored on the athlete. If the athlete already has all of them, an error is shown.
 * If any event given to `untag` is not one of the athlete's events, an error is shown and **no** events are removed.
   This guards against removing the wrong events because of a typo.
 * A successful `tag` or `untag` displays the full roster again.
 
-Examples:
+Examples (run in order on the sample data):
 
-* `tag 1 t/100m t/200m` adds `100m` and `200m` to the 1st athlete.
-* `tag 3 t/Long Jump` adds `Long Jump` to the 3rd athlete.
-* `untag 1 t/200m` removes `200m` from the 1st athlete.
-
-Successful output:
-
-* `Added event(s) 100m, 200m to Avery Tan.`
-* `Added event(s) 200m to Avery Tan. Already had: 100m.`
-* `Removed event(s) 200m from Avery Tan.`
+* `tag 2 t/200m t/4x100m` adds `200m` and `4x100m` to the 2nd athlete.<br>
+  Output: `Added event(s) 200m, 4x100m to Daniel Lim.`
+* `tag 2 t/400M t/Relay` adds only `Relay`, because the athlete already has `400m`.<br>
+  Output: `Added event(s) Relay to Daniel Lim. Already had: 400m.`
+* `tag 3 t/Long Jump` adds `Long Jump` to the 3rd athlete.<br>
+  Output: `Added event(s) Long Jump to Priya Nair.`
+* `untag 1 t/200m` removes `200m` from the 1st athlete.<br>
+  Output: `Removed event(s) 200m from Avery Tan.`
 
 ### Finding athletes across all or selected fields: `find`
 

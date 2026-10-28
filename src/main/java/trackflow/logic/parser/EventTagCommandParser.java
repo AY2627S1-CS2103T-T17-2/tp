@@ -35,12 +35,12 @@ public abstract class EventTagCommandParser<T extends EventTagCommand> implement
         try {
             index = ParserUtil.parseIndex(argMultimap.getPreamble());
         } catch (ParseException pe) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, getUsage()), pe);
+            throw new ParseException(getInvalidFormatMessage(), pe);
         }
 
         List<String> eventNames = argMultimap.getAllValues(PREFIX_TAG);
         if (eventNames.isEmpty()) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, getUsage()));
+            throw new ParseException(getInvalidFormatMessage());
         }
         Set<Tag> events = new HashSet<>();
         for (String eventName : eventNames) {
@@ -65,6 +65,10 @@ public abstract class EventTagCommandParser<T extends EventTagCommand> implement
      * Returns the usage message shown when the arguments are invalid.
      */
     protected abstract String getUsage();
+
+    private String getInvalidFormatMessage() {
+        return String.format(MESSAGE_INVALID_COMMAND_FORMAT, getUsage());
+    }
 
     /**
      * Creates the command from successfully parsed arguments.
