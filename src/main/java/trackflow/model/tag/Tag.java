@@ -22,8 +22,9 @@ public class Tag {
 
     /**
      * Words of letters/digits, separated by a single space or hyphen.
+     * {@code (?U)} makes letters and digits include non-English ones, such as {@code É} in {@code Saut-Élan}.
      */
-    public static final String VALIDATION_REGEX = "\\p{Alnum}+([ -]\\p{Alnum}+)*";
+    public static final String VALIDATION_REGEX = "(?U)\\p{Alnum}+([ -]\\p{Alnum}+)*";
 
     public final String tagName;
 

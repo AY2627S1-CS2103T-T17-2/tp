@@ -57,13 +57,13 @@ public class TagCommandTest {
 
     @Test
     public void execute_someEventsAlreadyPresent_addsOnlyNewEvents() {
-        // ALICE already has 'friends'; matching ignores case
+        // ALICE already has 'friends'; matching ignores case and the stored name is reported
         Person athlete = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         TagCommand command = new TagCommand(INDEX_FIRST_PERSON, getTagSet("FRIENDS", "200m"));
         Person taggedAthlete = new PersonBuilder(athlete).withTags("friends", "200m").build();
 
         String expectedMessage = String.format(TagCommand.MESSAGE_SUCCESS, "200m", athlete.getName())
-                + String.format(TagCommand.MESSAGE_SKIPPED_EVENTS, "FRIENDS");
+                + String.format(TagCommand.MESSAGE_SKIPPED_EVENTS, "friends");
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
         expectedModel.setPerson(athlete, taggedAthlete);
 
@@ -76,7 +76,7 @@ public class TagCommandTest {
         TagCommand command = new TagCommand(INDEX_FIRST_PERSON, getTagSet("Friends"));
 
         assertCommandFailure(command, model,
-                String.format(TagCommand.MESSAGE_ALREADY_TAGGED, athlete.getName(), "Friends"));
+                String.format(TagCommand.MESSAGE_ALREADY_TAGGED, athlete.getName(), "friends"));
     }
 
     @Test

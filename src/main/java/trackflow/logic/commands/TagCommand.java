@@ -50,8 +50,9 @@ public class TagCommand extends EventTagCommand {
 
         Set<Tag> newEvents = new HashSet<>(events);
         newEvents.removeAll(athlete.getTags());
-        Set<Tag> skippedEvents = new HashSet<>(events);
-        skippedEvents.retainAll(athlete.getTags());
+        // Report skipped events as stored on the athlete, which may differ in case from the user's input
+        Set<Tag> skippedEvents = new HashSet<>(athlete.getTags());
+        skippedEvents.retainAll(events);
 
         if (newEvents.isEmpty()) {
             throw new CommandException(String.format(MESSAGE_ALREADY_TAGGED,
