@@ -94,6 +94,10 @@ public class AutocompleteEngineTest {
         suggestions = autocompleteEngine.getSuggestions("add\t");
         assertTrue(suggestions.isEmpty());
 
+        // other whitespace after the command word also ends command-word suggestions
+        assertTrue(autocompleteEngine.getSuggestions("add\n").isEmpty());
+        assertTrue(autocompleteEngine.getSuggestions("add ").isEmpty()); // em space
+
         suggestions = autocompleteEngine.getSuggestions("clear ");
         assertTrue(suggestions.isEmpty());
     }

@@ -51,6 +51,12 @@ public class TagTest {
         assertTrue(Tag.isValidTagName("4x100m"));
         assertTrue(Tag.isValidTagName("Long Jump")); // single space
         assertTrue(Tag.isValidTagName("110m-Hurdles")); // single hyphen
+        assertTrue(Tag.isValidTagName("Saut-Élan")); // non-English letter
+        assertTrue(Tag.isValidTagName("Ünder18 Sprint")); // non-English letter with a digit
+
+        // non-English symbols are still rejected
+        assertFalse(Tag.isValidTagName("100m€"));
+        assertFalse(Tag.isValidTagName("Élan!"));
     }
 
     @Test

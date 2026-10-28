@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -73,7 +74,8 @@ public abstract class EventTagCommand extends Command {
     }
 
     /**
-     * Formats events as a comma-separated list, sorted alphabetically ignoring case, e.g. {@code 100m, Long Jump}.
+     * Formats events as a comma-separated list, sorted alphabetically ignoring case,
+     * e.g. {@code 100m, Long Jump}.
      */
     protected static String formatEvents(Collection<Tag> events) {
         return events.stream()
@@ -100,7 +102,7 @@ public abstract class EventTagCommand extends Command {
 
     @Override
     public int hashCode() {
-        return index.hashCode() * 31 + events.hashCode();
+        return Objects.hash(index, events);
     }
 
     @Override

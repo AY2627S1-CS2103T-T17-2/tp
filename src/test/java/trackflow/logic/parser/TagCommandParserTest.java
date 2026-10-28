@@ -31,6 +31,11 @@ public class TagCommandParserTest {
     }
 
     @Test
+    public void parse_nonEnglishLetters_success() {
+        assertParseSuccess(parser, "1 t/Saut-Élan", new TagCommand(INDEX_FIRST_PERSON, getTagSet("Saut-Élan")));
+    }
+
+    @Test
     public void parse_extraWhitespaceInEvent_collapsed() {
         assertParseSuccess(parser, "1 t/  Long   Jump  ", new TagCommand(INDEX_FIRST_PERSON, getTagSet("Long Jump")));
     }
