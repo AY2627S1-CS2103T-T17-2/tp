@@ -380,7 +380,9 @@ Format: `sort FIELD [ORDER]`
 
 Available fields:
 
-* `name` sorts names alphabetically without considering letter case.
+* `name` sorts names alphabetically without considering letter case or repeated ordinary spaces. For example,
+  `Lee Ann` sorts before `Lee  Bob` (two spaces). Displayed and saved name text is unchanged; names differing only
+  in case or repeated spaces compare equally for sorting.
 * `age` sorts competition categories in this order: `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
 * `phone` sorts phone numbers numerically by all digits in the stored text, ignoring non-digit characters.
   Sorting keeps the displayed and saved phone text unchanged. Digits inside notes currently affect ordering;

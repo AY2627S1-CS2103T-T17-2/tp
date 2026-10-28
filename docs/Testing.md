@@ -98,6 +98,10 @@ prefixes, escaped text, broad searches, and sort arguments. They also check that
 remarks survives JSON reload and that unknown or duplicate prefixes still fail without changing saved data.
 Existing `JsonRosterStorageTest` and `MainAppTest` also check null JSON roots/entries and preservation of malformed data.
 
+Name-sort regressions in `SortCommandTest` and `LogicManagerTest` cover repeated spaces, equivalent case/spacing
+keys, ascending and descending order, and subsequent adds/edits. A fresh JSON read verifies that comparison-key
+normalization does not rewrite name text or saved roster order.
+
 For startup/preferences, strict JSON roots, application-home paths and unavailable file logging, run:
 
 ```bash

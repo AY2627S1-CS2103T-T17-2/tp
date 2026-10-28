@@ -86,6 +86,32 @@ public class SortCommandTest {
     }
 
     @Test
+    public void execute_nameWithRepeatedSpaces_sortsWithoutChangingNames() {
+        Person leeAnn = new PersonBuilder(AMY).withName("Lee Ann").build();
+        Person leeBob = new PersonBuilder(MIA).withName("Lee  Bob").build();
+        Person leeAmy = new PersonBuilder(ZOE).withName("lee   Amy").build();
+        model = new ModelManager(new AthleteRosterBuilder().withPerson(leeBob)
+                .withPerson(leeAnn).withPerson(leeAmy).build(), new UserPrefs());
+
+        assertSortSuccess(NAME, ASCENDING, List.of(leeAmy, leeAnn, leeBob));
+        assertSortSuccess(NAME, DESCENDING, List.of(leeBob, leeAnn, leeAmy));
+        assertEquals(List.of("Lee  Bob", "Lee Ann", "lee   Amy"), model.getRoster().getPersonList().stream()
+                .map(person -> person.getName().fullName).toList());
+    }
+
+    @Test
+    public void execute_namesDifferingOnlyInCaseAndSpacing_compareAsEqual() {
+        Person leeAnn = new PersonBuilder(AMY).withName("Lee Ann").build();
+        Person equivalentName = new PersonBuilder(MIA).withName("LEE   Ann").build();
+        model = new ModelManager(new AthleteRosterBuilder().withPerson(leeAnn)
+                .withPerson(equivalentName).build(), new UserPrefs());
+
+        new SortCommand(NAME, ASCENDING).execute(model);
+
+        assertEquals(0, model.getPersonListComparator().compare(leeAnn, equivalentName));
+    }
+
+    @Test
     public void execute_ageAscending_sortsByCompetitionCategory() {
         useModelWithAllAgeCategories();
         assertSortSuccess(AGE, ASCENDING, List.of(AMY, IAN, ZOE, UMA, MIA));

@@ -223,6 +223,26 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_nameSortWithRepeatedSpaces_preservesTextAcrossUpdatesAndReload() throws Exception {
+        logic.execute("add n/Lee  Bob a/Open p/911 e/bob@example.com addr/Home");
+        logic.execute("add n/Lee Ann a/Open p/922 e/ann@example.com addr/Home");
+        logic.execute("sort name");
+        assertEquals(List.of("Lee Ann", "Lee  Bob"), getDisplayedNames(model));
+        logic.execute("sort name desc");
+        assertEquals(List.of("Lee  Bob", "Lee Ann"), getDisplayedNames(model));
+
+        logic.execute("filter a/Open");
+        logic.execute("add n/Lee   Amy a/Under 14 p/933 e/amy@example.com addr/Home");
+        assertEquals(List.of("Lee  Bob", "Lee Ann", "Lee   Amy"), getDisplayedNames(model));
+        logic.execute("edit 1 n/Lee    Aaron");
+        assertEquals(List.of("Lee Ann", "Lee   Amy", "Lee    Aaron"), getDisplayedNames(model));
+
+        JsonRosterStorage storage = new JsonRosterStorage(temporaryFolder.resolve("roster.json"));
+        ReadOnlyRoster reloaded = storage.readRoster().orElseThrow();
+        assertEquals(List.of("Lee    Aaron", "Lee Ann", "Lee   Amy"), getStoredNames(reloaded));
+    }
+
+    @Test
     public void execute_deleteAfterSort_usesSortedDisplayIndex() throws Exception {
         logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com addr/123 Main Street");
         logic.execute("add n/Zoe Tan a/Under 18 p/999 e/zoe@example.com addr/123 Main Street");

@@ -487,8 +487,9 @@ comparator through `Model.updateSortedPersonList`, changing only the displayed v
 `roster` order. Consequently, sorting composes with `find`, `filter`, and `list`, and indexed commands continue to
 resolve athletes against exactly what the user sees. The comparator is session-only and is not persisted.
 
-Text fields are compared without considering letter case. Phone sorting removes all non-digit characters before
-converting the stored text to an arbitrary-precision numeric value. Stored text is unchanged and large values do
+Text fields are compared without considering letter case. Name comparison also collapses repeated ordinary spaces
+in the comparison key without rewriting the displayed or saved name. Phone sorting removes all non-digit characters
+before converting the stored text to an arbitrary-precision numeric value. Stored text is unchanged and large values do
 not overflow. The current key includes digits inside phone notes, matching the current contact comparison; this
 known limitation is described in the UG and remains a separate phone-normalization fix.
 Age categories use the competition order
@@ -952,6 +953,20 @@ add n/Faye Teo a/Under 20 p/96666666 e/faye@example.com addr/60 Stadium Road
    change.
 1. Restart TrackFlow. Expect the remaining athletes in saved roster order; the deletion persists but sorting does not.
 
+For a separate name-spacing regression, use another disposable home folder and enter these commands one at a time:
+
+```text
+clear
+add n/Lee  Bob a/Open p/911 e/bob@example.com addr/Home
+add n/Lee Ann a/Open p/922 e/ann@example.com addr/Home
+sort name
+```
+
+Expect Lee Ann before Lee Bob, even though Bob's stored name has two spaces. Run `sort name desc` and expect the
+reverse order. Both names must retain their original spacing on screen and in the saved file. Restart: saved roster
+order is Bob then Ann, and Bob's two spaces remain intact. `SortCommandTest` and `LogicManagerTest` also cover
+equivalent name keys, both directions, subsequent adds/edits, and unchanged text after a fresh storage read.
+
 ### Command autocomplete
 
 When a step asks you to type a new command below, replace the previous input rather than appending to it.
@@ -1106,8 +1121,9 @@ tag 1 t/100m
 ### Duplicate identity and complete equality
 
 Duplicate checks use normalized name plus **either** matching phone or matching email, regardless of age category.
-Name normalization ignores case and repeated spaces; email matching ignores case. Complete equality additionally
-compares every stored value, including category, address, remark, and events. These are separate contracts.
+Name normalization ignores case and repeated spaces; email matching ignores case. Complete equality applies each
+field's equality rules across every field, including category, address, remark, and events. Phone formatting and
+event-name case do not by themselves make records unequal. These are separate contracts.
 
 1. Start with only Avery: run `clear`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`. Attempt to add `AVERY   TAN` with the same phone and a different
    email and category. Expect a duplicate error, with no saved changes. Repeat with a different phone and matching
