@@ -24,7 +24,7 @@ public class AutocompleteEngine {
             "exit",
             "filter a/",
             "find ",
-            "sort",
+            "sort name|age|phone|email|address [asc|desc]",
             "help",
             "list",
             "remark INDEX r/",

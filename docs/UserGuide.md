@@ -119,7 +119,7 @@ If a value begins with a slash, put a space after the real parameter: `edit 1 ad
 
 TrackFlow provides an autocomplete feature to speed up typing and ensure correct command formats.
 
-* As you type a command word in the command box, a dropdown menu will appear with suggested commands, including mandatory index parameters and prefixes (e.g., `edit INDEX n/ a/ p/ e/ addr/`, `delete INDEX`, `remark INDEX r/`). Suggestions are matched case-insensitively.
+* As you type a command word in the command box, a dropdown menu will appear with suggested commands, including mandatory index parameters and prefixes (e.g., `edit INDEX n/ a/ p/ e/ addr/`, `delete INDEX`, `remark INDEX r/`). For `sort`, the suggestion lists the supported fields and orders: `sort name|age|phone|email|address [asc|desc]`. Suggestions are matched case-insensitively.
 * Use the **Up** and **Down** arrow keys to navigate the list of suggestions.
 * Press **Tab**, or **Click** on a suggestion, to select it. This will insert the command word (followed by a space) into the command box and close the suggestions dropdown.
 * Pressing **Enter** does **not** select or apply a suggestion; it closes the suggestions dropdown and executes the command currently typed in the command box.
