@@ -74,8 +74,10 @@ Interface (GUI).
 
 * The `list`, `help`, `clear`, and `exit` commands do not accept parameters.
 
-* Leading and trailing ordinary spaces around a command are ignored. Use ordinary spaces between the command
-  word and its arguments; pasted Unicode spaces can be treated differently. See [Known issues](#known-issues).
+* Leading and trailing spaces around a command or parameter value are ignored. Pasted Unicode spaces, including
+  non-breaking and em spaces, are accepted between the command word and parameters, before prefixes, and between
+  `sort` arguments or broad `find` keywords. Spaces inside field values are preserved and follow that field's rules.
+  Invisible zero-width characters are not separators.
 
 * Enter one command per submission, using spaces to separate its word and parameters. The command box is a
   single-line field: pasted tabs and line breaks can be removed, joining adjacent text. Replace them with spaces
@@ -510,8 +512,6 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
 * **Phone formatting:** numbers wholly inside parentheses can be rejected, and digits inside notes can change
   duplicate checks and phone sorting. Keep the number outside parentheses and use notes such as `(HP)` without digits.
-* **Pasted whitespace:** use ordinary spaces at command boundaries. Some Unicode space characters are not handled
-  consistently by the command parser.
 * **Long stored event names:** a legacy event label may be clipped in a narrow window. The complete value remains
   in `data/trackflow.json`; close the app and inspect a backup copy when you need the exact name for `untag`.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do

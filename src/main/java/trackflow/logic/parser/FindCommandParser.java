@@ -40,7 +40,8 @@ public class FindCommandParser implements Parser<FindCommand> {
                 PREFIX_ADDRESS, PREFIX_REMARK, PREFIX_TAG);
 
         String preamble = arguments.getPreamble();
-        List<String> broadKeywords = preamble.isEmpty() ? List.of() : List.of(preamble.split("\\s+"));
+        List<String> broadKeywords = preamble.isEmpty() ? List.of()
+                : List.of(preamble.split(CommandWhitespace.SEPARATOR_REGEX));
         Map<SearchField, List<String>> fieldKeywords = new EnumMap<>(SearchField.class);
         addFieldKeyword(arguments, PREFIX_NAME, SearchField.NAME, fieldKeywords);
         addFieldKeyword(arguments, PREFIX_AGE_CATEGORY, SearchField.AGE_CATEGORY, fieldKeywords);

@@ -296,8 +296,14 @@ command, not a batch. Each field keeps its existing validation rules. The JavaFX
 `TextField` that removes pasted tabs and line breaks before parsing; users should paste commands on one line with
 spaces. Parser-level tests exercise multiline input directly.
 
+`CommandWhitespace` defines syntax separators as characters accepted by `Character.isWhitespace` or
+`Character.isSpaceChar`, including non-breaking, figure, narrow non-breaking, and em spaces. Command-word
+splitting, no-argument validation, index boundaries, broad search keywords, and sort arguments share this rule.
+Only boundary whitespace is stripped; whitespace inside field values retains its existing validation and storage
+behaviour. Zero-width spaces are not separators.
+
 `ArgumentTokenizer` recognizes supported parameter prefixes without considering letter case at the start of the
-arguments or after `Character.isWhitespace` characters, storing them under their canonical prefix.
+arguments or after these syntax separators, storing them under their canonical prefix.
 `ParserUtil.verifyNoUnknownPrefixes` uses the same boundary to reject unsupported parameter-like tokens of the
 reserved single-letter or `addr/` form before values are parsed. For example, unsupported `t/` produces a
 command-specific error. Longer slash-containing words such as `wrong/value` remain text.

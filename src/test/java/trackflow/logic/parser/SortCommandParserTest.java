@@ -11,6 +11,8 @@ import static trackflow.logic.commands.SortCommand.SortOrder.DESCENDING;
 import static trackflow.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static trackflow.logic.parser.CommandParserTestUtil.assertParseSuccess;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import trackflow.logic.commands.SortCommand;
@@ -39,6 +41,17 @@ public class SortCommandParserTest {
     @Test
     public void parse_mixedCaseAndWhitespace_returnsSortCommand() {
         assertParseSuccess(parser, "  AgE   DeSc  ", new SortCommand(AGE, DESCENDING));
+    }
+
+    @Test
+    public void parse_unicodeWhitespace_validatesAllArguments() {
+        for (String separator : List.of("\u00a0", "\u2003", "\u2007", "\u202f", "\u3000")) {
+            assertParseSuccess(parser, separator + "phone" + separator + "desc" + separator,
+                    new SortCommand(PHONE, DESCENDING));
+            String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
+            assertParseFailure(parser, separator, expectedMessage);
+            assertParseFailure(parser, "name" + separator + "asc" + separator + "extra", expectedMessage);
+        }
     }
 
     @Test

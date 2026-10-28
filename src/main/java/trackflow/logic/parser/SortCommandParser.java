@@ -16,12 +16,12 @@ public class SortCommandParser implements Parser<SortCommand> {
 
     @Override
     public SortCommand parse(String arguments) throws ParseException {
-        String trimmedArguments = arguments.trim();
+        String trimmedArguments = CommandWhitespace.strip(arguments);
         if (trimmedArguments.isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE));
         }
 
-        String[] tokens = trimmedArguments.split("\\s+");
+        String[] tokens = trimmedArguments.split(CommandWhitespace.SEPARATOR_REGEX);
         if (tokens.length > 2) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE));
         }

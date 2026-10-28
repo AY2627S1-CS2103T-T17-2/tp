@@ -52,6 +52,31 @@ public class ParserRobustnessTest {
     }
 
     @Test
+    public void execute_unicodeBoundaries_preserveContentAndValidatePrefixes() throws Exception {
+        for (String separator : List.of("\u00a0", "\u2003", "\u2007", "\u202f", "\u3000")) {
+            // Only syntax boundaries are interchangeable; whitespace inside free text must survive saving.
+            String address = "Block" + separator + "Annex  A/B";
+            String remark = "Practise" + separator + "x/y  twice";
+            logic.execute(separator + "edit" + separator + "1" + separator + "addr/" + separator
+                    + "Block" + separator + "Annex  A//B" + separator);
+            logic.execute("remark" + separator + "1" + separator + "r/Practise" + separator + "x//y  twice");
+            Person athlete = model.getFilteredPersonList().getFirst();
+            assertEquals(address, athlete.getAddress().value);
+            assertEquals(remark, athlete.getRemark().value);
+            assertEquals(athlete, rosterStorage.readRoster().orElseThrow().getPersonList().getFirst());
+
+            logic.execute("find" + separator + "Missing" + separator + "Avery");
+            assertEquals(List.of(athlete), model.getFilteredPersonList());
+            assertRejectedWithoutChanges(ParseException.class, List.of(
+                    "edit" + separator + "1" + separator + "addr/Home" + separator + "x/unknown",
+                    "remark 1 r/Note" + separator + "x/unknown",
+                    "edit 1 addr/Home" + separator + "ADDR/Other",
+                    "edit 1 addr/" + separator,
+                    "find n/" + separator));
+        }
+    }
+
+    @Test
     public void execute_escapedSlashText_persistsAndCanBeFound() throws Exception {
         logic.execute("edit 1 addr/Block A//B addr//Annex");
         logic.execute("remark 1 r/Practise r//relay x//y Mon/Tue");
