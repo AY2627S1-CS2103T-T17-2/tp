@@ -52,13 +52,12 @@
         "common-classes": "Common classes",
         "implementation": "Implementation",
         "command-parsing-and-validation": "Command parsing and validation",
-        "broad-and-field-scoped-finding": "Broad and field-scoped finding",
+        "finding-athletes": "Finding athletes",
         "command-autocomplete": "Command autocomplete",
         "athlete-remarks": "Athlete remarks",
         "event-tagging": "Event tagging",
         "age-category-filtering": "Age-category filtering",
         "multi-field-sorting": "Multi-field sorting",
-        "flexible-athlete-search": "Flexible athlete search",
         "future-features-future": "Future features [Future]",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
         "appendix-requirements": "Appendix: Requirements",
@@ -69,6 +68,7 @@
         "non-functional-requirements": "Non-Functional Requirements",
         "glossary": "Glossary",
         "appendix-instructions-for-manual-testing": "Appendix: Instructions for manual testing",
+        "before-testing": "Before testing",
         "launch-and-shutdown": "Launch and shutdown",
         "deleting-an-athlete": "Deleting an athlete",
         "filtering-by-age-category": "Filtering by age category",
@@ -78,8 +78,9 @@
         "missing-or-corrupted-data-file-recovery": "Missing or corrupted data file recovery",
         "adding-editing-and-remarks": "Adding, editing, and remarks",
         "parser-robustness": "Parser robustness",
-        "finding-athletes": "Finding athletes",
+        "finding-athletes-2": "Finding athletes",
         "tagging-athletes-with-events": "Tagging athletes with events",
+        "help-and-clearing-a-test-roster": "Help and clearing a test roster",
         "duplicate-identity-and-complete-equality": "Duplicate identity and complete equality"
       },
       "headingKeywords": {}
@@ -89,6 +90,7 @@
       "title": "Documentation guide",
       "headings": {
         "documentation-guide": "Documentation Guide",
+        "keeping-the-guides-current": "Keeping the guides current",
         "building-and-checking-the-site": "Building and checking the site",
         "uml-diagram-conventions": "UML diagram conventions",
         "shared-appearance": "Shared appearance",
@@ -128,6 +130,7 @@
         "testing-guide": "Testing guide",
         "running-tests": "Running tests",
         "types-of-tests": "Types of tests",
+        "reading-and-reviewing-tests": "Reading and reviewing tests",
         "build-and-focused-tests": "Build and focused tests"
       },
       "headingKeywords": {}
@@ -139,6 +142,7 @@
         "trackflow-user-guide": "TrackFlow User Guide",
         "quick-start": "Quick start",
         "features": "Features",
+        "working-with-the-displayed-list": "Working with the displayed list",
         "addresses-and-remarks-containing-slashes": "Addresses and remarks containing slashes",
         "command-autocomplete": "Command autocomplete",
         "window-size-and-scrolling": "Window size and scrolling",
@@ -157,7 +161,6 @@
         "exiting-the-program-exit": "Exiting the program: exit",
         "saving-the-data": "Saving the data",
         "editing-the-data-file": "Editing the data file",
-        "archiving-data-files-future": "Archiving data files [Future]",
         "faq": "FAQ",
         "known-issues": "Known issues",
         "command-summary": "Command summary"
