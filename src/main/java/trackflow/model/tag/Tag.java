@@ -19,7 +19,7 @@ public class Tag {
             + "made of words of letters or digits, separated by a single space or a single hyphen "
             + "(e.g. 100m, Long Jump, 110m-Hurdles; not Long - Jump or Long--Jump).";
 
-    /*
+    /**
      * Words of letters/digits, separated by a single space or hyphen.
      */
     public static final String VALIDATION_REGEX = "\\p{Alnum}+([ -]\\p{Alnum}+)*";

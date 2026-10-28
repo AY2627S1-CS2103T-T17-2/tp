@@ -81,6 +81,7 @@ public class PersonListPanel extends UiPart<Region> {
             }
         }
     }
+
     /**
      * Adds the person to the known persons map if they haven't been seen before.
      * Uses weak references to allow deleted athletes to be garbage collected.
