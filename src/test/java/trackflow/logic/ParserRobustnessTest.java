@@ -335,7 +335,7 @@ public class ParserRobustnessTest {
             model = new ModelManager(rosterStorage.readRoster().orElseThrow(), model.getUserPrefs());
             logic = new LogicManager(model, new StorageManager(rosterStorage,
                     new JsonUserPrefsStorage(temporaryFolder.resolve("preferences.json"))));
-            logic.execute("edit 1 p/91234567");
+            logic.execute("edit 1 p/9123456" + restart);
             Person athlete = model.getFilteredPersonList().getFirst();
             assertEquals("Block A///B addr//annex", athlete.getAddress().value);
             assertEquals("Use r///relay https://host/a//b", athlete.getRemark().value);
