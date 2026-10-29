@@ -68,6 +68,6 @@ with(this){return _c('pre',[_c('code',{pre:true,attrs:{"class":"hljs bash"}},[_c
 with(this){return _c('p',[_v("On Windows, use "),_c('code',{pre:true,attrs:{"class":"hljs inline no-lang"}},[_v("gradlew.bat")]),_v(". Open "),_c('code',{pre:true,attrs:{"class":"hljs inline no-lang"}},[_v("build/docs/javadoc/index.html")]),_v(" to inspect the generated API documentation.\nThe Javadoc tool can also report optional missing tags or comments on simple accessors/constants; those warnings\nare separate from the course standard's documented exceptions. Resolve malformed markup and broken references,\nand manually verify that each changed header describes the current behavior.")])}
 },function anonymous(
 ) {
-with(this){return _c('footer',[_c('div',{staticClass:"text-center"},[_c('small',[_v("["),_c('span',[_c('strong',[_v("Powered by")])]),_v(" "),_c('img',{attrs:{"src":"https://markbind.org/favicon.ico","width":"30"}}),_v(" "),_c('a',{attrs:{"href":"https://markbind.org/"}},[_v("MarkBind 5.1.0")]),_v(", generated on Thu, 29 Oct 2026, 19:07:06 GMT+8]")])])])}
+with(this){return _c('footer',[_c('div',{staticClass:"text-center"},[_c('small',[_v("["),_c('span',[_c('strong',[_v("Powered by")])]),_v(" "),_c('img',{attrs:{"src":"https://markbind.org/favicon.ico","width":"30"}}),_v(" "),_c('a',{attrs:{"href":"https://markbind.org/"}},[_v("MarkBind 5.1.0")]),_v(", generated on Thu, 29 Oct 2026, 19:19:13 GMT+8]")])])])}
 }];
   
