@@ -96,16 +96,12 @@ The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDi
 `AutocompleteEngine`, and each `PersonCard` holds the `Person` it displays. Generic JavaFX root parameters and
 toolkit details are omitted from this partial view.
 
-When restoring the window, `MainWindow` reads the saved size and position from `GuiSettings` and asks the
-stateless `WindowPlacement` utility, through a static call, whether that position is still reachable on a
-connected screen; it keeps no `WindowPlacement` instance. An unreachable position falls back to a size capped to
-the primary screen. On exit, `MainWindow` writes the current bounds back to `GuiSettings`.
-
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/MainWindow.java).
 
-`MainWindow` uses the static `WindowPlacement.fit` helper to fit saved outer bounds, including decorations, inside
-the visual bounds of a connected screen. A reachable saved position selects the screen with the largest overlap;
-an unreachable position falls back to the primary screen's center. Both restoration paths cap dimensions and
+`MainWindow` reads the saved window bounds from `GuiSettings` and uses the static `WindowPlacement.fit` helper to
+fit those outer bounds, including decorations, inside the visual bounds of a connected screen. A reachable saved
+position selects the screen with the largest overlap; an unreachable position falls back to the primary screen's
+center. Both restoration paths cap dimensions and
 clamp coordinates. The preferred minimum is 450 by 400 pixels, limited by the selected screen's usable area.
 Normal bounds are remembered in preferences in memory as the window moves or resizes, allowing normal bounds to
 survive maximized, minimized, full-screen and OS quit paths. Preference storage writes them on shutdown.

@@ -514,8 +514,6 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
 * **Phone duplicate checks:** validation and phone sorting ignore bracketed notes, but digits inside notes can still
   affect duplicate checks. Use notes without digits when adding or editing athletes until this separate identity
   issue is fixed. Write a bracketed country code with `+`, such as `(+65)`.
-* **Long stored event names:** a legacy event label may be clipped in a narrow window. The complete value remains
-  in `data/trackflow.json`; close the app and inspect a backup copy when you need the exact name for `untag`.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do
   not coordinate edits and a later save can overwrite changes from the other instance.
 
