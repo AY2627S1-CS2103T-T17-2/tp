@@ -28,8 +28,8 @@ Interface (GUI).
    will be stored beside the JAR. Use a separate copy in an empty folder when experimenting with test data.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar TrackFlow.jar`.<br>
-   On first launch, the GUI opens with sample athletes. On later launches, it opens your saved roster instead.
-   This screenshot shows the running application after `list`:<br>
+   On first launch, the GUI opens with sample athletes. After a successful roster change, later launches open your
+   saved roster instead. This screenshot shows the application displaying its sample roster:<br>
    ![TrackFlow displaying sample athletes with age categories, event labels, and command feedback](images/Ui.png)
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
