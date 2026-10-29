@@ -184,8 +184,9 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
 * All five fields are required.
 * Fields may appear in any order. Each parameter may appear only once.
 * Age category must be `Under 14`, `Under 16`, `Under 18`, `Under 20`, or `Open`. Category input ignores case and normalizes repeated spaces.
-* Names must start with a letter or digit and contain only ASCII letters (`A`–`Z`, `a`–`z`), digits, ordinary spaces,
-  hyphens, and apostrophes (for example, `Mary-Jane` or `O'Brien`). Accented letters and other writing systems are
+* Names are words of ASCII letters (`A`–`Z`, `a`–`z`) and digits, separated by ordinary spaces. A single hyphen or
+  apostrophe may join two words (for example, `Mary-Jane` or `O'Brien`), but a name cannot start or end with one,
+  repeat one (`Mary--Jane`), or put spaces around one (`Mary - Jane`). Accented letters and other writing systems are
   not currently supported.
 * Phone numbers must contain at least three significant digits. They may also include spaces, `+`, `-`, `(`, and
   `)`. A bracketed country code such as `(+65)` is part of the number, but any other bracketed text is treated as a
@@ -201,7 +202,8 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   listed separately with their name, age category, phone, email, and whether the phone, email, or both matched.
   Both checks search the full roster, including hidden athletes. Warnings identify athletes by their details rather
   than displayed indexes, which can change after a command.
-* Use `addr/ADDRESS` to supply the required nonblank, single-line address.
+* Use `addr/ADDRESS` to supply the required nonblank, single-line address. Addresses can contain any characters except line
+  breaks, including pasted line or paragraph separators.
 * Add does not accept events or remarks. `edit` updates athlete details and addresses, `tag` and `untag` update track events, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
   existing address, events, and remarks. Saved rosters are checked using the same duplicate rule on loading.
