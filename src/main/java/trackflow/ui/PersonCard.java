@@ -54,7 +54,9 @@ public class PersonCard extends UiPart<Region> {
     public PersonCard(Person person, int displayedIndex) {
         super(FXML);
         this.person = person;
-        id.setText(String.format("%02d", displayedIndex));
+        // Format with a fixed locale so the index always uses ASCII digits, matching the parser (which rejects
+        // locale-specific digits such as Arabic-Indic ٠١ under an Arabic locale).
+        id.setText(String.format(Locale.ROOT, "%02d", displayedIndex));
         name.setText(person.getName().fullName);
         ageCategory.setText(person.getAgeCategory().value);
         phone.setText(person.getPhone().value);
