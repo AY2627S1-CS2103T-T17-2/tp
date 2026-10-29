@@ -3,27 +3,24 @@
   title: "Austin Chia - Project Portfolio"
 ---
 
-This template is excluded from the published site. Copy it to `team/YOUR_GITHUB_HANDLE.md`, replace this notice
-and the title with your own details, and record only work you actually contributed. Add working links to the
-relevant pull requests, reviews, or other evidence before publishing.
+# Austin Chia - Project Portfolio
 
 ### Project: TrackFlow
-
-Describe the product briefly, then explain your contributions under the relevant headings below.
-Remove unused headings.
+TrackFlow is a desktop application for track and field coaches and sports administrators to manage their athlete rosters efficiently. It provides a fast, CLI-optimized interface alongside a clean graphical view to track athletes, contact details, ages, and performance tags.
 
 ### Code contributions
-
-Describe implemented features or fixes, your design decisions, and links to the merged changes.
+- **Search & Sort Logic**: Implemented the `sort reset` mechanism to restore the roster list to its default saved order. Fixed name search spacing mechanisms and remark feedback consistency.
+- **Age-Category Filtering**: Created the age-category architecture and updated the `filter` command logic to support finding athletes by specific age brackets.
+- **Validation**: Improved duplicate handling and implemented phone-note duplicate detection (AF01) to prevent silent collisions in the athlete roster.
 
 ### Testing
-
-Explain the meaningful test cases or testing improvements you contributed and link to evidence.
+- Wrote unit tests for age-category model filtering and verification of the sort-reset feature. Ensured duplicate detection mechanisms were thoroughly covered.
 
 ### Documentation
-
-Describe your User Guide, Developer Guide, and diagram changes with links to the corresponding changes.
+- **User Guide**: Consistently updated the UG across versions (v1.1 to v1.4). Authored the usage guidelines for age-category filtering.
+- **Developer Guide**: Authored the unified `ModelClassDiagram` UML to reflect roster interface changes and collection relationships.
+- **DevOps**: Pinned MarkBind configurations and actively fixed GitHub Actions docs deployment workflow (`docs.yml`).
 
 ### Project management and team contributions
-
-Record releases, reviews, or coordination you actually performed, with supporting links.
+- **Role**: Documentation
+- Monitored and assigned documentation workload among team members to keep styling and templates consistent. Fixed Markdown pipeline compilation issues before release deadlines.

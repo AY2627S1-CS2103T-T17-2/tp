@@ -3,27 +3,23 @@
   title: "Kenil - Project Portfolio"
 ---
 
-This template is excluded from the published site. Copy it to `team/YOUR_GITHUB_HANDLE.md`, replace this notice
-and the title with your own details, and record only work you actually contributed. Add working links to the
-relevant pull requests, reviews, or other evidence before publishing.
+# Kenil - Project Portfolio
 
 ### Project: TrackFlow
-
-Describe the product briefly, then explain your contributions under the relevant headings below.
-Remove unused headings.
+TrackFlow is a desktop application for track and field coaches and sports administrators to manage their athlete rosters efficiently. It provides a fast, CLI-optimized interface alongside a clean graphical view to track athletes, contact details, ages, and performance tags.
 
 ### Code contributions
-
-Describe implemented features or fixes, your design decisions, and links to the merged changes.
+- **UI Enhancements**: Resolved critical UI runtime bugs including window fitting, layout resizing, keyboard autocomplete behavior, and fixed the locale for athlete indexes. Added logic to show "X of Y" count when filter or find commands hide athletes.
+- **Personal Best Feature**: Designed and implemented the `pb` and `pbdel` commands to record athlete personal bests. Engineered the UI to display these as clearly labeled chips on the athlete card with split event names, values, and units.
+- **Validation Hardening**: Improved phone number validation and parsing by supporting bracketed country codes and rejecting malformed inputs.
 
 ### Testing
-
-Explain the meaningful test cases or testing improvements you contributed and link to evidence.
+- Wrote and expanded UI integration tests to assert correct graphical component state updates upon command executions. Asserted correct bounds constraints for application window scaling.
 
 ### Documentation
-
-Describe your User Guide, Developer Guide, and diagram changes with links to the corresponding changes.
+- **User Guide**: Added comprehensive documentation for the `pb` and `pbdel` commands. Authored UI walkthroughs and refreshed UI screenshots for the current release.
+- **Developer Guide**: Created the UI class diagram (`UiClassDiagram.puml`) with window placement helpers and wrote the DG window-bounds implementation explanation.
 
 ### Project management and team contributions
-
-Record releases, reviews, or coordination you actually performed, with supporting links.
+- **Role**: UI
+- Actively managed UI-related PRs, ensuring a cohesive and responsive visual layout. Guided the user interface experience and handled bug fixes for v1.4 and v1.5 UI rendering.
