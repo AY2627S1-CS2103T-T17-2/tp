@@ -2,8 +2,11 @@ package trackflow.model.person;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
+
+import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
@@ -50,6 +53,18 @@ public class NameTest {
         assertTrue(Name.isValidName("Jean-Luc O'Neil")); // hyphen and apostrophe in different words
         assertTrue(Name.isValidName("Lee  Ann")); // repeated spaces between words
         assertTrue(Name.isValidName("A")); // single letter
+    }
+
+    @Test
+    public void isValidName_longWordSequences_doesNotOverflowOrStall() {
+        String manyWords = "Alex ".repeat(3000).trim();
+        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
+            assertTrue(Name.isValidName(manyWords));
+            assertTrue(Name.isValidName(manyWords + "   "));
+            assertTrue(Name.isValidName("Alex-".repeat(3000) + "Tan"));
+            assertFalse(Name.isValidName(manyWords + "!"));
+            assertFalse(Name.isValidName(manyWords + "-"));
+        });
     }
 
     @Test

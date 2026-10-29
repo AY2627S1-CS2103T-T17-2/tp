@@ -4,14 +4,15 @@ import static java.util.Objects.requireNonNull;
 import static trackflow.commons.util.AppUtil.checkArgument;
 
 import java.text.Normalizer;
-import java.util.Locale;
+
+import trackflow.commons.util.StringUtil;
 
 /**
  * Represents a track event tag (e.g. {@code 100m}, {@code Long Jump}) of an athlete in the roster.
  * Tags are compared case-insensitively, but keep the casing they were created with for display.
  * Names are stored in composed Unicode form, so an accent typed as a separate mark matches the single-letter spelling.
  * New names satisfy {@link #isValidTagName(String)}; stored legacy names may also be longer alphanumeric strings.
- * Guarantees: immutable; the original name is preserved.
+ * Guarantees: immutable; the original capitalisation is preserved, with equivalent accent spellings composed.
  */
 public class Tag {
 
@@ -77,8 +78,7 @@ public class Tag {
     }
 
     private String getNormalizedName() {
-        // Upper-casing first also matches letters with more than one lower-case form, such as the Greek σ and ς
-        return tagName.toUpperCase(Locale.ROOT).toLowerCase(Locale.ROOT);
+        return StringUtil.normalizeForCaseInsensitiveMatching(tagName);
     }
 
     @Override

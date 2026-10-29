@@ -28,8 +28,8 @@ Interface (GUI).
    will be stored beside the JAR. Use a separate copy in an empty folder when experimenting with test data.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar TrackFlow.jar`.<br>
-   On first launch, the GUI opens with sample athletes. On later launches, it opens your saved roster instead.
-   This screenshot shows the running application after `list`:<br>
+   On first launch, the GUI opens with sample athletes. After a successful roster change, later launches open your
+   saved roster instead. This screenshot shows the application displaying its sample roster:<br>
    ![TrackFlow displaying sample athletes with age categories, event labels, and command feedback](images/Ui.png)
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
@@ -136,6 +136,7 @@ TrackFlow provides an autocomplete feature to speed up typing and ensure correct
   For `edit`, `remark`, `tag`, and `untag`, type the athlete index first; autocomplete does not insert it for you.
   After typing a parameter value, press **Tab** to insert the next missing prefix.
 * Prefixes already entered in the command box (even in uppercase or in a different order) are recognized and skipped automatically.
+  Autocomplete uses the same Unicode-space separators as command parsing, including pasted non-breaking spaces.
 * Press **Escape** to dismiss suggestions. **Shift+Tab** moves focus backward. When no suggestion or prefix is
   available, **Tab** moves focus to the next control, allowing keyboard access to feedback and the roster.
 
@@ -187,13 +188,23 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   apostrophe may join two words (for example, `Mary-Jane` or `O'Brien`), but a name cannot start or end with one,
   repeat one (`Mary--Jane`), or put spaces around one (`Mary - Jane`). Accented letters and other writing systems are
   not currently supported.
-* Phone numbers must contain at least three significant digits. They may also include spaces, `+`, `-`, `(`, and
-  `)`. A bracketed country code such as `(+65)` is part of the number, but any other bracketed text is treated as a
-  note and ignored, whether it is letters like `(HP)` or digits like `(5)` (for example, `+65 9123 4567`,
-  `(+65) 9123 4567`, or `9123 4567 (HP)`).
-* Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
-* Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Phone comparisons ignore bracketed notes (including digits), but count a bracketed country code such as `(+65)`. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
-* Use `addr/ADDRESS` to supply the required nonblank address. Addresses can contain any characters except line
+  Searching, sorting, and duplicate checking do not rename athletes or rewrite their stored name spacing.
+* Phone numbers must contain at least three significant digits, written as digit groups separated by spaces or
+  single hyphens (for example, `9123 4567` or `9123-4567`). An unbracketed `+` is allowed only at the start.
+  Brackets must be balanced and non-empty. A bracketed country code such as `(+65)` is part of the number, but
+  other bracketed text is treated as a note and ignored, whether it is letters like `(HP)` or digits like `(5)`.
+  Examples: `+65 9123 4567`, `(+65) 9123 4567`, or `9123 4567 (HP)`.
+* Emails must have the form `local-part@domain` and contain at most 254 characters. The local part consists of
+  alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by
+  hyphens; the final label must have at least two characters. Spaces are not allowed.
+* Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless
+  of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case.
+  Phone comparisons ignore bracketed notes (including digits), but retain country codes such as `(+65)`.
+  A different name sharing a phone or email is allowed with a possible-duplicate warning. Each matching athlete is
+  listed separately with their name, age category, phone, email, and whether the phone, email, or both matched.
+  Both checks search the full roster, including hidden athletes. Warnings identify athletes by their details rather
+  than displayed indexes, which can change after a command.
+* Use `addr/ADDRESS` to supply the required nonblank, single-line address. Addresses can contain any characters except line
   breaks, including pasted line or paragraph separators.
 * Add does not accept events or remarks. `edit` updates athlete details and addresses, `tag` and `untag` update track events, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
@@ -208,7 +219,9 @@ Successful output:
 
 `New athlete added: Kaylee Teo; Age category: Under 14; Phone: 61234567; Email: kaylee.teo@example.com`
 
-A duplicate produces `This athlete already exists in the roster: Avery Tan.` Failed validation leaves the command text available for correction.
+A duplicate add names the stored athlete, preserving their spelling, for example
+`This athlete already exists in the roster: Avery Tan.`, even if the submitted name was `avery   tan`.
+Failed validation leaves the command text available for correction.
 
 Command words and parameter prefixes are case-insensitive. Use `sort` to change the displayed order. TrackFlow reports
 a roster-changing command as successful only after saving it. If saving fails, the roster and displayed list remain
@@ -323,6 +336,8 @@ Format: `untag INDEX t/EVENT [t/EVENT]...`
   or `Long--Jump`.
   Letters include accented and non-English letters, e.g. `Saut-Élan`.
 * Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalisation it was first added with.
+  Equivalent accent spellings, such as an accented letter typed as a letter followed by an accent mark, are composed
+  into the same form. `tag`, `untag`, and `find` use the same case and accent equivalence rules.
 * Older rosters may contain alphanumeric tags longer than 30 characters. TrackFlow preserves these exactly when
   loading and saving. They remain searchable and can be removed with `untag INDEX t/EXACT_NAME`, ignoring case.
   The 30-character limit still applies when adding a new event with `tag`.
@@ -516,9 +531,10 @@ protect the original file. Keep the preserved copy if you need to recover its re
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install TrackFlow on the other computer and overwrite the data file it creates with the data file from your
-previous TrackFlow home folder. Close TrackFlow on both computers first and back up any destination roster before
-replacing it. Put the JAR in the destination home folder so TrackFlow reads its `data/trackflow.json`.
+**A**: Install TrackFlow on the other computer, then close TrackFlow on both computers. Back up any destination
+roster before replacing it. Inside the destination folder containing the JAR, create a `data` folder if necessary,
+then copy your previous home folder's `data/trackflow.json` into it. On the next launch, TrackFlow reads that copied
+file. A fresh launch only displays sample athletes; it does not create a roster file until a successful change.
 
 --------------------------------------------------------------------------------------------------------------------
 

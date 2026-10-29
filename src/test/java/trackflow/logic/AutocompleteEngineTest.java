@@ -9,6 +9,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import trackflow.logic.commands.EditCommand;
+import trackflow.logic.parser.TrackFlowParser;
+
 public class AutocompleteEngineTest {
 
     private AutocompleteEngine autocompleteEngine;
@@ -89,6 +92,28 @@ public class AutocompleteEngineTest {
     public void getSuggestions_leadingWhitespace_returnsMatchingSuggestions() {
         List<String> suggestions = autocompleteEngine.getSuggestions("   add");
         assertEquals(List.of("add n/ a/ p/ e/ addr/"), suggestions);
+    }
+
+    @Test
+    public void getSuggestions_unicodeWhitespace_distinguishesLeadingAndTrailingSeparators() {
+        for (String separator : List.of("\u00a0", "\u2003", "\u2007", "\u202f", "\u3000")) {
+            assertEquals(List.of("edit INDEX n/ a/ p/ e/ addr/"),
+                    autocompleteEngine.getSuggestions(separator + "ed"));
+            assertTrue(autocompleteEngine.getSuggestions("edit" + separator).isEmpty());
+            assertTrue(autocompleteEngine.getSuggestions(separator).isEmpty());
+        }
+    }
+
+    @Test
+    public void getNextPrefix_unicodeWhitespace_agreesWithCommandParser() throws Exception {
+        TrackFlowParser parser = new TrackFlowParser();
+        for (String separator : List.of("\u00a0", "\u2003", "\u2007", "\u202f", "\u3000")) {
+            String command = separator + "edit" + separator + "1";
+            assertEquals(" n/", autocompleteEngine.getNextPrefix(command));
+            assertEquals("n/", autocompleteEngine.getNextPrefix(command + separator));
+            assertEquals(" a/", autocompleteEngine.getNextPrefix(command + separator + "n/Avery"));
+            assertEquals(EditCommand.class, parser.parseCommand(command + separator + "n/Avery").getClass());
+        }
     }
 
     @Test

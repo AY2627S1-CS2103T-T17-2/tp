@@ -65,7 +65,8 @@ public class EditCommandParserTest {
             assertParseFailure(parser, preamble + NAME_DESC_AMY, MESSAGE_INVALID_FORMAT);
         }
         assertParseFailure(parser, "1 i/string" + NAME_DESC_AMY,
-                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "i/", EditCommand.MESSAGE_USAGE));
+                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "i/", EditCommand.MESSAGE_USAGE)
+                        + Messages.MESSAGE_LITERAL_PREFIX_HINT);
     }
 
     @Test
@@ -160,7 +161,7 @@ public class EditCommandParserTest {
                 "t/sprinter t/relay", "t/invalid*")) {
             String suppliedPrefix = unsupported.substring(0, 2);
             String expected = String.format(Messages.MESSAGE_UNKNOWN_PARAMETER,
-                    suppliedPrefix, EditCommand.MESSAGE_USAGE);
+                    suppliedPrefix, EditCommand.MESSAGE_USAGE) + Messages.MESSAGE_LITERAL_PREFIX_HINT;
             assertParseFailure(parser, "1 " + unsupported, expected);
             assertParseFailure(parser, "1 n/Amy " + unsupported, expected);
             assertParseFailure(parser, "1 " + unsupported + " a/Open", expected);

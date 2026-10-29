@@ -2,8 +2,11 @@ package trackflow.model.person;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
+
+import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
@@ -52,6 +55,17 @@ public class PhoneTest {
         assertTrue(Phone.isValidPhone("(+65)91234567")); // country code written against the digits
         assertTrue(Phone.isValidPhone("91234567(HP)")); // note written against the digits
         assertTrue(Phone.isValidPhone("9123-4567")); // hyphen-separated digit groups
+    }
+
+    @Test
+    public void isValidPhone_longDigitSequences_doesNotOverflowOrStall() {
+        String manyGroups = "123 ".repeat(3000).trim();
+        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
+            assertTrue(Phone.isValidPhone(manyGroups));
+            assertTrue(Phone.isValidPhone("123-".repeat(3000) + "456"));
+            assertFalse(Phone.isValidPhone(manyGroups + "x"));
+            assertFalse(Phone.isValidPhone("1".repeat(30000) + "x"));
+        });
     }
 
     @Test
