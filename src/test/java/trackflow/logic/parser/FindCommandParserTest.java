@@ -74,7 +74,8 @@ public class FindCommandParserTest {
     @Test
     public void parse_unknownParameter_throwsParseException() {
         assertParseFailure(parser, " x/value",
-                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "x/", FindCommand.MESSAGE_USAGE));
+                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "x/", FindCommand.MESSAGE_USAGE)
+                        + Messages.MESSAGE_LITERAL_PREFIX_HINT);
     }
 
     @Test

@@ -36,6 +36,12 @@ public class TagCommandParserTest {
     }
 
     @Test
+    public void parse_apostropheAndDecimalPoint_success() {
+        assertParseSuccess(parser, "1 t/Women's 100m t/Hammer 7.26kg",
+                new TagCommand(INDEX_FIRST_PERSON, getTagSet("Women's 100m", "Hammer 7.26kg")));
+    }
+
+    @Test
     public void parse_accentTypedAsSeparateMark_success() {
         assertParseSuccess(parser, "1 t/Saut-Élan",
                 new TagCommand(INDEX_FIRST_PERSON, getTagSet("Saut-Élan")));

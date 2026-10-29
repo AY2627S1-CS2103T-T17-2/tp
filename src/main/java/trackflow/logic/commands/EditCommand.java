@@ -57,7 +57,9 @@ public class EditCommand extends Command {
 
     public static final String MESSAGE_EDIT_PERSON_SUCCESS = "Edited athlete: %1$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
-    public static final String MESSAGE_DUPLICATE_PERSON = "This athlete already exists in the roster.";
+    public static final String MESSAGE_DUPLICATE_PERSON = "This athlete already exists in the roster: %1$s.";
+    public static final String MESSAGE_NO_CHANGE =
+            "At least one field must be different from the athlete's current details.";
 
     private final Index index;
     private final EditPersonDescriptor editPersonDescriptor;
@@ -95,12 +97,16 @@ public class EditCommand extends Command {
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
+        if (isUnchanged(personToEdit, editedPerson)) {
+            throw new CommandException(MESSAGE_NO_CHANGE);
+        }
+
         // @@author Austin-Chia
         List<Person> otherPersons = model.getRoster().getPersonList().stream()
                 .filter(person -> person != personToEdit).toList();
         if (otherPersons.stream().anyMatch(editedPerson::isSamePerson)) {
             // @@author
-            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
+            throw new CommandException(String.format(MESSAGE_DUPLICATE_PERSON, editedPerson.getName()));
         }
 
         String warning = Messages.getPossibleDuplicateWarning(editedPerson, otherPersons);
@@ -128,6 +134,15 @@ public class EditCommand extends Command {
 
         return new Person(updatedName, updatedAgeCategory, updatedPhone, updatedEmail,
                 updatedAddress, personToEdit.getRemark(), updatedTags);
+    }
+
+    /**
+     * Returns true if {@code editedPerson} does not differ from {@code personToEdit} in any attribute,
+     * including phone number formatting or notes.
+     */
+    private static boolean isUnchanged(Person personToEdit, Person editedPerson) {
+        return personToEdit.equals(editedPerson)
+                && personToEdit.getPhone().value.equals(editedPerson.getPhone().value);
     }
 
     @Override

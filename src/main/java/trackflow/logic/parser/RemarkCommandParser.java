@@ -1,7 +1,6 @@
 package trackflow.logic.parser;
 
 import static java.util.Objects.requireNonNull;
-import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static trackflow.logic.parser.CliSyntax.PREFIX_REMARK;
 
 import trackflow.commons.core.index.Index;
@@ -26,7 +25,7 @@ public class RemarkCommandParser implements Parser<RemarkCommand> {
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_REMARK);
 
         if (argMultimap.getValue(PREFIX_REMARK).isEmpty()) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE));
+            throw new ParseException(ParserUtil.getInvalidCommandFormatMessage(args, RemarkCommand.MESSAGE_USAGE));
         }
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_REMARK);
 
@@ -34,7 +33,7 @@ public class RemarkCommandParser implements Parser<RemarkCommand> {
         try {
             index = ParserUtil.parseIndex(argMultimap.getPreamble());
         } catch (ParseException pe) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE), pe);
+            throw new ParseException(ParserUtil.getInvalidCommandFormatMessage(args, RemarkCommand.MESSAGE_USAGE), pe);
         }
 
         String remark = argMultimap.getValue(PREFIX_REMARK).get();

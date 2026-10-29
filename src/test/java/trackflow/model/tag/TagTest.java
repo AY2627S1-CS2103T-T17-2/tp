@@ -54,6 +54,20 @@ public class TagTest {
         assertTrue(Tag.isValidTagName("Saut-Élan")); // non-English letter
         assertTrue(Tag.isValidTagName("Ünder18 Sprint")); // non-English letter with a digit
 
+        // apostrophes and decimal points inside words
+        assertTrue(Tag.isValidTagName("Women's 100m"));
+        assertTrue(Tag.isValidTagName("Hammer 7.26kg"));
+        assertTrue(Tag.isValidTagName("0.84m Hurdles"));
+        assertTrue(Tag.isValidTagName("Men's 4x400m-Relay"));
+        assertFalse(Tag.isValidTagName("'100m")); // leading apostrophe
+        assertFalse(Tag.isValidTagName("100m'")); // trailing apostrophe
+        assertFalse(Tag.isValidTagName("Women''s")); // repeated apostrophe
+        assertFalse(Tag.isValidTagName("7.kg")); // decimal point not followed by a digit
+        assertFalse(Tag.isValidTagName(".5kg")); // decimal point not after a digit
+        assertFalse(Tag.isValidTagName("Shot.Put")); // decimal point between letters
+        assertFalse(Tag.isValidTagName("7..26kg")); // repeated decimal point
+        assertFalse(Tag.isValidTagName("Women 's")); // space before an apostrophe
+
         // non-English symbols are still rejected
         assertFalse(Tag.isValidTagName("100m€"));
         assertFalse(Tag.isValidTagName("Élan!"));

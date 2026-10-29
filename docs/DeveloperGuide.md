@@ -16,6 +16,10 @@
 * This project is based on the AddressBook-Level3 project created by the [SE-EDU initiative](https://se-education.org).
 * Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5).
 * Font used: [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) by Tokotype, licensed under [OFL 1.1](https://scripts.sil.org/OFL).
+* Chetan (`chetangent`) used OpenAI Codex extensively to generate and refine project code and documentation.
+* Antony (`antonydchakola-hub`) used Claude (Anthropic) extensively to review and refactor code, write tests, find
+  and reproduce bugs, and draft User Guide and Developer Guide text. He reviewed and tested all generated output
+  before committing it.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -60,7 +64,10 @@ parsing and execution on a detached model; [delete execution](#logic-component) 
 
 `updatedRoster` means `stagedModel.getRoster()`, and `predicate` means `stagedModel.getPersonListPredicate()`.
 Preparing the staged model copies the live roster, preferences, filter, and sort comparator; those accessor calls
-are omitted. After saving and updating the live model, `withDataSaved()` creates `savedResult`; its call is omitted.
+are omitted. A snapshot of the displayed positions breaks comparator ties in the detached copy, preserving the
+athlete addressed by each displayed index after consecutive sorts. This tie breaker is not installed in the live
+model and does not reorder saved records. After saving and updating the live model, `withDataSaved()` creates
+`savedResult`; its call is omitted.
 The live sort comparator is retained. JavaFX observes the published change, and `MainWindow` displays the result.
 
 The separate failure trace shows what happens if saving throws an `IOException`, including an
@@ -314,8 +321,8 @@ are not special syntax. Escaped tokens cannot supply required fields or bypass o
 A slash-led value must be separated from its real prefix by whitespace: `addr/ /home/coach` supplies the address
 `/home/coach`, while `addr//home/coach` is literal text and does not introduce an address parameter.
 
-Commands that take no arguments (`clear`, `help`, and `exit`) reject extra text. `remark` requires exactly one `r/`
-prefix. Index parsing scans ASCII digits once, capping the accumulated value at `Integer.MAX_VALUE` without building
+Commands that take no arguments (`clear`, `help`, and `exit`) reject extra text.
+`remark` requires exactly one `r/` prefix. Index parsing scans ASCII digits once, capping the accumulated value at `Integer.MAX_VALUE` without building
 an arbitrary-precision number. It continues validating the remaining characters after reaching the cap, so an
 oversized number followed by text is still rejected. Leading zeroes are accepted; all-zero and malformed indexes are
 rejected. Oversized positive numbers reach the command's normal invalid-displayed-index check.
@@ -341,6 +348,9 @@ the model is changed. `ArgumentTokenizer` decodes escaped prefix-like text once,
 
 Matching is case-insensitive substring matching. Thus `find n/avery a/Under 14` requires both the name and category,
 while `find Blake n/avery a/Under 14` additionally includes athletes matching the broad keyword `Blake`.
+`StringUtil.normalizeForCaseInsensitiveMatching` supplies the comparison key for both search text and event identity,
+composing Unicode accents and applying the same case normalization. Broad and event-scoped searches therefore
+recognize equivalent spellings such as Greek `Σ`/`ς` and composed/decomposed `É`, including after saved-data reload.
 For `n/` phrases, repeated ordinary spaces in both the stored name and query are collapsed for comparison only.
 Stored names, phrase order, partial matching, and other fields' internal-spacing semantics are preserved.
 `find t/100m` also matches an event such as `4x100m`; exact-event matching is not implemented. Event names are joined
@@ -647,7 +657,9 @@ Use case ends.
   * 4b1. TrackFlow reports the save failure. No athlete is added, and the previous roster remains visible.
   * Use case ends.
 * 4c. A differently named athlete shares the phone or email.
-  * 4c1. TrackFlow saves the new record and includes a possible-duplicate warning naming the matching athletes.
+  * 4c1. TrackFlow saves the new record and includes a possible-duplicate warning listing each matching athlete's
+    name, age category, phone, email, and the matching contact field(s). Hidden athletes are included without using
+    displayed indexes.
   * Use case resumes at step 5.
 
 #### UC02: Remove an athlete
@@ -699,6 +711,10 @@ Use case ends.
 * 3a. The index or field values are missing, invalid, repeated, or unsupported.
   * 3a1. TrackFlow reports the error and leaves the roster and display unchanged.
   * Use case resumes at step 3.
+* 3b. All supplied values are the same as the athlete's stored details.
+  * 3b1. TrackFlow reports that at least one field must differ, without saving or changing the view. A change to
+    the stored phone formatting or note is treated as an edit.
+  * Use case resumes at step 3.
 * 4a. The edit would duplicate another athlete, including one hidden by the current filter.
   * 4a1. TrackFlow rejects the edit and leaves the roster unchanged.
   * Use case resumes at step 3.
@@ -737,7 +753,7 @@ Use case ends.
 
 #### UC05: Filter athletes by age category
 
-**Status**: Implemented in v1.4.<br>
+**Status**: Implemented in v1.5.<br>
 **Related stories**: US02, US03, US05, US11.<br>
 **Precondition**: TrackFlow is open.<br>
 **Success postcondition**: Only matching athletes are displayed; stored records are unchanged.
@@ -864,6 +880,7 @@ When a procedure asks for the **three-athlete fixture**, restart TrackFlow first
 
 ```text
 clear
+Y
 add n/Blake Lee a/Open p/92222222 e/blake@example.com addr/20 Stadium Road
 add n/Avery Tan a/Under 14 p/91111111 e/avery@example.com addr/10 Stadium Road
 add n/Casey Lim a/Under 14 p/93333333 e/casey@example.com addr/30 Stadium Road
@@ -953,7 +970,8 @@ add n/Faye Teo a/Under 20 p/96666666 e/faye@example.com addr/60 Stadium Road
    containing one, it should appear first in ascending address order and last in descending order.
 1. Run `filter a/Under 14`, then `sort name desc`. Expect only Casey and Avery, in that order.
 1. Run `list`. Expect the full roster in saved roster order.
-1. Run `delete 1` on a sorted list. Expect the athlete visibly shown at index 1 to be deleted.
+1. Run `sort name desc`, note the athlete visibly shown at index 1, then run `delete 1`. Expect that athlete to be
+   deleted.
 1. Try `sort`, `sort height`, `sort name upwards`, and `sort name asc extra`. Expect actionable errors and no display
    change.
 1. Restart TrackFlow. Expect the remaining athletes in saved roster order; the deletion persists but sorting does not.
@@ -962,6 +980,7 @@ For a separate name-spacing regression, use another disposable home folder and e
 
 ```text
 clear
+Y
 add n/Lee  Bob a/Open p/911 e/bob@example.com addr/Home
 add n/Lee Ann a/Open p/922 e/ann@example.com addr/Home
 sort name
@@ -976,6 +995,7 @@ For a separate phone-note regression, use another disposable home folder and ent
 
 ```text
 clear
+Y
 add n/Aaa Tan a/Open p/200 (5) e/aaa@example.com addr/Home
 add n/Bbb Tan a/Open p/300 e/bbb@example.com addr/Home
 add n/Ccc Tan a/Open p/(+65) 200 e/ccc@example.com addr/Home
@@ -986,6 +1006,25 @@ Expect Aaa, Bbb, Ccc: the note digit is ignored, while the country code contribu
 `sort phone desc` and expect Ccc, Bbb, Aaa. Phone text must remain unchanged. Restart, sort again, and verify both
 orders. `SortCommandTest` and `LogicManagerTest` also cover formatted values, zero-valued numbers with numeric notes,
 large numbers, subsequent updates, and exact phone-text preservation after a fresh storage read.
+
+For an indexed-command regression with tied sort values, prepare a separate disposable roster:
+
+```text
+clear
+add n/Alice a/Open p/111 e/alice@example.com addr/Home
+add n/Bob a/Open p/222 e/bob@example.com addr/Home
+tag 1 t/Original
+tag 2 t/Original
+sort name desc
+sort age
+```
+
+Expect Bob at index 1 and Alice at index 2. Run `delete 1` and verify that Bob is removed, including after restart.
+Recreate the fixture before each of `edit 1 addr/Changed`, `remark 1 r/Changed`, `tag 1 t/Changed`, and
+`untag 1 t/Original`. Each must change Bob, leave Alice unchanged, and persist the result after restart.
+Repeat after adding a third athlete in `Under 14` and running `filter a/Open` before the two sorts.
+`DisplayedIndexPersistenceTest` also verifies these cases with failed saves, preserving the live roster, predicate,
+comparator, displayed order and saved file.
 
 ### Command autocomplete
 
@@ -1021,13 +1060,13 @@ When a step asks you to type a new command below, replace the previous input rat
 
 ### Saving data
 
-1. Run `clear`, `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`, and `tag 1 t/100m`
+1. Run `clear`, then `Y`, `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`, and `tag 1 t/100m`
    separately, then restart TrackFlow.<br>
    Expected: Avery and the `100m` event remain after the restart.
 1. On this disposable roster, temporarily remove write permission from
    the folder containing the roster data file. Then attempt each roster-changing command separately:
    `add n/Blake Tan a/Open p/81234567 e/blake@example.com addr/Home`, `edit 1 p/999`, `remark 1 r/Test`,
-   `tag 1 t/400m`, `untag 1 t/100m`, `delete 1`, and `clear`.<br>
+   `tag 1 t/400m`, `untag 1 t/100m`, `delete 1`, and `clear`, then `Y`.<br>
    Expected: TrackFlow reports that it could not save. The roster, displayed athletes, filter, sort order, and data file
    remain unchanged after every attempt.
 1. While storage is unwritable, run `list`, `find n/Avery`, `filter a/Under 14`, `sort name`, `help`, and `exit` separately.<br>
@@ -1052,23 +1091,27 @@ When a step asks you to type a new command below, replace the previous input rat
 3. Corrupted data file with read-only folder
    1. Close TrackFlow. Replace `data/trackflow.json` with `{` as above, and use folder permissions to block creation of a backup file. Verify that the operating system actually denies a write in that folder.
    2. Launch TrackFlow.<br>
-      Expected: TrackFlow logs a severe error and shuts down immediately before any commands can execute, preventing unreadable data from being overwritten.
+      Expected: TrackFlow logs a severe error and displays a blocking error dialog. No commands can execute and the
+      original file remains unchanged. Dismiss the dialog; TrackFlow then exits.
 
 ### Adding, editing, and remarks
 
 Use a disposable home folder; these procedures change saved data.
 
-1. Run `clear`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`.
+1. Run `clear`, then `Y`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`.
    Expect one saved athlete. Restart from the same folder and confirm every supplied field remains.
 1. Run `remark 1 r/Sprints`, then `edit 1 a/Under 16 addr/Training centre`. Expect the new category and address,
    with the original name, phone, email, and remark retained. Restart and verify those values again.
+1. Run `edit 1 n/Avery Tan` without changing any other details. Expect
+   `At least one field must be different from the athlete's current details.`, with no save or change to the view.
 1. Run `remark 1 r/Recovery`, then restart. Expect `Recovery` to replace `Sprints`.
 1. Run `remark 1 r/`, then restart. Expect the remark to be empty and the category still `Under 16`.
 1. Run `remark 1 r/` again. Expect `Athlete has no remark to remove` with the athlete's details, with no save
    or change to the current view.
 1. Try `add n/Incomplete`, `edit 1`, `edit 0 p/999`, `edit 1 addr/`, and `remark 1`.
-   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add or edit command must produce an error; add reports invalid command format, while edit identifies the unsupported prefix.
-1. Run `clear`, restart, and confirm the roster stays empty rather than loading samples again.
+   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add or edit command must produce
+   an error identifying `t/` as an unsupported prefix in both cases.
+1. Run `clear`, then `Y`, restart, and confirm the roster stays empty rather than loading samples again.
 
 ### Parser robustness
 
@@ -1117,7 +1160,7 @@ tag 1 t/4x100m
 
 ### Tagging athletes with events
 
-Use a disposable roster. Run `clear`, then the following commands separately to ensure a known starting state:
+Use a disposable roster. Run `clear`, then `Y`, then the following commands separately to ensure a known starting state:
 
 ```text
 add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home
@@ -1130,15 +1173,17 @@ tag 1 t/100m
 1. Run `tag 1 t/JAVELIN`. Expect an already-present error and no changes.
 1. Run `untag 1 t/Shot Put t/Discus`. Expect an error naming `Discus`; `Shot Put` must remain.
 1. Run `untag 1 t/shot put`. Expect `Shot Put` to be removed. Restart and verify the remaining labels persist.
-1. Try `tag 1`, `tag t/100m`, `tag 0 t/100m`, `tag 1 t/`, `tag 1 t/100m*`, `tag 1 t/Long - Jump`,
-   and `tag 1 t/` followed by 31 letters. Expect an error after each command and no changes.
+1. Run `tag 1 t/Hammer 7.26kg t/Women's 100m`. Expect both events to be added, keeping the decimal point and the
+   apostrophe.
+1. Try `tag 1`, `tag t/100m`, `tag 0 t/100m`, `tag 1 t/`, `tag 1 t/100m*`, `tag 1 t/Long - Jump`, `tag 1 t/7.kg`,
+   `tag 1 t/Women''s`, and `tag 1 t/` followed by 31 letters. Expect an error after each command and no changes.
 
 ### Help and clearing a test roster
 
 1. Run `help`. Expect a scrollable command guide. Resize it and check that command descriptions remain reachable.
 1. Close help, then run `help` again. Expect it to reopen without changing the roster or losing the current filter.
-1. On the disposable roster only, run `clear`. Expect an immediate successful deletion of all athletes, without a
-   confirmation prompt or undo. Restart and verify the roster remains empty rather than repopulating samples.
+1. On the disposable roster only, run `clear`. Expect a yellow warning; the roster must remain unchanged, including after
+   restarting. Run `clear`, then `Y` to delete all athletes permanently. Restart and verify the roster remains empty.
 
 ### Duplicate identity and complete equality
 
@@ -1148,16 +1193,23 @@ Name normalization ignores case and repeated spaces; email matching ignores case
 field's equality rules across every field, including category, address, remark, and events. Phone formatting and
 event-name case do not by themselves make records unequal. These are separate contracts.
 
-1. Start with only Avery: run `clear`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`. Attempt to add `AVERY   TAN` with the same phone and a different
+1. Start with only Avery: run `clear`, then `Y`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`. Attempt to add `AVERY   TAN` with the same phone and a different
    email and category. Expect a duplicate error, with no saved changes. Repeat with a different phone and matching
    email (including different email case); expect rejection again.
 1. Add a record with the same name but both a different phone and a different email. Expect success.
-1. Add `Jordan Lee` with Avery's phone and a different email. Expect success with a possible-duplicate warning naming
-   Avery. Different names sharing contact details are permitted.
+1. Add `Jordan Lee` with Avery's phone and a different email. Expect success with a possible-duplicate warning listing
+   Avery's name, category, phone and email, with `Matches: phone`. Edit Jordan to a different phone and Avery's email
+   in different case; expect `Matches: email`. Match both contacts and expect one Avery entry with
+   `Matches: phone and email`. Different names sharing contact details are permitted.
 1. Run `find n/Jordan`, then attempt to add Avery's duplicate. Expect rejection even though Avery is hidden.
 1. With Jordan displayed, attempt to edit the name to `AVERY TAN` while retaining Avery's phone. Expect rejection
    because duplicate checks search the complete roster. The previous filter and roster remain unchanged.
 1. Restart and repeat the duplicate attempts. Expect the same decisions after reloading.
+1. In a separate empty disposable roster, add two `Alex Tan` records with different phones and emails. Hide both
+   using `find n/Nobody`, then add `Blake Tan` with the first Alex's phone and the second Alex's email. Expect two
+   separate warning entries identifying each Alex's contact details, with `Matches: phone` and `Matches: email`
+   respectively. Repeat after a restart and an edit while only Blake is displayed. The warning must not borrow
+   indexes from the filtered list or include Blake as their own match.
 Developer-only check: the automated `PersonTest` and `DuplicatePersistenceTest` checks in the
 [testing guide](Testing.md#build-and-focused-tests) verify complete equality separately from duplicate identity.
 Address-only and remark-only changes affect full equality without changing duplicate identity.

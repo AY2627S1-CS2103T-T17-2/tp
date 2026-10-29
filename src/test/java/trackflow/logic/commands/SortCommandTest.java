@@ -254,7 +254,7 @@ public class SortCommandTest {
         SortCommand command = new SortCommand(field, order);
         CommandResult result = command.execute(model);
         String expectedMessage = String.format(SortCommand.MESSAGE_SUCCESS,
-                field == AGE ? "age category" : field.name().toLowerCase(),
+                field.name().toLowerCase(),
                 order == ASCENDING ? "ascending" : "descending");
         assertEquals(expectedMessage, result.getFeedbackToUser());
         assertEquals(expectedOrder, model.getFilteredPersonList());

@@ -6,11 +6,11 @@ import static java.util.Objects.requireNonNull;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import trackflow.commons.util.StringUtil;
 import trackflow.commons.util.ToStringBuilder;
 
 /**
@@ -67,11 +67,11 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     }
 
     private static boolean containsAnyKeyword(String text, List<String> keywords) {
-        String normalizedText = text.toLowerCase(Locale.ROOT);
+        String normalizedText = StringUtil.normalizeForCaseInsensitiveMatching(text);
         return keywords.stream()
                 .map(String::trim)
                 .filter(keyword -> !keyword.isEmpty())
-                .map(keyword -> keyword.toLowerCase(Locale.ROOT))
+                .map(StringUtil::normalizeForCaseInsensitiveMatching)
                 .anyMatch(normalizedText::contains);
     }
 

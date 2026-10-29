@@ -120,7 +120,9 @@ public class TrackFlowParserTest {
     public void parseCommand_clear() throws Exception {
         Command command = parser.parseCommand(ClearCommand.COMMAND_WORD);
         assertTrue(command instanceof ClearCommand);
-        assertTrue(command.changesRoster());
+        assertFalse(command.changesRoster());
+        assertThrows(ParseException.class, () -> parser.parseCommand("clear confirm"));
+        assertThrows(ParseException.class, () -> parser.parseCommand("clear confirm extra"));
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ClearCommand.MESSAGE_USAGE);
         assertThrows(ParseException.class, expectedMessage, () ->
                 parser.parseCommand(ClearCommand.COMMAND_WORD + " 3"));

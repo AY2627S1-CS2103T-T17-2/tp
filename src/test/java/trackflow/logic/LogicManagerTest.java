@@ -29,6 +29,7 @@ import org.junit.jupiter.api.io.TempDir;
 import trackflow.commons.core.GuiSettings;
 // @@author qiyuannn
 import trackflow.logic.commands.AddCommand;
+import trackflow.logic.commands.ClearCommand;
 import trackflow.logic.commands.CommandResult;
 import trackflow.logic.commands.ListAthleteCommand;
 import trackflow.logic.commands.exceptions.CommandException;
@@ -122,6 +123,32 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_clear_requiresConfirmationBeforeSaving() throws Exception {
+        logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home");
+        Path rosterPath = temporaryFolder.resolve("roster.json");
+        String savedRoster = Files.readString(rosterPath);
+
+        CommandResult warning = logic.execute("clear");
+        assertEquals(ClearCommand.MESSAGE_CONFIRMATION, warning.getFeedbackToUser());
+        assertEquals(false, warning.isDataSaved());
+        assertEquals(1, model.getRoster().getPersonList().size());
+        assertEquals(savedRoster, Files.readString(rosterPath));
+
+        assertEquals(true, warning.isWarning());
+        logic.execute("N");
+        assertEquals(savedRoster, Files.readString(rosterPath));
+        assertThrows(ParseException.class, () -> logic.execute("Y"));
+        logic.execute("clear");
+        logic.execute("list");
+        assertThrows(ParseException.class, () -> logic.execute("y"));
+        logic.execute("clear");
+        CommandResult confirmed = logic.execute(" Y ");
+        assertEquals(true, confirmed.isDataSaved());
+        assertEquals(0, model.getRoster().getPersonList().size());
+        assertEquals(0, new JsonRosterStorage(rosterPath).readRoster().orElseThrow().getPersonList().size());
+    }
+
+    @Test
     public void execute_rosterChangingCommand_reportsDataSaved() throws Exception {
         CommandResult result = logic.execute(
                 "add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/123 Main Street");
@@ -186,7 +213,8 @@ public class LogicManagerTest {
                 logic.execute("add n/Avery Tan " + variant + " addr/123 Main Street"));
         }
         assertEquals(1, model.getFilteredPersonList().size());
-        assertThrows(CommandException.class, "This athlete already exists in the roster: AVERY   TAN.", () ->
+        assertThrows(CommandException.class,
+                String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"), () ->
             logic.execute("add n/AVERY   TAN a/under 14 p/91234567 e/AVERY.TAN@example.com addr/123 Main Street"));
         assertEquals(1, model.getFilteredPersonList().size());
         // @@author qiyuannn
@@ -381,7 +409,10 @@ public class LogicManagerTest {
                 new JsonUserPrefsStorage(temporaryFolder.resolve("failingPrefs.json"))));
 
         for (String command : List.of("add n/Ben Lee a/Open p/222 e/ben@example.com addr/Home",
-                "edit 1 n/Zed Tan", "remark 1 r/Injured", "delete 1", "clear")) {
+                "edit 1 n/Zed Tan", "remark 1 r/Injured", "delete 1", "y")) {
+            if (command.equals("y")) {
+                failingLogic.execute("clear");
+            }
             assertThrows(CommandException.class, () -> failingLogic.execute(command));
             assertEquals(rosterBeforeFailure, model.getRoster());
             assertEquals(displayBeforeFailure, model.getFilteredPersonList());

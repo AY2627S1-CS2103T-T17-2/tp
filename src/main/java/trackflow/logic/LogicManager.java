@@ -2,11 +2,14 @@ package trackflow.logic;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javafx.collections.ObservableList;
 import trackflow.commons.core.GuiSettings;
 import trackflow.commons.core.LogsCenter;
+import trackflow.logic.commands.ClearCommand;
 import trackflow.logic.commands.Command;
 import trackflow.logic.commands.CommandResult;
 import trackflow.logic.commands.exceptions.CommandException;
@@ -33,6 +36,7 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final TrackFlowParser trackFlowParser;
+    private boolean clearPending;
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -52,7 +56,14 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
-        Command command = trackFlowParser.parseCommand(commandText);
+        boolean wasClearPending = clearPending;
+        clearPending = false;
+        if (wasClearPending && commandText.strip().equalsIgnoreCase("n")) {
+            return new CommandResult("Clear cancelled. No athletes were deleted.");
+        }
+        Command command = wasClearPending && commandText.strip().equalsIgnoreCase("y")
+                ? new ClearCommand(true) : trackFlowParser.parseCommand(commandText);
+        clearPending = command instanceof ClearCommand && !command.changesRoster();
         if (!command.changesRoster()) {
             return command.execute(model);
         }
@@ -76,13 +87,21 @@ public class LogicManager implements Logic {
 
     /**
      * Returns a detached copy of the model with the same roster and display state.
-     * Roster mutations are applied to this copy until persistence succeeds.
+     * Roster mutations are applied to this copy until persistence succeeds. Comparator ties retain the live
+     * displayed order so that indexed commands address the same athlete in the copy.
      */
     private Model createStagedModel() {
         Model stagedModel = new ModelManager(model.getRoster(), model.getUserPrefs());
         stagedModel.updateFilteredPersonList(model.getPersonListPredicate());
         if (model.getPersonListComparator() != null) {
-            stagedModel.updateSortedPersonList(model.getPersonListComparator());
+            Map<Person, Integer> displayedPositions = new IdentityHashMap<>();
+            for (int index = 0; index < model.getFilteredPersonList().size(); index++) {
+                displayedPositions.put(model.getFilteredPersonList().get(index), index);
+            }
+            // A fresh SortedList otherwise resolves ties from stored order, which can differ after another sort.
+            // Only the detached copy receives this tie breaker; the live comparator and saved order are unchanged.
+            stagedModel.updateSortedPersonList(model.getPersonListComparator().thenComparingInt(
+                    person -> displayedPositions.getOrDefault(person, Integer.MAX_VALUE)));
         }
         return stagedModel;
     }

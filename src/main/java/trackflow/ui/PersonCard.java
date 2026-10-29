@@ -53,7 +53,7 @@ public class PersonCard extends UiPart<Region> {
     public PersonCard(Person person, int displayedIndex) {
         super(FXML);
         this.person = person;
-        id.setText(String.format("%02d", displayedIndex));
+        id.setText(formatDisplayedIndex(displayedIndex));
         name.setText(person.getName().fullName);
         ageCategory.setText(person.getAgeCategory().value);
         phone.setText(person.getPhone().value);
@@ -66,6 +66,13 @@ public class PersonCard extends UiPart<Region> {
                 .forEach(tag -> tags.getChildren().add(createEventChip(tag.tagName)));
         tags.setVisible(!tags.getChildren().isEmpty());
         tags.setManaged(tags.isVisible());
+    }
+
+    /**
+     * Formats an index using the ASCII digits accepted by the command parser, regardless of the system locale.
+     */
+    static String formatDisplayedIndex(int displayedIndex) {
+        return String.format(Locale.ROOT, "%02d", displayedIndex);
     }
 
     /**

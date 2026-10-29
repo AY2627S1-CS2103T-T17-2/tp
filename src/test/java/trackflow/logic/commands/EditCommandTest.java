@@ -68,7 +68,8 @@ public class EditCommandTest {
         EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
                 new EditPersonDescriptorBuilder().withEmail("OTHER@example.com").build());
         String expected = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(edited))
-                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, other.getName());
+                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE,
+                        "- Jordan Lee; Age category: Open; Phone: 81112222; Email: other@example.com; Matches: email");
         assertCommandSuccess(command, model, expected, expectedModel);
     }
 
@@ -117,18 +118,26 @@ public class EditCommandTest {
     }
 
     @Test
-    public void execute_noFieldSpecifiedUnfilteredList_success() {
+    public void execute_noFieldSpecifiedUnfilteredList_failure() {
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, new EditPersonDescriptor());
-        Person editedPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        assertCommandFailure(editCommand, model, EditCommand.MESSAGE_NO_CHANGE);
+    }
 
-        String expectedMessage = String.format(
-                EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(editedPerson));
+    @Test
+    public void execute_identicalFieldsUnfilteredList_failure() {
+        Person firstPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(firstPerson).build();
+        EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
+        assertCommandFailure(editCommand, model, EditCommand.MESSAGE_NO_CHANGE);
+    }
 
-        // @@author qiyuannn
-        Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
-        // @@author
-
-        assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    @Test
+    public void execute_sameNameUnfilteredList_failure() {
+        Person firstPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder()
+                .withName(firstPerson.getName().fullName).build();
+        EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
+        assertCommandFailure(editCommand, model, EditCommand.MESSAGE_NO_CHANGE);
     }
 
     @Test
@@ -157,7 +166,8 @@ public class EditCommandTest {
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(firstPerson).build();
         EditCommand editCommand = new EditCommand(INDEX_SECOND_PERSON, descriptor);
 
-        assertCommandFailure(editCommand, model, EditCommand.MESSAGE_DUPLICATE_PERSON);
+        assertCommandFailure(editCommand, model,
+                String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, firstPerson.getName()));
     }
 
     @Test
@@ -171,7 +181,8 @@ public class EditCommandTest {
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON,
                 new EditPersonDescriptorBuilder(personInList).build());
 
-        assertCommandFailure(editCommand, model, EditCommand.MESSAGE_DUPLICATE_PERSON);
+        assertCommandFailure(editCommand, model,
+                String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, personInList.getName()));
     }
 
     @Test
@@ -225,7 +236,8 @@ public class EditCommandTest {
         model.updateFilteredPersonList(new AgeCategoryPredicate(new AgeCategory("Under 16")));
         EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
                 new EditPersonDescriptorBuilder().withEmail(first.getEmail().value.toUpperCase()).build());
-        assertCommandFailure(command, model, EditCommand.MESSAGE_DUPLICATE_PERSON);
+        assertCommandFailure(command, model,
+                String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, second.getName()));
         assertEquals(second.getRemark(), model.getFilteredPersonList().get(0).getRemark());
     }
 

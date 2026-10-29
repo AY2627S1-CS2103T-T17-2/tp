@@ -13,7 +13,9 @@ import static trackflow.commons.util.AppUtil.checkArgument;
  */
 public class Address {
 
-    public static final String MESSAGE_CONSTRAINTS = "Addresses can take any values, and should not be blank";
+    public static final String MESSAGE_CONSTRAINTS =
+            "Addresses supplied to add or edit must be nonblank single-line text. Any characters are allowed "
+                    + "except line breaks, including line or paragraph separators.";
 
     /*
      * The first character of the address must not be a whitespace,

@@ -4,7 +4,6 @@ package trackflow.logic.parser;
 
 import static java.util.Objects.requireNonNull;
 // @@author qiyuannn
-import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static trackflow.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static trackflow.logic.parser.CliSyntax.PREFIX_AGE_CATEGORY;
 import static trackflow.logic.parser.CliSyntax.PREFIX_EMAIL;
@@ -43,7 +42,7 @@ public class EditCommandParser implements Parser<EditCommand> {
         try {
             index = ParserUtil.parseIndex(argMultimap.getPreamble());
         } catch (ParseException pe) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE), pe);
+            throw new ParseException(ParserUtil.getInvalidCommandFormatMessage(args, EditCommand.MESSAGE_USAGE), pe);
         }
 
         argMultimap.verifyNoDuplicatePrefixesFor(
