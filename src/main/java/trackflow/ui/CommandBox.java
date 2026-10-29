@@ -181,12 +181,9 @@ public class CommandBox extends UiPart<Region> {
      * Handles keys, other than Shift+Tab, pressed while the suggestions list itself has focus.
      */
     private void handleSuggestionsKeyPressed(KeyEvent event) {
-        if (event.getCode() == KeyCode.TAB) {
+        if (event.getCode() == KeyCode.TAB || event.getCode() == KeyCode.ENTER) {
+            // Both keys accept the highlighted suggestion; the command runs on the next Enter once it is complete.
             applySelectedSuggestionLater(event);
-        } else if (event.getCode() == KeyCode.ENTER) {
-            event.consume();
-            autocompletePopup.hide();
-            handleCommandEntered();
         }
     }
 
@@ -210,7 +207,10 @@ public class CommandBox extends UiPart<Region> {
             moveSuggestionSelection(event, 1);
         } else if (key == KeyCode.TAB) {
             applySelectedSuggestionLater(event);
-        } else if (key == KeyCode.ENTER || key == KeyCode.ESCAPE) {
+        } else if (key == KeyCode.ENTER) {
+            // Accept the highlighted suggestion, matching Tab, instead of running the half-typed command.
+            applySelectedSuggestionLater(event);
+        } else if (key == KeyCode.ESCAPE) {
             autocompletePopup.hide();
         }
     }

@@ -11,6 +11,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 import trackflow.model.person.Person;
 
@@ -31,7 +32,7 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private GridPane cardPane;
     @FXML
-    private Label name;
+    private Text name;
     @FXML
     private Label id;
     @FXML
@@ -39,7 +40,9 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label ageCategory;
     @FXML
-    private Label address;
+    private Text address;
+    @FXML
+    private TextFlow addressContainer;
     @FXML
     private Text email;
     @FXML
@@ -58,7 +61,10 @@ public class PersonCard extends UiPart<Region> {
         ageCategory.setText(person.getAgeCategory().value);
         phone.setText(person.getPhone().value);
         email.setText(person.getEmail().value);
-        showIfNotEmpty(address, person.getAddress().value);
+        String addressValue = person.getAddress().value;
+        address.setText(addressValue);
+        addressContainer.setVisible(!addressValue.isEmpty());
+        addressContainer.setManaged(addressContainer.isVisible());
         showIfNotEmpty(remark, person.getRemark().value);
         person.getTags().stream()
                 // Sort ignoring case to match the order used in tag/untag command feedback (EventTagCommand).
@@ -106,11 +112,12 @@ public class PersonCard extends UiPart<Region> {
     }
 
     /**
-     * Shows {@code text} in {@code label}, hiding the label entirely when {@code text} is empty.
+     * Shows {@code text} in {@code label}, hiding the label entirely when {@code text} is blank, so a
+     * whitespace-only value does not leave an empty gap.
      */
     private static void showIfNotEmpty(Label label, String text) {
         label.setText(text);
-        label.setVisible(!text.isEmpty());
+        label.setVisible(!text.isBlank());
         label.setManaged(label.isVisible());
     }
 }

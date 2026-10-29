@@ -10,7 +10,6 @@
     <Region styleClass="status-dot" />
     <Label fx:id="saveStateStatus" styleClass="status-save-state" minWidth="-Infinity" />
   </HBox>
-  <Label fx:id="saveLocationStatus" styleClass="status-path" />
-  <Region HBox.hgrow="ALWAYS" />
+  <Label fx:id="saveLocationStatus" styleClass="status-path" maxWidth="Infinity" HBox.hgrow="ALWAYS" />
   <Label fx:id="athleteCountStatus" minWidth="-Infinity" />
 </HBox>
