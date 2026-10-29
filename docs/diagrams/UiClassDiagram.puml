@@ -18,7 +18,8 @@ package "UI" as UIPackage {
     class StatusBarFooter
     class PersonCard
     class WindowPlacement <<utility>> {
-        {static} +isReachable(...): boolean
+        {static} ~fit(...): Rectangle2D
+        {static} ~isReachable(...): boolean
     }
 }
 interface Logic <<interface>> LOGIC_COLOR_T1
@@ -34,7 +35,7 @@ MainWindow ..> CommandBox : <<create>>
 MainWindow --> "0..1" ResultDisplay
 MainWindow --> "0..1" PersonListPanel
 MainWindow --> "0..1" StatusBarFooter
-MainWindow ..> WindowPlacement : checks saved\nposition reachable
+MainWindow ..> WindowPlacement : fits saved\nwindow bounds
 MainWindow ..> GuiSettings : reads / writes\nsaved bounds
 MainWindow -up-|> UiPart
 CommandBox -up-|> UiPart
