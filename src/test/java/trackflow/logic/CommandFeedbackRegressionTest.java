@@ -63,6 +63,24 @@ public class CommandFeedbackRegressionTest {
     }
 
     @Test
+    public void execute_searchSortAndDuplicateChecks_doNotRenameStoredAthlete() throws Exception {
+        logic.execute("add n/LEE   Ann a/Open p/84446666 e/lee.ann@example.com addr/Home");
+        String before = Files.readString(storage.getRosterFilePath());
+        for (String command : List.of("find n/lee ann", "sort name", "find n/LEE   Ann", "sort age")) {
+            logic.execute(command);
+            assertEquals("LEE   Ann", model.getFilteredPersonList().getFirst().getName().fullName);
+            assertEquals(before, Files.readString(storage.getRosterFilePath()));
+        }
+        CommandException error = assertThrows(CommandException.class, () ->
+                logic.execute("add n/lee ann a/Open p/84446666 e/other@example.com addr/Home"));
+        assertEquals("This athlete already exists in the roster: LEE   Ann.", error.getMessage());
+        assertEquals(before, Files.readString(storage.getRosterFilePath()));
+
+        logic.execute("remark 1 r/Checked");
+        assertEquals("LEE   Ann", storage.readRoster().orElseThrow().getPersonList().getLast().getName().fullName);
+    }
+
+    @Test
     public void execute_unknownPrefixInFreeText_explainsEscapingAndPreservesData() throws Exception {
         String before = Files.readString(storage.getRosterFilePath());
         for (String command : List.of("remark 1 r/Practise w/coach", "edit 1 addr/Block s/West")) {

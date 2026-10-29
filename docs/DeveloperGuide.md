@@ -16,8 +16,7 @@
 * This project is based on the AddressBook-Level3 project created by the [SE-EDU initiative](https://se-education.org).
 * Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5).
 * Font used: [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) by Tokotype, licensed under [OFL 1.1](https://scripts.sil.org/OFL).
-* Chetan (`chetangent`) used OpenAI Codex to assist with implementation, debugging, regression tests, release checks,
-  and documentation updates, including command parsing, sorting, and shared-contact feedback.
+* Chetan (`chetangent`) used OpenAI Codex extensively to generate and refine project code and documentation.
 
 --------------------------------------------------------------------------------------------------------------------
 

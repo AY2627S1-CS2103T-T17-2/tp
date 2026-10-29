@@ -3,6 +3,8 @@ package trackflow.model.person;
 import static java.util.Objects.requireNonNull;
 import static trackflow.commons.util.AppUtil.checkArgument;
 
+import java.util.regex.Pattern;
+
 /**
  * Represents a Person's phone number in the athlete roster.
  * Guarantees: immutable; is valid as declared in {@link #isValidPhone(String)}
@@ -26,13 +28,13 @@ public class Phone {
     private static final String BRACKETED_NOTE_REGEX = "\\([^+)]*\\)";
 
     /** A run of digits, optionally split into groups by single hyphens: "9123" or "9123-4567". */
-    private static final String DIGIT_GROUP_REGEX = "\\d+(?:-\\d+)*";
+    private static final String DIGIT_GROUP_REGEX = "\\d++(?:-\\d++)*+";
 
     /** A bracketed country code such as "(+65)". */
-    private static final String COUNTRY_CODE_REGEX = "\\(\\+\\d+\\)";
+    private static final String COUNTRY_CODE_REGEX = "\\(\\+\\d++\\)";
 
     /** A non-empty bracketed note with balanced brackets, such as "(HP)" or "(65)". */
-    private static final String NOTE_REGEX = "\\([^+()]+\\)";
+    private static final String NOTE_REGEX = "\\([^+()]++\\)";
 
     /**
      * A valid phone number: a sequence of digit groups, country codes and notes, each optionally separated by a
@@ -42,7 +44,8 @@ public class Phone {
      */
     private static final String VALIDATION_REGEX =
             "(?:\\+?" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + ")"
-                    + "(?: ?(?:" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + "))*";
+                    + "(?: ?(?:" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + "))*+";
+    private static final Pattern VALIDATION_PATTERN = Pattern.compile(VALIDATION_REGEX);
 
     public final String value;
 
@@ -66,7 +69,8 @@ public class Phone {
     public static boolean isValidPhone(String test) {
         requireNonNull(test);
         String normalised = test.trim().replaceAll("\\s+", " ");
-        return normalised.matches(VALIDATION_REGEX)
+        // Repetitions are possessive: the token boundaries do not need backtracking, even for long pasted input.
+        return VALIDATION_PATTERN.matcher(normalised).matches()
                 && countDigits(normalised.replaceAll(BRACKETED_NOTE_REGEX, "")) >= MINIMUM_DIGITS;
     }
 

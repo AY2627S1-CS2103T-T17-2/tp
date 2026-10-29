@@ -3,6 +3,8 @@ package trackflow.model.person;
 import static java.util.Objects.requireNonNull;
 import static trackflow.commons.util.AppUtil.checkArgument;
 
+import java.util.regex.Pattern;
+
 /**
  * Represents a Person's name in the athlete roster.
  * Guarantees: immutable; is valid as declared in {@link #isValidName(String)}
@@ -19,7 +21,9 @@ public class Name {
      * such as "Mary-Jane" and "O'Brien" while rejecting "-Jane", "Jane-", and "Mary--Jane".
      * Trailing spaces remain valid so that previously saved names still load; commands trim them before parsing.
      */
-    public static final String VALIDATION_REGEX = "\\p{Alnum}+(( +|[-'])\\p{Alnum}+)* *";
+    // Possessive repetitions keep long pasted names from exhausting the regex stack or revisiting word boundaries.
+    public static final String VALIDATION_REGEX = "\\p{Alnum}++(?:(?: ++|[-'])\\p{Alnum}++)*+ *+";
+    private static final Pattern VALIDATION_PATTERN = Pattern.compile(VALIDATION_REGEX);
 
     public final String fullName;
 
@@ -38,7 +42,7 @@ public class Name {
      * Returns true if a given string is a valid name.
      */
     public static boolean isValidName(String test) {
-        return test.matches(VALIDATION_REGEX);
+        return VALIDATION_PATTERN.matcher(test).matches();
     }
 
 

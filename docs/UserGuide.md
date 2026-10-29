@@ -188,10 +188,12 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   apostrophe may join two words (for example, `Mary-Jane` or `O'Brien`), but a name cannot start or end with one,
   repeat one (`Mary--Jane`), or put spaces around one (`Mary - Jane`). Accented letters and other writing systems are
   not currently supported.
-* Phone numbers must contain at least three significant digits. They may also include spaces, `+`, `-`, `(`, and
-  `)`. A bracketed country code such as `(+65)` is part of the number, but any other bracketed text is treated as a
-  note and ignored, whether it is letters like `(HP)` or digits like `(5)` (for example, `+65 9123 4567`,
-  `(+65) 9123 4567`, or `9123 4567 (HP)`).
+  Searching, sorting, and duplicate checking do not rename athletes or rewrite their stored name spacing.
+* Phone numbers must contain at least three significant digits, written as digit groups separated by spaces or
+  single hyphens (for example, `9123 4567` or `9123-4567`). An unbracketed `+` is allowed only at the start.
+  Brackets must be balanced and non-empty. A bracketed country code such as `(+65)` is part of the number, but
+  other bracketed text is treated as a note and ignored, whether it is letters like `(HP)` or digits like `(5)`.
+  Examples: `+65 9123 4567`, `(+65) 9123 4567`, or `9123 4567 (HP)`.
 * Emails must have the form `local-part@domain` and contain at most 254 characters. The local part consists of
   alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by
   hyphens; the final label must have at least two characters. Spaces are not allowed.
