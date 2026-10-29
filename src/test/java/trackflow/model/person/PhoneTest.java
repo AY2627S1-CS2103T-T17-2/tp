@@ -33,6 +33,11 @@ public class PhoneTest {
         assertFalse(Phone.isValidPhone("9011p041")); // letters outside brackets
         assertFalse(Phone.isValidPhone("(HP)")); // a note but no digits
         assertFalse(Phone.isValidPhone("(91234567)")); // all digits are inside a note bracket
+        assertFalse(Phone.isValidPhone("91234567 (")); // dangling open bracket
+        assertFalse(Phone.isValidPhone("123 ()")); // empty bracket
+        assertFalse(Phone.isValidPhone("(a(b)) 123")); // nested, unbalanced brackets
+        assertFalse(Phone.isValidPhone("---123---")); // leading, trailing and repeated hyphens
+        assertFalse(Phone.isValidPhone("91+23+45")); // "+" anywhere other than the start
 
         // valid phone numbers
         assertTrue(Phone.isValidPhone("911")); // exactly 3 digits
@@ -44,6 +49,9 @@ public class PhoneTest {
         assertTrue(Phone.isValidPhone("(65) 9123-4567")); // (65) has no +, so it is a note; 8 digits remain
         assertTrue(Phone.isValidPhone("9123 4567 (HP)")); // trailing note
         assertTrue(Phone.isValidPhone("200 (5)")); // trailing numeric note is ignored; 200 is enough
+        assertTrue(Phone.isValidPhone("(+65)91234567")); // country code written against the digits
+        assertTrue(Phone.isValidPhone("91234567(HP)")); // note written against the digits
+        assertTrue(Phone.isValidPhone("9123-4567")); // hyphen-separated digit groups
     }
 
     @Test
