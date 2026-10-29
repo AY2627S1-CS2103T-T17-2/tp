@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import trackflow.commons.core.GuiSettings;
 import trackflow.commons.core.LogsCenter;
+import trackflow.logic.commands.ClearCommand;
 import trackflow.logic.commands.Command;
 import trackflow.logic.commands.CommandResult;
 import trackflow.logic.commands.exceptions.CommandException;
@@ -33,6 +34,7 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final TrackFlowParser trackFlowParser;
+    private boolean clearPending;
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -52,7 +54,14 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
-        Command command = trackFlowParser.parseCommand(commandText);
+        boolean wasClearPending = clearPending;
+        clearPending = false;
+        if (wasClearPending && commandText.strip().equalsIgnoreCase("n")) {
+            return new CommandResult("Clear cancelled. No athletes were deleted.");
+        }
+        Command command = wasClearPending && commandText.strip().equalsIgnoreCase("y")
+                ? new ClearCommand(true) : trackFlowParser.parseCommand(commandText);
+        clearPending = command instanceof ClearCommand && !command.changesRoster();
         if (!command.changesRoster()) {
             return command.execute(model);
         }

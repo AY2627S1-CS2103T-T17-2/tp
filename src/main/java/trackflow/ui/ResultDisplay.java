@@ -45,6 +45,13 @@ public class ResultDisplay extends UiPart<Region> {
         showFeedback(feedbackToUser, FeedbackType.ERROR);
     }
 
+    /**
+     * Displays a warning that requires confirmation before proceeding.
+     */
+    public void showWarning(String feedbackToUser) {
+        showFeedback(feedbackToUser, FeedbackType.WARNING);
+    }
+
     private void showFeedback(String feedbackToUser, FeedbackType type) {
         requireNonNull(feedbackToUser);
         for (FeedbackType otherType : FeedbackType.values()) {
@@ -64,6 +71,7 @@ public class ResultDisplay extends UiPart<Region> {
      */
     private enum FeedbackType {
         SUCCESS("result-success", "M5.5 10.5 L8.5 13.5 L14.5 6.5"),
+        WARNING("result-warning", "M10 5 L10 11 M10 14 L10 14.2"),
         ERROR("result-error", "M6.5 6.5 L13.5 13.5 M13.5 6.5 L6.5 13.5");
 
         private final String styleClass;
