@@ -511,8 +511,6 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
   duplicate checks and phone sorting. Keep the number outside parentheses and use notes such as `(HP)` without digits.
 * **Pasted whitespace:** use ordinary spaces at command boundaries. Some Unicode space characters are not handled
   consistently by the command parser.
-* **Long stored event names:** a legacy event label may be clipped in a narrow window. The complete value remains
-  in `data/trackflow.json`; close the app and inspect a backup copy when you need the exact name for `untag`.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do
   not coordinate edits and a later save can overwrite changes from the other instance.
 
