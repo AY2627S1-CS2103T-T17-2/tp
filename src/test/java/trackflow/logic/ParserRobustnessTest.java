@@ -2,10 +2,12 @@ package trackflow.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static trackflow.testutil.Assert.assertThrows;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -341,6 +343,23 @@ public class ParserRobustnessTest {
                 "find n/Avery N/Ben", "edit 1 p/999 P/888", "remark 1 r/first R/second",
                 "edit 1 x/value", "remark 1 r/Note\u2003x/value",
                 "edit 1 addr/Block\nAnnex", "edit 1 addr/Block\rAnnex", "edit 1 addr/Block\u2028Annex"));
+    }
+
+    @Test
+    public void execute_pathologicalEmail_preservesRosterDisplayAndFile() throws Exception {
+        logic.execute("sort name desc");
+        logic.execute("find n/Avery");
+        Duration timeout = Duration.ofMillis(200);
+        List<String> pathologicalCommands = List.of(
+                "add n/Bob a/Under 14 p/91234567 e/" + "a".repeat(5000) + " addr/Block A",
+                "add n/Bob a/Under 14 p/91234567 e/a@" + "b".repeat(5000) + " addr/Block A",
+                "edit 1 e/" + "a".repeat(5000),
+                "edit 1 e/a@" + "b".repeat(5000),
+                "edit 1 e/a@" + "a.".repeat(2500));
+        for (String command : pathologicalCommands) {
+            assertTimeoutPreemptively(timeout, () ->
+                    assertRejectedWithoutChanges(ParseException.class, List.of(command)));
+        }
     }
 
     @Test
