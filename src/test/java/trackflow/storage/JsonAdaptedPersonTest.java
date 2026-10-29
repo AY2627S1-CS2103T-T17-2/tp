@@ -3,12 +3,14 @@ package trackflow.storage;
 // @@author
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 // @@author qiyuannn
 import static trackflow.storage.JsonAdaptedPerson.MISSING_FIELD_MESSAGE_FORMAT;
 import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalPersons.BENSON;
 // @@author
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -110,6 +112,25 @@ public class JsonAdaptedPersonTest {
                 new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, INVALID_EMAIL, VALID_ADDRESS, VALID_REMARK, VALID_TAGS);
         String expectedMessage = Email.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
+    }
+
+    @Test
+    public void toModelType_pathologicalEmail_throwsIllegalValueExceptionQuickly() {
+        Duration timeout = Duration.ofMillis(200);
+        JsonAdaptedPerson personLongLocal = new JsonAdaptedPerson(
+                VALID_NAME, VALID_PHONE, "a".repeat(5000), VALID_ADDRESS, VALID_REMARK, VALID_TAGS);
+        assertTimeoutPreemptively(timeout, () ->
+                assertThrows(IllegalValueException.class, Email.MESSAGE_CONSTRAINTS, personLongLocal::toModelType));
+
+        JsonAdaptedPerson personLongDomain = new JsonAdaptedPerson(
+                VALID_NAME, VALID_PHONE, "a@" + "b".repeat(5000), VALID_ADDRESS, VALID_REMARK, VALID_TAGS);
+        assertTimeoutPreemptively(timeout, () ->
+                assertThrows(IllegalValueException.class, Email.MESSAGE_CONSTRAINTS, personLongDomain::toModelType));
+
+        JsonAdaptedPerson personStackOverflow = new JsonAdaptedPerson(
+                VALID_NAME, VALID_PHONE, "a@" + "a.".repeat(2500), VALID_ADDRESS, VALID_REMARK, VALID_TAGS);
+        assertTimeoutPreemptively(timeout, () ->
+                assertThrows(IllegalValueException.class, Email.MESSAGE_CONSTRAINTS, personStackOverflow::toModelType));
     }
 
     @Test

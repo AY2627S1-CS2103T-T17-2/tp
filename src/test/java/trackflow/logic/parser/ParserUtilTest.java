@@ -1,11 +1,13 @@
 package trackflow.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
 import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
 import java.math.BigInteger;
+import java.time.Duration;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -244,6 +246,27 @@ public class ParserUtilTest {
         String emailWithWhitespace = WHITESPACE + VALID_EMAIL + WHITESPACE;
         Email expectedEmail = new Email(VALID_EMAIL);
         assertEquals(expectedEmail, ParserUtil.parseEmail(emailWithWhitespace));
+    }
+
+    @Test
+    public void parseEmail_pathologicalInput_throwsParseExceptionQuickly() {
+        Duration timeout = Duration.ofMillis(200);
+        assertTimeoutPreemptively(timeout, () ->
+                assertThrows(ParseException.class, Email.MESSAGE_CONSTRAINTS, () ->
+                        ParserUtil.parseEmail("a".repeat(5000))));
+        assertTimeoutPreemptively(timeout, () ->
+                assertThrows(ParseException.class, Email.MESSAGE_CONSTRAINTS, () ->
+                        ParserUtil.parseEmail("a@" + "b".repeat(5000))));
+        assertTimeoutPreemptively(timeout, () ->
+                assertThrows(ParseException.class, Email.MESSAGE_CONSTRAINTS, () ->
+                        ParserUtil.parseEmail("a@" + "a.".repeat(2500))));
+    }
+
+    @Test
+    public void parseEmail_exceedsMaxLength_throwsParseException() {
+        String exceedMaxEmail = "a@" + "b".repeat(251) + "cd";
+        assertThrows(ParseException.class, Email.MESSAGE_CONSTRAINTS, () ->
+                ParserUtil.parseEmail(exceedMaxEmail));
     }
 
     @Test
