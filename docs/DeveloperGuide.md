@@ -341,6 +341,8 @@ the model is changed. `ArgumentTokenizer` decodes escaped prefix-like text once,
 
 Matching is case-insensitive substring matching. Thus `find n/avery a/Under 14` requires both the name and category,
 while `find Blake n/avery a/Under 14` additionally includes athletes matching the broad keyword `Blake`.
+For `n/` phrases, repeated ordinary spaces in both the stored name and query are collapsed for comparison only.
+Stored names, phrase order, partial matching, and other fields' internal-spacing semantics are preserved.
 `find t/100m` also matches an event such as `4x100m`; exact-event matching is not implemented. Event names are joined
 with line breaks, which keeps ordinary single-line keywords from spanning two names.
 
@@ -393,7 +395,9 @@ The command resolves that index against the displayed list during execution.
 <puml src="diagrams/add-remark/ParserClass.puml" width="650" alt="RemarkCommandParser realizes Parser of RemarkCommand and reports ParseException" />
 
 `RemarkCommand` retains the new `Remark` and index, replaces the selected athlete with a copy, and restores the
-full roster view. An empty remark removes the note. It declares `changesRoster()` as true, so `LogicManager`
+full roster view. An empty remark removes the note. If both the existing and replacement remarks are empty,
+the command throws `CommandException` before mutation, so the current view is retained and no save is attempted.
+It declares `changesRoster()` as true, so `LogicManager`
 uses the staged save-before-publication path. Success messages use the same athlete summary as add, edit, and
 delete, including age category, phone, and email. These diagrams omit helpers, the index field, and result internals.
 
@@ -480,15 +484,16 @@ names without considering letter case, while rejecting missing fields, unsupport
 
 `ModelManager` wraps its existing `FilteredList<Person>` in a `SortedList<Person>`. `SortCommand` installs the selected
 comparator through `Model.updateSortedPersonList`, changing only the displayed view rather than the underlying
-`roster` order. Consequently, sorting composes with `find`, `filter`, and `list`, and indexed commands continue to
-resolve athletes against exactly what the user sees. The comparator is session-only and is not persisted.
+`roster` order. Sorting composes with `find` and `filter`, and indexed commands continue to resolve athletes against
+exactly what the user sees. `ListAthleteCommand` clears both the filter and comparator, restoring the full roster in
+saved order. Sorting and filtering are session-only view changes and are not persisted.
 
 Text fields are compared without considering letter case. Name comparison also collapses repeated ordinary spaces
 in the comparison key without rewriting the displayed or saved name. Phone sorting converts
 `Phone.getSignificantDigits()` to an arbitrary-precision numeric value. The shared key includes a bracketed country
 code such as `(+65)` and excludes other bracketed notes, including digits in `(5)` or `(Office 9)`. Displayed and
-saved text is unchanged, and large numeric values do not overflow. Duplicate identity still uses separate
-note-digit handling; its remaining limitation is identified in the UG.
+saved text is unchanged, and large numeric values do not overflow. Duplicate identity uses the same significant
+digits key, so note digits are ignored there too.
 Age categories use the competition order
 `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
 
@@ -764,6 +769,8 @@ Use case ends.
 
 * **1a.** The index is invalid or the required `r/` prefix is missing or repeated. TrackFlow reports the error and
   leaves the roster unchanged.
+* **2a.** The coach requests removal when the athlete has no remark. TrackFlow reports that no remark can be
+  removed, retaining the current roster and view without saving.
 * **3a.** Saving fails. TrackFlow reports the failure and leaves the live roster, filter, and sort order unchanged.
 
 #### UC07: Add or remove an athlete's track events
@@ -808,7 +815,7 @@ These are product requirements and acceptance targets, not claims about the curr
 | NFR09 | A loading failure shall not silently overwrite unrecovered data. That data shall remain separately preserved even if the coach makes changes to the new empty roster. |
 | NFR10 | As a performance target, with 1,000 athlete records on a computer with a dual-core processor, 8 GB RAM, and local SSD storage, at least 95 of 100 consecutive add, list, or delete commands shall update the display within two seconds of submission, with persistence included for changes. |
 | NFR11 | At 1920 × 1080 or higher with 100% and 125% display scaling, the interface shall avoid clipping essential controls and feedback. At 1280 × 720 or higher with 150% scaling, all functions shall remain accessible, including through scrolling or resizing where necessary. |
-| NFR12 | For identical input and roster state, validation shall report the same first error. Without an active sort, listing shall use saved roster order. An active sort shall remain applied across find, filter, list, and roster changes during the session; sorting shall not change saved roster order. |
+| NFR12 | For identical input and roster state, validation shall report the same first error. Listing shall use saved roster order. An active sort shall remain applied across find, filter, and roster changes until list or restart; sorting shall not change saved roster order. |
 
 ### Glossary
 
@@ -938,13 +945,14 @@ add n/Faye Teo a/Under 20 p/96666666 e/faye@example.com addr/60 Stadium Road
 
 1. Run `sort name`. Expect case-insensitive alphabetical name order and the ascending success message.
 1. Run `sort name desc`. Expect the reverse name order.
+1. Run `filter a/Under 14`, then `sort name desc`, then `list`. Expect every athlete in saved roster order.
 1. Run `sort age`. Expect `Under 14`, `Under 16`, `Under 18`, `Under 20`, then `Open`.
 1. Run `sort age descending`. Expect the reverse category order.
 1. Run `sort phone`, `sort email`, and `sort address` separately, then repeat each with `desc`. Verify numeric phone
    ordering and case-insensitive text ordering. This fixture has no empty addresses; if testing an older roster
    containing one, it should appear first in ascending address order and last in descending order.
 1. Run `filter a/Under 14`, then `sort name desc`. Expect only Casey and Avery, in that order.
-1. Run `list`. Expect the full roster while retaining the selected order.
+1. Run `list`. Expect the full roster in saved roster order.
 1. Run `delete 1` on a sorted list. Expect the athlete visibly shown at index 1 to be deleted.
 1. Try `sort`, `sort height`, `sort name upwards`, and `sort name asc extra`. Expect actionable errors and no display
    change.
@@ -1056,6 +1064,8 @@ Use a disposable home folder; these procedures change saved data.
    with the original name, phone, email, and remark retained. Restart and verify those values again.
 1. Run `remark 1 r/Recovery`, then restart. Expect `Recovery` to replace `Sprints`.
 1. Run `remark 1 r/`, then restart. Expect the remark to be empty and the category still `Under 16`.
+1. Run `remark 1 r/` again. Expect `Athlete has no remark to remove` with the athlete's details, with no save
+   or change to the current view.
 1. Try `add n/Incomplete`, `edit 1`, `edit 0 p/999`, `edit 1 addr/`, and `remark 1`.
    Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add or edit command must produce an error; add reports invalid command format, while edit identifies the unsupported prefix.
 1. Run `clear`, restart, and confirm the roster stays empty rather than loading samples again.
@@ -1132,7 +1142,8 @@ tag 1 t/100m
 
 ### Duplicate identity and complete equality
 
-Duplicate checks use normalized name plus **either** matching phone or matching email, regardless of age category.
+Duplicate checks use normalized name plus **either** matching significant phone digits or matching email, regardless
+of age category. Bracketed notes are ignored; a country code such as `(+65)` counts as part of the phone number.
 Name normalization ignores case and repeated spaces; email matching ignores case. Complete equality applies each
 field's equality rules across every field, including category, address, remark, and events. Phone formatting and
 event-name case do not by themselves make records unequal. These are separate contracts.

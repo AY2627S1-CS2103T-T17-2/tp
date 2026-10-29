@@ -75,6 +75,17 @@ public class RemarkCommandTest {
     }
 
     @Test
+    public void execute_deleteMissingRemark_failureAndPreservesFilteredView() {
+        Person person = model.getFilteredPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
+        Person withoutRemark = new PersonBuilder(person).withRemark("").build();
+        model.setPerson(person, withoutRemark);
+        showPersonAtIndex(model, INDEX_SECOND_PERSON);
+
+        assertCommandFailure(new RemarkCommand(INDEX_FIRST_PERSON, new Remark("")), model,
+                String.format(RemarkCommand.MESSAGE_NO_REMARK, Messages.formatAthlete(withoutRemark)));
+    }
+
+    @Test
     public void execute_filteredList_success() {
         showPersonAtIndex(model, INDEX_SECOND_PERSON);
 

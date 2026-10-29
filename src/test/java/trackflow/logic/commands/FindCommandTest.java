@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import trackflow.logic.parser.FindCommandParser;
 import trackflow.model.Model;
 import trackflow.model.ModelManager;
 import trackflow.model.UserPrefs;
@@ -112,6 +113,23 @@ public class FindCommandTest {
 
         assertCommandSuccess(command, model, FindCommand.MESSAGE_SUCCESS_SINGLE, expectedModel);
         assertEquals(List.of(namedUnderwood), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_namePhraseWithRepeatedSpaces_matchesWithoutChangingStoredName() throws Exception {
+        FindCommandParser parser = new FindCommandParser();
+        for (String storedName : List.of("Avery Tan", "Avery   Tan")) {
+            Person athlete = new PersonBuilder().withName(storedName).build();
+            model = new ModelManager(new AthleteRosterBuilder().withPerson(athlete).build(), new UserPrefs());
+            for (String query : List.of(" n/Avery Tan", " n/aVeRy   tAn", " n/very  Ta", " Avery   Tan")) {
+                assertEquals(FindCommand.MESSAGE_SUCCESS_SINGLE,
+                        parser.parse(query).execute(model).getFeedbackToUser());
+                assertEquals(List.of(athlete), model.getFilteredPersonList());
+                assertEquals(storedName, model.getRoster().getPersonList().get(0).getName().fullName);
+            }
+            parser.parse(" n/Tan Avery").execute(model);
+            assertTrue(model.getFilteredPersonList().isEmpty());
+        }
     }
 
     @Test

@@ -249,6 +249,11 @@ public class LogicManagerTest {
         ReadOnlyRoster reloadedRoster = storage.readRoster().orElseThrow();
         assertEquals(List.of("Zoe Tan", "Amy Lim"), getStoredNames(reloadedRoster));
         // @@author
+
+        CommandResult listResult = logic.execute("list");
+        assertEquals("Displaying 2 athletes.", listResult.getFeedbackToUser());
+        assertEquals(false, listResult.isDataSaved());
+        assertEquals(List.of("Zoe Tan", "Amy Lim"), getDisplayedNames(model));
     }
 
     @Test

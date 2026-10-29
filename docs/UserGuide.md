@@ -92,8 +92,8 @@ Interface (GUI).
 ### Working with the displayed list
 
 `find` and `filter` select athletes from the full roster. Each replaces the previous selection; they do not narrow
-the results of the preceding command. `sort` orders the selected athletes, and `list` shows everyone while retaining
-that order. Sorting and filtering are reset when TrackFlow restarts.
+the results of the preceding command. `sort` orders the selected athletes, and `list` shows everyone in saved roster
+order. Sorting and filtering are reset when TrackFlow restarts.
 
 While a `find` or `filter` is hiding some athletes, the status bar shows the count as `X of Y athletes` (for
 example, `2 of 9 athletes`), so you can tell you are viewing a subset even after a later command such as `sort`
@@ -191,7 +191,7 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   note and ignored, whether it is letters like `(HP)` or digits like `(5)` (for example, `+65 9123 4567`,
   `(+65) 9123 4567`, or `9123 4567 (HP)`).
 * Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
-* Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
+* Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Phone comparisons ignore bracketed notes (including digits), but count a bracketed country code such as `(+65)`. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` to supply the required nonblank address.
 * Add does not accept events or remarks. `edit` updates athlete details and addresses, `tag` and `untag` update track events, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
@@ -218,8 +218,8 @@ Shows the complete athlete roster.
 
 Format: `list`
 
-The command also restores the complete roster after a `find` or `filter` command, retaining the current sort order.
-Without an active sort, athletes appear in saved roster order. It does not accept parameters.
+The command restores the complete roster in saved roster order after a `find`, `filter`, or `sort` command.
+It clears the active filter and sort without changing saved data. It does not accept parameters.
 
 * An empty roster displays `The athlete roster is empty.`
 * A roster with one athlete displays `Displaying 1 athlete.`
@@ -291,6 +291,8 @@ Format: `remark INDEX r/[REMARK]`
 * Exactly one `r/` prefix is required. The prefix is case-insensitive.
 * A new remark replaces the existing remark; remarks are not appended.
 * Use an empty remark, such as `remark 1 r/`, to remove the athlete's existing remark.
+  If the athlete already has no remark, TrackFlow reports `Athlete has no remark to remove` followed by their
+  details, and leaves the roster and current view unchanged.
 * Remarks form part of the saved athlete record and remain after restarting TrackFlow.
 * Updating a remark preserves the athlete's age category and other details.
 * A successful remark update displays the full roster again and retains the current sort order.
@@ -355,6 +357,8 @@ Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/A
 * Broad and field-specific criteria can be combined. An athlete is returned when at least one broad keyword matches
   **or** every field-specific value matches. Each field prefix may appear at most once and cannot have an empty value.
 * Broad keyword order does not matter: `find Avery Tan` and `find Tan Avery` return the same results. A prefixed value is matched as one phrase, so `find n/Avery Tan` matches that name but `find n/Tan Avery` does not. Put broad keywords before any field prefixes. Each athlete appears at most once.
+* Name searches ignore repeated ordinary spaces: `find n/Avery   Tan` and `find n/Avery Tan` match both
+  `Avery Tan` and `Avery   Tan`. Stored names are unchanged. Other field searches retain literal internal spacing.
 * Each `find` searches the entire roster and replaces any previous `find` or `filter`. Matching athletes retain the
   current displayed ordering, including any active sort, and receive indexes starting from 1. Use `list` to restore the complete roster.
 * An empty or whitespace-only search is rejected and displays the accepted command format.
@@ -402,10 +406,12 @@ Available orders are `asc` or `ascending`, and `desc` or `descending`. If `ORDER
 Field and order names are case-insensitive.
 
 Sorting changes only the displayed order; it does not rewrite the saved roster order. The selected ordering remains
-active for the rest of the application session, including after `find`, `filter`, `list`, and roster-changing commands
+active until `list` or a restart, including after `find`, `filter`, and roster-changing commands
 such as `add`, `edit`, `remark`, and `delete`. New or edited athletes automatically move to the correct position in the
 displayed list. A later `sort` command replaces the selected ordering. Indexed commands such as `edit`, `remark`, and
 `delete` use the indexes shown in the sorted list.
+
+Use `list` to show the full roster in saved order. This clears any active sort and filter without saving data.
 
 Examples:
 
@@ -518,9 +524,6 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
 * **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
   JDK 25 FX runtime on macOS and verify the packaged JAR on your machine. See the
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
-* **Phone duplicate checks:** validation and phone sorting ignore bracketed notes, but digits inside notes can still
-  affect duplicate checks. Use notes without digits when adding or editing athletes until this separate identity
-  issue is fixed. Write a bracketed country code with `+`, such as `(+65)`.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do
   not coordinate edits and a later save can overwrite changes from the other instance.
 

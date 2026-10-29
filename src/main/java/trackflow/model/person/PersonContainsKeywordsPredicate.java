@@ -19,7 +19,7 @@ import trackflow.commons.util.ToStringBuilder;
  * A prefixed keyword is matched only against its field, and different field prefixes are combined with AND, so a
  * person must satisfy every field criterion. When both unprefixed keywords and field criteria are given, a person
  * matches if any unprefixed keyword matches or every field criterion matches. Empty keyword collections match no
- * athletes.
+ * athletes. Name-scoped matching ignores repeated ordinary spaces in both the name and search phrase.
  */
 public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     private final List<String> keywords;
@@ -60,7 +60,7 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
         // An absent field group must not make a broad-only search match everything through an empty allMatch.
         boolean matchesEveryField = !fieldKeywords.isEmpty()
                 && fieldKeywords.entrySet().stream()
-                        .allMatch(entry -> containsAnyKeyword(getFieldText(person, entry.getKey()), entry.getValue()));
+                        .allMatch(entry -> containsFieldKeyword(person, entry.getKey(), entry.getValue()));
         // Field criteria are combined with AND among themselves; broad keywords and field criteria are combined
         // with OR, so an athlete matches if any broad keyword matches or every field criterion matches.
         return matchesBroadKeywords || matchesEveryField;
@@ -73,6 +73,15 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
                 .filter(keyword -> !keyword.isEmpty())
                 .map(keyword -> keyword.toLowerCase(Locale.ROOT))
                 .anyMatch(normalizedText::contains);
+    }
+
+    private static boolean containsFieldKeyword(Person person, SearchField field, List<String> keywords) {
+        String text = getFieldText(person, field);
+        if (field == SearchField.NAME) {
+            return containsAnyKeyword(text.replaceAll(" +", " "),
+                    keywords.stream().map(keyword -> keyword.replaceAll(" +", " ")).toList());
+        }
+        return containsAnyKeyword(text, keywords);
     }
 
     private static String getSearchableText(Person person) {

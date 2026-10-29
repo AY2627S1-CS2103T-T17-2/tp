@@ -31,6 +31,7 @@ public class RemarkCommand extends Command {
 
     public static final String MESSAGE_ADD_REMARK_SUCCESS = "Added remark to athlete: %1$s";
     public static final String MESSAGE_DELETE_REMARK_SUCCESS = "Removed remark from athlete: %1$s";
+    public static final String MESSAGE_NO_REMARK = "Athlete has no remark to remove: %1$s";
 
     private final Index index;
     private final Remark remark;
@@ -63,6 +64,9 @@ public class RemarkCommand extends Command {
         }
 
         Person personToEdit = lastShownList.get(index.getZeroBased());
+        if (remark.value.isEmpty() && personToEdit.getRemark().value.isEmpty()) {
+            throw new CommandException(String.format(MESSAGE_NO_REMARK, Messages.formatAthlete(personToEdit)));
+        }
         Person editedPerson = new Person(
                 personToEdit.getName(), personToEdit.getAgeCategory(), personToEdit.getPhone(), personToEdit.getEmail(),
                 personToEdit.getAddress(), remark, personToEdit.getTags());

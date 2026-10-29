@@ -106,12 +106,12 @@ public class Person {
     }
 
     /**
-     * Returns true if either the phone's digits or the email matches those of {@code otherPerson}.
+     * Returns true if either the phone's significant digits or the email matches those of {@code otherPerson}.
      * Email comparison ignores case and surrounding whitespace. Names are not compared; null returns false.
      */
     public boolean hasSameContactDetails(Person otherPerson) {
         return otherPerson != null
-                && (phone.value.replaceAll("\\D", "").equals(otherPerson.phone.value.replaceAll("\\D", ""))
+                && (phone.getSignificantDigits().equals(otherPerson.phone.getSignificantDigits())
                 || email.value.trim().equalsIgnoreCase(otherPerson.email.value.trim()));
     }
 

@@ -190,13 +190,13 @@ public class SortCommandTest {
     }
 
     @Test
-    public void execute_filteredList_sortsMatchesAndPersistsAfterList() {
+    public void execute_filteredList_sortsMatchesAndListRestoresRosterOrder() {
         model.updateFilteredPersonList(person -> !person.equals(MIA));
         new SortCommand(NAME, ASCENDING).execute(model);
         assertEquals(List.of(AMY, ZOE), model.getFilteredPersonList());
 
         new ListAthleteCommand().execute(model);
-        assertEquals(List.of(AMY, MIA, ZOE), model.getFilteredPersonList());
+        assertEquals(List.of(ZOE, MIA, AMY), model.getFilteredPersonList());
     }
 
     @Test

@@ -133,7 +133,7 @@ public class ModelManager implements Model {
 
     @Override
     public void updateSortedPersonList(Comparator<Person> comparator) {
-        personListComparator = requireNonNull(comparator);
+        personListComparator = comparator;
         sortedPersons.setComparator(comparator);
     }
 

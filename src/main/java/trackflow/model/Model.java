@@ -97,9 +97,7 @@ public interface Model {
 
     /**
      * Replaces the display ordering with {@code comparator}, retaining the current filter.
-     * Does not reorder the stored roster.
-     *
-     * @throws NullPointerException If {@code comparator} is null.
+     * Does not reorder the stored roster. A {@code null} comparator restores saved roster order.
      */
     void updateSortedPersonList(Comparator<Person> comparator);
 }
