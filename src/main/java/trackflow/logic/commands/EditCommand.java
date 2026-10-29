@@ -47,7 +47,7 @@ public class EditCommand extends Command {
             + "Existing values will be overwritten by the input values.\n"
             + "Parameters: INDEX (must be a positive integer) "
             + "[" + PREFIX_NAME + "NAME] "
-            + "[" + PREFIX_AGE_CATEGORY + "AGE_CATEGORY] "
+            + "[" + PREFIX_AGE_CATEGORY + "AGE_CATEGORY (Under 14, Under 16, Under 18, Under 20, or Open)] "
             + "[" + PREFIX_PHONE + "PHONE] "
             + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_ADDRESS + "ADDRESS]\n"

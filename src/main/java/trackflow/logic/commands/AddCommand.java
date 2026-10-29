@@ -27,7 +27,8 @@ public class AddCommand extends Command {
     public static final String COMMAND_WORD = "add";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds an athlete to the roster. "
-            + "Parameters: " + PREFIX_NAME + "NAME " + PREFIX_AGE_CATEGORY + "AGE_CATEGORY "
+            + "Parameters: " + PREFIX_NAME + "NAME "
+            + PREFIX_AGE_CATEGORY + "AGE_CATEGORY (Under 14, Under 16, Under 18, Under 20, or Open) "
             + PREFIX_PHONE + "PHONE " + PREFIX_EMAIL + "EMAIL " + PREFIX_ADDRESS + "ADDRESS\n"
             + "Example: " + COMMAND_WORD + " n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com "
             + "addr/123 Main Street";
