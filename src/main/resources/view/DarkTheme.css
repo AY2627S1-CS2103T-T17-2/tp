@@ -340,15 +340,18 @@
     -fx-font-family: "Plus Jakarta Sans SemiBold";
     -fx-font-size: 14px;
     -fx-text-fill: -tf-text;
+    -fx-fill: -tf-text;
 }
 
 .cell_small_label {
     -fx-font-size: 12px;
     -fx-text-fill: -tf-muted;
+    -fx-fill: -tf-muted;
 }
 
 #personListView .list-cell .cell_small_label {
     -fx-text-fill: -tf-muted;
+    -fx-fill: -tf-muted;
 }
 
 .list-placeholder {

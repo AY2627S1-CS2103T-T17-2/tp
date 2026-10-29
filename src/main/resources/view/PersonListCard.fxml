@@ -27,14 +27,18 @@
     </minWidth>
   </Label>
   <VBox spacing="3" minWidth="0" GridPane.columnIndex="1">
-    <Label fx:id="name" text="\$first" styleClass="cell_big_label" wrapText="true" />
-    <!-- A TextFlow (unlike a Label) can break a long email address that has no spaces. -->
+    <!-- TextFlows (unlike Labels) break a long name/address/email that has no spaces, instead of clipping it. -->
+    <TextFlow>
+      <Text fx:id="name" styleClass="cell_big_label" text="\$first" />
+    </TextFlow>
     <TextFlow>
       <Text fx:id="phone" styleClass="cell_detail, cell_phone" text="\$phone" />
       <Text text="  ·  " styleClass="cell_detail, cell_separator" />
       <Text fx:id="email" styleClass="cell_detail" text="\$email" />
     </TextFlow>
-    <Label fx:id="address" styleClass="cell_small_label" text="\$address" wrapText="true" />
+    <TextFlow fx:id="addressContainer">
+      <Text fx:id="address" styleClass="cell_small_label" text="\$address" />
+    </TextFlow>
     <FlowPane fx:id="tags" />
     <Label fx:id="remark" styleClass="cell_small_label, cell_remark" text="\$remark" wrapText="true" />
   </VBox>
