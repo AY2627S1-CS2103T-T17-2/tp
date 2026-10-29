@@ -10,6 +10,8 @@ import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static trackflow.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static trackflow.testutil.TypicalPersons.getTypicalRoster;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 
 import trackflow.commons.core.index.Index;
@@ -19,6 +21,7 @@ import trackflow.model.Model;
 import trackflow.model.ModelManager;
 import trackflow.model.UserPrefs;
 import trackflow.model.person.Person;
+import trackflow.model.tag.Tag;
 import trackflow.testutil.PersonBuilder;
 
 /**
@@ -52,6 +55,26 @@ public class UntagCommandTest {
                 athlete.getName());
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
         expectedModel.setPerson(athlete, untaggedAthlete);
+
+        assertCommandSuccess(command, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_legacyEventLongerThanLimit_removesEvent() {
+        Person athlete = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Tag legacyEvent = Tag.fromStoredName("A".repeat(Tag.MAX_LENGTH + 1));
+        Person athleteWithLegacyEvent = new Person(athlete.getName(), athlete.getAgeCategory(), athlete.getPhone(),
+                athlete.getEmail(), athlete.getAddress(), athlete.getRemark(), Set.of(legacyEvent));
+        model.setPerson(athlete, athleteWithLegacyEvent);
+
+        UntagCommand command = new UntagCommand(INDEX_FIRST_PERSON,
+                Set.of(Tag.fromStoredName("a".repeat(Tag.MAX_LENGTH + 1)))); // matching ignores case
+        Person untaggedAthlete = new PersonBuilder(athleteWithLegacyEvent).withTags().build();
+
+        String expectedMessage = String.format(UntagCommand.MESSAGE_SUCCESS, legacyEvent.tagName,
+                athlete.getName());
+        Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
+        expectedModel.setPerson(athleteWithLegacyEvent, untaggedAthlete);
 
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
     }
