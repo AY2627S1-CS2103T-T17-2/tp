@@ -177,7 +177,11 @@ public class MainWindow extends UiPart<Stage> {
             CommandResult commandResult = logic.execute(commandText);
             logger.info("Result: " + commandResult.getFeedbackToUser());
             personListPanel.highlightNewlyAddedPerson();
-            resultDisplay.showSuccess(commandResult.getFeedbackToUser());
+            if (commandResult.isWarning()) {
+                resultDisplay.showWarning(commandResult.getFeedbackToUser());
+            } else {
+                resultDisplay.showSuccess(commandResult.getFeedbackToUser());
+            }
             if (commandResult.isDataSaved()) {
                 statusBarFooter.showSaved();
             } else {

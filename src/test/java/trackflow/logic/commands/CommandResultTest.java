@@ -69,8 +69,18 @@ public class CommandResultTest {
         CommandResult commandResult = new CommandResult("feedback");
         String expected = CommandResult.class.getCanonicalName() + "{feedbackToUser="
                 + commandResult.getFeedbackToUser() + ", showHelp=" + commandResult.isShowHelp()
-                + ", exit=" + commandResult.isExit() + ", dataSaved=" + commandResult.isDataSaved() + "}";
+                + ", exit=" + commandResult.isExit() + ", dataSaved=" + commandResult.isDataSaved()
+                + ", warning=" + commandResult.isWarning() + "}";
         assertEquals(expected, commandResult.toString());
+    }
+
+    @Test
+    public void warning_hasDistinctState() {
+        CommandResult warning = CommandResult.warning("Confirm?");
+        assertTrue(warning.isWarning());
+        assertFalse(warning.isDataSaved());
+        assertNotEquals(new CommandResult("Confirm?"), warning);
+        assertTrue(warning.withDataSaved().isWarning());
     }
 
     @Test

@@ -36,7 +36,7 @@ public class HelpCommand extends Command {
                     RemarkCommand.MESSAGE_USAGE + "\nTo remove a remark: remark 1 r/",
                     TagCommand.MESSAGE_USAGE,
                     UntagCommand.MESSAGE_USAGE,
-                    "clear: Removes all athletes from the roster.\nExample: clear",
+                    ClearCommand.MESSAGE_USAGE,
                     MESSAGE_USAGE,
                     "exit: Closes the application.\nExample: exit");
 

@@ -72,7 +72,7 @@ Interface (GUI).
 * Command words and parameter prefixes are case-insensitive. For example, `LIST`, `List`, and `list` invoke the same
   command, while `n/Avery` and `N/Avery` supply the same name parameter.
 
-* The `list`, `help`, `clear`, and `exit` commands do not accept parameters.
+* The `list`, `help`, and `exit` commands do not accept parameters.
 
 * Leading and trailing spaces around a command or parameter value are ignored. Pasted Unicode spaces, including
   non-breaking and em spaces, are accepted between the command word and parameters, before prefixes, and between
@@ -474,11 +474,12 @@ Examples:
 
 Deletes all athletes from the roster.
 
-Format: `clear`
+Format: `clear`, then `Y`
 
-The command does not accept parameters.
+`clear` displays a yellow warning without changing or saving the roster. To proceed, type `Y`.
+Type `N` to cancel. Responses are case-insensitive; any other command also cancels the pending clear.
 
-**This action is permanent:** `clear` immediately saves an empty roster, with no confirmation or undo. Close the app
+**Confirmed deletion is permanent:** `Y` saves an empty roster with no undo. Close the app
 and back up `data/trackflow.json` in the JAR's home folder before clearing data you may need later. `delete` also saves
 its deletion immediately.
 
@@ -559,7 +560,7 @@ file. A fresh launch only displays sample athletes; it does not create a roster 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com addr/123 Main Street`
-**Clear**  | `clear`
+**Clear**  | `clear`, then `Y`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`

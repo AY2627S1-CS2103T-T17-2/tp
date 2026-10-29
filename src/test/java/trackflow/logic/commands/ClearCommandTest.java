@@ -15,11 +15,20 @@ import trackflow.model.UserPrefs;
 public class ClearCommandTest {
 
     @Test
+    public void execute_unconfirmed_keepsRoster() {
+        Model model = new ModelManager(getTypicalRoster(), new UserPrefs());
+        Model expectedModel = new ModelManager(getTypicalRoster(), new UserPrefs());
+
+        assertCommandSuccess(new ClearCommand(), model,
+                CommandResult.warning(ClearCommand.MESSAGE_CONFIRMATION), expectedModel);
+    }
+
+    @Test
     public void execute_emptyAthleteRoster_success() {
         Model model = new ModelManager();
         Model expectedModel = new ModelManager();
 
-        assertCommandSuccess(new ClearCommand(), model, ClearCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(new ClearCommand(true), model, ClearCommand.MESSAGE_SUCCESS, expectedModel);
     }
 
     @Test
@@ -28,7 +37,7 @@ public class ClearCommandTest {
         Model expectedModel = new ModelManager(getTypicalRoster(), new UserPrefs());
         expectedModel.setRoster(new AthleteRoster());
 
-        assertCommandSuccess(new ClearCommand(), model, ClearCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(new ClearCommand(true), model, ClearCommand.MESSAGE_SUCCESS, expectedModel);
     }
 
 }

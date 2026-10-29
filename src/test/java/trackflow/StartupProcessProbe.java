@@ -14,6 +14,7 @@ public class StartupProcessProbe {
         app.init();
         if (args.length > 0 && args[0].equals("change")) {
             app.logic.execute("clear");
+            app.logic.execute("y");
             app.logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/23 Bishan Street");
             app.logic.execute("remark 1 r/Weekend training");
             app.logic.execute("tag 1 t/100m");
