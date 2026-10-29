@@ -25,6 +25,7 @@ repositories {
 
 checkstyle {
     toolVersion = '14.1.0'
+    maxWarnings = 0
 }
 
 test {

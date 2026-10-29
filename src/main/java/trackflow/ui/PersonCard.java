@@ -26,8 +26,7 @@ public class PersonCard extends UiPart<Region> {
      * As a consequence, UI elements' variable names cannot be set to such keywords
      * or an exception will be thrown by JavaFX during runtime.
      */
-
-    public final Person person;
+    private final Person person;
 
     @FXML
     private GridPane cardPane;

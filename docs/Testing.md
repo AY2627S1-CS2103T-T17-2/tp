@@ -127,3 +127,19 @@ window tests or launch verification of the final release JAR on each supported r
 Automated results are in `build/reports/tests/test/index.html`; Checkstyle reports are in
 `build/reports/checkstyle/`. Verify guide examples and startup behavior using the
 [manual testing procedures](DeveloperGuide.md#appendix-instructions-for-manual-testing).
+
+## Week 11 release testing
+
+For the [Week 11 v1.5 milestone](https://nus-cs2103-ay2627-s1.github.io/website/schedule/week11/project.html),
+test the packaged JAR in a fresh writable folder with Java 25. Record the JAR version, OS, processor,
+runtime, resolution and display scale alongside each result. Use the manual testing appendix for command,
+save/restart, help-window and display checks; compare the result with the published UG.
+
+Each member must submit at least five genuine issues labeled `alpha-bug`. Assign feature testing across the
+team, fix or triage the reports, and repeat affected checks on the final JAR. Issue counts establish reporting
+participation; they do not establish that every bug is fixed or that the release passed its smoke test.
+
+Before releasing, check RepoSense attribution for each member and verify the final website and JAR against
+the same source revision. Publish the v1.5 JAR and website by October 29, 2026, 23:59 Singapore time, then
+reschedule or close outstanding milestone items and close the milestone. The course recommends a team beta
+test of the released JAR and guides on October 30, 16:00–18:00 Singapore time.

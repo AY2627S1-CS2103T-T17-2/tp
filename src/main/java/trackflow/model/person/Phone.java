@@ -14,7 +14,9 @@ public class Phone {
                     + "A bracketed country code such as (+65) counts as part of the number; other bracketed text "
                     + "such as (HP) is treated as a note and is ignored.";
 
-    /** Minimum number of significant digits a phone number must contain. */
+    /**
+     * Minimum number of significant digits a phone number must contain.
+     */
     private static final int MINIMUM_DIGITS = 3;
 
     /**
@@ -23,7 +25,9 @@ public class Phone {
      */
     private static final String BRACKETED_NOTE_REGEX = "\\([^+)]*\\)";
 
-    /** The characters allowed once bracketed notes are set aside: digits, spaces, and + - ( ). */
+    /**
+     * The characters allowed once bracketed notes are set aside: digits, spaces, and + - ( ).
+     */
     private static final String ALLOWED_CHARACTERS_REGEX = "[0-9 +\\-()]*";
 
     public final String value;

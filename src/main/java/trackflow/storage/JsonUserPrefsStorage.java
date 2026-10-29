@@ -1,5 +1,7 @@
 package trackflow.storage;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -18,9 +20,11 @@ public class JsonUserPrefsStorage {
 
     /**
      * Creates storage for user preferences at {@code filePath} without reading or creating the file.
+     *
+     * @throws NullPointerException If the file path is null.
      */
     public JsonUserPrefsStorage(Path filePath) {
-        this.filePath = filePath;
+        this.filePath = requireNonNull(filePath);
     }
 
     public Path getUserPrefsFilePath() {

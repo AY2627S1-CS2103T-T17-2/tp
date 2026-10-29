@@ -137,7 +137,9 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
                 .toString();
     }
 
-    /** Fields that a find keyword can be restricted to. */
+    /**
+     * Fields that a find keyword can be restricted to.
+     */
     public enum SearchField {
         NAME,
         AGE_CATEGORY,

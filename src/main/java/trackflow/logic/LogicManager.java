@@ -1,5 +1,7 @@
 package trackflow.logic;
 
+import static trackflow.commons.util.CollectionUtil.requireAllNonNull;
+
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.logging.Logger;
@@ -36,8 +38,11 @@ public class LogicManager implements Logic {
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
+     *
+     * @throws NullPointerException If the model or storage is null.
      */
     public LogicManager(Model model, Storage storage) {
+        requireAllNonNull(model, storage);
         this.model = model;
         this.storage = storage;
         trackFlowParser = new TrackFlowParser();
