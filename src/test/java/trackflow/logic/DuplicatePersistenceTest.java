@@ -55,9 +55,9 @@ public class DuplicatePersistenceTest {
                 "add n/avery tan a/Open p/93456789 e/AVERY@example.com addr/Elsewhere",
                 String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "avery tan"),
                 "edit 1 n/AVERY   TAN e/AVERY@example.com",
-                EditCommand.MESSAGE_DUPLICATE_PERSON,
+                String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, "AVERY   TAN"),
                 "edit 1 n/Avery Tan p/91234567 (Office 2)",
-                EditCommand.MESSAGE_DUPLICATE_PERSON,
+                String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"),
                 "add n/Jordan Lee a/Open p/6592345678 (Office 2) e/other@example.com addr/Elsewhere",
                 String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Jordan Lee"));
         for (var entry : duplicateCommands.entrySet()) {

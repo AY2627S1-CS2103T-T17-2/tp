@@ -266,12 +266,13 @@ Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]
 * Edits the athlete at the specified `INDEX`. The index refers to the index number shown in the displayed athlete list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
+* At least one field must be different from the athlete's current details.
 * Omitted fields retain their current values. Track events and remarks are preserved.
 * `a/` means age category. Supported categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`;
   case and repeated ordinary spaces are normalized. Addresses use the separate `addr/` prefix.
 * Use `addr/ADDRESS` to edit the address. An empty or whitespace-only address is rejected.
 * Repeated field prefixes, empty or invalid values, and `t/` or `r/` parameters are rejected. Use `tag`/`untag` for events and `remark` for remarks.
-* Edits that create a duplicate athlete are rejected using the same normalized name and contact comparison as `add`.
+* Edits that create a duplicate athlete are rejected (producing `This athlete already exists in the roster: Avery Tan.`) using the same normalized name and contact comparison as `add`.
 * A successful edit displays the full roster again; failed edits leave the roster and displayed list unchanged.
 
 Examples:
