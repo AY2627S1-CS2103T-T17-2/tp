@@ -750,7 +750,7 @@ Use case ends.
 
 #### UC05: Filter athletes by age category
 
-**Status**: Implemented in v1.4.<br>
+**Status**: Implemented in v1.5.<br>
 **Related stories**: US02, US03, US05, US11.<br>
 **Precondition**: TrackFlow is open.<br>
 **Success postcondition**: Only matching athletes are displayed; stored records are unchanged.

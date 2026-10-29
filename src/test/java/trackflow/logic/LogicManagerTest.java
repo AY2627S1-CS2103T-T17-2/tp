@@ -186,7 +186,8 @@ public class LogicManagerTest {
                 logic.execute("add n/Avery Tan " + variant + " addr/123 Main Street"));
         }
         assertEquals(1, model.getFilteredPersonList().size());
-        assertThrows(CommandException.class, "This athlete already exists in the roster: Avery Tan.", () ->
+        assertThrows(CommandException.class,
+                String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"), () ->
             logic.execute("add n/AVERY   TAN a/under 14 p/91234567 e/AVERY.TAN@example.com addr/123 Main Street"));
         assertEquals(1, model.getFilteredPersonList().size());
         // @@author qiyuannn

@@ -109,7 +109,7 @@ public class SortCommand extends Command {
      */
     public enum SortField {
         NAME("name"),
-        AGE("age category"),
+        AGE("age"),
         PHONE("phone"),
         EMAIL("email"),
         ADDRESS("address");
