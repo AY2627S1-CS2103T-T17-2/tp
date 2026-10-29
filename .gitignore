@@ -28,3 +28,4 @@ docs/_site/
 # Temp files
 _temp/
 docs/_markbind/logs/
+output/

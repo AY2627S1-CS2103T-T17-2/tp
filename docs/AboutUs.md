@@ -15,7 +15,7 @@ You can reach us through our [project repository](https://github.com/AY2627S1-CS
 
 <img src="images/ken2k7.png" width="200px">
 
-[[github](https://github.com/ken2k7)]
+[[github](https://github.com/ken2k7)] [[portfolio](team/ken2k7.html)]
 
 * Role: UI
 * Responsibilities: Looks after the design and implementation of the user interface.
@@ -24,7 +24,7 @@ You can reach us through our [project repository](https://github.com/AY2627S1-CS
 
 <img src="images/qiyuannn.png" width="200px">
 
-[[github](http://github.com/qiyuannn)]
+[[github](http://github.com/qiyuannn)] [[portfolio](team/qiyuannn.html)]
 
 * Role: Testing
 <!-- @@author qiyuannn -->
@@ -35,7 +35,7 @@ You can reach us through our [project repository](https://github.com/AY2627S1-CS
 
 <img src="images/chetangent.png" width="200px">
 
-[[github](http://github.com/chetangent)]
+[[github](http://github.com/chetangent)] [[portfolio](team/chetangent.html)]
 * Role: Team lead
 * Responsibilities: Responsible for overall project coordination.
 
@@ -43,7 +43,7 @@ You can reach us through our [project repository](https://github.com/AY2627S1-CS
 
 <img src="images/austin-chia.png" width="200px">
 
-[[github](https://github.com/austin-chia)]
+[[github](https://github.com/austin-chia)] [[portfolio](team/austin-chia.html)]
 
 <!-- @@author Austin-Chia -->
 * Role: Documentation
@@ -54,7 +54,7 @@ You can reach us through our [project repository](https://github.com/AY2627S1-CS
 
 <img src="images/antonydchakola-hub.png" width="200px">
 
-[[github](https://github.com/antonydchakola-hub)]
+[[github](https://github.com/antonydchakola-hub)] [[portfolio](team/antonydchakola-hub.html)]
 
 * Role: Deliverables and deadlines expert
 * Responsibilities: Ensures project deliverables are done on time and in the right format.

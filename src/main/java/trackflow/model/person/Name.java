@@ -43,6 +43,7 @@ public class Name {
      * Returns true if a given string is a valid name.
      */
     public static boolean isValidName(String test) {
+        requireNonNull(test);
         return VALIDATION_PATTERN.matcher(test).matches();
     }
 
