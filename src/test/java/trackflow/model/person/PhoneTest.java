@@ -2,8 +2,11 @@ package trackflow.model.person;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
+
+import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
@@ -52,6 +55,22 @@ public class PhoneTest {
         assertTrue(Phone.isValidPhone("(+65)91234567")); // country code written against the digits
         assertTrue(Phone.isValidPhone("91234567(HP)")); // note written against the digits
         assertTrue(Phone.isValidPhone("9123-4567")); // hyphen-separated digit groups
+    }
+
+    @Test
+    public void isValidPhone_pathologicalInput_evaluatesQuickly() {
+        Duration timeout = Duration.ofMillis(200);
+
+        // A long run of digits followed by an invalid character forces the match to fail. With greedy
+        // quantifiers this backtracks quadratically; the possessive quantifiers keep it linear. These must
+        // return quickly instead of freezing the UI thread on a pasted "phone number".
+        String longDigits = "1".repeat(100_000) + "!";
+        String longSpaced = "1 ".repeat(50_000) + "!";
+        String longHyphened = "1-".repeat(50_000) + "!";
+
+        assertTimeoutPreemptively(timeout, () -> assertFalse(Phone.isValidPhone(longDigits)));
+        assertTimeoutPreemptively(timeout, () -> assertFalse(Phone.isValidPhone(longSpaced)));
+        assertTimeoutPreemptively(timeout, () -> assertFalse(Phone.isValidPhone(longHyphened)));
     }
 
     @Test

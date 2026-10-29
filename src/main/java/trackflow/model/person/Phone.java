@@ -26,13 +26,17 @@ public class Phone {
     private static final String BRACKETED_NOTE_REGEX = "\\([^+)]*\\)";
 
     /** A run of digits, optionally split into groups by single hyphens: "9123" or "9123-4567". */
-    private static final String DIGIT_GROUP_REGEX = "\\d+(?:-\\d+)*";
+    // Quantifiers below are possessive (++, *+, ?+) so the matcher never backtracks. The elements are
+    // unambiguous (each starts with a digit, "+", or "("), so a maximal match is always the only match, and
+    // forbidding backtracking turns a failing match on a long input (e.g. a pasted 50 000-digit string) from
+    // quadratic time into linear time. Do not relax these to greedy quantifiers.
+    private static final String DIGIT_GROUP_REGEX = "\\d++(?:-\\d++)*+";
 
     /** A bracketed country code such as "(+65)". */
-    private static final String COUNTRY_CODE_REGEX = "\\(\\+\\d+\\)";
+    private static final String COUNTRY_CODE_REGEX = "\\(\\+\\d++\\)";
 
     /** A non-empty bracketed note with balanced brackets, such as "(HP)" or "(65)". */
-    private static final String NOTE_REGEX = "\\([^+()]+\\)";
+    private static final String NOTE_REGEX = "\\([^+()]++\\)";
 
     /**
      * A valid phone number: a sequence of digit groups, country codes and notes, each optionally separated by a
@@ -41,8 +45,8 @@ public class Phone {
      * notes and country codes written directly against the digits (such as "(+65)91234567").
      */
     private static final String VALIDATION_REGEX =
-            "(?:\\+?" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + ")"
-                    + "(?: ?(?:" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + "))*";
+            "(?:\\+?+" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + ")"
+                    + "(?: ?+(?:" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + "))*+";
 
     public final String value;
 
