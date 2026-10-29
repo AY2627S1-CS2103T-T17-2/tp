@@ -1011,6 +1011,7 @@ For an indexed-command regression with tied sort values, prepare a separate disp
 
 ```text
 clear
+Y
 add n/Alice a/Open p/111 e/alice@example.com addr/Home
 add n/Bob a/Open p/222 e/bob@example.com addr/Home
 tag 1 t/Original
