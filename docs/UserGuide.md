@@ -280,8 +280,10 @@ Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]
 
 * Edits the athlete at the specified `INDEX`. The index refers to the index number shown in the displayed athlete list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
+* At least one supplied value must change the stored details. Otherwise, TrackFlow reports
+  `At least one field must be different from the athlete's current details.` without saving or changing the view.
+  Changing the stored phone formatting or note still counts as an edit.
 * Existing values will be updated to the input values.
-* At least one field must be different from the athlete's current details.
 * Omitted fields retain their current values. Track events and remarks are preserved.
 * `a/` means age category. Supported categories are `Under 14`, `Under 16`, `Under 18`, `Under 20`, and `Open`;
   case and repeated ordinary spaces are normalized. Addresses use the separate `addr/` prefix.

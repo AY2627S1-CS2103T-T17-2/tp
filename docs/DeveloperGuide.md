@@ -708,6 +708,10 @@ Use case ends.
 * 3a. The index or field values are missing, invalid, repeated, or unsupported.
   * 3a1. TrackFlow reports the error and leaves the roster and display unchanged.
   * Use case resumes at step 3.
+* 3b. All supplied values are the same as the athlete's stored details.
+  * 3b1. TrackFlow reports that at least one field must differ, without saving or changing the view. A change to
+    the stored phone formatting or note is treated as an edit.
+  * Use case resumes at step 3.
 * 4a. The edit would duplicate another athlete, including one hidden by the current filter.
   * 4a1. TrackFlow rejects the edit and leaves the roster unchanged.
   * Use case resumes at step 3.
@@ -1092,12 +1096,15 @@ Use a disposable home folder; these procedures change saved data.
    Expect one saved athlete. Restart from the same folder and confirm every supplied field remains.
 1. Run `remark 1 r/Sprints`, then `edit 1 a/Under 16 addr/Training centre`. Expect the new category and address,
    with the original name, phone, email, and remark retained. Restart and verify those values again.
+1. Run `edit 1 n/Avery Tan` without changing any other details. Expect
+   `At least one field must be different from the athlete's current details.`, with no save or change to the view.
 1. Run `remark 1 r/Recovery`, then restart. Expect `Recovery` to replace `Sprints`.
 1. Run `remark 1 r/`, then restart. Expect the remark to be empty and the category still `Under 16`.
 1. Run `remark 1 r/` again. Expect `Athlete has no remark to remove` with the athlete's details, with no save
    or change to the current view.
 1. Try `add n/Incomplete`, `edit 1`, `edit 0 p/999`, `edit 1 addr/`, and `remark 1`.
-   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add or edit command must produce an error; add reports invalid command format, while edit identifies the unsupported prefix.
+   Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add or edit command must produce
+   an error identifying `t/` as an unsupported prefix in both cases.
 1. Run `clear`, restart, and confirm the roster stays empty rather than loading samples again.
 
 ### Parser robustness
