@@ -183,8 +183,9 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
 * All five fields are required.
 * Fields may appear in any order. Each parameter may appear only once.
 * Age category must be `Under 14`, `Under 16`, `Under 18`, `Under 20`, or `Open`. Category input ignores case and normalizes repeated spaces.
-* Names must start with a letter or digit and contain only ASCII letters (`A`–`Z`, `a`–`z`), digits, ordinary spaces,
-  hyphens, and apostrophes (for example, `Mary-Jane` or `O'Brien`). Accented letters and other writing systems are
+* Names are words of ASCII letters (`A`–`Z`, `a`–`z`) and digits, separated by ordinary spaces. A single hyphen or
+  apostrophe may join two words (for example, `Mary-Jane` or `O'Brien`), but a name cannot start or end with one,
+  repeat one (`Mary--Jane`), or put spaces around one (`Mary - Jane`). Accented letters and other writing systems are
   not currently supported.
 * Phone numbers must contain at least three significant digits. They may also include spaces, `+`, `-`, `(`, and
   `)`. A bracketed country code such as `(+65)` is part of the number, but any other bracketed text is treated as a
@@ -192,7 +193,8 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   `(+65) 9123 4567`, or `9123 4567 (HP)`).
 * Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Phone comparisons ignore bracketed notes (including digits), but count a bracketed country code such as `(+65)`. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
-* Use `addr/ADDRESS` to supply the required nonblank address.
+* Use `addr/ADDRESS` to supply the required nonblank address. Addresses can contain any characters except line
+  breaks, including pasted line or paragraph separators.
 * Add does not accept events or remarks. `edit` updates athlete details and addresses, `tag` and `untag` update track events, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
   existing address, events, and remarks. Saved rosters are checked using the same duplicate rule on loading.

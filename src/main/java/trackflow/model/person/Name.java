@@ -10,15 +10,16 @@ import static trackflow.commons.util.AppUtil.checkArgument;
 public class Name {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Names should only contain alphanumeric characters, spaces, hyphens, and apostrophes, "
-                    + "and should not be blank";
+            "Names should be words of letters or digits separated by spaces, and may join words with a single "
+                    + "hyphen or apostrophe (e.g. Mary-Jane, O'Brien). Names should not be blank, and should not "
+                    + "start or end with a hyphen or apostrophe";
 
     /*
-     * The first character of the name must be alphanumeric, so that a blank string or a name beginning with a
-     * space, hyphen, or apostrophe is rejected. Later characters may also be spaces, hyphens, or apostrophes,
-     * allowing names such as "Mary-Jane" and "O'Brien".
+     * Words of letters or digits, separated by spaces or joined by a single hyphen or apostrophe, allowing names
+     * such as "Mary-Jane" and "O'Brien" while rejecting "-Jane", "Jane-", and "Mary--Jane".
+     * Trailing spaces remain valid so that previously saved names still load; commands trim them before parsing.
      */
-    public static final String VALIDATION_REGEX = "[\\p{Alnum}][\\p{Alnum} '-]*";
+    public static final String VALIDATION_REGEX = "\\p{Alnum}+(( +|[-'])\\p{Alnum}+)* *";
 
     public final String fullName;
 
