@@ -318,7 +318,7 @@ Format: `remark INDEX r/[REMARK]`
 Examples:
 
 * `remark 1 r/100m personal best: 12.34s`
-* `remark 2 r/` removes the 2nd athlete's remark.
+* `remark 1 r/` removes the 1st athlete's remark.
 
 ### Tagging athletes with track events: `tag`, `untag`
 
@@ -336,8 +336,11 @@ Format: `untag INDEX t/EVENT [t/EVENT]...`
   30 characters long, e.g. `100m`, `4x100m`, `Long Jump`, `110m-Hurdles`. Extra spaces between words are reduced to
   one, but a hyphen cannot have spaces around it or be repeated: use `Long-Jump` or `Long Jump`, not `Long - Jump`
   or `Long--Jump`.
+  A word may also contain an apostrophe or a decimal point between digits, e.g. `Women's 100m` or `Hammer 7.26kg`.
   Letters include accented and non-English letters, e.g. `Saut-Élan`.
 * Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalisation it was first added with.
+  Spacing and punctuation still count, so `100m`, `100 m`, and `100-m` are different events. Use one spelling for
+  each event so that `untag` and `find t/` match it.
   Equivalent accent spellings, such as an accented letter typed as a letter followed by an accent mark, are composed
   into the same form. `tag`, `untag`, and `find` use the same case and accent equivalence rules.
 * Older rosters may contain alphanumeric tags longer than 30 characters. TrackFlow preserves these exactly when

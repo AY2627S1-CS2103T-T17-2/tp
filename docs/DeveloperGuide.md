@@ -17,6 +17,9 @@
 * Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5).
 * Font used: [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) by Tokotype, licensed under [OFL 1.1](https://scripts.sil.org/OFL).
 * Chetan (`chetangent`) used OpenAI Codex extensively to generate and refine project code and documentation.
+* Antony (`antonydchakola-hub`) used Claude (Anthropic) extensively to review and refactor code, write tests, find
+  and reproduce bugs, and draft User Guide and Developer Guide text. He reviewed and tested all generated output
+  before committing it.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -1167,8 +1170,10 @@ tag 1 t/100m
 1. Run `tag 1 t/JAVELIN`. Expect an already-present error and no changes.
 1. Run `untag 1 t/Shot Put t/Discus`. Expect an error naming `Discus`; `Shot Put` must remain.
 1. Run `untag 1 t/shot put`. Expect `Shot Put` to be removed. Restart and verify the remaining labels persist.
-1. Try `tag 1`, `tag t/100m`, `tag 0 t/100m`, `tag 1 t/`, `tag 1 t/100m*`, `tag 1 t/Long - Jump`,
-   and `tag 1 t/` followed by 31 letters. Expect an error after each command and no changes.
+1. Run `tag 1 t/Hammer 7.26kg t/Women's 100m`. Expect both events to be added, keeping the decimal point and the
+   apostrophe.
+1. Try `tag 1`, `tag t/100m`, `tag 0 t/100m`, `tag 1 t/`, `tag 1 t/100m*`, `tag 1 t/Long - Jump`, `tag 1 t/7.kg`,
+   `tag 1 t/Women''s`, and `tag 1 t/` followed by 31 letters. Expect an error after each command and no changes.
 
 ### Help and clearing a test roster
 
