@@ -30,7 +30,7 @@ public class AddCommand extends Command {
             + "Parameters: " + PREFIX_NAME + "NAME "
             + PREFIX_AGE_CATEGORY + "AGE_CATEGORY (Under 14, Under 16, Under 18, Under 20, or Open) "
             + PREFIX_PHONE + "PHONE " + PREFIX_EMAIL + "EMAIL " + PREFIX_ADDRESS + "ADDRESS\n"
-            + "Example: " + COMMAND_WORD + " n/Avery Tan a/Under 14 p/91234567 e/avery.tan@example.com "
+            + "Example: " + COMMAND_WORD + " n/Morgan Vale a/Under 14 p/95551234 e/morgan.vale@example.com "
             + "addr/123 Main Street";
 
     public static final String MESSAGE_SUCCESS = "New athlete added: %1$s";
@@ -56,7 +56,9 @@ public class AddCommand extends Command {
         requireNonNull(model);
 
         if (model.hasPerson(toAdd)) {
-            throw new CommandException(String.format(MESSAGE_DUPLICATE_PERSON, toAdd.getName()));
+            var storedName = model.getRoster().getPersonList().stream()
+                    .filter(toAdd::isSamePerson).findFirst().orElseThrow().getName();
+            throw new CommandException(String.format(MESSAGE_DUPLICATE_PERSON, storedName));
         }
 
         // @@author Austin-Chia

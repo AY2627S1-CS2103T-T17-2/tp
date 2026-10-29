@@ -2,7 +2,9 @@
 package trackflow.logic;
 // @@author
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,19 +27,42 @@ public class Messages {
                 "Multiple values specified for the following single-valued field(s): ";
     public static final String MESSAGE_UNKNOWN_PARAMETER =
             "%1$s is not valid for this command.\n%2$s";
+    public static final String MESSAGE_LITERAL_PREFIX_HINT =
+            "\nFor literal address or remark text, double a parameter-like slash (e.g. w//coach). "
+            + "If a value starts with '/', put a space after its prefix (e.g. addr/ //server/share).";
 
     public static final String MESSAGE_POSSIBLE_DUPLICATE =
-            "\nWarning: possible duplicate. Phone or email matches another athlete: %1$s. Please review the records.";
+            "\nWarning: possible duplicate. Shared contact details:\n%1$s\nPlease review the records.";
 
     /**
-     * Warns about shared contacts with differently named athletes without blocking the change.
+     * Warns about shared contacts without blocking the change. Each matching record is identified by its details
+     * and the shared contact fields, rather than a displayed index that may refer to another filtered view.
      */
     public static String getPossibleDuplicateWarning(Person person, Collection<Person> otherPersons) {
         String matches = otherPersons.stream()
-                .filter(other -> !person.isSamePerson(other) && person.hasSameContactDetails(other))
-                .map(other -> other.getName().toString())
-                .collect(Collectors.joining(", "));
+                .filter(other -> !person.isSamePerson(other))
+                .map(other -> formatSharedContact(person, other))
+                .filter(match -> !match.isEmpty())
+                .collect(Collectors.joining("\n"));
         return matches.isEmpty() ? "" : String.format(MESSAGE_POSSIBLE_DUPLICATE, matches);
+    }
+
+    /**
+     * Describes an existing record and its matching contact fields, or returns an empty string if neither matches.
+     * Phone comparison uses the shared significant-digit rule; email comparison ignores case and surrounding spaces.
+     */
+    private static String formatSharedContact(Person person, Person other) {
+        List<String> matchingFields = new ArrayList<>();
+        if (person.getPhone().getSignificantDigits().equals(other.getPhone().getSignificantDigits())) {
+            matchingFields.add("phone");
+        }
+        if (person.getEmail().value.trim().equalsIgnoreCase(other.getEmail().value.trim())) {
+            matchingFields.add("email");
+        }
+        if (matchingFields.isEmpty()) {
+            return "";
+        }
+        return "- " + formatAthlete(other) + "; Matches: " + String.join(" and ", matchingFields);
     }
 
     /**

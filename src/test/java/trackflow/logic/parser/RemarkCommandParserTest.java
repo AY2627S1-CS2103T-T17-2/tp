@@ -49,7 +49,8 @@ public class RemarkCommandParserTest {
     @Test
     public void parse_unknownParameter_failure() {
         assertParseFailure(parser, "1 r/Note n/Alice",
-                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "n/", RemarkCommand.MESSAGE_USAGE));
+                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "n/", RemarkCommand.MESSAGE_USAGE)
+                        + Messages.MESSAGE_LITERAL_PREFIX_HINT);
     }
 
     @Test

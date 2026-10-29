@@ -86,6 +86,11 @@ public class PersonTest {
         assertFalse(local.isSamePerson(withCountryCode));
         assertTrue(withCountryCode.isSamePerson(new PersonBuilder(withCountryCode)
                 .withPhone("6581234567 (Office 2)").withEmail("other@example.com").build()));
+
+        // digits inside a note are not part of the number, so 200 (5) and 2005 are different phones
+        Person withNumericNote = new PersonBuilder(local).withPhone("200 (5)").withEmail("x1@example.com").build();
+        assertFalse(withNumericNote.isSamePerson(new PersonBuilder(withNumericNote).withPhone("2005")
+                .withEmail("x2@example.com").build()));
     }
 
     @Test

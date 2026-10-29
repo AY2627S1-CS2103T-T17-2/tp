@@ -69,7 +69,10 @@ public class AddCommandTest {
         CommandResult result = new AddCommand(added).execute(modelStub);
 
         assertEquals(String.format(AddCommand.MESSAGE_SUCCESS, Messages.formatAthlete(added))
-                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, "First Match, Second Match"),
+                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE,
+                        "- First Match; Age category: Open; Phone: 91234567; Email: first@example.com; Matches: phone\n"
+                        + "- Second Match; Age category: Open; Phone: 81112222; "
+                        + "Email: SECOND@example.com; Matches: email"),
                 result.getFeedbackToUser());
     }
 
@@ -194,6 +197,13 @@ public class AddCommandTest {
         public boolean hasPerson(Person person) {
             requireNonNull(person);
             return this.person.isSamePerson(person);
+        }
+
+        @Override
+        public ReadOnlyRoster getRoster() {
+            AthleteRoster roster = new AthleteRoster();
+            roster.addPerson(person);
+            return roster;
         }
     }
 

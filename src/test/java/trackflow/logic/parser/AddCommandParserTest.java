@@ -81,7 +81,8 @@ public class AddCommandParserTest {
     @Test
     public void parse_unknownParameter_failure() {
         assertParseFailure(parser, validArgs + " x/value",
-                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "x/", AddCommand.MESSAGE_USAGE));
+                String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "x/", AddCommand.MESSAGE_USAGE)
+                        + Messages.MESSAGE_LITERAL_PREFIX_HINT);
     }
 
     @Test
@@ -116,12 +117,15 @@ public class AddCommandParserTest {
 
     @Test
     public void parse_unsupportedParameter_failure() {
-        String expected = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE);
-        assertParseFailure(parser, validArgs + " t/sprints", expected);
-        assertParseFailure(parser, validArgs + " r/note", expected);
-        assertParseFailure(parser, validArgs + " t/", expected);
-        assertParseFailure(parser, validArgs + " r/", expected);
-        assertParseFailure(parser, " t/sprints t/relay" + validArgs, expected);
+        String tagError = String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "t/", AddCommand.MESSAGE_USAGE)
+                + Messages.MESSAGE_LITERAL_PREFIX_HINT;
+        String remarkError = String.format(Messages.MESSAGE_UNKNOWN_PARAMETER, "r/", AddCommand.MESSAGE_USAGE)
+                + Messages.MESSAGE_LITERAL_PREFIX_HINT;
+        assertParseFailure(parser, validArgs + " t/sprints", tagError);
+        assertParseFailure(parser, validArgs + " r/note", remarkError);
+        assertParseFailure(parser, validArgs + " t/", tagError);
+        assertParseFailure(parser, validArgs + " r/", remarkError);
+        assertParseFailure(parser, " t/sprints t/relay" + validArgs, tagError);
     }
 
     @Test

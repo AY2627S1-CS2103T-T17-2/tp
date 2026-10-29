@@ -2,8 +2,11 @@ package trackflow.model.person;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
+
+import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +35,12 @@ public class NameTest {
         assertFalse(Name.isValidName("peter*")); // contains non-alphanumeric characters
         assertFalse(Name.isValidName("-Jane")); // starts with a hyphen
         assertFalse(Name.isValidName("'Brien")); // starts with an apostrophe
+        assertFalse(Name.isValidName("Jane-")); // ends with a hyphen
+        assertFalse(Name.isValidName("O'")); // ends with an apostrophe
+        assertFalse(Name.isValidName("Mary--Jane")); // repeated hyphen
+        assertFalse(Name.isValidName("A--''")); // only separators after the first letter
+        assertFalse(Name.isValidName("Mary - Jane")); // spaces around a hyphen
+        assertFalse(Name.isValidName("Jane- ")); // ends with a hyphen before a trailing space
 
         // valid name
         assertTrue(Name.isValidName("peter jack")); // alphabets only
@@ -41,6 +50,21 @@ public class NameTest {
         assertTrue(Name.isValidName("David Roger Jackson Ray Jr 2nd")); // long names
         assertTrue(Name.isValidName("Mary-Jane")); // with a hyphen
         assertTrue(Name.isValidName("O'Brien")); // with an apostrophe
+        assertTrue(Name.isValidName("Jean-Luc O'Neil")); // hyphen and apostrophe in different words
+        assertTrue(Name.isValidName("Lee  Ann")); // repeated spaces between words
+        assertTrue(Name.isValidName("A")); // single letter
+    }
+
+    @Test
+    public void isValidName_longWordSequences_doesNotOverflowOrStall() {
+        String manyWords = "Alex ".repeat(3000).trim();
+        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
+            assertTrue(Name.isValidName(manyWords));
+            assertTrue(Name.isValidName(manyWords + "   "));
+            assertTrue(Name.isValidName("Alex-".repeat(3000) + "Tan"));
+            assertFalse(Name.isValidName(manyWords + "!"));
+            assertFalse(Name.isValidName(manyWords + "-"));
+        });
     }
 
     @Test
