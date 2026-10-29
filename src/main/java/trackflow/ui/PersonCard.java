@@ -1,6 +1,7 @@
 package trackflow.ui;
 
 import java.util.Comparator;
+import java.util.Locale;
 
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -61,7 +62,8 @@ public class PersonCard extends UiPart<Region> {
         showIfNotEmpty(address, person.getAddress().value);
         showIfNotEmpty(remark, person.getRemark().value);
         person.getTags().stream()
-                .sorted(Comparator.comparing(tag -> tag.tagName))
+                // Sort ignoring case to match the order used in tag/untag command feedback (EventTagCommand).
+                .sorted(Comparator.comparing(tag -> tag.tagName.toLowerCase(Locale.ROOT)))
                 .forEach(tag -> tags.getChildren().add(createEventChip(tag.tagName)));
         tags.setVisible(!tags.getChildren().isEmpty());
         tags.setManaged(tags.isVisible());
