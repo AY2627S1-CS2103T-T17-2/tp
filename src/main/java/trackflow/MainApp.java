@@ -45,10 +45,14 @@ public class MainApp extends Application {
     protected Storage storage;
     protected Model model;
 
-    /** Set when the saved roster could not be read but was preserved; shown to the user once the UI is ready. */
+    /**
+     * Set when the saved roster could not be read but was preserved; shown to the user once the UI is ready.
+     */
     private String rosterLoadWarning;
 
-    /** Set when the saved roster could not even be preserved; start-up stops with a dialog instead of a model. */
+    /**
+     * Set when the saved roster could not even be preserved; start-up stops with a dialog instead of a model.
+     */
     private IOException startupFatalError;
 
     @Override

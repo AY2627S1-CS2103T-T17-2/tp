@@ -48,7 +48,7 @@ import trackflow.storage.StorageManager;
 
 /**
  * Exercises command execution across model and storage boundaries, including persistence and failed-save isolation.
- * Temporary files verify reload behaviour; failing storage doubles verify that unsuccessful saves are not published.
+ * Temporary files verify reload behavior; failing storage doubles verify that unsuccessful saves are not published.
  */
 public class LogicManagerTest {
     private static final IOException DUMMY_IO_EXCEPTION = new IOException("dummy IO exception");

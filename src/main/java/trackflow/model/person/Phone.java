@@ -18,7 +18,9 @@ public class Phone {
                     + "as part of the number; any other bracketed text is treated as a note and is ignored. Brackets "
                     + "must be balanced and non-empty.";
 
-    /** Minimum number of significant digits a phone number must contain. */
+    /**
+     * Minimum number of significant digits a phone number must contain.
+     */
     private static final int MINIMUM_DIGITS = 3;
 
     /**

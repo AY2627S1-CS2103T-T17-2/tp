@@ -13,13 +13,19 @@ public class CommandResult {
 
     private final String feedbackToUser;
 
-    /** Help information should be shown to the user. */
+    /**
+     * Help information should be shown to the user.
+     */
     private final boolean showHelp;
 
-    /** The application should exit. */
+    /**
+     * The application should exit.
+     */
     private final boolean exit;
 
-    /** Roster changes were successfully persisted while executing the command. */
+    /**
+     * Roster changes were successfully persisted while executing the command.
+     */
     private final boolean dataSaved;
     private final boolean warning;
 

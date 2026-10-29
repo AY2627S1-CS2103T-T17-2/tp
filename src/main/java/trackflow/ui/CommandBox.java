@@ -32,11 +32,17 @@ public class CommandBox extends UiPart<Region> {
      * The popup has its own scene, so the main stylesheet does not apply to it.
      */
     private static final String SUGGESTIONS_STYLE = "-fx-font-family: 'Consolas'; -fx-font-size: 11pt;";
-    /** Approximate height of one suggestion row, in pixels. */
+    /**
+     * Approximate height of one suggestion row, in pixels.
+     */
     private static final double SUGGESTION_ROW_HEIGHT = 24;
-    /** Extra height around the suggestion rows, in pixels. */
+    /**
+     * Extra height around the suggestion rows, in pixels.
+     */
     private static final double SUGGESTIONS_PADDING = 10;
-    /** Height above which the suggestions list scrolls instead of growing, in pixels. */
+    /**
+     * Height above which the suggestions list scrolls instead of growing, in pixels.
+     */
     private static final double MAX_SUGGESTIONS_HEIGHT = 150;
 
     private final CommandExecutor commandExecutor;
