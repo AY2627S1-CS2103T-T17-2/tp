@@ -481,15 +481,12 @@ The existing `DeleteCommand` resolves indexes against `Model.getFilteredPersonLi
 `TrackFlowParser` dispatches `sort` to `SortCommandParser`. The parser requires one supported field and accepts one
 optional order, defaulting to ascending. It accepts short (`asc`, `desc`) and long (`ascending`, `descending`) order
 names without considering letter case, while rejecting missing fields, unsupported values, and extra arguments.
-It also accepts `sort reset` (case-insensitive) with no additional arguments, producing `SortCommand.reset()`.
 
 `ModelManager` wraps its existing `FilteredList<Person>` in a `SortedList<Person>`. `SortCommand` installs the selected
 comparator through `Model.updateSortedPersonList`, changing only the displayed view rather than the underlying
-`roster` order. Consequently, sorting composes with `find`, `filter`, and `list`, and indexed commands continue to
-resolve athletes against exactly what the user sees. The comparator is session-only and is not persisted.
-`sort reset` passes a null comparator to `Model.updateSortedPersonList`, restoring the underlying roster order
-while retaining the current predicate. Subsequent roster changes keep that order until another sort is selected.
-Reset is a view command and does not save data; it also succeeds on empty or already-unsorted lists.
+`roster` order. Sorting composes with `find` and `filter`, and indexed commands continue to resolve athletes against
+exactly what the user sees. `ListAthleteCommand` clears both the filter and comparator, restoring the full roster in
+saved order. Sorting and filtering are session-only view changes and are not persisted.
 
 Text fields are compared without considering letter case. Name comparison also collapses repeated ordinary spaces
 in the comparison key without rewriting the displayed or saved name. Phone sorting converts
@@ -818,7 +815,7 @@ These are product requirements and acceptance targets, not claims about the curr
 | NFR09 | A loading failure shall not silently overwrite unrecovered data. That data shall remain separately preserved even if the coach makes changes to the new empty roster. |
 | NFR10 | As a performance target, with 1,000 athlete records on a computer with a dual-core processor, 8 GB RAM, and local SSD storage, at least 95 of 100 consecutive add, list, or delete commands shall update the display within two seconds of submission, with persistence included for changes. |
 | NFR11 | At 1920 × 1080 or higher with 100% and 125% display scaling, the interface shall avoid clipping essential controls and feedback. At 1280 × 720 or higher with 150% scaling, all functions shall remain accessible, including through scrolling or resizing where necessary. |
-| NFR12 | For identical input and roster state, validation shall report the same first error. Without an active sort, listing shall use saved roster order. An active sort shall remain applied across find, filter, list, and roster changes until reset or restart; sorting shall not change saved roster order. |
+| NFR12 | For identical input and roster state, validation shall report the same first error. Listing shall use saved roster order. An active sort shall remain applied across find, filter, and roster changes until list or restart; sorting shall not change saved roster order. |
 
 ### Glossary
 
@@ -948,15 +945,14 @@ add n/Faye Teo a/Under 20 p/96666666 e/faye@example.com addr/60 Stadium Road
 
 1. Run `sort name`. Expect case-insensitive alphabetical name order and the ascending success message.
 1. Run `sort name desc`. Expect the reverse name order.
-1. Run `sort reset`. Expect saved roster order. Run `filter a/Under 14`, then `sort name desc`, then `sort reset`.
-   Expect only matching athletes in saved order. Run `list` to restore everyone; the roster remains in saved order.
+1. Run `filter a/Under 14`, then `sort name desc`, then `list`. Expect every athlete in saved roster order.
 1. Run `sort age`. Expect `Under 14`, `Under 16`, `Under 18`, `Under 20`, then `Open`.
 1. Run `sort age descending`. Expect the reverse category order.
 1. Run `sort phone`, `sort email`, and `sort address` separately, then repeat each with `desc`. Verify numeric phone
    ordering and case-insensitive text ordering. This fixture has no empty addresses; if testing an older roster
    containing one, it should appear first in ascending address order and last in descending order.
 1. Run `filter a/Under 14`, then `sort name desc`. Expect only Casey and Avery, in that order.
-1. Run `list`. Expect the full roster while retaining the selected order.
+1. Run `list`. Expect the full roster in saved roster order.
 1. Run `delete 1` on a sorted list. Expect the athlete visibly shown at index 1 to be deleted.
 1. Try `sort`, `sort height`, `sort name upwards`, and `sort name asc extra`. Expect actionable errors and no display
    change.

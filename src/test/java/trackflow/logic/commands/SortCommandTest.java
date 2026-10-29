@@ -2,7 +2,6 @@ package trackflow.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.logic.commands.SortCommand.SortField.ADDRESS;
 import static trackflow.logic.commands.SortCommand.SortField.AGE;
@@ -191,41 +190,13 @@ public class SortCommandTest {
     }
 
     @Test
-    public void execute_filteredList_sortsMatchesAndPersistsAfterList() {
+    public void execute_filteredList_sortsMatchesAndListRestoresRosterOrder() {
         model.updateFilteredPersonList(person -> !person.equals(MIA));
         new SortCommand(NAME, ASCENDING).execute(model);
         assertEquals(List.of(AMY, ZOE), model.getFilteredPersonList());
 
         new ListAthleteCommand().execute(model);
-        assertEquals(List.of(AMY, MIA, ZOE), model.getFilteredPersonList());
-    }
-
-    @Test
-    public void execute_reset_restoresRosterOrderAndRetainsFilter() {
-        model.updateFilteredPersonList(person -> !person.equals(MIA));
-        new SortCommand(NAME, ASCENDING).execute(model);
-        assertEquals(List.of(AMY, ZOE), model.getFilteredPersonList());
-
-        CommandResult result = SortCommand.reset().execute(model);
-
-        assertEquals(SortCommand.MESSAGE_RESET_SUCCESS, result.getFeedbackToUser());
-        assertEquals(List.of(ZOE, AMY), model.getFilteredPersonList());
-        assertEquals(List.of(ZOE, MIA, AMY), model.getRoster().getPersonList());
-        assertNull(model.getPersonListComparator());
-        new ListAthleteCommand().execute(model);
         assertEquals(List.of(ZOE, MIA, AMY), model.getFilteredPersonList());
-    }
-
-    @Test
-    public void execute_resetWithoutActiveSort_succeedsAndCanSortAgain() {
-        SortCommand.reset().execute(model);
-        SortCommand.reset().execute(model);
-        assertEquals(List.of(ZOE, MIA, AMY), model.getFilteredPersonList());
-        assertSortSuccess(NAME, ASCENDING, List.of(AMY, MIA, ZOE));
-
-        model = new ModelManager();
-        SortCommand.reset().execute(model);
-        assertTrue(model.getFilteredPersonList().isEmpty());
     }
 
     @Test
@@ -269,9 +240,6 @@ public class SortCommandTest {
         assertFalse(command.equals(new SortCommand(AGE, ASCENDING)));
         assertFalse(command.equals(null));
         assertFalse(command.equals(new ClearCommand()));
-        assertFalse(command.equals(SortCommand.reset()));
-        assertFalse(SortCommand.reset().equals(command));
-        assertTrue(SortCommand.reset().equals(SortCommand.reset()));
     }
 
     @Test

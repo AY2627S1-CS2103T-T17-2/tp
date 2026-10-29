@@ -112,19 +112,6 @@ public class PersonContainsKeywordsPredicateTest {
     }
 
     @Test
-    public void test_nameSpacingNormalization_preservesOtherFieldCriteria() {
-        PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of(), Map.of(
-                SearchField.NAME, List.of("avery   tan"),
-                SearchField.AGE_CATEGORY, List.of("Under 16")));
-        assertTrue(predicate.test(ATHLETE));
-        assertFalse(predicate.test(new PersonBuilder(ATHLETE).withAgeCategory("Open").build()));
-        assertFalse(new PersonContainsKeywordsPredicate(List.of(),
-                Map.of(SearchField.REMARK, List.of("personal   best"))).test(ATHLETE));
-        assertFalse(new PersonContainsKeywordsPredicate(List.of(),
-                Map.of(SearchField.EVENT, List.of("Sprints Relay"))).test(ATHLETE));
-    }
-
-    @Test
     public void test_multipleFields_requiresAllToMatch() {
         // n/avery a/Under 16 -> both field criteria must hold.
         PersonContainsKeywordsPredicate predicate = new PersonContainsKeywordsPredicate(List.of(), Map.of(

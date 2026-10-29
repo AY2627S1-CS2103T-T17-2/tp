@@ -12,8 +12,7 @@ import trackflow.model.Model;
 import trackflow.model.person.Person;
 
 /**
- * Sorts the displayed athlete list by a selected field and order, or restores saved roster order.
- * Preserves the current filter.
+ * Sorts the displayed athlete list by a selected field and order, preserving its current filter.
  * Changes only the display order; the stored roster order is unchanged.
  */
 public class SortCommand extends Command {
@@ -21,24 +20,20 @@ public class SortCommand extends Command {
     public static final String COMMAND_WORD = "sort";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Sorts the displayed athlete list.\n"
-            + "Parameters: FIELD [ORDER] or reset\n"
+            + "Parameters: FIELD [ORDER]\n"
             + "Available fields: name, age, phone, email, address\n"
             + "Available orders: asc, ascending, desc, descending (default: asc)\n"
-            + "Use sort reset to restore saved roster order while retaining the current filter.\n"
             + "Example: " + COMMAND_WORD + " age desc";
     public static final String MESSAGE_INVALID_FIELD =
-            "Unknown sort field: %1$s. Available fields: name, age, phone, email, address. "
-                    + "Use sort reset to restore saved roster order.";
+            "Unknown sort field: %1$s. Available fields: name, age, phone, email, address.";
     public static final String MESSAGE_INVALID_ORDER =
             "Unknown sort order: %1$s. Use asc, ascending, desc, or descending.";
     public static final String MESSAGE_SUCCESS =
             "Sorted the displayed athlete list by %1$s in %2$s order.";
-    public static final String MESSAGE_RESET_SUCCESS = "Restored saved roster order for the displayed athletes.";
 
     private static final Comparator<String> CASE_INSENSITIVE_TEXT_COMPARATOR = String.CASE_INSENSITIVE_ORDER;
     private static final Pattern REPEATED_NAME_SPACES = Pattern.compile(" {2,}");
 
-    /** Both field and order are null only for a reset command created by {@link #reset()}. */
     private final SortField field;
     private final SortOrder order;
 
@@ -50,25 +45,9 @@ public class SortCommand extends Command {
         this.order = requireNonNull(order);
     }
 
-    private SortCommand() {
-        field = null;
-        order = null;
-    }
-
-    /**
-     * Creates a command that clears the active sort and restores saved roster order, retaining the filter.
-     */
-    public static SortCommand reset() {
-        return new SortCommand();
-    }
-
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        if (field == null) {
-            model.updateSortedPersonList(null);
-            return new CommandResult(MESSAGE_RESET_SUCCESS);
-        }
         Comparator<Person> comparator = getComparator(field);
         if (order == SortOrder.DESCENDING) {
             comparator = comparator.reversed();

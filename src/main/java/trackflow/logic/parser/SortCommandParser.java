@@ -26,13 +26,6 @@ public class SortCommandParser implements Parser<SortCommand> {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE));
         }
 
-        if (tokens[0].equalsIgnoreCase("reset")) {
-            if (tokens.length != 1) {
-                throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE));
-            }
-            return SortCommand.reset();
-        }
-
         SortField field = parseField(tokens[0]);
         SortOrder order = tokens.length == 1 ? SortOrder.ASCENDING : parseOrder(tokens[1]);
         return new SortCommand(field, order);

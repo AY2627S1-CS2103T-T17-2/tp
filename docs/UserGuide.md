@@ -92,8 +92,8 @@ Interface (GUI).
 ### Working with the displayed list
 
 `find` and `filter` select athletes from the full roster. Each replaces the previous selection; they do not narrow
-the results of the preceding command. `sort` orders the selected athletes, and `list` shows everyone while retaining
-that order. Sorting and filtering are reset when TrackFlow restarts.
+the results of the preceding command. `sort` orders the selected athletes, and `list` shows everyone in saved roster
+order. Sorting and filtering are reset when TrackFlow restarts.
 
 While a `find` or `filter` is hiding some athletes, the status bar shows the count as `X of Y athletes` (for
 example, `2 of 9 athletes`), so you can tell you are viewing a subset even after a later command such as `sort`
@@ -128,7 +128,7 @@ If a value begins with a slash, put a space after the real parameter: `edit 1 ad
 
 TrackFlow provides an autocomplete feature to speed up typing and ensure correct command formats.
 
-* As you type a command word in the command box, a dropdown menu will appear with suggested commands, including mandatory index parameters and prefixes (e.g., `edit INDEX n/ a/ p/ e/ addr/`, `delete INDEX`, `remark INDEX r/`). For `sort`, the suggestions list the supported fields and orders (`sort name|age|phone|email|address [asc|desc]`) and `sort reset`. Suggestions are matched case-insensitively.
+* As you type a command word in the command box, a dropdown menu will appear with suggested commands, including mandatory index parameters and prefixes (e.g., `edit INDEX n/ a/ p/ e/ addr/`, `delete INDEX`, `remark INDEX r/`). For `sort`, the suggestion lists the supported fields and orders: `sort name|age|phone|email|address [asc|desc]`. Suggestions are matched case-insensitively.
 * Use the **Up** and **Down** arrow keys to navigate the list of suggestions.
 * Press **Tab**, or **Click** on a suggestion, to select it. This will insert the command word (followed by a space) into the command box and close the suggestions dropdown.
 * Pressing **Enter** does **not** select or apply a suggestion; it closes the suggestions dropdown and executes the command currently typed in the command box.
@@ -218,8 +218,8 @@ Shows the complete athlete roster.
 
 Format: `list`
 
-The command also restores the complete roster after a `find` or `filter` command, retaining the current sort order.
-Without an active sort, athletes appear in saved roster order. It does not accept parameters.
+The command restores the complete roster in saved roster order after a `find`, `filter`, or `sort` command.
+It clears the active filter and sort without changing saved data. It does not accept parameters.
 
 * An empty roster displays `The athlete roster is empty.`
 * A roster with one athlete displays `Displaying 1 athlete.`
@@ -387,7 +387,7 @@ Examples:
 
 Sorts the currently displayed athlete list by a selected field.
 
-Format: `sort FIELD [ORDER]` or `sort reset`
+Format: `sort FIELD [ORDER]`
 
 Available fields:
 
@@ -406,14 +406,12 @@ Available orders are `asc` or `ascending`, and `desc` or `descending`. If `ORDER
 Field and order names are case-insensitive.
 
 Sorting changes only the displayed order; it does not rewrite the saved roster order. The selected ordering remains
-active until `sort reset` or a restart, including after `find`, `filter`, `list`, and roster-changing commands
+active until `list` or a restart, including after `find`, `filter`, and roster-changing commands
 such as `add`, `edit`, `remark`, and `delete`. New or edited athletes automatically move to the correct position in the
 displayed list. A later `sort` command replaces the selected ordering. Indexed commands such as `edit`, `remark`, and
 `delete` use the indexes shown in the sorted list.
 
-Use `sort reset` to restore saved roster order without restarting. The current `find` or `filter` remains active;
-run `list` afterward to show the complete roster in saved order. Resetting is also accepted when no sort is active
-or the roster is empty. `sort reset` takes no order argument and does not save or change athlete data.
+Use `list` to show the full roster in saved order. This clears any active sort and filter without saving data.
 
 Examples:
 
@@ -422,19 +420,15 @@ Examples:
 * `sort age ascending` places `Under 14` before the older categories and `Open`.
 * `sort age desc` reverses the category order.
 * `sort phone` sorts by numeric phone value.
-* `sort reset` restores saved roster order for the currently displayed athletes.
 
 Successful output follows this format:
 `Sorted the displayed athlete list by FIELD in ORDER order.`
-
-Reset feedback: `Restored saved roster order for the displayed athletes.`
 
 Invalid sort commands leave the displayed list unchanged. Examples of errors include:
 
 * `sort` or `sort name asc extra`: displays the accepted command format because a field is missing or there are too
   many arguments.
-* `sort height`: displays `Unknown sort field: height. Available fields: name, age, phone, email, address. Use sort reset to restore saved roster order.`
-* `sort reset desc`: displays the accepted command format because reset takes no additional arguments.
+* `sort height`: displays `Unknown sort field: height. Available fields: name, age, phone, email, address.`
 * `sort name upwards`: displays `Unknown sort order: upwards. Use asc, ascending, desc, or descending.`
 
 ### Deleting an athlete: `delete`
@@ -551,7 +545,7 @@ Action     | Format, Examples
 **Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK] [t/EVENT]`<br> e.g., `find n/rachel r/relay`, `find t/100m`
 **List**   | `list`
 **Remark** | `remark INDEX r/[REMARK]`<br> e.g., `remark 1 r/100m personal best: 12.34s`
-**Sort**   | `sort FIELD [ORDER]` or `sort reset`<br> e.g., `sort age desc`
+**Sort**   | `sort FIELD [ORDER]`<br> e.g., `sort age desc`
 **Tag**    | `tag INDEX t/EVENT [t/EVENT]...`<br> e.g., `tag 1 t/100m t/Long Jump`
 **Untag**  | `untag INDEX t/EVENT [t/EVENT]...`<br> e.g., `untag 1 t/100m`
 **Help**   | `help`

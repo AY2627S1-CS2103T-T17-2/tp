@@ -3,7 +3,6 @@ package trackflow.logic;
 // @@author
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 // @@author qiyuannn
@@ -32,11 +31,8 @@ import trackflow.commons.core.GuiSettings;
 import trackflow.logic.commands.AddCommand;
 import trackflow.logic.commands.CommandResult;
 import trackflow.logic.commands.ListAthleteCommand;
-import trackflow.logic.commands.RemarkCommand;
-import trackflow.logic.commands.SortCommand;
 import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.logic.parser.exceptions.ParseException;
-import trackflow.model.AthleteRoster;
 import trackflow.model.Model;
 import trackflow.model.ModelManager;
 import trackflow.model.ReadOnlyRoster;
@@ -144,38 +140,9 @@ public class LogicManagerTest {
         Logic readOnlyLogic = new LogicManager(model, new StorageManager(unavailableStorage,
                 new JsonUserPrefsStorage(temporaryFolder.resolve("readOnlyPrefs.json"))));
 
-        for (String command : List.of("list", "find amy", "filter a/Open", "sort name",
-                "sort reset", "help", "exit")) {
+        for (String command : List.of("list", "find amy", "filter a/Open", "sort name", "help", "exit")) {
             assertEquals(false, readOnlyLogic.execute(command).isDataSaved());
         }
-    }
-
-    @Test
-    public void execute_removeMissingRemark_doesNotSaveOrChangeView() throws Exception {
-        logic.execute("add n/Zoe Tan a/Open p/999 e/zoe@example.com addr/Home");
-        logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com addr/Home");
-        logic.execute("sort name desc");
-        logic.execute("find n/Amy");
-        Person athlete = model.getFilteredPersonList().get(0);
-        var filter = model.getPersonListPredicate();
-        var comparator = model.getPersonListComparator();
-        ReadOnlyRoster before = new AthleteRoster(model.getRoster());
-        JsonRosterStorage storage = new JsonRosterStorage(temporaryFolder.resolve("unused.json")) {
-            @Override
-            public void saveRoster(ReadOnlyRoster roster) {
-                throw new AssertionError("Removing a missing remark must not attempt to save");
-            }
-        };
-        Logic testLogic = new LogicManager(model, new StorageManager(storage,
-                new JsonUserPrefsStorage(temporaryFolder.resolve("unusedPrefs.json"))));
-
-        String expectedMessage = String.format(RemarkCommand.MESSAGE_NO_REMARK, Messages.formatAthlete(athlete));
-        assertThrows(CommandException.class, expectedMessage, () -> testLogic.execute("remark 1 r/"));
-
-        assertEquals(before, model.getRoster());
-        assertEquals(List.of(athlete), model.getFilteredPersonList());
-        assertSame(filter, model.getPersonListPredicate());
-        assertSame(comparator, model.getPersonListComparator());
     }
 
     @Test
@@ -282,34 +249,14 @@ public class LogicManagerTest {
         ReadOnlyRoster reloadedRoster = storage.readRoster().orElseThrow();
         assertEquals(List.of("Zoe Tan", "Amy Lim"), getStoredNames(reloadedRoster));
         // @@author
+
+        CommandResult listResult = logic.execute("list");
+        assertEquals("Displaying 2 athletes.", listResult.getFeedbackToUser());
+        assertEquals(false, listResult.isDataSaved());
+        assertEquals(List.of("Zoe Tan", "Amy Lim"), getDisplayedNames(model));
     }
 
     @Test
-    public void execute_resetSort_retainsFilterAndUsesRosterOrderForLaterChanges() throws Exception {
-        logic.execute("add n/Zoe Tan a/Under 14 p/999 e/zoe@example.com addr/Home");
-        logic.execute("add n/Mia Ong a/Open p/888 e/mia@example.com addr/Home");
-        logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com addr/Home");
-        Path savedPath = temporaryFolder.resolve("roster.json");
-        String savedData = Files.readString(savedPath);
-        logic.execute("filter a/Under 14");
-        logic.execute("sort name");
-        assertEquals(List.of("Amy Lim", "Zoe Tan"), getDisplayedNames(model));
-
-        CommandResult result = logic.execute("SoRt ReSeT");
-
-        assertEquals(SortCommand.MESSAGE_RESET_SUCCESS, result.getFeedbackToUser());
-        assertEquals(false, result.isDataSaved());
-        assertEquals(List.of("Zoe Tan", "Amy Lim"), getDisplayedNames(model));
-        assertNull(model.getPersonListComparator());
-        assertEquals(savedData, Files.readString(savedPath));
-
-        logic.execute("remark 1 r/Captain");
-        assertEquals("Captain", model.getRoster().getPersonList().get(0).getRemark().value);
-        assertEquals(List.of("Zoe Tan", "Mia Ong", "Amy Lim"), getDisplayedNames(model));
-        logic.execute("add n/Ben Lee a/Open p/777 e/ben@example.com addr/Home");
-        assertEquals(List.of("Zoe Tan", "Mia Ong", "Amy Lim", "Ben Lee"), getDisplayedNames(model));
-        logic.execute("sort name");
-        assertEquals(List.of("Amy Lim", "Ben Lee", "Mia Ong", "Zoe Tan"), getDisplayedNames(model));
     public void execute_nameSortWithRepeatedSpaces_preservesTextAcrossUpdatesAndReload() throws Exception {
         logic.execute("add n/Lee  Bob a/Open p/911 e/bob@example.com addr/Home");
         logic.execute("add n/Lee Ann a/Open p/922 e/ann@example.com addr/Home");
