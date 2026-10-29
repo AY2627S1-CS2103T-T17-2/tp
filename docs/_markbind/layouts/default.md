@@ -40,7 +40,12 @@
   * [Documentation, logging, testing, dev-ops]({{ baseUrl }}/DeveloperGuide.html#documentation-logging-testing-dev-ops)
   * [Appendix: Requirements]({{ baseUrl }}/DeveloperGuide.html#appendix-requirements)
   * [Appendix: Instructions for manual testing]({{ baseUrl }}/DeveloperGuide.html#appendix-instructions-for-manual-testing)
-* [About Us]({{ baseUrl }}/AboutUs.html)
+* [About Us]({{ baseUrl }}/AboutUs.html) :expanded:
+  * [Kenil]({{ baseUrl }}/team/ken2k7.html)
+  * [Kong Qi Yuan]({{ baseUrl }}/team/qiyuannn.html)
+  * [Chetan]({{ baseUrl }}/team/chetangent.html)
+  * [Austin Chia]({{ baseUrl }}/team/austin-chia.html)
+  * [Antony Dennis Chakola]({{ baseUrl }}/team/antonydchakola-hub.html)
       </site-nav>
     </div>
   </nav>
