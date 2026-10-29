@@ -68,7 +68,8 @@ public class EditCommandTest {
         EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
                 new EditPersonDescriptorBuilder().withEmail("OTHER@example.com").build());
         String expected = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.formatAthlete(edited))
-                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, other.getName());
+                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE,
+                        "- Jordan Lee; Age category: Open; Phone: 81112222; Email: other@example.com; Matches: email");
         assertCommandSuccess(command, model, expected, expectedModel);
     }
 

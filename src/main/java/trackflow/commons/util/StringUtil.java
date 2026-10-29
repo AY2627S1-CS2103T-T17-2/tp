@@ -5,12 +5,24 @@ import static trackflow.commons.util.AppUtil.checkArgument;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.Normalizer;
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * Helper functions for handling strings.
  */
 public class StringUtil {
+
+    /**
+     * Returns a comparison key shared by event identity and text searches. Composes equivalent accent spellings
+     * and applies locale-independent case normalization, including alternative forms such as Greek sigma.
+     * Stored and displayed text are not changed.
+     */
+    public static String normalizeForCaseInsensitiveMatching(String text) {
+        requireNonNull(text);
+        return Normalizer.normalize(text, Normalizer.Form.NFC).toUpperCase(Locale.ROOT).toLowerCase(Locale.ROOT);
+    }
 
     /**
      * Returns true if the {@code sentence} contains the {@code word}.

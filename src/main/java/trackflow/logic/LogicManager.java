@@ -2,6 +2,8 @@ package trackflow.logic;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javafx.collections.ObservableList;
@@ -76,13 +78,21 @@ public class LogicManager implements Logic {
 
     /**
      * Returns a detached copy of the model with the same roster and display state.
-     * Roster mutations are applied to this copy until persistence succeeds.
+     * Roster mutations are applied to this copy until persistence succeeds. Comparator ties retain the live
+     * displayed order so that indexed commands address the same athlete in the copy.
      */
     private Model createStagedModel() {
         Model stagedModel = new ModelManager(model.getRoster(), model.getUserPrefs());
         stagedModel.updateFilteredPersonList(model.getPersonListPredicate());
         if (model.getPersonListComparator() != null) {
-            stagedModel.updateSortedPersonList(model.getPersonListComparator());
+            Map<Person, Integer> displayedPositions = new IdentityHashMap<>();
+            for (int index = 0; index < model.getFilteredPersonList().size(); index++) {
+                displayedPositions.put(model.getFilteredPersonList().get(index), index);
+            }
+            // A fresh SortedList otherwise resolves ties from stored order, which can differ after another sort.
+            // Only the detached copy receives this tie breaker; the live comparator and saved order are unchanged.
+            stagedModel.updateSortedPersonList(model.getPersonListComparator().thenComparingInt(
+                    person -> displayedPositions.getOrDefault(person, Integer.MAX_VALUE)));
         }
         return stagedModel;
     }

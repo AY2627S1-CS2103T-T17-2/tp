@@ -45,7 +45,8 @@ public class AddCommandIntegrationTest {
         expectedModel.updateFilteredPersonList(person -> false);
         expectedModel.addPerson(candidate);
         String expected = String.format(AddCommand.MESSAGE_SUCCESS, Messages.formatAthlete(candidate))
-                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE, existing.getName());
+                + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE,
+                        "- " + Messages.formatAthlete(existing) + "; Matches: phone");
         assertCommandSuccess(new AddCommand(candidate), model, expected, expectedModel);
     }
 

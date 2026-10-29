@@ -35,6 +35,8 @@ public class ParserUtil {
      */
     private static final Pattern PARAMETER_PREFIX_PATTERN =
             Pattern.compile(CommandWhitespace.TOKEN_BOUNDARY_REGEX + "((?i:addr/)|[A-Za-z]/)(?!/)");
+    private static final Pattern ESCAPED_VALUE_PREFIX_PATTERN =
+            Pattern.compile(CommandWhitespace.TOKEN_BOUNDARY_REGEX + "(?i:addr|r)//");
 
     /**
      * Parses an age category using its canonical display form.
@@ -92,10 +94,22 @@ public class ParserUtil {
         while (matcher.find()) {
             String suppliedPrefix = matcher.group(1);
             if (!allowed.contains(suppliedPrefix.toLowerCase(Locale.ROOT))) {
+                String hint = allowed.contains("addr/") || allowed.contains("r/")
+                        ? Messages.MESSAGE_LITERAL_PREFIX_HINT : "";
                 throw new ParseException(String.format(Messages.MESSAGE_UNKNOWN_PARAMETER,
-                        suppliedPrefix, commandUsage));
+                        suppliedPrefix, commandUsage) + hint);
             }
         }
+    }
+
+    /**
+     * Formats a syntax error, explaining slash escaping when an escaped address or remark prefix may have been
+     * mistaken for the actual field prefix. Accepted commands and stored text are unaffected.
+     */
+    public static String getInvalidCommandFormatMessage(String arguments, String commandUsage) {
+        String message = String.format(Messages.MESSAGE_INVALID_COMMAND_FORMAT, commandUsage);
+        return ESCAPED_VALUE_PREFIX_PATTERN.matcher(arguments).find()
+                ? message + Messages.MESSAGE_LITERAL_PREFIX_HINT : message;
     }
 
     /**

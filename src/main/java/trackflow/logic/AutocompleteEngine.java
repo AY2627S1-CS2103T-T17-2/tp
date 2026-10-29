@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 // @@author
 import trackflow.logic.parser.ArgumentMultimap;
 import trackflow.logic.parser.ArgumentTokenizer;
+import trackflow.logic.parser.CommandWhitespace;
 import trackflow.logic.parser.Prefix;
 
 /**
@@ -44,8 +45,8 @@ public class AutocompleteEngine {
             return List.of();
         }
 
-        String trimmed = inputText.stripLeading();
-        if (trimmed.isEmpty() || trimmed.chars().anyMatch(Character::isWhitespace)) {
+        String trimmed = CommandWhitespace.stripLeading(inputText);
+        if (trimmed.isEmpty() || trimmed.chars().anyMatch(CommandWhitespace::isWhitespace)) {
             return List.of();
         }
 
@@ -63,10 +64,10 @@ public class AutocompleteEngine {
      * @return The next prefix to append (e.g., " p/"), or an empty string if none.
      */
     public String getNextPrefix(String currentText) {
-        if (currentText == null || currentText.trim().isEmpty()) {
+        if (currentText == null || CommandWhitespace.strip(currentText).isEmpty()) {
             return "";
         }
-        String[] parts = currentText.trim().split("\\s+");
+        String[] parts = CommandWhitespace.strip(currentText).split(CommandWhitespace.SEPARATOR_REGEX);
         String commandWord = parts[0].toLowerCase(Locale.ROOT);
 
         String template = COMMAND_TEMPLATES.stream()
@@ -89,7 +90,8 @@ public class AutocompleteEngine {
         ArgumentMultimap arguments = ArgumentTokenizer.tokenize(currentText, prefixes.toArray(Prefix[]::new));
         for (Prefix prefix : prefixes) {
             if (arguments.getValue(prefix).isEmpty()) {
-                return (currentText.endsWith(" ") ? "" : " ") + prefix.getPrefix();
+                return (CommandWhitespace.isWhitespace(currentText.charAt(currentText.length() - 1)) ? "" : " ")
+                        + prefix.getPrefix();
             }
         }
         return "";
