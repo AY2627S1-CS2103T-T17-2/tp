@@ -50,4 +50,38 @@ public class HelpCommandTest {
                 .toList();
         assertEquals(expected, listed);
     }
+
+    @Test
+    public void commandUsages_ageCategoryCommandsListAllCategories() {
+        List<String> validCategories = List.of("Under 14", "Under 16", "Under 18", "Under 20", "Open");
+        List<String> targetPrefixes = List.of(
+                AddCommand.COMMAND_WORD + ":",
+                EditCommand.COMMAND_WORD + ":",
+                FilterCommand.COMMAND_WORD + ":");
+
+        List<String> matchingUsages = HelpCommand.COMMAND_USAGES.stream()
+                .filter(usage -> targetPrefixes.stream().anyMatch(usage::startsWith))
+                .toList();
+
+        assertEquals(targetPrefixes.size(), matchingUsages.size());
+        assertTrue(HelpCommand.COMMAND_USAGES.contains(AddCommand.MESSAGE_USAGE));
+        assertTrue(HelpCommand.COMMAND_USAGES.contains(EditCommand.MESSAGE_USAGE));
+        assertTrue(HelpCommand.COMMAND_USAGES.contains(FilterCommand.MESSAGE_USAGE));
+
+        assertTrue(AddCommand.MESSAGE_USAGE.contains(
+                "a/AGE_CATEGORY (Under 14, Under 16, Under 18, Under 20, or Open)"));
+        assertTrue(EditCommand.MESSAGE_USAGE.contains(
+                "[a/AGE_CATEGORY (Under 14, Under 16, Under 18, Under 20, or Open)]"));
+        assertTrue(FilterCommand.MESSAGE_USAGE.contains(
+                "a/AGE_CATEGORY (Under 14, Under 16, Under 18, Under 20, or Open)"));
+
+        for (String usage : matchingUsages) {
+            for (String category : validCategories) {
+                assertTrue(usage.contains(category));
+            }
+        }
+        for (String category : validCategories) {
+            assertTrue(HelpCommand.HELP_MESSAGE.contains(category));
+        }
+    }
 }

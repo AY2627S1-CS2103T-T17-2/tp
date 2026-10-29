@@ -104,6 +104,16 @@ public class AddCommandTest {
         assertEquals(expected, addCommand.toString());
     }
 
+    @Test
+    public void messageUsage_listsAllValidAgeCategories() {
+        List<String> validCategories = List.of("Under 14", "Under 16", "Under 18", "Under 20", "Open");
+        assertTrue(AddCommand.MESSAGE_USAGE.contains(
+                "a/AGE_CATEGORY (Under 14, Under 16, Under 18, Under 20, or Open)"));
+        for (String category : validCategories) {
+            assertTrue(AddCommand.MESSAGE_USAGE.contains(category));
+        }
+    }
+
     /**
      * A default model stub that has all of the methods failing.
      */

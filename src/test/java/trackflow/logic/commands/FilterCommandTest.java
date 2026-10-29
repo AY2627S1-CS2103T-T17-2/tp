@@ -97,4 +97,14 @@ public class FilterCommandTest {
         String expected = FilterCommand.class.getCanonicalName() + "{ageCategory=" + ageCategory + "}";
         assertEquals(expected, command.toString());
     }
+
+    @Test
+    public void messageUsage_listsAllValidAgeCategories() {
+        List<String> validCategories = List.of("Under 14", "Under 16", "Under 18", "Under 20", "Open");
+        assertTrue(FilterCommand.MESSAGE_USAGE.contains(
+                "a/AGE_CATEGORY (Under 14, Under 16, Under 18, Under 20, or Open)"));
+        for (String category : validCategories) {
+            assertTrue(FilterCommand.MESSAGE_USAGE.contains(category));
+        }
+    }
 }

@@ -24,6 +24,8 @@ import static trackflow.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static trackflow.testutil.TypicalPersons.getTypicalRoster;
 // @@author
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 // @@author qiyuannn
@@ -262,4 +264,13 @@ public class EditCommandTest {
         assertEquals(expected, editCommand.toString());
     }
 
+    @Test
+    public void messageUsage_listsAllValidAgeCategories() {
+        List<String> validCategories = List.of("Under 14", "Under 16", "Under 18", "Under 20", "Open");
+        assertTrue(EditCommand.MESSAGE_USAGE.contains(
+                "[a/AGE_CATEGORY (Under 14, Under 16, Under 18, Under 20, or Open)]"));
+        for (String category : validCategories) {
+            assertTrue(EditCommand.MESSAGE_USAGE.contains(category));
+        }
+    }
 }
