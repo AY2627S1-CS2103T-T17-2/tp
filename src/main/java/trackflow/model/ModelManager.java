@@ -1,3 +1,4 @@
+// @@author qiyuannn
 package trackflow.model;
 
 import static java.util.Objects.requireNonNull;

@@ -22,6 +22,7 @@ src/test/data/sandbox/
 docs/_site/
 
 # AI Agents
+/.agents/
 
 
 # Temp files

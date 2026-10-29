@@ -2,10 +2,12 @@ package trackflow.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static trackflow.testutil.Assert.assertThrows;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -49,6 +51,31 @@ public class ParserRobustnessTest {
         logic = new LogicManager(model, new StorageManager(rosterStorage,
                 new JsonUserPrefsStorage(temporaryFolder.resolve("preferences.json"))));
         logic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home");
+    }
+
+    @Test
+    public void execute_unicodeBoundaries_preserveContentAndValidatePrefixes() throws Exception {
+        for (String separator : List.of("\u00a0", "\u2003", "\u2007", "\u202f", "\u3000")) {
+            // Only syntax boundaries are interchangeable; whitespace inside free text must survive saving.
+            String address = "Block" + separator + "Annex  A/B";
+            String remark = "Practise" + separator + "x/y  twice";
+            logic.execute(separator + "edit" + separator + "1" + separator + "addr/" + separator
+                    + "Block" + separator + "Annex  A//B" + separator);
+            logic.execute("remark" + separator + "1" + separator + "r/Practise" + separator + "x//y  twice");
+            Person athlete = model.getFilteredPersonList().getFirst();
+            assertEquals(address, athlete.getAddress().value);
+            assertEquals(remark, athlete.getRemark().value);
+            assertEquals(athlete, rosterStorage.readRoster().orElseThrow().getPersonList().getFirst());
+
+            logic.execute("find" + separator + "Missing" + separator + "Avery");
+            assertEquals(List.of(athlete), model.getFilteredPersonList());
+            assertRejectedWithoutChanges(ParseException.class, List.of(
+                    "edit" + separator + "1" + separator + "addr/Home" + separator + "x/unknown",
+                    "remark 1 r/Note" + separator + "x/unknown",
+                    "edit 1 addr/Home" + separator + "ADDR/Other",
+                    "edit 1 addr/" + separator,
+                    "find n/" + separator));
+        }
     }
 
     @Test
@@ -341,6 +368,23 @@ public class ParserRobustnessTest {
                 "find n/Avery N/Ben", "edit 1 p/999 P/888", "remark 1 r/first R/second",
                 "edit 1 x/value", "remark 1 r/Note\u2003x/value",
                 "edit 1 addr/Block\nAnnex", "edit 1 addr/Block\rAnnex", "edit 1 addr/Block\u2028Annex"));
+    }
+
+    @Test
+    public void execute_pathologicalEmail_preservesRosterDisplayAndFile() throws Exception {
+        logic.execute("sort name desc");
+        logic.execute("find n/Avery");
+        Duration timeout = Duration.ofMillis(200);
+        List<String> pathologicalCommands = List.of(
+                "add n/Bob a/Under 14 p/91234567 e/" + "a".repeat(5000) + " addr/Block A",
+                "add n/Bob a/Under 14 p/91234567 e/a@" + "b".repeat(5000) + " addr/Block A",
+                "edit 1 e/" + "a".repeat(5000),
+                "edit 1 e/a@" + "b".repeat(5000),
+                "edit 1 e/a@" + "a.".repeat(2500));
+        for (String command : pathologicalCommands) {
+            assertTimeoutPreemptively(timeout, () ->
+                    assertRejectedWithoutChanges(ParseException.class, List.of(command)));
+        }
     }
 
     @Test

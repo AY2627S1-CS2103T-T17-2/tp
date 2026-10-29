@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.math.BigInteger;
 import java.util.Comparator;
+import java.util.regex.Pattern;
 
 import trackflow.commons.util.ToStringBuilder;
 import trackflow.model.Model;
@@ -31,8 +32,7 @@ public class SortCommand extends Command {
             "Sorted the displayed athlete list by %1$s in %2$s order.";
 
     private static final Comparator<String> CASE_INSENSITIVE_TEXT_COMPARATOR = String.CASE_INSENSITIVE_ORDER;
-    private static final Comparator<String> NUMERIC_TEXT_COMPARATOR =
-            Comparator.comparing(phone -> new BigInteger(phone.replaceAll("\\D", "")));
+    private static final Pattern REPEATED_NAME_SPACES = Pattern.compile(" {2,}");
 
     private final SortField field;
     private final SortOrder order;
@@ -58,12 +58,16 @@ public class SortCommand extends Command {
 
     /**
      * Returns an ascending comparator: case-insensitive text, numeric phone values, or competition category rank.
+     * Name comparison collapses repeated ordinary spaces in the comparison key without changing stored names.
+     * Phone comparison uses significant digits, retaining country codes and excluding bracketed notes.
      */
     private static Comparator<Person> getComparator(SortField field) {
         return switch (field) {
-            case NAME -> Comparator.comparing(person -> person.getName().fullName, CASE_INSENSITIVE_TEXT_COMPARATOR);
+            case NAME -> Comparator.comparing(
+                    person -> REPEATED_NAME_SPACES.matcher(person.getName().fullName).replaceAll(" "),
+                    CASE_INSENSITIVE_TEXT_COMPARATOR);
             case AGE -> Comparator.comparingInt(person -> getAgeCategoryRank(person.getAgeCategory().value));
-            case PHONE -> Comparator.comparing(person -> person.getPhone().value, NUMERIC_TEXT_COMPARATOR);
+            case PHONE -> Comparator.comparing(person -> new BigInteger(person.getPhone().getSignificantDigits()));
             case EMAIL -> Comparator.comparing(person -> person.getEmail().value, CASE_INSENSITIVE_TEXT_COMPARATOR);
             case ADDRESS -> Comparator.comparing(person -> person.getAddress().value, CASE_INSENSITIVE_TEXT_COMPARATOR);
         };

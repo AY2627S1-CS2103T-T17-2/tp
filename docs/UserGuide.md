@@ -6,7 +6,7 @@
 
 # TrackFlow User Guide
 
-TrackFlow v1.4 is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
+TrackFlow v1.5 is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
 prefer typing commands through a Command Line Interface (CLI), while retaining the benefits of a Graphical User
 Interface (GUI).
 
@@ -74,8 +74,10 @@ Interface (GUI).
 
 * The `list`, `help`, `clear`, and `exit` commands do not accept parameters.
 
-* Leading and trailing ordinary spaces around a command are ignored. Use ordinary spaces between the command
-  word and its arguments; pasted Unicode spaces can be treated differently. See [Known issues](#known-issues).
+* Leading and trailing spaces around a command or parameter value are ignored. Pasted Unicode spaces, including
+  non-breaking and em spaces, are accepted between the command word and parameters, before prefixes, and between
+  `sort` arguments or broad `find` keywords. Spaces inside field values are preserved and follow that field's rules.
+  Invisible zero-width characters are not separators.
 
 * Enter one command per submission, using spaces to separate its word and parameters. The command box is a
   single-line field: pasted tabs and line breaks can be removed, joining adjacent text. Replace them with spaces
@@ -119,7 +121,7 @@ If a value begins with a slash, put a space after the real parameter: `edit 1 ad
 
 TrackFlow provides an autocomplete feature to speed up typing and ensure correct command formats.
 
-* As you type a command word in the command box, a dropdown menu will appear with suggested commands, including mandatory index parameters and prefixes (e.g., `edit INDEX n/ a/ p/ e/ addr/`, `delete INDEX`, `remark INDEX r/`). Suggestions are matched case-insensitively.
+* As you type a command word in the command box, a dropdown menu will appear with suggested commands, including mandatory index parameters and prefixes (e.g., `edit INDEX n/ a/ p/ e/ addr/`, `delete INDEX`, `remark INDEX r/`). For `sort`, the suggestion lists the supported fields and orders: `sort name|age|phone|email|address [asc|desc]`. Suggestions are matched case-insensitively.
 * Use the **Up** and **Down** arrow keys to navigate the list of suggestions.
 * Press **Tab**, or **Click** on a suggestion, to select it. This will insert the command word (followed by a space) into the command box and close the suggestions dropdown.
 * Pressing **Enter** does **not** select or apply a suggestion; it closes the suggestions dropdown and executes the command currently typed in the command box.
@@ -177,10 +179,10 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
 * Names must start with a letter or digit and contain only ASCII letters (`A`–`Z`, `a`–`z`), digits, ordinary spaces,
   hyphens, and apostrophes (for example, `Mary-Jane` or `O'Brien`). Accented letters and other writing systems are
   not currently supported.
-* Phone numbers must contain at least three digits outside parenthesized notes. They may also include spaces,
-  `+`, `-`, `(`, `)`, and notes such as `(HP)` (for example, `+65 9123 4567` or `9123 4567 (HP)`). Duplicate comparison
-  currently uses all digits in the stored text, including digits in notes. Keep the number outside parentheses
-  and use notes without digits; see [Known issues](#known-issues).
+* Phone numbers must contain at least three significant digits. They may also include spaces, `+`, `-`, `(`, and
+  `)`. A bracketed country code such as `(+65)` is part of the number, but any other bracketed text is treated as a
+  note and ignored, whether it is letters like `(HP)` or digits like `(5)` (for example, `+65 9123 4567`,
+  `(+65) 9123 4567`, or `9123 4567 (HP)`).
 * Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` to supply the required nonblank address.
@@ -378,11 +380,13 @@ Format: `sort FIELD [ORDER]`
 
 Available fields:
 
-* `name` sorts names alphabetically without considering letter case.
+* `name` sorts names alphabetically without considering letter case or repeated ordinary spaces. For example,
+  `Lee Ann` sorts before `Lee  Bob` (two spaces). Displayed and saved name text is unchanged; names differing only
+  in case or repeated spaces compare equally for sorting.
 * `age` sorts competition categories in this order: `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
-* `phone` sorts phone numbers numerically by all digits in the stored text, ignoring non-digit characters.
-  Sorting keeps the displayed and saved phone text unchanged. Digits inside notes currently affect ordering;
-  see [Known issues](#known-issues).
+* `phone` sorts phone numbers numerically by their significant digits. Formatting and bracketed notes such as
+  `(HP)` or `(5)` are ignored, while a bracketed country code such as `(+65)` counts as part of the number.
+  For example, `200 (5)` sorts before `300`, and `(+65) 200` sorts after both. Displayed and saved phone text is unchanged.
 * `email` sorts email addresses alphabetically without considering letter case.
 * `address` sorts addresses alphabetically without considering letter case. Empty addresses appear first in ascending
   order and last in descending order.
@@ -507,10 +511,9 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
 * **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
   JDK 25 FX runtime on macOS and verify the packaged JAR on your machine. See the
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
-* **Phone formatting:** numbers wholly inside parentheses can be rejected, and digits inside notes can change
-  duplicate checks and phone sorting. Keep the number outside parentheses and use notes such as `(HP)` without digits.
-* **Pasted whitespace:** use ordinary spaces at command boundaries. Some Unicode space characters are not handled
-  consistently by the command parser.
+* **Phone duplicate checks:** validation and phone sorting ignore bracketed notes, but digits inside notes can still
+  affect duplicate checks. Use notes without digits when adding or editing athletes until this separate identity
+  issue is fixed. Write a bracketed country code with `+`, such as `(+65)`.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do
   not coordinate edits and a later save can overwrite changes from the other instance.
 

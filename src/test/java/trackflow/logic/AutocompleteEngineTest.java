@@ -53,6 +53,12 @@ public class AutocompleteEngineTest {
         suggestions = autocompleteEngine.getSuggestions("ta");
         assertEquals(List.of("tag INDEX t/"), suggestions);
 
+        // sort shows its supported fields and orders
+        suggestions = autocompleteEngine.getSuggestions("so");
+        assertEquals(List.of("sort name|age|phone|email|address [asc|desc]"), suggestions);
+        suggestions = autocompleteEngine.getSuggestions("sort");
+        assertEquals(List.of("sort name|age|phone|email|address [asc|desc]"), suggestions);
+
         suggestions = autocompleteEngine.getSuggestions("u");
         assertEquals(List.of("untag INDEX t/"), suggestions);
     }
@@ -142,6 +148,7 @@ public class AutocompleteEngineTest {
         assertEquals("", autocompleteEngine.getNextPrefix("delete"));
         assertEquals("", autocompleteEngine.getNextPrefix("find"));
         assertEquals("", autocompleteEngine.getNextPrefix("sort"));
+        assertEquals("", autocompleteEngine.getNextPrefix("sort name ")); // sort arguments are not prefixes
         assertEquals("", autocompleteEngine.getNextPrefix("help"));
     }
 

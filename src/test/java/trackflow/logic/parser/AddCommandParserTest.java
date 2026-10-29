@@ -2,11 +2,13 @@
 package trackflow.logic.parser;
 // @@author
 
-// @@author qiyuannn
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static trackflow.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static trackflow.logic.parser.CommandParserTestUtil.assertParseSuccess;
 // @@author
+
+import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
@@ -120,5 +122,19 @@ public class AddCommandParserTest {
         assertParseFailure(parser, validArgs + " t/", expected);
         assertParseFailure(parser, validArgs + " r/", expected);
         assertParseFailure(parser, " t/sprints t/relay" + validArgs, expected);
+    }
+
+    @Test
+    public void parse_pathologicalEmail_throwsParseExceptionQuickly() {
+        Duration timeout = Duration.ofMillis(200);
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseFailure(parser, validArgs.replace("avery.tan@example.com", "a".repeat(5000)),
+                        Email.MESSAGE_CONSTRAINTS));
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseFailure(parser, validArgs.replace("avery.tan@example.com", "a@" + "b".repeat(5000)),
+                        Email.MESSAGE_CONSTRAINTS));
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseFailure(parser, validArgs.replace("avery.tan@example.com", "a@" + "a.".repeat(2500)),
+                        Email.MESSAGE_CONSTRAINTS));
     }
 }

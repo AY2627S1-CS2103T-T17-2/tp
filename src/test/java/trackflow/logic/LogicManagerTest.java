@@ -4,6 +4,7 @@ package trackflow.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 // @@author qiyuannn
 import static trackflow.logic.Messages.MESSAGE_EMPTY_COMMAND;
 import static trackflow.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +38,7 @@ import trackflow.model.ModelManager;
 import trackflow.model.ReadOnlyRoster;
 import trackflow.model.UserPrefs;
 import trackflow.model.person.AgeCategory;
+import trackflow.model.person.Email;
 import trackflow.model.person.Person;
 import trackflow.storage.JsonRosterStorage;
 import trackflow.storage.JsonUserPrefsStorage;
@@ -78,6 +81,32 @@ public class LogicManagerTest {
     @Test
     public void execute_emptyCommand_throwsParseException() {
         assertParseException("", MESSAGE_EMPTY_COMMAND);
+    }
+
+    @Test
+    public void execute_pathologicalEmailInput_throwsParseExceptionQuickly() {
+        Duration timeout = Duration.ofMillis(200);
+        String longEmailCommand = "add n/Avery Tan a/Under 14 p/91234567 e/" + "a".repeat(5000)
+                + " addr/123 Main Street";
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseException(longEmailCommand, Email.MESSAGE_CONSTRAINTS));
+
+        String longDomainCommand = "add n/Avery Tan a/Under 14 p/91234567 e/a@" + "b".repeat(5000)
+                + " addr/123 Main Street";
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseException(longDomainCommand, Email.MESSAGE_CONSTRAINTS));
+
+        String editLongEmailCommand = "edit 1 e/" + "a".repeat(5000);
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseException(editLongEmailCommand, Email.MESSAGE_CONSTRAINTS));
+
+        String editLongDomainCommand = "edit 1 e/a@" + "b".repeat(5000);
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseException(editLongDomainCommand, Email.MESSAGE_CONSTRAINTS));
+
+        String editStackOverflowCommand = "edit 1 e/a@" + "a.".repeat(2500);
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseException(editStackOverflowCommand, Email.MESSAGE_CONSTRAINTS));
     }
 
     @Test
@@ -220,6 +249,53 @@ public class LogicManagerTest {
         ReadOnlyRoster reloadedRoster = storage.readRoster().orElseThrow();
         assertEquals(List.of("Zoe Tan", "Amy Lim"), getStoredNames(reloadedRoster));
         // @@author
+    }
+
+    @Test
+    public void execute_nameSortWithRepeatedSpaces_preservesTextAcrossUpdatesAndReload() throws Exception {
+        logic.execute("add n/Lee  Bob a/Open p/911 e/bob@example.com addr/Home");
+        logic.execute("add n/Lee Ann a/Open p/922 e/ann@example.com addr/Home");
+        logic.execute("sort name");
+        assertEquals(List.of("Lee Ann", "Lee  Bob"), getDisplayedNames(model));
+        logic.execute("sort name desc");
+        assertEquals(List.of("Lee  Bob", "Lee Ann"), getDisplayedNames(model));
+
+        logic.execute("filter a/Open");
+        logic.execute("add n/Lee   Amy a/Under 14 p/933 e/amy@example.com addr/Home");
+        assertEquals(List.of("Lee  Bob", "Lee Ann", "Lee   Amy"), getDisplayedNames(model));
+        logic.execute("edit 1 n/Lee    Aaron");
+        assertEquals(List.of("Lee Ann", "Lee   Amy", "Lee    Aaron"), getDisplayedNames(model));
+
+        JsonRosterStorage storage = new JsonRosterStorage(temporaryFolder.resolve("roster.json"));
+        ReadOnlyRoster reloaded = storage.readRoster().orElseThrow();
+        assertEquals(List.of("Lee    Aaron", "Lee Ann", "Lee   Amy"), getStoredNames(reloaded));
+    }
+
+    @Test
+    public void execute_phoneNotesSortThenUpdates_preservesTextAcrossReload() throws Exception {
+        logic.execute("add n/Aaa Tan a/Open p/200 (5) e/aaa@example.com addr/Home");
+        logic.execute("add n/Bbb Tan a/Open p/300 e/bbb@example.com addr/Home");
+        logic.execute("add n/Ccc Tan a/Open p/(+65) 200 e/ccc@example.com addr/Home");
+        logic.execute("sort phone");
+        assertEquals(List.of("Aaa Tan", "Bbb Tan", "Ccc Tan"), getDisplayedNames(model));
+        logic.execute("sort phone desc");
+        assertEquals(List.of("Ccc Tan", "Bbb Tan", "Aaa Tan"), getDisplayedNames(model));
+
+        logic.execute("edit 1 p/100 (Office 9)");
+        assertEquals(List.of("Bbb Tan", "Aaa Tan", "Ccc Tan"), getDisplayedNames(model));
+        logic.execute("add n/Ddd Tan a/Open p/2 50 (Office 8) e/ddd@example.com addr/Home");
+        assertEquals(List.of("Bbb Tan", "Ddd Tan", "Aaa Tan", "Ccc Tan"), getDisplayedNames(model));
+
+        JsonRosterStorage storage = new JsonRosterStorage(temporaryFolder.resolve("roster.json"));
+        ReadOnlyRoster reloaded = storage.readRoster().orElseThrow();
+        assertEquals(List.of("Aaa Tan", "Bbb Tan", "Ccc Tan", "Ddd Tan"), getStoredNames(reloaded));
+        assertEquals(List.of("200 (5)", "300", "100 (Office 9)", "2 50 (Office 8)"),
+                reloaded.getPersonList().stream().map(person -> person.getPhone().value).toList());
+        Model reloadedModel = new ModelManager(reloaded, new UserPrefs());
+        Logic reloadedLogic = new LogicManager(reloadedModel, new StorageManager(storage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("reloadedPrefs.json"))));
+        reloadedLogic.execute("sort phone");
+        assertEquals(List.of("Ccc Tan", "Aaa Tan", "Ddd Tan", "Bbb Tan"), getDisplayedNames(reloadedModel));
     }
 
     @Test
