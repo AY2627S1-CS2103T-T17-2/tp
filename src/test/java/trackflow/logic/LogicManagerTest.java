@@ -272,6 +272,33 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_phoneNotesSortThenUpdates_preservesTextAcrossReload() throws Exception {
+        logic.execute("add n/Aaa Tan a/Open p/200 (5) e/aaa@example.com addr/Home");
+        logic.execute("add n/Bbb Tan a/Open p/300 e/bbb@example.com addr/Home");
+        logic.execute("add n/Ccc Tan a/Open p/(+65) 200 e/ccc@example.com addr/Home");
+        logic.execute("sort phone");
+        assertEquals(List.of("Aaa Tan", "Bbb Tan", "Ccc Tan"), getDisplayedNames(model));
+        logic.execute("sort phone desc");
+        assertEquals(List.of("Ccc Tan", "Bbb Tan", "Aaa Tan"), getDisplayedNames(model));
+
+        logic.execute("edit 1 p/100 (Office 9)");
+        assertEquals(List.of("Bbb Tan", "Aaa Tan", "Ccc Tan"), getDisplayedNames(model));
+        logic.execute("add n/Ddd Tan a/Open p/2 50 (Office 8) e/ddd@example.com addr/Home");
+        assertEquals(List.of("Bbb Tan", "Ddd Tan", "Aaa Tan", "Ccc Tan"), getDisplayedNames(model));
+
+        JsonRosterStorage storage = new JsonRosterStorage(temporaryFolder.resolve("roster.json"));
+        ReadOnlyRoster reloaded = storage.readRoster().orElseThrow();
+        assertEquals(List.of("Aaa Tan", "Bbb Tan", "Ccc Tan", "Ddd Tan"), getStoredNames(reloaded));
+        assertEquals(List.of("200 (5)", "300", "100 (Office 9)", "2 50 (Office 8)"),
+                reloaded.getPersonList().stream().map(person -> person.getPhone().value).toList());
+        Model reloadedModel = new ModelManager(reloaded, new UserPrefs());
+        Logic reloadedLogic = new LogicManager(reloadedModel, new StorageManager(storage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("reloadedPrefs.json"))));
+        reloadedLogic.execute("sort phone");
+        assertEquals(List.of("Ccc Tan", "Aaa Tan", "Ddd Tan", "Bbb Tan"), getDisplayedNames(reloadedModel));
+    }
+
+    @Test
     public void execute_deleteAfterSort_usesSortedDisplayIndex() throws Exception {
         logic.execute("add n/Amy Lim a/Under 14 p/1000 e/amy@example.com addr/123 Main Street");
         logic.execute("add n/Zoe Tan a/Under 18 p/999 e/zoe@example.com addr/123 Main Street");

@@ -384,9 +384,9 @@ Available fields:
   `Lee Ann` sorts before `Lee  Bob` (two spaces). Displayed and saved name text is unchanged; names differing only
   in case or repeated spaces compare equally for sorting.
 * `age` sorts competition categories in this order: `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
-* `phone` sorts phone numbers numerically by all digits in the stored text, ignoring non-digit characters.
-  Sorting keeps the displayed and saved phone text unchanged. Digits inside notes currently affect ordering;
-  see [Known issues](#known-issues).
+* `phone` sorts phone numbers numerically by their significant digits. Formatting and bracketed notes such as
+  `(HP)` or `(5)` are ignored, while a bracketed country code such as `(+65)` counts as part of the number.
+  For example, `200 (5)` sorts before `300`, and `(+65) 200` sorts after both. Displayed and saved phone text is unchanged.
 * `email` sorts email addresses alphabetically without considering letter case.
 * `address` sorts addresses alphabetically without considering letter case. Empty addresses appear first in ascending
   order and last in descending order.
@@ -511,9 +511,9 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
 * **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
   JDK 25 FX runtime on macOS and verify the packaged JAR on your machine. See the
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
-* **Phone notes:** a digit inside a bracketed note such as `(5)` is ignored when validating a phone number, but it
-  can still change duplicate checks and phone sorting. Use notes without digits, and keep the number and any
-  `(+65)` country code outside notes.
+* **Phone duplicate checks:** validation and phone sorting ignore bracketed notes, but digits inside notes can still
+  affect duplicate checks. Use notes without digits when adding or editing athletes until this separate identity
+  issue is fixed. Write a bracketed country code with `+`, such as `(+65)`.
 * **Long stored event names:** a legacy event label may be clipped in a narrow window. The complete value remains
   in `data/trackflow.json`; close the app and inspect a backup copy when you need the exact name for `untag`.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do

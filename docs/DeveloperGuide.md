@@ -488,10 +488,11 @@ comparator through `Model.updateSortedPersonList`, changing only the displayed v
 resolve athletes against exactly what the user sees. The comparator is session-only and is not persisted.
 
 Text fields are compared without considering letter case. Name comparison also collapses repeated ordinary spaces
-in the comparison key without rewriting the displayed or saved name. Phone sorting removes all non-digit characters
-before converting the stored text to an arbitrary-precision numeric value. Stored text is unchanged and large values do
-not overflow. The current key includes digits inside phone notes, matching the current contact comparison; this
-known limitation is described in the UG and remains a separate phone-normalization fix.
+in the comparison key without rewriting the displayed or saved name. Phone sorting converts
+`Phone.getSignificantDigits()` to an arbitrary-precision numeric value. The shared key includes a bracketed country
+code such as `(+65)` and excludes other bracketed notes, including digits in `(5)` or `(Office 9)`. Displayed and
+saved text is unchanged, and large numeric values do not overflow. Duplicate identity still uses separate
+note-digit handling; its remaining limitation is identified in the UG.
 Age categories use the competition order
 `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
 
@@ -966,6 +967,21 @@ Expect Lee Ann before Lee Bob, even though Bob's stored name has two spaces. Run
 reverse order. Both names must retain their original spacing on screen and in the saved file. Restart: saved roster
 order is Bob then Ann, and Bob's two spaces remain intact. `SortCommandTest` and `LogicManagerTest` also cover
 equivalent name keys, both directions, subsequent adds/edits, and unchanged text after a fresh storage read.
+
+For a separate phone-note regression, use another disposable home folder and enter these commands one at a time:
+
+```text
+clear
+add n/Aaa Tan a/Open p/200 (5) e/aaa@example.com addr/Home
+add n/Bbb Tan a/Open p/300 e/bbb@example.com addr/Home
+add n/Ccc Tan a/Open p/(+65) 200 e/ccc@example.com addr/Home
+sort phone
+```
+
+Expect Aaa, Bbb, Ccc: the note digit is ignored, while the country code contributes to the numeric key. Run
+`sort phone desc` and expect Ccc, Bbb, Aaa. Phone text must remain unchanged. Restart, sort again, and verify both
+orders. `SortCommandTest` and `LogicManagerTest` also cover formatted values, zero-valued numbers with numeric notes,
+large numbers, subsequent updates, and exact phone-text preservation after a fresh storage read.
 
 ### Command autocomplete
 
