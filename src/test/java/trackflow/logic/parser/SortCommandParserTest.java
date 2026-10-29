@@ -20,6 +20,20 @@ public class SortCommandParserTest {
     private final SortCommandParser parser = new SortCommandParser();
 
     @Test
+    public void parse_reset_returnsResetCommand() {
+        assertParseSuccess(parser, "reset", SortCommand.reset());
+        assertParseSuccess(parser, "  ReSeT  ", SortCommand.reset());
+    }
+
+    @Test
+    public void parse_resetWithExtraArguments_throwsParseException() {
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
+        assertParseFailure(parser, "reset asc", expectedMessage);
+        assertParseFailure(parser, "reset desc", expectedMessage);
+        assertParseFailure(parser, "reset name extra", expectedMessage);
+    }
+
+    @Test
     public void parse_fieldOnly_defaultsToAscending() {
         assertParseSuccess(parser, "name", new SortCommand(NAME, ASCENDING));
         assertParseSuccess(parser, "age", new SortCommand(AGE, ASCENDING));

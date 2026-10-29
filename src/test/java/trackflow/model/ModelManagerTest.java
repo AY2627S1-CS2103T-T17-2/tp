@@ -2,6 +2,7 @@ package trackflow.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 import static trackflow.testutil.Assert.assertThrows;
@@ -75,8 +76,16 @@ public class ModelManagerTest {
     }
 
     @Test
-    public void updateSortedPersonList_nullComparator_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> modelManager.updateSortedPersonList(null));
+    public void updateSortedPersonList_nullComparator_restoresRosterOrder() {
+        modelManager = new ModelManager(
+                new AthleteRosterBuilder().withPerson(BENSON).withPerson(ALICE).build(), new UserPrefs());
+        modelManager.updateSortedPersonList(
+                Comparator.comparing(person -> person.getName().fullName, String.CASE_INSENSITIVE_ORDER));
+
+        modelManager.updateSortedPersonList(null);
+
+        assertNull(modelManager.getPersonListComparator());
+        assertEquals(List.of(BENSON, ALICE), modelManager.getFilteredPersonList());
     }
 
     @Test

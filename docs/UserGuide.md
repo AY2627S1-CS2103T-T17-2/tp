@@ -119,7 +119,7 @@ If a value begins with a slash, put a space after the real parameter: `edit 1 ad
 
 TrackFlow provides an autocomplete feature to speed up typing and ensure correct command formats.
 
-* As you type a command word in the command box, a dropdown menu will appear with suggested commands, including mandatory index parameters and prefixes (e.g., `edit INDEX n/ a/ p/ e/ addr/`, `delete INDEX`, `remark INDEX r/`). For `sort`, the suggestion lists the supported fields and orders: `sort name|age|phone|email|address [asc|desc]`. Suggestions are matched case-insensitively.
+* As you type a command word in the command box, a dropdown menu will appear with suggested commands, including mandatory index parameters and prefixes (e.g., `edit INDEX n/ a/ p/ e/ addr/`, `delete INDEX`, `remark INDEX r/`). For `sort`, the suggestions list the supported fields and orders (`sort name|age|phone|email|address [asc|desc]`) and `sort reset`. Suggestions are matched case-insensitively.
 * Use the **Up** and **Down** arrow keys to navigate the list of suggestions.
 * Press **Tab**, or **Click** on a suggestion, to select it. This will insert the command word (followed by a space) into the command box and close the suggestions dropdown.
 * Pressing **Enter** does **not** select or apply a suggestion; it closes the suggestions dropdown and executes the command currently typed in the command box.
@@ -282,6 +282,8 @@ Format: `remark INDEX r/[REMARK]`
 * Exactly one `r/` prefix is required. The prefix is case-insensitive.
 * A new remark replaces the existing remark; remarks are not appended.
 * Use an empty remark, such as `remark 1 r/`, to remove the athlete's existing remark.
+  If the athlete already has no remark, TrackFlow reports `Athlete has no remark to remove` followed by their
+  details, and leaves the roster and current view unchanged.
 * Remarks form part of the saved athlete record and remain after restarting TrackFlow.
 * Updating a remark preserves the athlete's age category and other details.
 * A successful remark update displays the full roster again and retains the current sort order.
@@ -346,6 +348,8 @@ Format: `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/A
 * Broad and field-specific criteria can be combined. An athlete is returned when at least one broad keyword matches
   **or** every field-specific value matches. Each field prefix may appear at most once and cannot have an empty value.
 * Broad keyword order does not matter: `find Avery Tan` and `find Tan Avery` return the same results. A prefixed value is matched as one phrase, so `find n/Avery Tan` matches that name but `find n/Tan Avery` does not. Put broad keywords before any field prefixes. Each athlete appears at most once.
+* Name searches ignore repeated ordinary spaces: `find n/Avery   Tan` and `find n/Avery Tan` match both
+  `Avery Tan` and `Avery   Tan`. Stored names are unchanged. Other field searches retain literal internal spacing.
 * Each `find` searches the entire roster and replaces any previous `find` or `filter`. Matching athletes retain the
   current displayed ordering, including any active sort, and receive indexes starting from 1. Use `list` to restore the complete roster.
 * An empty or whitespace-only search is rejected and displays the accepted command format.
@@ -374,7 +378,7 @@ Examples:
 
 Sorts the currently displayed athlete list by a selected field.
 
-Format: `sort FIELD [ORDER]`
+Format: `sort FIELD [ORDER]` or `sort reset`
 
 Available fields:
 
@@ -391,10 +395,14 @@ Available orders are `asc` or `ascending`, and `desc` or `descending`. If `ORDER
 Field and order names are case-insensitive.
 
 Sorting changes only the displayed order; it does not rewrite the saved roster order. The selected ordering remains
-active for the rest of the application session, including after `find`, `filter`, `list`, and roster-changing commands
+active until `sort reset` or a restart, including after `find`, `filter`, `list`, and roster-changing commands
 such as `add`, `edit`, `remark`, and `delete`. New or edited athletes automatically move to the correct position in the
 displayed list. A later `sort` command replaces the selected ordering. Indexed commands such as `edit`, `remark`, and
 `delete` use the indexes shown in the sorted list.
+
+Use `sort reset` to restore saved roster order without restarting. The current `find` or `filter` remains active;
+run `list` afterward to show the complete roster in saved order. Resetting is also accepted when no sort is active
+or the roster is empty. `sort reset` takes no order argument and does not save or change athlete data.
 
 Examples:
 
@@ -403,15 +411,19 @@ Examples:
 * `sort age ascending` places `Under 14` before the older categories and `Open`.
 * `sort age desc` reverses the category order.
 * `sort phone` sorts by numeric phone value.
+* `sort reset` restores saved roster order for the currently displayed athletes.
 
 Successful output follows this format:
 `Sorted the displayed athlete list by FIELD in ORDER order.`
+
+Reset feedback: `Restored saved roster order for the displayed athletes.`
 
 Invalid sort commands leave the displayed list unchanged. Examples of errors include:
 
 * `sort` or `sort name asc extra`: displays the accepted command format because a field is missing or there are too
   many arguments.
-* `sort height`: displays `Unknown sort field: height. Available fields: name, age, phone, email, address.`
+* `sort height`: displays `Unknown sort field: height. Available fields: name, age, phone, email, address. Use sort reset to restore saved roster order.`
+* `sort reset desc`: displays the accepted command format because reset takes no additional arguments.
 * `sort name upwards`: displays `Unknown sort order: upwards. Use asc, ascending, desc, or descending.`
 
 ### Deleting an athlete: `delete`
@@ -532,7 +544,7 @@ Action     | Format, Examples
 **Find**   | `find [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS] [r/REMARK] [t/EVENT]`<br> e.g., `find n/rachel r/relay`, `find t/100m`
 **List**   | `list`
 **Remark** | `remark INDEX r/[REMARK]`<br> e.g., `remark 1 r/100m personal best: 12.34s`
-**Sort**   | `sort FIELD [ORDER]`<br> e.g., `sort age desc`
+**Sort**   | `sort FIELD [ORDER]` or `sort reset`<br> e.g., `sort age desc`
 **Tag**    | `tag INDEX t/EVENT [t/EVENT]...`<br> e.g., `tag 1 t/100m t/Long Jump`
 **Untag**  | `untag INDEX t/EVENT [t/EVENT]...`<br> e.g., `untag 1 t/100m`
 **Help**   | `help`

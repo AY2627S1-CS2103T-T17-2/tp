@@ -55,9 +55,9 @@ public class AutocompleteEngineTest {
 
         // sort shows its supported fields and orders
         suggestions = autocompleteEngine.getSuggestions("so");
-        assertEquals(List.of("sort name|age|phone|email|address [asc|desc]"), suggestions);
+        assertEquals(List.of("sort name|age|phone|email|address [asc|desc]", "sort reset"), suggestions);
         suggestions = autocompleteEngine.getSuggestions("sort");
-        assertEquals(List.of("sort name|age|phone|email|address [asc|desc]"), suggestions);
+        assertEquals(List.of("sort name|age|phone|email|address [asc|desc]", "sort reset"), suggestions);
 
         suggestions = autocompleteEngine.getSuggestions("u");
         assertEquals(List.of("untag INDEX t/"), suggestions);
