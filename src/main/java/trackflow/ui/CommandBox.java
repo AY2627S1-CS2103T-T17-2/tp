@@ -32,11 +32,17 @@ public class CommandBox extends UiPart<Region> {
      * The popup has its own scene, so the main stylesheet does not apply to it.
      */
     private static final String SUGGESTIONS_STYLE = "-fx-font-family: 'Consolas'; -fx-font-size: 11pt;";
-    /** Approximate height of one suggestion row, in pixels. */
+    /**
+     * Approximate height of one suggestion row, in pixels.
+     */
     private static final double SUGGESTION_ROW_HEIGHT = 24;
-    /** Extra height around the suggestion rows, in pixels. */
+    /**
+     * Extra height around the suggestion rows, in pixels.
+     */
     private static final double SUGGESTIONS_PADDING = 10;
-    /** Height above which the suggestions list scrolls instead of growing, in pixels. */
+    /**
+     * Height above which the suggestions list scrolls instead of growing, in pixels.
+     */
     private static final double MAX_SUGGESTIONS_HEIGHT = 150;
 
     private final CommandExecutor commandExecutor;
@@ -172,7 +178,8 @@ public class CommandBox extends UiPart<Region> {
     }
 
     /**
-     * Handles keys, other than Shift+Tab, pressed while the suggestions list itself has focus.
+     * Handles keys, other than Shift+Tab, that reach the suggestions list. While the popup is showing, JavaFX
+     * redirects key presses in the command box to the popup, so these keys arrive here.
      */
     private void handleSuggestionsKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.TAB) {
@@ -181,6 +188,10 @@ public class CommandBox extends UiPart<Region> {
             event.consume();
             autocompletePopup.hide();
             handleCommandEntered();
+        } else if (event.getCode() == KeyCode.ESCAPE) {
+            // The list would otherwise consume Escape, which stops the popup from closing itself
+            event.consume();
+            autocompletePopup.hide();
         }
     }
 

@@ -13,14 +13,21 @@ public class CommandResult {
 
     private final String feedbackToUser;
 
-    /** Help information should be shown to the user. */
+    /**
+     * Help information should be shown to the user.
+     */
     private final boolean showHelp;
 
-    /** The application should exit. */
+    /**
+     * The application should exit.
+     */
     private final boolean exit;
 
-    /** Roster changes were successfully persisted while executing the command. */
+    /**
+     * Roster changes were successfully persisted while executing the command.
+     */
     private final boolean dataSaved;
+    private final boolean warning;
 
     /**
      * Constructs feedback with the requested help and exit actions, without claiming that data was saved.
@@ -31,14 +38,15 @@ public class CommandResult {
      * @throws NullPointerException If {@code feedbackToUser} is null.
      */
     public CommandResult(String feedbackToUser, boolean showHelp, boolean exit) {
-        this(feedbackToUser, showHelp, exit, false);
+        this(feedbackToUser, showHelp, exit, false, false);
     }
 
-    private CommandResult(String feedbackToUser, boolean showHelp, boolean exit, boolean dataSaved) {
+    private CommandResult(String feedbackToUser, boolean showHelp, boolean exit, boolean dataSaved, boolean warning) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
         this.dataSaved = dataSaved;
+        this.warning = warning;
     }
 
     /**
@@ -62,6 +70,17 @@ public class CommandResult {
         return exit;
     }
 
+    public boolean isWarning() {
+        return warning;
+    }
+
+    /**
+     * Returns a warning that requires the user's attention rather than reporting success.
+     */
+    public static CommandResult warning(String feedbackToUser) {
+        return new CommandResult(feedbackToUser, false, false, false, true);
+    }
+
     public boolean isDataSaved() {
         return dataSaved;
     }
@@ -71,7 +90,7 @@ public class CommandResult {
      * Calling this method does not perform a save; the logic layer calls it after persistence succeeds.
      */
     public CommandResult withDataSaved() {
-        return new CommandResult(feedbackToUser, showHelp, exit, true);
+        return new CommandResult(feedbackToUser, showHelp, exit, true, warning);
     }
 
     @Override
@@ -88,12 +107,13 @@ public class CommandResult {
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && showHelp == otherCommandResult.showHelp
                 && exit == otherCommandResult.exit
-                && dataSaved == otherCommandResult.dataSaved;
+                && dataSaved == otherCommandResult.dataSaved
+                && warning == otherCommandResult.warning;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit, dataSaved);
+        return Objects.hash(feedbackToUser, showHelp, exit, dataSaved, warning);
     }
 
     @Override
@@ -103,6 +123,7 @@ public class CommandResult {
                 .add("showHelp", showHelp)
                 .add("exit", exit)
                 .add("dataSaved", dataSaved)
+                .add("warning", warning)
                 .toString();
     }
 

@@ -10,7 +10,8 @@ import trackflow.commons.util.StringUtil;
 /**
  * Represents a track event tag (e.g. {@code 100m}, {@code Long Jump}) of an athlete in the roster.
  * Tags are compared case-insensitively, but keep the casing they were created with for display.
- * Names are stored in composed Unicode form, so an accent typed as a separate mark matches the single-letter spelling.
+ * Names are stored in composed Unicode form, so an accent typed as a separate mark matches the single-letter
+ * spelling.
  * New names satisfy {@link #isValidTagName(String)}; stored legacy names may also be longer alphanumeric strings.
  * Guarantees: immutable; the original capitalisation is preserved, with equivalent accent spellings composed.
  */
@@ -21,13 +22,20 @@ public class Tag {
     public static final String MESSAGE_CONSTRAINTS = "Events should be 1 to " + MAX_LENGTH
             + " characters long and made of words of letters or digits, "
             + "separated by a single space or a single hyphen "
-            + "(e.g. 100m, Long Jump, 110m-Hurdles; not Long - Jump or Long--Jump).";
+            + "(e.g. 100m, Long Jump, 110m-Hurdles; not Long - Jump or Long--Jump). "
+            + "A word may also contain an apostrophe or a decimal point between digits (e.g. Women's 100m, "
+            + "Hammer 7.26kg).";
 
     /**
-     * Words of letters/digits, separated by a single space or hyphen.
+     * A word of letters/digits, which may contain an apostrophe or a decimal point between two digits.
      * {@code (?U)} makes letters and digits include non-English ones, such as {@code É} in {@code Saut-Élan}.
      */
-    public static final String VALIDATION_REGEX = "(?U)\\p{Alnum}+([ -]\\p{Alnum}+)*";
+    private static final String WORD_REGEX = "\\p{Alnum}++(?:(?:'|(?<=\\d)\\.(?=\\d))\\p{Alnum}++)*+";
+
+    /**
+     * Words separated by a single space or hyphen.
+     */
+    public static final String VALIDATION_REGEX = "(?U)" + WORD_REGEX + "(?:[ -]" + WORD_REGEX + ")*+";
 
     public final String tagName;
 

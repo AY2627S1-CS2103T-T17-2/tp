@@ -10,19 +10,29 @@ import trackflow.commons.core.GuiSettings;
  */
 final class WindowPlacement {
 
-    /** Preferred minimum outer width where the screen has enough space. */
+    /**
+     * Preferred minimum outer width where the screen has enough space.
+     */
     static final double MIN_WINDOW_WIDTH = 450;
 
-    /** Preferred minimum outer height where the screen has enough space. */
+    /**
+     * Preferred minimum outer height where the screen has enough space.
+     */
     static final double MIN_WINDOW_HEIGHT = 400;
 
-    /** Width of the window, in pixels, that must be visible so that the title bar can still be grabbed. */
+    /**
+     * Width of the window, in pixels, that must be visible so that the title bar can still be grabbed.
+     */
     static final double MIN_VISIBLE_WIDTH = 100;
 
-    /** Height of the window, in pixels, that must be visible below the top edge. */
+    /**
+     * Height of the window, in pixels, that must be visible below the top edge.
+     */
     static final double MIN_VISIBLE_HEIGHT = 50;
 
-    /** Slack allowed above a screen's top edge (some platforms place maximized windows slightly above it). */
+    /**
+     * Slack allowed above a screen's top edge (some platforms place maximized windows slightly above it).
+     */
     private static final double TOP_TOLERANCE = 10;
 
     private WindowPlacement() {

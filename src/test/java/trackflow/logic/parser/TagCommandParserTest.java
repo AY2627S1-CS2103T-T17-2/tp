@@ -32,7 +32,14 @@ public class TagCommandParserTest {
 
     @Test
     public void parse_nonEnglishLetters_success() {
-        assertParseSuccess(parser, "1 t/Saut-Élan", new TagCommand(INDEX_FIRST_PERSON, getTagSet("Saut-Élan")));
+        assertParseSuccess(parser, "1 t/Saut-Élan",
+                new TagCommand(INDEX_FIRST_PERSON, getTagSet("Saut-Élan")));
+    }
+
+    @Test
+    public void parse_apostropheAndDecimalPoint_success() {
+        assertParseSuccess(parser, "1 t/Women's 100m t/Hammer 7.26kg",
+                new TagCommand(INDEX_FIRST_PERSON, getTagSet("Women's 100m", "Hammer 7.26kg")));
     }
 
     @Test
@@ -43,7 +50,8 @@ public class TagCommandParserTest {
 
     @Test
     public void parse_extraWhitespaceInEvent_collapsed() {
-        assertParseSuccess(parser, "1 t/  Long   Jump  ", new TagCommand(INDEX_FIRST_PERSON, getTagSet("Long Jump")));
+        assertParseSuccess(parser, "1 t/  Long   Jump  ",
+                new TagCommand(INDEX_FIRST_PERSON, getTagSet("Long Jump")));
     }
 
     @Test

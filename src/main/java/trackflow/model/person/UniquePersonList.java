@@ -146,7 +146,7 @@ public class UniquePersonList implements Iterable<Person> {
     /**
      * Returns true if {@code persons} contains only unique persons, using {@code Person#isSamePerson}.
      * Two persons can only be the same if their names match (ignoring case and repeated spaces), so persons are
-     * grouped by that normalized name and only compared within a group. This gives linear behaviour for the
+     * grouped by that normalized name and only compared within a group. This gives linear behavior for the
      * common case of distinct names while keeping exactly the same notion of duplicates as a full pairwise check.
      */
     private boolean personsAreUnique(List<Person> persons) {

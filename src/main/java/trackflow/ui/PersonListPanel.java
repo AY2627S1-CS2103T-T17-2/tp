@@ -29,11 +29,15 @@ public class PersonListPanel extends UiPart<Region> {
     private static final String FXML = "PersonListPanel.fxml";
     private static final PseudoClass NEW_ATHLETE_PSEUDO_CLASS = PseudoClass.getPseudoClass("new-athlete");
 
-    /** Shown when the roster itself is empty (e.g. on first launch or after clear). */
+    /**
+     * Shown when the roster itself is empty (e.g. on first launch or after clear).
+     */
     private static final String EMPTY_ROSTER_MESSAGE =
             "No athletes yet. Add one with\nadd n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS\n"
             + "or type help to see all commands.";
-    /** Shown when the roster has athletes but a find or filter matched none of them. */
+    /**
+     * Shown when the roster has athletes but a find or filter matched none of them.
+     */
     private static final String NO_MATCH_MESSAGE =
             "No athletes match the current find or filter. Type list to show everyone.";
 
@@ -42,16 +46,24 @@ public class PersonListPanel extends UiPart<Region> {
     @FXML
     private ListView<Person> personListView;
 
-    /** Every athlete object that has been shown in the list, compared by identity. */
+    /**
+     * Every athlete object that has been shown in the list, compared by identity.
+     */
     private final Map<Integer, List<WeakReference<Person>>> knownPersons = new HashMap<>();
 
-    /** Athletes that first appeared in the list since the last command finished. */
+    /**
+     * Athletes that first appeared in the list since the last command finished.
+     */
     private final List<Person> newPersons = new ArrayList<>();
 
-    /** Athletes that were removed from the list since the last command finished (some may have returned). */
+    /**
+     * Athletes that were removed from the list since the last command finished (some may have returned).
+     */
     private final List<Person> removedPersons = new ArrayList<>();
 
-    /** The athlete added by the latest command, if it added exactly one. Each cell highlights itself to match. */
+    /**
+     * The athlete added by the latest command, if it added exactly one. Each cell highlights itself to match.
+     */
     private final ObjectProperty<Person> recentlyAddedPerson = new SimpleObjectProperty<>();
 
     /**

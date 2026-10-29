@@ -30,6 +30,7 @@
     -tf-accent-soft: #ff8b70;
     -tf-success: #2ed3a0;
     -tf-error: #ff6b6b;
+    -tf-warning: #f5c451;
 
     -fx-font-family: "Plus Jakarta Sans";
     -fx-font-size: 13px;
@@ -189,6 +190,10 @@
     -fx-background-color: rgba(46, 211, 160, 0.45), -tf-panel;
 }
 
+.result-banner.result-warning {
+    -fx-background-color: -tf-warning, #29251b;
+}
+
 .result-banner.result-error {
     -fx-background-color: rgba(255, 107, 107, 0.55), -tf-panel;
 }
@@ -205,6 +210,10 @@
 
 .result-success .result-icon {
     -fx-background-color: -tf-success;
+}
+
+.result-warning .result-icon {
+    -fx-background-color: -tf-warning;
 }
 
 .result-error .result-icon {

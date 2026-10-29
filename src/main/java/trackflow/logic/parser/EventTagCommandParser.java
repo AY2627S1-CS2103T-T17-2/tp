@@ -55,7 +55,7 @@ public abstract class EventTagCommandParser<T extends EventTagCommand> implement
      * Parses a newly entered event using the current name constraints.
      * Removal parsers may override this to identify preserved legacy names.
      *
-     * @throws ParseException If the event name is invalid.
+     * @throws ParseException if the event name is invalid.
      */
     protected Tag parseEvent(String eventName) throws ParseException {
         return ParserUtil.parseTag(eventName);

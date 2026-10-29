@@ -17,6 +17,9 @@
 * Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5).
 * Font used: [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) by Tokotype, licensed under [OFL 1.1](https://scripts.sil.org/OFL).
 * Chetan (`chetangent`) used OpenAI Codex extensively to generate and refine project code and documentation.
+* Antony (`antonydchakola-hub`) used Claude (Anthropic) extensively to review and refactor code, write tests, find
+  and reproduce bugs, and draft User Guide and Developer Guide text. He reviewed and tested all generated output
+  before committing it.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -318,8 +321,8 @@ are not special syntax. Escaped tokens cannot supply required fields or bypass o
 A slash-led value must be separated from its real prefix by whitespace: `addr/ /home/coach` supplies the address
 `/home/coach`, while `addr//home/coach` is literal text and does not introduce an address parameter.
 
-Commands that take no arguments (`clear`, `help`, and `exit`) reject extra text. `remark` requires exactly one `r/`
-prefix. Index parsing scans ASCII digits once, capping the accumulated value at `Integer.MAX_VALUE` without building
+Commands that take no arguments (`clear`, `help`, and `exit`) reject extra text.
+`remark` requires exactly one `r/` prefix. Index parsing scans ASCII digits once, capping the accumulated value at `Integer.MAX_VALUE` without building
 an arbitrary-precision number. It continues validating the remaining characters after reaching the cap, so an
 oversized number followed by text is still rejected. Leading zeroes are accepted; all-zero and malformed indexes are
 rejected. Oversized positive numbers reach the command's normal invalid-displayed-index check.
@@ -750,7 +753,7 @@ Use case ends.
 
 #### UC05: Filter athletes by age category
 
-**Status**: Implemented in v1.4.<br>
+**Status**: Implemented in v1.5.<br>
 **Related stories**: US02, US03, US05, US11.<br>
 **Precondition**: TrackFlow is open.<br>
 **Success postcondition**: Only matching athletes are displayed; stored records are unchanged.
@@ -877,6 +880,7 @@ When a procedure asks for the **three-athlete fixture**, restart TrackFlow first
 
 ```text
 clear
+Y
 add n/Blake Lee a/Open p/92222222 e/blake@example.com addr/20 Stadium Road
 add n/Avery Tan a/Under 14 p/91111111 e/avery@example.com addr/10 Stadium Road
 add n/Casey Lim a/Under 14 p/93333333 e/casey@example.com addr/30 Stadium Road
@@ -976,6 +980,7 @@ For a separate name-spacing regression, use another disposable home folder and e
 
 ```text
 clear
+Y
 add n/Lee  Bob a/Open p/911 e/bob@example.com addr/Home
 add n/Lee Ann a/Open p/922 e/ann@example.com addr/Home
 sort name
@@ -990,6 +995,7 @@ For a separate phone-note regression, use another disposable home folder and ent
 
 ```text
 clear
+Y
 add n/Aaa Tan a/Open p/200 (5) e/aaa@example.com addr/Home
 add n/Bbb Tan a/Open p/300 e/bbb@example.com addr/Home
 add n/Ccc Tan a/Open p/(+65) 200 e/ccc@example.com addr/Home
@@ -1037,6 +1043,8 @@ When a step asks you to type a new command below, replace the previous input rat
       Expected: Selection moves between the suggestions in the list.
    6. Press Enter while suggestions are displayed.<br>
       Expected: The dropdown closes without auto-completing, and TrackFlow executes the typed input (showing an unknown command error for `f`).
+   7. Type `ed`, then press Escape.<br>
+      Expected: The dropdown closes and the command box still contains `ed`.
 
 2. Selecting a suggestion with Tab
    1. Type `ad` and press Tab (or click the suggestion with the mouse).<br>
@@ -1054,13 +1062,13 @@ When a step asks you to type a new command below, replace the previous input rat
 
 ### Saving data
 
-1. Run `clear`, `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`, and `tag 1 t/100m`
+1. Run `clear`, then `Y`, `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`, and `tag 1 t/100m`
    separately, then restart TrackFlow.<br>
    Expected: Avery and the `100m` event remain after the restart.
 1. On this disposable roster, temporarily remove write permission from
    the folder containing the roster data file. Then attempt each roster-changing command separately:
    `add n/Blake Tan a/Open p/81234567 e/blake@example.com addr/Home`, `edit 1 p/999`, `remark 1 r/Test`,
-   `tag 1 t/400m`, `untag 1 t/100m`, `delete 1`, and `clear`.<br>
+   `tag 1 t/400m`, `untag 1 t/100m`, `delete 1`, and `clear`, then `Y`.<br>
    Expected: TrackFlow reports that it could not save. The roster, displayed athletes, filter, sort order, and data file
    remain unchanged after every attempt.
 1. While storage is unwritable, run `list`, `find n/Avery`, `filter a/Under 14`, `sort name`, `help`, and `exit` separately.<br>
@@ -1092,7 +1100,7 @@ When a step asks you to type a new command below, replace the previous input rat
 
 Use a disposable home folder; these procedures change saved data.
 
-1. Run `clear`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`.
+1. Run `clear`, then `Y`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`.
    Expect one saved athlete. Restart from the same folder and confirm every supplied field remains.
 1. Run `remark 1 r/Sprints`, then `edit 1 a/Under 16 addr/Training centre`. Expect the new category and address,
    with the original name, phone, email, and remark retained. Restart and verify those values again.
@@ -1105,7 +1113,7 @@ Use a disposable home folder; these procedures change saved data.
 1. Try `add n/Incomplete`, `edit 1`, `edit 0 p/999`, `edit 1 addr/`, and `remark 1`.
    Expect errors with no roster changes. Adding `t/sprinter` to an otherwise valid add or edit command must produce
    an error identifying `t/` as an unsupported prefix in both cases.
-1. Run `clear`, restart, and confirm the roster stays empty rather than loading samples again.
+1. Run `clear`, then `Y`, restart, and confirm the roster stays empty rather than loading samples again.
 
 ### Parser robustness
 
@@ -1154,7 +1162,7 @@ tag 1 t/4x100m
 
 ### Tagging athletes with events
 
-Use a disposable roster. Run `clear`, then the following commands separately to ensure a known starting state:
+Use a disposable roster. Run `clear`, then `Y`, then the following commands separately to ensure a known starting state:
 
 ```text
 add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home
@@ -1167,15 +1175,17 @@ tag 1 t/100m
 1. Run `tag 1 t/JAVELIN`. Expect an already-present error and no changes.
 1. Run `untag 1 t/Shot Put t/Discus`. Expect an error naming `Discus`; `Shot Put` must remain.
 1. Run `untag 1 t/shot put`. Expect `Shot Put` to be removed. Restart and verify the remaining labels persist.
-1. Try `tag 1`, `tag t/100m`, `tag 0 t/100m`, `tag 1 t/`, `tag 1 t/100m*`, `tag 1 t/Long - Jump`,
-   and `tag 1 t/` followed by 31 letters. Expect an error after each command and no changes.
+1. Run `tag 1 t/Hammer 7.26kg t/Women's 100m`. Expect both events to be added, keeping the decimal point and the
+   apostrophe.
+1. Try `tag 1`, `tag t/100m`, `tag 0 t/100m`, `tag 1 t/`, `tag 1 t/100m*`, `tag 1 t/Long - Jump`, `tag 1 t/7.kg`,
+   `tag 1 t/Women''s`, and `tag 1 t/` followed by 31 letters. Expect an error after each command and no changes.
 
 ### Help and clearing a test roster
 
 1. Run `help`. Expect a scrollable command guide. Resize it and check that command descriptions remain reachable.
 1. Close help, then run `help` again. Expect it to reopen without changing the roster or losing the current filter.
-1. On the disposable roster only, run `clear`. Expect an immediate successful deletion of all athletes, without a
-   confirmation prompt or undo. Restart and verify the roster remains empty rather than repopulating samples.
+1. On the disposable roster only, run `clear`. Expect a yellow warning; the roster must remain unchanged, including after
+   restarting. Run `clear`, then `Y` to delete all athletes permanently. Restart and verify the roster remains empty.
 
 ### Duplicate identity and complete equality
 
@@ -1185,7 +1195,7 @@ Name normalization ignores case and repeated spaces; email matching ignores case
 field's equality rules across every field, including category, address, remark, and events. Phone formatting and
 event-name case do not by themselves make records unequal. These are separate contracts.
 
-1. Start with only Avery: run `clear`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`. Attempt to add `AVERY   TAN` with the same phone and a different
+1. Start with only Avery: run `clear`, then `Y`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`. Attempt to add `AVERY   TAN` with the same phone and a different
    email and category. Expect a duplicate error, with no saved changes. Repeat with a different phone and matching
    email (including different email case); expect rejection again.
 1. Add a record with the same name but both a different phone and a different email. Expect success.

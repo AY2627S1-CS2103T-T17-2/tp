@@ -58,7 +58,7 @@ public class CommandFeedbackRegressionTest {
         String before = Files.readString(storage.getRosterFilePath());
         CommandException error = assertThrows(CommandException.class, () ->
                 logic.execute("add n/avery   tan a/Open p/91234567 e/other@example.com addr/Home"));
-        assertEquals("This athlete already exists in the roster: Avery Tan.", error.getMessage());
+        assertEquals(String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"), error.getMessage());
         assertEquals(before, Files.readString(storage.getRosterFilePath()));
     }
 
@@ -73,7 +73,7 @@ public class CommandFeedbackRegressionTest {
         }
         CommandException error = assertThrows(CommandException.class, () ->
                 logic.execute("add n/lee ann a/Open p/84446666 e/other@example.com addr/Home"));
-        assertEquals("This athlete already exists in the roster: LEE   Ann.", error.getMessage());
+        assertEquals(String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "LEE   Ann"), error.getMessage());
         assertEquals(before, Files.readString(storage.getRosterFilePath()));
 
         logic.execute("remark 1 r/Checked");

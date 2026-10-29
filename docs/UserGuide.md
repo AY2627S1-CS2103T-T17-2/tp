@@ -72,7 +72,7 @@ Interface (GUI).
 * Command words and parameter prefixes are case-insensitive. For example, `LIST`, `List`, and `list` invoke the same
   command, while `n/Avery` and `N/Avery` supply the same name parameter.
 
-* The `list`, `help`, `clear`, and `exit` commands do not accept parameters.
+* The `list`, `help`, and `exit` commands do not accept parameters.
 
 * Leading and trailing spaces around a command or parameter value are ignored. Pasted Unicode spaces, including
   non-breaking and em spaces, are accepted between the command word and parameters, before prefixes, and between
@@ -318,7 +318,7 @@ Format: `remark INDEX r/[REMARK]`
 Examples:
 
 * `remark 1 r/100m personal best: 12.34s`
-* `remark 2 r/` removes the 2nd athlete's remark.
+* `remark 1 r/` removes the 1st athlete's remark.
 
 ### Tagging athletes with track events: `tag`, `untag`
 
@@ -336,8 +336,11 @@ Format: `untag INDEX t/EVENT [t/EVENT]...`
   30 characters long, e.g. `100m`, `4x100m`, `Long Jump`, `110m-Hurdles`. Extra spaces between words are reduced to
   one, but a hyphen cannot have spaces around it or be repeated: use `Long-Jump` or `Long Jump`, not `Long - Jump`
   or `Long--Jump`.
+  A word may also contain an apostrophe or a decimal point between digits, e.g. `Women's 100m` or `Hammer 7.26kg`.
   Letters include accented and non-English letters, e.g. `Saut-Élan`.
-* Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalisation it was first added with.
+* Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalization it was first added with.
+  Spacing and punctuation still count, so `100m`, `100 m`, and `100-m` are different events. Use one spelling for
+  each event so that `untag` and `find t/` match it.
   Equivalent accent spellings, such as an accented letter typed as a letter followed by an accent mark, are composed
   into the same form. `tag`, `untag`, and `find` use the same case and accent equivalence rules.
 * Older rosters may contain alphanumeric tags longer than 30 characters. TrackFlow preserves these exactly when
@@ -460,7 +463,7 @@ Format: `delete INDEX`
 * Deletes the athlete at the specified `INDEX`.
 * The index refers to the index number shown in the displayed athlete list.
 * The index **must be a positive integer** 1, 2, 3, ...
-* On success, the deleted athlete's details are shown, e.g. `Athlete deleted: Avery Tan; Age category: Under 18; Phone: 91234567; Email: avery@example.com`.
+* On success, the deleted athlete's details are shown, e.g. `Athlete deleted: Avery Tan; Age category: Under 14; Phone: 91234567; Email: avery.tan@example.com`.
 
 Examples:
 
@@ -471,11 +474,12 @@ Examples:
 
 Deletes all athletes from the roster.
 
-Format: `clear`
+Format: `clear`, then `Y`
 
-The command does not accept parameters.
+`clear` displays a yellow warning without changing or saving the roster. To proceed, type `Y`.
+Type `N` to cancel. Responses are case-insensitive; any other command also cancels the pending clear.
 
-**This action is permanent:** `clear` immediately saves an empty roster, with no confirmation or undo. Close the app
+**Confirmed deletion is permanent:** `Y` saves an empty roster with no undo. Close the app
 and back up `data/trackflow.json` in the JAR's home folder before clearing data you may need later. `delete` also saves
 its deletion immediately.
 
@@ -556,7 +560,7 @@ file. A fresh launch only displays sample athletes; it does not create a roster 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Add**    | `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS` <br> e.g., `add n/James Ho a/Under 18 p/22224444 e/jamesho@example.com addr/123 Main Street`
-**Clear**  | `clear`
+**Clear**  | `clear`, then `Y`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter a/AGE_CATEGORY`<br> e.g., `filter a/Under 14`

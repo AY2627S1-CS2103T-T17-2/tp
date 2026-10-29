@@ -406,7 +406,9 @@ public class ParserRobustnessTest {
         }
     }
 
-    /** Checks parser/command failures against the full roster, active view, and byte-for-byte saved contents. */
+    /**
+     * Checks parser/command failures against the full roster, active view, and byte-for-byte saved contents.
+     */
     private void assertRejectedWithoutChanges(Class<? extends Exception> exceptionType, List<String> commands)
             throws Exception {
         ReadOnlyRoster rosterBefore = new ModelManager(model.getRoster(), model.getUserPrefs()).getRoster();
