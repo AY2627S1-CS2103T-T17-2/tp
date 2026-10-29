@@ -16,7 +16,7 @@ public class FilterCommand extends Command {
     public static final String COMMAND_WORD = "filter";
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Lists athletes in the specified age category.\n"
-            + "Parameters: a/AGE_CATEGORY\n"
+            + "Parameters: a/AGE_CATEGORY (Under 14, Under 16, Under 18, Under 20, or Open)\n"
             + "Example: " + COMMAND_WORD + " a/Under 14";
     public static final String MESSAGE_SUCCESS = "Displaying %1$d athletes in age category %2$s.";
     public static final String MESSAGE_SUCCESS_SINGLE = "Displaying 1 athlete in age category %1$s.";
