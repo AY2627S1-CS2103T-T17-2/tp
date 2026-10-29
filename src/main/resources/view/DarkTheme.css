@@ -342,6 +342,13 @@
     -fx-text-fill: -tf-muted;
 }
 
+.list-placeholder {
+    -fx-text-fill: -tf-muted;
+    -fx-font-size: 13px;
+    -fx-text-alignment: center;
+    -fx-padding: 20;
+}
+
 .cell_detail {
     -fx-font-family: "Plus Jakarta Sans";
     -fx-font-size: 12px;

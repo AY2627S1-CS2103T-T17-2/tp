@@ -5,6 +5,7 @@ import trackflow.commons.core.GuiSettings;
 import trackflow.logic.commands.CommandResult;
 import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.logic.parser.exceptions.ParseException;
+import trackflow.model.ReadOnlyRoster;
 import trackflow.model.person.Person;
 
 /**
@@ -27,6 +28,12 @@ public interface Logic {
      * Returns the live, unmodifiable athlete list in its current filtered and sorted display order.
      */
     ObservableList<Person> getFilteredPersonList();
+
+    /**
+     * Returns the full athlete roster, regardless of any active find or filter. The UI uses this to tell an
+     * empty roster apart from a find or filter that matched nothing.
+     */
+    ReadOnlyRoster getRoster();
 
     /**
      * Returns the user prefs' GUI settings.

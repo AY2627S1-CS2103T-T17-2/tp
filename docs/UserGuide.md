@@ -97,6 +97,9 @@ For `edit`, `remark`, `tag`, `untag`, and `delete`, always use the index current
 Indexes can change after another command. A successful add, edit, remark, tag, or untag shows the full roster again;
 deleting an athlete keeps the current filter. Check the displayed names before your next indexed command.
 
+When the list area is empty, it explains why: if the roster has no athletes (for example, on first launch or after
+`clear`), it shows how to add one; if a `find` or `filter` matched nothing, it says so and reminds you to run `list`.
+
 ### Addresses and remarks containing slashes
 
 Type ordinary addresses and notes normally. If the text looks like a command parameter, such as `A/B` or `r/relay`,
