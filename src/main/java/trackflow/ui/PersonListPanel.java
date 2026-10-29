@@ -15,6 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
@@ -27,6 +28,15 @@ import trackflow.model.person.Person;
 public class PersonListPanel extends UiPart<Region> {
     private static final String FXML = "PersonListPanel.fxml";
     private static final PseudoClass NEW_ATHLETE_PSEUDO_CLASS = PseudoClass.getPseudoClass("new-athlete");
+
+    /** Shown when the roster itself is empty (e.g. on first launch or after clear). */
+    private static final String EMPTY_ROSTER_MESSAGE =
+            "No athletes yet. Add one with\nadd n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS\n"
+            + "or type help to see all commands.";
+    /** Shown when the roster has athletes but a find or filter matched none of them. */
+    private static final String NO_MATCH_MESSAGE =
+            "No athletes match the current find or filter. Type list to show everyone.";
+
     private final Logger logger = LogsCenter.getLogger(PersonListPanel.class);
 
     @FXML
@@ -47,14 +57,31 @@ public class PersonListPanel extends UiPart<Region> {
     /**
      * Creates a {@code PersonListPanel} with the given {@code ObservableList}.
      */
-    public PersonListPanel(ObservableList<Person> personList) {
+    public PersonListPanel(ObservableList<Person> personList, ObservableList<Person> fullRoster) {
         super(FXML);
         personListView.setItems(personList);
         personListView.setCellFactory(listView -> new PersonListViewCell());
+        personListView.setPlaceholder(createEmptyPlaceholder(fullRoster));
         for (Person person : personList) {
             addToKnownPersonsIfNew(person);
         }
         personList.addListener(this::recordListChange);
+    }
+
+    /**
+     * Returns the node shown when the displayed list is empty. It distinguishes an empty roster, where it guides
+     * the user towards adding an athlete, from a find or filter that matched nothing, and updates its message as
+     * the roster gains or loses athletes.
+     */
+    private Label createEmptyPlaceholder(ObservableList<Person> fullRoster) {
+        Label placeholder = new Label();
+        placeholder.getStyleClass().add("list-placeholder");
+        placeholder.setWrapText(true);
+        Runnable updateText = () -> placeholder.setText(
+                fullRoster.isEmpty() ? EMPTY_ROSTER_MESSAGE : NO_MATCH_MESSAGE);
+        updateText.run();
+        fullRoster.addListener((ListChangeListener<Person>) change -> updateText.run());
+        return placeholder;
     }
 
     /**

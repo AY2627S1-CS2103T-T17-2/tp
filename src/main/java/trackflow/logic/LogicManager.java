@@ -14,6 +14,7 @@ import trackflow.logic.parser.TrackFlowParser;
 import trackflow.logic.parser.exceptions.ParseException;
 import trackflow.model.Model;
 import trackflow.model.ModelManager;
+import trackflow.model.ReadOnlyRoster;
 import trackflow.model.person.Person;
 import trackflow.storage.Storage;
 
@@ -89,6 +90,11 @@ public class LogicManager implements Logic {
     @Override
     public ObservableList<Person> getFilteredPersonList() {
         return model.getFilteredPersonList();
+    }
+
+    @Override
+    public ReadOnlyRoster getRoster() {
+        return model.getRoster();
     }
 
     @Override

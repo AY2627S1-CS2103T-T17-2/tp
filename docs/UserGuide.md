@@ -95,9 +95,16 @@ Interface (GUI).
 the results of the preceding command. `sort` orders the selected athletes, and `list` shows everyone while retaining
 that order. Sorting and filtering are reset when TrackFlow restarts.
 
+While a `find` or `filter` is hiding some athletes, the status bar shows the count as `X of Y athletes` (for
+example, `2 of 9 athletes`), so you can tell you are viewing a subset even after a later command such as `sort`
+changes the feedback message. It shows `Y athletes` when the whole roster is displayed.
+
 For `edit`, `remark`, `tag`, `untag`, and `delete`, always use the index currently shown beside the athlete.
 Indexes can change after another command. A successful add, edit, remark, tag, or untag shows the full roster again;
 deleting an athlete keeps the current filter. Check the displayed names before your next indexed command.
+
+When the list area is empty, it explains why: if the roster has no athletes (for example, on first launch or after
+`clear`), it shows how to add one; if a `find` or `filter` matched nothing, it says so and reminds you to run `list`.
 
 ### Addresses and remarks containing slashes
 
