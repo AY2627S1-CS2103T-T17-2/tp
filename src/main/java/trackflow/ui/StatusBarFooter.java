@@ -35,16 +35,20 @@ public class StatusBarFooter extends UiPart<Region> {
     private Label athleteCountStatus;
 
     /**
-     * Creates a {@code StatusBarFooter} showing the given {@code Path} and the number of athletes in
-     * {@code displayedPersons}, which is kept up to date as the list changes.
+     * Creates a {@code StatusBarFooter} showing the given {@code Path} and the athlete count, kept up to date as
+     * the lists change. The count is shown as "X of Y athletes" while a find or filter is hiding some athletes,
+     * so an active selection stays visible even after later commands, and as "Y athletes" when the whole roster
+     * is displayed.
      */
-    public StatusBarFooter(Path saveLocation, ObservableList<Person> displayedPersons) {
+    public StatusBarFooter(Path saveLocation, ObservableList<Person> displayedPersons,
+            ObservableList<Person> fullRoster) {
         super(FXML);
         saveLocationStatus.setText(Paths.get(".").resolve(saveLocation).toString());
         saveStateStatus.setText(NO_CHANGES_STATUS);
-        showAthleteCount(displayedPersons.size());
-        displayedPersons.addListener((ListChangeListener<Person>) change ->
-                showAthleteCount(displayedPersons.size()));
+        Runnable updateCount = () -> showAthleteCount(displayedPersons.size(), fullRoster.size());
+        updateCount.run();
+        displayedPersons.addListener((ListChangeListener<Person>) change -> updateCount.run());
+        fullRoster.addListener((ListChangeListener<Person>) change -> updateCount.run());
     }
 
     /**
@@ -78,8 +82,11 @@ public class StatusBarFooter extends UiPart<Region> {
         saveStateStatus.setText(status);
     }
 
-    private void showAthleteCount(int count) {
-        athleteCountStatus.setText(count == 1 ? "1 athlete shown" : count + " athletes shown");
+    private void showAthleteCount(int shown, int total) {
+        String noun = total == 1 ? "athlete" : "athletes";
+        athleteCountStatus.setText(shown == total
+                ? total + " " + noun
+                : shown + " of " + total + " " + noun);
     }
 
 }
