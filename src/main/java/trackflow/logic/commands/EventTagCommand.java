@@ -66,6 +66,7 @@ public abstract class EventTagCommand extends Command {
      * @return the updated athlete.
      */
     protected static Person replaceEvents(Model model, Person athlete, Set<Tag> updatedEvents) {
+        requireAllNonNull(model, athlete, updatedEvents);
         Person updatedAthlete = new Person(athlete.getName(), athlete.getAgeCategory(), athlete.getPhone(),
                 athlete.getEmail(), athlete.getAddress(), athlete.getRemark(), updatedEvents);
         model.setPerson(athlete, updatedAthlete);

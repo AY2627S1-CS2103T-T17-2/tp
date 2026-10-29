@@ -1040,6 +1040,8 @@ When a step asks you to type a new command below, replace the previous input rat
       Expected: Selection moves between the suggestions in the list.
    6. Press Enter while suggestions are displayed.<br>
       Expected: The dropdown closes without auto-completing, and TrackFlow executes the typed input (showing an unknown command error for `f`).
+   7. Type `ed`, then press Escape.<br>
+      Expected: The dropdown closes and the command box still contains `ed`.
 
 2. Selecting a suggestion with Tab
    1. Type `ad` and press Tab (or click the suggestion with the mouse).<br>

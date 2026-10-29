@@ -118,7 +118,7 @@ public class AutocompleteEngineTest {
 
     @Test
     public void getSuggestions_trailingWhitespace_returnsEmptyList() {
-        // Issue 1A fix: Once the user enters a trailing space after command word, do not suggest command templates
+        // Once the user enters a space after the command word, command templates are no longer suggested
         List<String> suggestions = autocompleteEngine.getSuggestions("add ");
         assertTrue(suggestions.isEmpty());
 
@@ -197,21 +197,25 @@ public class AutocompleteEngineTest {
         assertEquals(" e/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567"));
 
         // With name, age, phone, email
-        assertEquals(" addr/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567 e/j@e.com"));
+        assertEquals(" addr/",
+                autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567 e/j@e.com"));
 
         // All prefixes present
-        assertEquals("", autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567 e/j@e.com addr/NUS"));
+        assertEquals("",
+                autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567 e/j@e.com addr/NUS"));
     }
 
     @Test
     public void getNextPrefix_uppercaseCommandAndPrefixes_matchesCaseInsensitively() {
-        // Issue 1B fix: Uppercase prefixes should be recognized so that already entered prefixes are not repeated
+        // Uppercase prefixes are recognized, so prefixes already entered are not inserted again
         assertEquals("n/", autocompleteEngine.getNextPrefix("EDIT 1 "));
         assertEquals(" a/", autocompleteEngine.getNextPrefix("add N/John"));
         assertEquals(" p/", autocompleteEngine.getNextPrefix("add N/John A/Under 20"));
         assertEquals(" e/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 P/91234567"));
-        assertEquals(" addr/", autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567 E/j@e.com"));
-        assertEquals("", autocompleteEngine.getNextPrefix("add N/John A/Under 20 P/91234567 E/j@e.com ADDR/NUS"));
+        assertEquals(" addr/",
+                autocompleteEngine.getNextPrefix("add n/John a/Under 20 p/91234567 E/j@e.com"));
+        assertEquals("",
+                autocompleteEngine.getNextPrefix("add N/John A/Under 20 P/91234567 E/j@e.com ADDR/NUS"));
     }
 
     @Test
@@ -238,7 +242,8 @@ public class AutocompleteEngineTest {
     public void getNextPrefix_editCommand_returnsPrefixes() {
         assertEquals(" n/", autocompleteEngine.getNextPrefix("edit 1"));
         assertEquals(" a/", autocompleteEngine.getNextPrefix("edit 1 n/Alex"));
-        assertEquals("", autocompleteEngine.getNextPrefix("edit 1 n/Alex a/Under 20 p/91234567 e/a@b.com addr/NUS"));
+        assertEquals("",
+                autocompleteEngine.getNextPrefix("edit 1 n/Alex a/Under 20 p/91234567 e/a@b.com addr/NUS"));
     }
 
     @Test
