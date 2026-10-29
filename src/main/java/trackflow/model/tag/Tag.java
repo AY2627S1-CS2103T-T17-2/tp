@@ -10,7 +10,8 @@ import trackflow.commons.util.StringUtil;
 /**
  * Represents a track event tag (e.g. {@code 100m}, {@code Long Jump}) of an athlete in the roster.
  * Tags are compared case-insensitively, but keep the casing they were created with for display.
- * Names are stored in composed Unicode form, so an accent typed as a separate mark matches the single-letter spelling.
+ * Names are stored in composed Unicode form, so an accent typed as a separate mark matches the single-letter
+ * spelling.
  * New names satisfy {@link #isValidTagName(String)}; stored legacy names may also be longer alphanumeric strings.
  * Guarantees: immutable; the original capitalisation is preserved, with equivalent accent spellings composed.
  */

@@ -178,12 +178,20 @@ public class CommandBox extends UiPart<Region> {
     }
 
     /**
-     * Handles keys, other than Shift+Tab, pressed while the suggestions list itself has focus.
+     * Handles keys, other than Shift+Tab, that reach the suggestions list. While the popup is showing, JavaFX
+     * redirects key presses in the command box to the popup, so these keys arrive here.
      */
     private void handleSuggestionsKeyPressed(KeyEvent event) {
-        if (event.getCode() == KeyCode.TAB || event.getCode() == KeyCode.ENTER) {
-            // Both keys accept the highlighted suggestion; the command runs on the next Enter once it is complete.
+        if (event.getCode() == KeyCode.TAB) {
             applySelectedSuggestionLater(event);
+        } else if (event.getCode() == KeyCode.ENTER) {
+            event.consume();
+            autocompletePopup.hide();
+            handleCommandEntered();
+        } else if (event.getCode() == KeyCode.ESCAPE) {
+            // The list would otherwise consume Escape, which stops the popup from closing itself
+            event.consume();
+            autocompletePopup.hide();
         }
     }
 
@@ -207,10 +215,7 @@ public class CommandBox extends UiPart<Region> {
             moveSuggestionSelection(event, 1);
         } else if (key == KeyCode.TAB) {
             applySelectedSuggestionLater(event);
-        } else if (key == KeyCode.ENTER) {
-            // Accept the highlighted suggestion, matching Tab, instead of running the half-typed command.
-            applySelectedSuggestionLater(event);
-        } else if (key == KeyCode.ESCAPE) {
+        } else if (key == KeyCode.ENTER || key == KeyCode.ESCAPE) {
             autocompletePopup.hide();
         }
     }

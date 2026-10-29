@@ -338,7 +338,7 @@ Format: `untag INDEX t/EVENT [t/EVENT]...`
   or `Long--Jump`.
   A word may also contain an apostrophe or a decimal point between digits, e.g. `Women's 100m` or `Hammer 7.26kg`.
   Letters include accented and non-English letters, e.g. `Saut-Élan`.
-* Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalisation it was first added with.
+* Events ignore case: `100m` and `100M` are the same event. An event keeps the capitalization it was first added with.
   Spacing and punctuation still count, so `100m`, `100 m`, and `100-m` are different events. Use one spelling for
   each event so that `untag` and `find t/` match it.
   Equivalent accent spellings, such as an accented letter typed as a letter followed by an accent mark, are composed

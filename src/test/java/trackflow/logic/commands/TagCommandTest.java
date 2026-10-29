@@ -48,7 +48,8 @@ public class TagCommandTest {
         TagCommand command = new TagCommand(INDEX_FIRST_PERSON, getTagSet("Long Jump", "100m"));
         Person taggedAthlete = new PersonBuilder(athlete).withTags("friends", "100m", "Long Jump").build();
 
-        String expectedMessage = String.format(TagCommand.MESSAGE_SUCCESS, "100m, Long Jump", athlete.getName());
+        String expectedMessage = String.format(TagCommand.MESSAGE_SUCCESS, "100m, Long Jump",
+                athlete.getName());
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
         expectedModel.setPerson(athlete, taggedAthlete);
 
