@@ -93,7 +93,18 @@ The tests distinguish Java `null` API inputs from the literal text `null`, exerc
 one value is empty or escaped, and verify that restarts and unrelated edits do not decode stored text again.
 The tokenizer tests cover every single-letter escape in both cases, multiple whitespace boundaries, long slash runs,
 URLs, network paths, and ordinary quotes/backslashes. Parser tests check all 120 orders of the five add fields.
+Unicode-boundary regressions cover non-breaking, figure, narrow non-breaking, and em spaces in command words,
+prefixes, escaped text, broad searches, and sort arguments. They also check that whitespace inside addresses and
+remarks survives JSON reload and that unknown or duplicate prefixes still fail without changing saved data.
 Existing `JsonRosterStorageTest` and `MainAppTest` also check null JSON roots/entries and preservation of malformed data.
+
+Name-sort regressions in `SortCommandTest` and `LogicManagerTest` cover repeated spaces, equivalent case/spacing
+keys, ascending and descending order, and subsequent adds/edits. A fresh JSON read verifies that comparison-key
+normalization does not rewrite name text or saved roster order.
+
+Phone-sort regressions use the shared significant-digit rule: bracketed notes are ignored and `(+65)` country codes
+are retained. They cover both directions, numeric notes, formatting, zero-valued and large numbers, add/edit updates,
+and unchanged phone text after JSON reload.
 
 For startup/preferences, strict JSON roots, application-home paths and unavailable file logging, run:
 

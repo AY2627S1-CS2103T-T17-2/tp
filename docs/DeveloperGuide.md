@@ -96,16 +96,12 @@ The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDi
 `AutocompleteEngine`, and each `PersonCard` holds the `Person` it displays. Generic JavaFX root parameters and
 toolkit details are omitted from this partial view.
 
-When restoring the window, `MainWindow` reads the saved size and position from `GuiSettings` and asks the
-stateless `WindowPlacement` utility, through a static call, whether that position is still reachable on a
-connected screen; it keeps no `WindowPlacement` instance. An unreachable position falls back to a size capped to
-the primary screen. On exit, `MainWindow` writes the current bounds back to `GuiSettings`.
-
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T17-2/tp/tree/master/src/main/java/trackflow/ui/MainWindow.java).
 
-`MainWindow` uses the static `WindowPlacement.fit` helper to fit saved outer bounds, including decorations, inside
-the visual bounds of a connected screen. A reachable saved position selects the screen with the largest overlap;
-an unreachable position falls back to the primary screen's center. Both restoration paths cap dimensions and
+`MainWindow` reads the saved window bounds from `GuiSettings` and uses the static `WindowPlacement.fit` helper to
+fit those outer bounds, including decorations, inside the visual bounds of a connected screen. A reachable saved
+position selects the screen with the largest overlap; an unreachable position falls back to the primary screen's
+center. Both restoration paths cap dimensions and
 clamp coordinates. The preferred minimum is 450 by 400 pixels, limited by the selected screen's usable area.
 Normal bounds are remembered in preferences in memory as the window moves or resizes, allowing normal bounds to
 survive maximized, minimized, full-screen and OS quit paths. Preference storage writes them on shutdown.
@@ -296,8 +292,14 @@ command, not a batch. Each field keeps its existing validation rules. The JavaFX
 `TextField` that removes pasted tabs and line breaks before parsing; users should paste commands on one line with
 spaces. Parser-level tests exercise multiline input directly.
 
+`CommandWhitespace` defines syntax separators as characters accepted by `Character.isWhitespace` or
+`Character.isSpaceChar`, including non-breaking, figure, narrow non-breaking, and em spaces. Command-word
+splitting, no-argument validation, index boundaries, broad search keywords, and sort arguments share this rule.
+Only boundary whitespace is stripped; whitespace inside field values retains its existing validation and storage
+behaviour. Zero-width spaces are not separators.
+
 `ArgumentTokenizer` recognizes supported parameter prefixes without considering letter case at the start of the
-arguments or after `Character.isWhitespace` characters, storing them under their canonical prefix.
+arguments or after these syntax separators, storing them under their canonical prefix.
 `ParserUtil.verifyNoUnknownPrefixes` uses the same boundary to reject unsupported parameter-like tokens of the
 reserved single-letter or `addr/` form before values are parsed. For example, unsupported `t/` produces a
 command-specific error. Longer slash-containing words such as `wrong/value` remain text.
@@ -489,17 +491,19 @@ resolve athletes against exactly what the user sees. The comparator is session-o
 while retaining the current predicate. Subsequent roster changes keep that order until another sort is selected.
 Reset is a view command and does not save data; it also succeeds on empty or already-unsorted lists.
 
-Text fields are compared without considering letter case. Phone sorting removes all non-digit characters before
-converting the stored text to an arbitrary-precision numeric value. Stored text is unchanged and large values do
-not overflow. The current key includes digits inside phone notes, matching the current contact comparison; this
-known limitation is described in the UG and remains a separate phone-normalization fix.
+Text fields are compared without considering letter case. Name comparison also collapses repeated ordinary spaces
+in the comparison key without rewriting the displayed or saved name. Phone sorting converts
+`Phone.getSignificantDigits()` to an arbitrary-precision numeric value. The shared key includes a bracketed country
+code such as `(+65)` and excludes other bracketed notes, including digits in `(5)` or `(Office 9)`. Displayed and
+saved text is unchanged, and large numeric values do not overflow. Duplicate identity still uses separate
+note-digit handling; its remaining limitation is identified in the UG.
 Age categories use the competition order
 `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
 
 ### Future features [Future]
 
 Undo/redo, archiving, guardian links, relay squads, and event grouping are not
-implemented in v1.4. Their user stories record possible future scope; they do not describe existing classes or
+implemented in v1.5. Their user stories record possible future scope; they do not describe existing classes or
 commit to a release version.
 
 --------------------------------------------------------------------------------------------------------------------
@@ -526,7 +530,7 @@ commit to a release version.
 
 **Value proposition**: TrackFlow helps a coach maintain and retrieve an organized athlete roster through short keyboard commands, reducing the effort of navigating forms and keeping contact information available between training sessions.
 
-**v1.4 scope**: The release supports adding, listing, editing, remarking, searching, filtering, sorting, tagging and
+**v1.5 scope**: The release supports adding, listing, editing, remarking, searching, filtering, sorting, tagging and
 untagging events, deleting, clearing, built-in help, and exit. New athletes require a name, age category, phone
 number, email address, and nonblank address. Remarks can be added or removed separately. Roster changes are saved locally before being published
 to the live model; view-only commands do not save roster data.
@@ -565,7 +569,7 @@ overwritten.
 
 ### User stories
 
-Priorities: `* * *` = high, `* *` = medium, `*` = low. **Implemented** describes v1.4 behavior;
+Priorities: `* * *` = high, `* *` = medium, `*` = low. **Implemented** describes v1.5 behavior;
 **[Future]** records unimplemented scope without committing it to a release; **Excluded** records an idea outside
 this product. Priority does not imply implementation status.
 
@@ -604,7 +608,7 @@ this product. Priority does not imply implementation status.
 | US34 | `* *` | [Future] | coach | view an athlete's relay-squad and event-group memberships | review the athlete's assignments before making changes |
 | US35 | `* *` | [Future] | coach | correct an inaccurate status log entry | keep the athlete's recorded history reliable |
 | US36 | `*` | [Future] | coach | import and export roster records in bulk | transfer my own records without entering each one manually |
-| US37 | `*` | [Future] | coach | store names with characters beyond v1.4's supported set | preserve athletes' preferred name spellings |
+| US37 | `*` | [Future] | coach | store names with characters beyond v1.5's supported set | preserve athletes' preferred name spellings |
 | US38 | `*` | [Future] | coach | store multiple phone numbers and phone extensions | retain alternative ways of contacting an athlete |
 | US39 | `*` | [Future] | coach | check whether an email address can receive mail | distinguish a structurally valid address from a reachable one |
 | US40 | `*` | Implemented | keyboard-oriented coach | close TrackFlow with a text command | finish a session from the command box |
@@ -831,7 +835,7 @@ These are product requirements and acceptance targets, not claims about the curr
 | Event specialization | An athletics discipline, such as sprinting or long jump, associated with an athlete through the `tag` and `untag` commands. |
 | Guardian | A parent or other responsible adult whose future contact record may be linked to one or more athletes. |
 | Local persistence | Automatically saving roster changes on the coach's computer and loading them in a later application session. |
-| Implemented | A feature available in the current v1.4 code. Future features are identified separately. |
+| Implemented | A feature available in the current v1.5 code. Future features are identified separately. |
 | Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone comparisons ignore permitted formatting characters and use the digits. Display formatting may be retained. |
 | Participation log | A future record of an athlete's involvement in training or competition. |
 | Relay squad / event group | A future grouping of athletes for a relay team or a particular athletics event. |
@@ -957,6 +961,35 @@ add n/Faye Teo a/Under 20 p/96666666 e/faye@example.com addr/60 Stadium Road
 1. Try `sort`, `sort height`, `sort name upwards`, and `sort name asc extra`. Expect actionable errors and no display
    change.
 1. Restart TrackFlow. Expect the remaining athletes in saved roster order; the deletion persists but sorting does not.
+
+For a separate name-spacing regression, use another disposable home folder and enter these commands one at a time:
+
+```text
+clear
+add n/Lee  Bob a/Open p/911 e/bob@example.com addr/Home
+add n/Lee Ann a/Open p/922 e/ann@example.com addr/Home
+sort name
+```
+
+Expect Lee Ann before Lee Bob, even though Bob's stored name has two spaces. Run `sort name desc` and expect the
+reverse order. Both names must retain their original spacing on screen and in the saved file. Restart: saved roster
+order is Bob then Ann, and Bob's two spaces remain intact. `SortCommandTest` and `LogicManagerTest` also cover
+equivalent name keys, both directions, subsequent adds/edits, and unchanged text after a fresh storage read.
+
+For a separate phone-note regression, use another disposable home folder and enter these commands one at a time:
+
+```text
+clear
+add n/Aaa Tan a/Open p/200 (5) e/aaa@example.com addr/Home
+add n/Bbb Tan a/Open p/300 e/bbb@example.com addr/Home
+add n/Ccc Tan a/Open p/(+65) 200 e/ccc@example.com addr/Home
+sort phone
+```
+
+Expect Aaa, Bbb, Ccc: the note digit is ignored, while the country code contributes to the numeric key. Run
+`sort phone desc` and expect Ccc, Bbb, Aaa. Phone text must remain unchanged. Restart, sort again, and verify both
+orders. `SortCommandTest` and `LogicManagerTest` also cover formatted values, zero-valued numbers with numeric notes,
+large numbers, subsequent updates, and exact phone-text preservation after a fresh storage read.
 
 ### Command autocomplete
 
@@ -1114,8 +1147,9 @@ tag 1 t/100m
 ### Duplicate identity and complete equality
 
 Duplicate checks use normalized name plus **either** matching phone or matching email, regardless of age category.
-Name normalization ignores case and repeated spaces; email matching ignores case. Complete equality additionally
-compares every stored value, including category, address, remark, and events. These are separate contracts.
+Name normalization ignores case and repeated spaces; email matching ignores case. Complete equality applies each
+field's equality rules across every field, including category, address, remark, and events. Phone formatting and
+event-name case do not by themselves make records unequal. These are separate contracts.
 
 1. Start with only Avery: run `clear`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`. Attempt to add `AVERY   TAN` with the same phone and a different
    email and category. Expect a duplicate error, with no saved changes. Repeat with a different phone and matching

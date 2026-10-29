@@ -50,6 +50,24 @@ public class TrackFlowParserTest {
     private final TrackFlowParser parser = new TrackFlowParser();
 
     @Test
+    public void parseCommand_unicodeSeparators_matchOrdinarySpaces() throws Exception {
+        for (String separator : List.of("\t", "\r\n", "\u00a0", "\u1680", "\u2003", "\u2007",
+                "\u2028", "\u2029", "\u202f", "\u205f", "\u3000")) {
+            assertEquals(parser.parseCommand("find Avery Ben"),
+                    parser.parseCommand(separator + "find" + separator + "Avery" + separator + "Ben" + separator));
+            assertEquals(parser.parseCommand("sort name desc"),
+                    parser.parseCommand(separator + "sort" + separator + "name" + separator + "desc" + separator));
+            assertEquals(parser.parseCommand("delete 1"), parser.parseCommand("delete" + separator + "1" + separator));
+            for (String commandWord : List.of("list", "clear", "help", "exit")) {
+                assertEquals(parser.parseCommand(commandWord).getClass(),
+                        parser.parseCommand(separator + commandWord + separator).getClass());
+                assertThrows(ParseException.class, () -> parser.parseCommand(commandWord + separator + "extra"));
+            }
+            assertThrows(ParseException.class, MESSAGE_EMPTY_COMMAND, () -> parser.parseCommand(separator));
+        }
+    }
+
+    @Test
     public void parseCommand_add() throws Exception {
         Person person = new PersonBuilder().withAddress("123 Main Street").withRemark("").withTags().build();
         String addCommandText = PersonUtil.getAddCommand(person);
@@ -79,9 +97,8 @@ public class TrackFlowParserTest {
                 .withAgeCategory("Open").withRemark("").withTags().build());
         assertEquals(120, permutations.size());
         for (List<String> fields : permutations) {
-            for (String separator : List.of(" ", "\t", "\r\n", "\u2003")) {
-                // Keep the command-word separator ASCII; Unicode separators here are parameter boundaries.
-                String input = "AdD " + String.join(separator, fields);
+            for (String separator : List.of(" ", "\t", "\r\n", "\u2003", "\u00a0", "\u2007", "\u202f")) {
+                String input = "AdD" + separator + String.join(separator, fields);
                 assertEquals(expected, parser.parseCommand(input), input);
             }
         }

@@ -4,7 +4,7 @@
 
 # TrackFlow
 
-**TrackFlow** is a keyboard-driven roster and contact manager for **track and field head and assistant coaches**. TrackFlow v1.4 stores athlete names, age categories, contact details, addresses, and remarks locally. Coaches can add, edit, search, filter, sort, tag, and delete athletes using short text commands.
+**TrackFlow** is a keyboard-driven roster and contact manager for **track and field head and assistant coaches**. TrackFlow v1.5 stores athlete names, age categories, contact details, addresses, and remarks locally. Coaches can add, edit, search, filter, sort, tag, and delete athletes using short text commands.
 
 While it has a Graphical User Interface (GUI), most user interactions occur using a Command Line Interface (CLI). It is strictly optimized for touch-typist coaches working at a desk between practices and meets who strongly prefer rapid, keyboard-driven text entry over navigating nested GUI drop-downs and bloated sports-management web platforms.
 

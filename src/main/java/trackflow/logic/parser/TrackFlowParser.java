@@ -38,7 +38,7 @@ public class TrackFlowParser {
      * The arguments are passed to one command parser; this does not execute a batch of commands.
      */
     private static final Pattern BASIC_COMMAND_FORMAT =
-            Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)", Pattern.DOTALL);
+            Pattern.compile("(?<commandWord>[^" + CommandWhitespace.CHARACTERS + "]+)(?<arguments>.*)", Pattern.DOTALL);
     private static final Logger logger = LogsCenter.getLogger(TrackFlowParser.class);
 
     /**
@@ -49,7 +49,7 @@ public class TrackFlowParser {
      * @throws ParseException if the user input does not conform to the expected format.
      */
     public Command parseCommand(String userInput) throws ParseException {
-        final Matcher matcher = BASIC_COMMAND_FORMAT.matcher(userInput.trim());
+        final Matcher matcher = BASIC_COMMAND_FORMAT.matcher(CommandWhitespace.strip(userInput));
         if (!matcher.matches()) {
             throw new ParseException(MESSAGE_EMPTY_COMMAND);
         }
@@ -87,7 +87,7 @@ public class TrackFlowParser {
 
     private static Command parseNoArguments(String arguments, Command command, String messageUsage)
             throws ParseException {
-        if (!arguments.trim().isEmpty()) {
+        if (!CommandWhitespace.strip(arguments).isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, messageUsage));
         }
         return command;

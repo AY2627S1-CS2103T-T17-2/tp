@@ -34,7 +34,7 @@ public class ParserUtil {
      * Uses the same whitespace boundary as {@link ArgumentTokenizer}; an extra slash marks literal text.
      */
     private static final Pattern PARAMETER_PREFIX_PATTERN =
-            Pattern.compile("(?<!\\P{javaWhitespace})((?i:addr/)|[A-Za-z]/)(?!/)");
+            Pattern.compile(CommandWhitespace.TOKEN_BOUNDARY_REGEX + "((?i:addr/)|[A-Za-z]/)(?!/)");
 
     /**
      * Parses an age category using its canonical display form.
@@ -56,7 +56,7 @@ public class ParserUtil {
      */
     public static Index parseIndex(String oneBasedIndex) throws ParseException {
         requireNonNull(oneBasedIndex);
-        String trimmedIndex = oneBasedIndex.strip();
+        String trimmedIndex = CommandWhitespace.strip(oneBasedIndex);
         int boundedIndex = 0;
         for (int index = 0; index < trimmedIndex.length(); index++) {
             char character = trimmedIndex.charAt(index);

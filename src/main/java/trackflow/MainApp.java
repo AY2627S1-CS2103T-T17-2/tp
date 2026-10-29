@@ -34,7 +34,7 @@ import trackflow.ui.UiManager;
  */
 public class MainApp extends Application {
 
-    public static final String VERSION = "v1.4";
+    public static final String VERSION = "v1.5";
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
     private static final Path USER_PREFS_FILE_PATH = ApplicationHome.resolve("preferences.json");

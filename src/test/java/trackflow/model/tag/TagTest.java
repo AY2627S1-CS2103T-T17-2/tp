@@ -114,6 +114,25 @@ public class TagTest {
     }
 
     @Test
+    public void constructor_decomposedAccent_storedAsSingleLetter() {
+        String decomposedName = "Élan"; // E followed by a combining acute accent
+        assertTrue(Tag.isValidTagName(decomposedName));
+        assertEquals("Élan", new Tag(decomposedName).tagName);
+        assertEquals("Élan", Tag.fromStoredName(decomposedName).tagName);
+        assertEquals(new Tag("Élan"), new Tag(decomposedName));
+    }
+
+    @Test
+    public void equals_lettersWithSeveralLowerCaseForms_returnsTrue() {
+        // the Greek capital sigma has two lower-case forms, σ and the word-final ς
+        Tag capitalSigma = new Tag("Σ");
+        for (String name : new String[] {"σ", "ς"}) {
+            assertEquals(capitalSigma, new Tag(name));
+            assertEquals(capitalSigma.hashCode(), new Tag(name).hashCode());
+        }
+    }
+
+    @Test
     public void toString_keepsOriginalCase() {
         assertEquals("[Long Jump]", new Tag("Long Jump").toString());
     }

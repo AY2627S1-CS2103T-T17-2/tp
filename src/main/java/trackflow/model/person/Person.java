@@ -93,7 +93,7 @@ public class Person {
      * Returns true if the normalized name and either phone or email match, or this is the same object.
      * Name comparison ignores case and repeated whitespace; contact comparison follows
      * {@link #hasSameContactDetails(Person)}. Age category and other stored details do not affect duplicate identity.
-     * Returns false for null. Use {@link #equals(Object)} to compare all stored values exactly.
+     * Returns false for null. Use {@link #equals(Object)} to compare all fields using their respective equality rules.
      */
     public boolean isSamePerson(Person otherPerson) {
         if (otherPerson == this) {
@@ -120,8 +120,9 @@ public class Person {
     }
 
     /**
-     * Returns true if all stored values match exactly, including name, category, contacts, address, remark, and tags.
-     * Unlike {@link #isSamePerson(Person)}, this comparison does not normalize names or email addresses.
+     * Returns true when every field compares equal using its own equality rules.
+     * Names and email addresses are case-sensitive. Phone formatting and event-name case are handled by
+     * {@link Phone#equals(Object)} and {@link Tag#equals(Object)}, respectively.
      */
     @Override
     public boolean equals(Object other) {
