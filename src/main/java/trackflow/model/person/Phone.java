@@ -10,9 +10,11 @@ import static trackflow.commons.util.AppUtil.checkArgument;
 public class Phone {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Phone numbers must contain at least 3 digits. They may also include spaces and the characters + - ( ). "
-                    + "A bracketed country code such as (+65) counts as part of the number; other bracketed text "
-                    + "such as (HP) is treated as a note and is ignored.";
+            "Phone numbers must contain at least 3 digits, written as digit groups separated by single spaces or "
+                    + "hyphens (for example, 9123 4567 or 9123-4567). They may start with a country code such as "
+                    + "+65 or (+65), and may include a bracketed note such as (HP). A bracketed country code counts "
+                    + "as part of the number; any other bracketed text is treated as a note and is ignored. Brackets "
+                    + "must be balanced and non-empty.";
 
     /** Minimum number of significant digits a phone number must contain. */
     private static final int MINIMUM_DIGITS = 3;
@@ -23,8 +25,24 @@ public class Phone {
      */
     private static final String BRACKETED_NOTE_REGEX = "\\([^+)]*\\)";
 
-    /** The characters allowed once bracketed notes are set aside: digits, spaces, and + - ( ). */
-    private static final String ALLOWED_CHARACTERS_REGEX = "[0-9 +\\-()]*";
+    /** A run of digits, optionally split into groups by single hyphens: "9123" or "9123-4567". */
+    private static final String DIGIT_GROUP_REGEX = "\\d+(?:-\\d+)*";
+
+    /** A bracketed country code such as "(+65)". */
+    private static final String COUNTRY_CODE_REGEX = "\\(\\+\\d+\\)";
+
+    /** A non-empty bracketed note with balanced brackets, such as "(HP)" or "(65)". */
+    private static final String NOTE_REGEX = "\\([^+()]+\\)";
+
+    /**
+     * A valid phone number: a sequence of digit groups, country codes and notes, each optionally separated by a
+     * single space, where only the first digit group may carry a leading "+". This rejects dangling or empty
+     * brackets, stray or repeated hyphens, and a "+" placed anywhere other than the start, while still accepting
+     * notes and country codes written directly against the digits (such as "(+65)91234567").
+     */
+    private static final String VALIDATION_REGEX =
+            "(?:\\+?" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + ")"
+                    + "(?: ?(?:" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + "))*";
 
     public final String value;
 
@@ -40,14 +58,16 @@ public class Phone {
     }
 
     /**
-     * Returns true if a given string is a valid phone number: setting aside bracketed notes such as "(HP)",
-     * it contains only digits, spaces, and the characters + - ( ), and has at least three significant digits.
-     * A bracketed country code such as "(+65)" is kept, so its digits count towards the minimum.
+     * Returns true if a given string is a valid phone number: a space-separated sequence of digit groups,
+     * country codes and notes (see {@link #VALIDATION_REGEX}) with at least three significant digits. Setting
+     * aside bracketed notes such as "(HP)", a bracketed country code such as "(+65)" is kept, so its digits
+     * count towards the minimum.
      */
     public static boolean isValidPhone(String test) {
         requireNonNull(test);
-        String withoutNotes = test.replaceAll(BRACKETED_NOTE_REGEX, "");
-        return withoutNotes.matches(ALLOWED_CHARACTERS_REGEX) && countDigits(withoutNotes) >= MINIMUM_DIGITS;
+        String normalised = test.trim().replaceAll("\\s+", " ");
+        return normalised.matches(VALIDATION_REGEX)
+                && countDigits(normalised.replaceAll(BRACKETED_NOTE_REGEX, "")) >= MINIMUM_DIGITS;
     }
 
     /**
