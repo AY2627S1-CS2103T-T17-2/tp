@@ -492,8 +492,8 @@ Text fields are compared without considering letter case. Name comparison also c
 in the comparison key without rewriting the displayed or saved name. Phone sorting converts
 `Phone.getSignificantDigits()` to an arbitrary-precision numeric value. The shared key includes a bracketed country
 code such as `(+65)` and excludes other bracketed notes, including digits in `(5)` or `(Office 9)`. Displayed and
-saved text is unchanged, and large numeric values do not overflow. Duplicate identity still uses separate
-note-digit handling; its remaining limitation is identified in the UG.
+saved text is unchanged, and large numeric values do not overflow. Duplicate identity uses the same significant
+digits key, so note digits are ignored there too.
 Age categories use the competition order
 `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
 
@@ -1142,7 +1142,8 @@ tag 1 t/100m
 
 ### Duplicate identity and complete equality
 
-Duplicate checks use normalized name plus **either** matching phone or matching email, regardless of age category.
+Duplicate checks use normalized name plus **either** matching significant phone digits or matching email, regardless
+of age category. Bracketed notes are ignored; a country code such as `(+65)` counts as part of the phone number.
 Name normalization ignores case and repeated spaces; email matching ignores case. Complete equality applies each
 field's equality rules across every field, including category, address, remark, and events. Phone formatting and
 event-name case do not by themselves make records unequal. These are separate contracts.

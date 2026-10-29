@@ -39,7 +39,7 @@ public class DuplicatePersistenceTest {
                 new JsonUserPrefsStorage(temporaryFolder.resolve("preferences.json")));
         Logic initialLogic = new LogicManager(new ModelManager(), storage);
         initialLogic.execute("add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home");
-        initialLogic.execute("add n/Jordan Lee a/Open p/92345678 e/jordan@example.com addr/School");
+        initialLogic.execute("add n/Jordan Lee a/Open p/(+65) 92345678 e/jordan@example.com addr/School");
 
         Model reloaded = new ModelManager(rosterStorage.readRoster().orElseThrow(), new UserPrefs());
         Logic logic = new LogicManager(reloaded, storage);
@@ -50,10 +50,16 @@ public class DuplicatePersistenceTest {
         Map<String, String> duplicateCommands = Map.of(
                 "add n/AVERY   TAN a/Under 16 p/91234567 e/other@example.com addr/Elsewhere",
                 String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "AVERY   TAN"),
+                "add n/Avery Tan a/Open p/91234567 (Office 2) e/other@example.com addr/Elsewhere",
+                String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"),
                 "add n/avery tan a/Open p/93456789 e/AVERY@example.com addr/Elsewhere",
                 String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "avery tan"),
                 "edit 1 n/AVERY   TAN e/AVERY@example.com",
-                EditCommand.MESSAGE_DUPLICATE_PERSON);
+                EditCommand.MESSAGE_DUPLICATE_PERSON,
+                "edit 1 n/Avery Tan p/91234567 (Office 2)",
+                EditCommand.MESSAGE_DUPLICATE_PERSON,
+                "add n/Jordan Lee a/Open p/6592345678 (Office 2) e/other@example.com addr/Elsewhere",
+                String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Jordan Lee"));
         for (var entry : duplicateCommands.entrySet()) {
             assertThrows(CommandException.class, entry.getValue(), () -> logic.execute(entry.getKey()));
             assertEquals(originalDisplay, reloaded.getFilteredPersonList());

@@ -191,7 +191,7 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   note and ignored, whether it is letters like `(HP)` or digits like `(5)` (for example, `+65 9123 4567`,
   `(+65) 9123 4567`, or `9123 4567 (HP)`).
 * Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
-* Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
+* Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Phone comparisons ignore bracketed notes (including digits), but count a bracketed country code such as `(+65)`. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` to supply the required nonblank address.
 * Add does not accept events or remarks. `edit` updates athlete details and addresses, `tag` and `untag` update track events, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
@@ -524,9 +524,6 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
 * **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
   JDK 25 FX runtime on macOS and verify the packaged JAR on your machine. See the
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
-* **Phone duplicate checks:** validation and phone sorting ignore bracketed notes, but digits inside notes can still
-  affect duplicate checks. Use notes without digits when adding or editing athletes until this separate identity
-  issue is fixed. Write a bracketed country code with `+`, such as `(+65)`.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do
   not coordinate edits and a later save can overwrite changes from the other instance.
 

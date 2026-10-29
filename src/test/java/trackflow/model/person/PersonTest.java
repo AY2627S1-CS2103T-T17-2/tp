@@ -76,6 +76,16 @@ public class PersonTest {
 
         // different phone and email -> returns false
         assertFalse(ALICE.hasSameContactDetails(BOB));
+
+        Person local = new PersonBuilder(ALICE).withPhone("81234567").withEmail("local@example.com").build();
+        Person withNote = new PersonBuilder(local).withPhone("81234567 (Office 2)")
+                .withEmail("note@example.com").build();
+        Person withCountryCode = new PersonBuilder(local).withPhone("(+65) 81234567")
+                .withEmail("country@example.com").build();
+        assertTrue(local.isSamePerson(withNote));
+        assertFalse(local.isSamePerson(withCountryCode));
+        assertTrue(withCountryCode.isSamePerson(new PersonBuilder(withCountryCode)
+                .withPhone("6581234567 (Office 2)").withEmail("other@example.com").build()));
     }
 
     @Test
