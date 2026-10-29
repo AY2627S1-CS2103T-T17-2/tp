@@ -14,7 +14,7 @@ public class ListAthleteCommandParser implements Parser<ListAthleteCommand> {
      * @throws ParseException If the input contains arguments.
      */
     public ListAthleteCommand parse(String arguments) throws ParseException {
-        if (!arguments.trim().isEmpty()) {
+        if (!CommandWhitespace.strip(arguments).isEmpty()) {
             throw new ParseException(ListAthleteCommand.MESSAGE_USAGE);
         }
         return new ListAthleteCommand();

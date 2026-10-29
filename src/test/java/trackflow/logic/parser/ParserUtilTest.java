@@ -72,6 +72,9 @@ public class ParserUtilTest {
         // Leading and trailing whitespaces
         assertEquals(INDEX_FIRST_PERSON, ParserUtil.parseIndex("  1  "));
         assertEquals(INDEX_FIRST_PERSON, ParserUtil.parseIndex("0001"));
+        for (String separator : List.of("\u00a0", "\u2003", "\u2007", "\u202f", "\u3000")) {
+            assertEquals(INDEX_FIRST_PERSON, ParserUtil.parseIndex(separator + "0001" + separator));
+        }
     }
 
     @Test
@@ -108,7 +111,7 @@ public class ParserUtilTest {
 
     @Test
     public void verifyNoUnknownPrefixes_realAndEscapedTokens_useSameBoundaries() throws Exception {
-        for (String boundary : List.of("", " ", "\t", "\r\n", "\f", "\u2003")) {
+        for (String boundary : List.of("", " ", "\t", "\r\n", "\f", "\u2003", "\u00a0", "\u2007", "\u202f")) {
             for (char letter = 'a'; letter <= 'z'; letter++) {
                 String token = String.valueOf(letter);
                 String unknown = boundary + token + "/value";
@@ -137,7 +140,7 @@ public class ParserUtilTest {
     public void verifyNoUnknownPrefixes_urlsPathsAndPunctuation_areOrdinaryText() throws Exception {
         for (String text : List.of("https://example.com/n/value?p//other", "file:///home/coach",
                 "x://host/path", "//server/share", "C:\\Training", "Mon/Tue", "wrong/value",
-                "(x/value)", "\"x/value\"", "'x/value'", "\\x/value", "\u00a0x/value", "\u200bx/value")) {
+                "(x/value)", "\"x/value\"", "'x/value'", "\\x/value", "\u200bx/value")) {
             ParserUtil.verifyNoUnknownPrefixes(text, "usage");
         }
         // Quotes are ordinary characters, so whitespace inside them still introduces a parameter.

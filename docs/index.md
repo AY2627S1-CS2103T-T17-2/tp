@@ -12,7 +12,7 @@
 
 _The running application with sample athletes. See the [User Guide](UserGuide.md) to get started._
 
-**TrackFlow v1.4** is a lightning-fast, keyboard-driven roster and contact manager designed specifically for **track and field head and assistant coaches**. While it has a GUI, most of the user interactions happen using a CLI (Command Line Interface).
+**TrackFlow v1.5** is a lightning-fast, keyboard-driven roster and contact manager designed specifically for **track and field head and assistant coaches**. While it has a GUI, most of the user interactions happen using a CLI (Command Line Interface).
 
 * If you are interested in using TrackFlow, head over to the [_Quick Start_ section of the **User Guide**](UserGuide.html#quick-start).
 * If you are interested in developing TrackFlow, the [**Developer Guide**](DeveloperGuide.html) is a good place to start.

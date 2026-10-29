@@ -6,7 +6,7 @@
 
 # TrackFlow User Guide
 
-TrackFlow v1.4 is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
+TrackFlow v1.5 is a **desktop application for managing a track-and-field athlete roster**. It is optimized for coaches who
 prefer typing commands through a Command Line Interface (CLI), while retaining the benefits of a Graphical User
 Interface (GUI).
 
@@ -74,8 +74,10 @@ Interface (GUI).
 
 * The `list`, `help`, `clear`, and `exit` commands do not accept parameters.
 
-* Leading and trailing ordinary spaces around a command are ignored. Use ordinary spaces between the command
-  word and its arguments; pasted Unicode spaces can be treated differently. See [Known issues](#known-issues).
+* Leading and trailing spaces around a command or parameter value are ignored. Pasted Unicode spaces, including
+  non-breaking and em spaces, are accepted between the command word and parameters, before prefixes, and between
+  `sort` arguments or broad `find` keywords. Spaces inside field values are preserved and follow that field's rules.
+  Invisible zero-width characters are not separators.
 
 * Enter one command per submission, using spaces to separate its word and parameters. The command box is a
   single-line field: pasted tabs and line breaks can be removed, joining adjacent text. Replace them with spaces
@@ -378,11 +380,13 @@ Format: `sort FIELD [ORDER]`
 
 Available fields:
 
-* `name` sorts names alphabetically without considering letter case.
+* `name` sorts names alphabetically without considering letter case or repeated ordinary spaces. For example,
+  `Lee Ann` sorts before `Lee  Bob` (two spaces). Displayed and saved name text is unchanged; names differing only
+  in case or repeated spaces compare equally for sorting.
 * `age` sorts competition categories in this order: `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
-* `phone` sorts phone numbers numerically by all digits in the stored text, ignoring non-digit characters.
-  Sorting keeps the displayed and saved phone text unchanged. Digits inside notes currently affect ordering;
-  see [Known issues](#known-issues).
+* `phone` sorts phone numbers numerically by their significant digits. Formatting and bracketed notes such as
+  `(HP)` or `(5)` are ignored, while a bracketed country code such as `(+65)` counts as part of the number.
+  For example, `200 (5)` sorts before `300`, and `(+65) 200` sorts after both. Displayed and saved phone text is unchanged.
 * `email` sorts email addresses alphabetically without considering letter case.
 * `address` sorts addresses alphabetically without considering letter case. Empty addresses appear first in ascending
   order and last in descending order.
@@ -507,11 +511,9 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
 * **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
   JDK 25 FX runtime on macOS and verify the packaged JAR on your machine. See the
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
-* **Phone notes:** a digit inside a bracketed note such as `(5)` is ignored when validating a phone number, but it
-  can still change duplicate checks and phone sorting. Use notes without digits, and keep the number and any
-  `(+65)` country code outside notes.
-* **Pasted whitespace:** use ordinary spaces at command boundaries. Some Unicode space characters are not handled
-  consistently by the command parser.
+* **Phone duplicate checks:** validation and phone sorting ignore bracketed notes, but digits inside notes can still
+  affect duplicate checks. Use notes without digits when adding or editing athletes until this separate identity
+  issue is fixed. Write a bracketed country code with `+`, such as `(+65)`.
 * **Long stored event names:** a legacy event label may be clipped in a narrow window. The complete value remains
   in `data/trackflow.json`; close the app and inspect a backup copy when you need the exact name for `untag`.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do

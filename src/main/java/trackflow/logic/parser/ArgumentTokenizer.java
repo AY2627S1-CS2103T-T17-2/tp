@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class ArgumentTokenizer {
 
     private static final Pattern ESCAPED_PREFIX_PATTERN =
-            Pattern.compile("(?<!\\P{javaWhitespace})((?i:addr)|[A-Za-z])/(/+)");
+            Pattern.compile(CommandWhitespace.TOKEN_BOUNDARY_REGEX + "((?i:addr)|[A-Za-z])/(/+)");
 
     /**
      * Tokenizes an arguments string and returns an {@code ArgumentMultimap} object that maps prefixes to their
@@ -68,7 +68,7 @@ public class ArgumentTokenizer {
     /**
      * Returns the index of the first occurrence of {@code prefix} in
      * {@code argsString} starting from index {@code fromIndex}. An occurrence
-     * is valid at the beginning of the string or after whitespace, ignoring case.
+     * is valid at the beginning of the string or after Java whitespace or a Unicode space character, ignoring case.
      * A slash-terminated prefix followed by another slash is literal text, not a delimiter.
      * Returns -1 if no such occurrence can be found.
      *
@@ -81,7 +81,7 @@ public class ArgumentTokenizer {
     private static int findPrefixPosition(String argsString, String prefix, int fromIndex) {
         int latestStart = argsString.length() - prefix.length();
         for (int index = Math.max(0, fromIndex); index <= latestStart; index++) {
-            boolean isAtBoundary = index == 0 || Character.isWhitespace(argsString.charAt(index - 1));
+            boolean isAtBoundary = index == 0 || CommandWhitespace.isWhitespace(argsString.charAt(index - 1));
             int prefixEnd = index + prefix.length();
             boolean isEscaped = prefix.endsWith("/") && prefixEnd < argsString.length()
                     && argsString.charAt(prefixEnd) == '/';
@@ -139,7 +139,7 @@ public class ArgumentTokenizer {
         int valueStartPos = currentPrefixPosition.getStartPosition() + prefix.getPrefix().length();
         String value = argsString.substring(valueStartPos, nextPrefixPosition.getStartPosition());
 
-        return ESCAPED_PREFIX_PATTERN.matcher(value.strip()).replaceAll("$1$2");
+        return ESCAPED_PREFIX_PATTERN.matcher(CommandWhitespace.strip(value)).replaceAll("$1$2");
     }
 
     /**

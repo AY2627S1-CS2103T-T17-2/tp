@@ -83,7 +83,7 @@ public class ArgumentTokenizerTest {
 
     @Test
     public void tokenize_prefixAtStartOrAfterWhitespace_recognized() {
-        for (String separator : new String[] {"", " ", "\t", "\r\n", "\u2003"}) {
+        for (String separator : new String[] {"", " ", "\t", "\r\n", "\u2003", "\u00a0", "\u2007", "\u202f"}) {
             ArgumentMultimap arguments = ArgumentTokenizer.tokenize(separator + "P/123", pSlash);
             assertPreambleEmpty(arguments);
             assertArgumentPresent(arguments, pSlash, "123");
@@ -125,7 +125,8 @@ public class ArgumentTokenizerTest {
 
     @Test
     public void tokenize_blankArguments_hasNoNullOrPhantomValues() {
-        for (String input : List.of("", " ", "\t", "\r\n", "\f", "\u2003", " \t\u2003\n")) {
+        for (String input : List.of("", " ", "\t", "\r\n", "\f", "\u2003", "\u00a0", "\u2007", "\u202f",
+                " \t\u2003\n")) {
             ArgumentMultimap arguments = ArgumentTokenizer.tokenize(input, pSlash);
             assertPreambleEmpty(arguments);
             assertArgumentAbsent(arguments, pSlash);
@@ -148,7 +149,7 @@ public class ArgumentTokenizerTest {
     }
 
     private void assertEscapeBoundaries(String token) {
-        for (String boundary : List.of(" ", "\t", "\n", "\r\n", "\f", "\u2003")) {
+        for (String boundary : List.of(" ", "\t", "\n", "\r\n", "\f", "\u2003", "\u00a0", "\u2007", "\u202f")) {
             for (int slashCount = 2; slashCount <= 5; slashCount++) {
                 String entered = token + "/".repeat(slashCount) + "literal";
                 String decoded = token + "/".repeat(slashCount - 1) + "literal";
@@ -165,7 +166,7 @@ public class ArgumentTokenizerTest {
         for (String text : List.of("http://host/?n/value&p//other#addr//here",
                 "file:///home/coach", "mailto:coach@example.com", "///server/share",
                 "AA//B", "addrx//annex", "0A//B", "_A//B", "(A//B)", "\"A//B\"", "'A//B'",
-                "\\A//B", "😀A//B", "\u00a0A//B", "\u200bA//B")) {
+                "\\A//B", "😀A//B", "\u200bA//B")) {
             assertArgumentPresent(ArgumentTokenizer.tokenize("p/ " + text, pSlash), pSlash, text);
         }
     }

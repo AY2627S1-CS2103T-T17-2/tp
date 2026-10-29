@@ -86,6 +86,32 @@ public class SortCommandTest {
     }
 
     @Test
+    public void execute_nameWithRepeatedSpaces_sortsWithoutChangingNames() {
+        Person leeAnn = new PersonBuilder(AMY).withName("Lee Ann").build();
+        Person leeBob = new PersonBuilder(MIA).withName("Lee  Bob").build();
+        Person leeAmy = new PersonBuilder(ZOE).withName("lee   Amy").build();
+        model = new ModelManager(new AthleteRosterBuilder().withPerson(leeBob)
+                .withPerson(leeAnn).withPerson(leeAmy).build(), new UserPrefs());
+
+        assertSortSuccess(NAME, ASCENDING, List.of(leeAmy, leeAnn, leeBob));
+        assertSortSuccess(NAME, DESCENDING, List.of(leeBob, leeAnn, leeAmy));
+        assertEquals(List.of("Lee  Bob", "Lee Ann", "lee   Amy"), model.getRoster().getPersonList().stream()
+                .map(person -> person.getName().fullName).toList());
+    }
+
+    @Test
+    public void execute_namesDifferingOnlyInCaseAndSpacing_compareAsEqual() {
+        Person leeAnn = new PersonBuilder(AMY).withName("Lee Ann").build();
+        Person equivalentName = new PersonBuilder(MIA).withName("LEE   Ann").build();
+        model = new ModelManager(new AthleteRosterBuilder().withPerson(leeAnn)
+                .withPerson(equivalentName).build(), new UserPrefs());
+
+        new SortCommand(NAME, ASCENDING).execute(model);
+
+        assertEquals(0, model.getPersonListComparator().compare(leeAnn, equivalentName));
+    }
+
+    @Test
     public void execute_ageAscending_sortsByCompetitionCategory() {
         useModelWithAllAgeCategories();
         assertSortSuccess(AGE, ASCENDING, List.of(AMY, IAN, ZOE, UMA, MIA));
@@ -109,7 +135,7 @@ public class SortCommandTest {
 
     @Test
     public void execute_formattedPhones_sortsDigitsWithoutChangingStoredValues() {
-        for (String phone : List.of("1 000", "+1-000", "(1) 000", "1000 (HP)", "000 1000")) {
+        for (String phone : List.of("1 000", "+1-000", "(+1) 000", "1000 (HP)", "000 1000")) {
             Person formattedAmy = new PersonBuilder(AMY).withPhone(phone).build();
             Person longPhoneMia = new PersonBuilder(MIA).withPhone("9".repeat(100)).build();
             model = new ModelManager(new AthleteRosterBuilder().withPerson(longPhoneMia)
@@ -119,6 +145,32 @@ public class SortCommandTest {
             assertSortSuccess(PHONE, DESCENDING, List.of(longPhoneMia, formattedAmy, ZOE));
             assertEquals(phone, formattedAmy.getPhone().value);
         }
+    }
+
+    @Test
+    public void execute_phoneNotes_sortsSignificantDigitsAndKeepsCountryCode() {
+        for (String phone : List.of("200 (5)", "2 00 (Office 9)", "000200 (1234)")) {
+            Person withNote = new PersonBuilder(ZOE).withPhone(phone).build();
+            Person withoutNote = new PersonBuilder(AMY).withPhone("300").build();
+            Person withCountryCode = new PersonBuilder(MIA).withPhone("(+65) 200").build();
+            model = new ModelManager(new AthleteRosterBuilder().withPerson(withCountryCode)
+                    .withPerson(withoutNote).withPerson(withNote).build(), new UserPrefs());
+
+            assertSortSuccess(PHONE, ASCENDING, List.of(withNote, withoutNote, withCountryCode));
+            assertSortSuccess(PHONE, DESCENDING, List.of(withCountryCode, withoutNote, withNote));
+            assertEquals(phone, withNote.getPhone().value);
+            assertEquals("(+65) 200", withCountryCode.getPhone().value);
+        }
+    }
+
+    @Test
+    public void execute_numericNoteWithZeroNumber_doesNotTreatNoteAsCountryCode() {
+        Person zeroNumber = new PersonBuilder(AMY).withPhone("(1) 000").build();
+        model = new ModelManager(new AthleteRosterBuilder().withPerson(ZOE)
+                .withPerson(zeroNumber).build(), new UserPrefs());
+
+        assertSortSuccess(PHONE, ASCENDING, List.of(zeroNumber, ZOE));
+        assertSortSuccess(PHONE, DESCENDING, List.of(ZOE, zeroNumber));
     }
 
     @Test
