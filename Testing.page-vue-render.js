@@ -59,6 +59,6 @@ with(this){return _c('p',[_c('code',{pre:true,attrs:{"class":"hljs inline no-lan
 with(this){return _c('p',[_v("Automated results are in "),_c('code',{pre:true,attrs:{"class":"hljs inline no-lang"}},[_v("build/reports/tests/test/index.html")]),_v("; Checkstyle reports are in\n"),_c('code',{pre:true,attrs:{"class":"hljs inline no-lang"}},[_v("build/reports/checkstyle/")]),_v(". Verify guide examples and startup behavior using the\n"),_c('a',{attrs:{"href":"/tp/DeveloperGuide.html#appendix-instructions-for-manual-testing"}},[_v("manual testing procedures")]),_v(".")])}
 },function anonymous(
 ) {
-with(this){return _c('footer',[_c('div',{staticClass:"text-center"},[_c('small',[_v("["),_c('span',[_c('strong',[_v("Powered by")])]),_v(" "),_c('img',{attrs:{"src":"https://markbind.org/favicon.ico","width":"30"}}),_v(" "),_c('a',{attrs:{"href":"https://markbind.org/"}},[_v("MarkBind 5.1.0")]),_v(", generated on Wed, 28 Oct 2026, 17:49:25 GMT+8]")])])])}
+with(this){return _c('footer',[_c('div',{staticClass:"text-center"},[_c('small',[_v("["),_c('span',[_c('strong',[_v("Powered by")])]),_v(" "),_c('img',{attrs:{"src":"https://markbind.org/favicon.ico","width":"30"}}),_v(" "),_c('a',{attrs:{"href":"https://markbind.org/"}},[_v("MarkBind 5.1.0")]),_v(", generated on Thu, 29 Oct 2026, 11:14:12 GMT+8]")])])])}
 }];
   
