@@ -32,6 +32,7 @@ public class PhoneTest {
         assertFalse(Phone.isValidPhone("phone")); // non-numeric
         assertFalse(Phone.isValidPhone("9011p041")); // letters outside brackets
         assertFalse(Phone.isValidPhone("(HP)")); // a note but no digits
+        assertFalse(Phone.isValidPhone("(91234567)")); // all digits are inside a note bracket
 
         // valid phone numbers
         assertTrue(Phone.isValidPhone("911")); // exactly 3 digits
@@ -39,8 +40,18 @@ public class PhoneTest {
         assertTrue(Phone.isValidPhone("124293842033123")); // long phone numbers
         assertTrue(Phone.isValidPhone("9312 1534")); // spaces between digits
         assertTrue(Phone.isValidPhone("+65 9123 4567")); // country code and spaces
-        assertTrue(Phone.isValidPhone("(65) 9123-4567")); // brackets and hyphen
+        assertTrue(Phone.isValidPhone("(+65) 9123 4567")); // bracketed country code counts
+        assertTrue(Phone.isValidPhone("(65) 9123-4567")); // (65) has no +, so it is a note; 8 digits remain
         assertTrue(Phone.isValidPhone("9123 4567 (HP)")); // trailing note
+        assertTrue(Phone.isValidPhone("200 (5)")); // trailing numeric note is ignored; 200 is enough
+    }
+
+    @Test
+    public void getSignificantDigits() {
+        assertEquals("91234567", new Phone("9123 4567").getSignificantDigits()); // formatting ignored
+        assertEquals("91234567", new Phone("9123 4567 (HP)").getSignificantDigits()); // textual note ignored
+        assertEquals("200", new Phone("200 (5)").getSignificantDigits()); // numeric note ignored
+        assertEquals("6591234567", new Phone("(+65) 9123 4567").getSignificantDigits()); // country code counts
     }
 
     @Test
@@ -73,6 +84,13 @@ public class PhoneTest {
         // same digits, different formatting and notes -> returns true
         assertTrue(new Phone("9123 4567 (HP)").equals(new Phone("91234567")));
         assertTrue(new Phone("9123 4567").hashCode() == new Phone("91234567").hashCode());
+
+        // digits inside a note are ignored, so a note does not change identity -> returns true
+        assertTrue(new Phone("200 (5)").equals(new Phone("200")));
+        assertFalse(new Phone("200 (5)").equals(new Phone("2005")));
+
+        // a bracketed country code is part of the number -> returns true
+        assertTrue(new Phone("(+65) 9123 4567").equals(new Phone("6591234567")));
 
         // different digits once country code is included -> returns false
         assertFalse(new Phone("+65 9123 4567").equals(new Phone("9123 4567")));
