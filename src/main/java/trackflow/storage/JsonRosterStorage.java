@@ -29,12 +29,10 @@ public class JsonRosterStorage {
     /**
      * Creates storage that reads and writes roster data at {@code filePath}.
      * The file is not read or created until a read or save operation is requested.
-     *
-     * @throws NullPointerException If the file path is null.
      */
     // @@author -
     public JsonRosterStorage(Path filePath) {
-        this.filePath = requireNonNull(filePath);
+        this.filePath = filePath;
     }
 
     public Path getRosterFilePath() {

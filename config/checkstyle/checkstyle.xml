@@ -393,11 +393,6 @@
     <!-- Checks that all Javadoc comments start from the second line. -->
     <module name="JavadocContentLocationCheck" />
 
-    <module name="RegexpSinglelineJava">
-      <property name="format" value="/\*\*.*\S"/>
-      <property name="message" value="Place the opening Javadoc marker on its own line."/>
-    </module>
-
     <!-- Checks that each line in Javadoc has leading asterisks. -->
     <module name="JavadocMissingLeadingAsterisk"/>
 

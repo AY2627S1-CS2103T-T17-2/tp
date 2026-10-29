@@ -2,8 +2,6 @@
 // Unassigned sections are adapted from SE-EDU AddressBook-Level3.
 package trackflow.storage;
 
-import static trackflow.commons.util.CollectionUtil.requireAllNonNull;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -26,11 +24,8 @@ public class StorageManager implements Storage {
 
     /**
      * Creates a {@code StorageManager} with the given athlete roster and user prefs storage.
-     *
-     * @throws NullPointerException If either storage component is null.
      */
     public StorageManager(JsonRosterStorage rosterStorage, JsonUserPrefsStorage userPrefsStorage) {
-        requireAllNonNull(rosterStorage, userPrefsStorage);
         this.rosterStorage = rosterStorage;
         this.userPrefsStorage = userPrefsStorage;
     }

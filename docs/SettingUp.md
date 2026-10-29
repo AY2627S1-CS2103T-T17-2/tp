@@ -61,20 +61,6 @@ If you plan to use IntelliJ IDEA (highly recommended):
     Optionally, follow the guide [_[se-edu/guides] Using Checkstyle_](https://se-education.org/guides/tutorials/checkstyle.html) to learn how to use Checkstyle in IDEA, for example to report problems _as_ you write code.
    </box>
 
-1. **Enable assertions**
-
-   In IntelliJ's run configuration for `trackflow.Main`, add `-ea` to the VM options. Gradle's `run` task
-   enables assertions, and Gradle tests enable them by default. For a direct development launch, use
-   `java -ea -jar TrackFlow.jar`. Validate user input with exceptions; use assertions for internal invariants.
-
-1. **Follow Git conventions**
-
-   The course requires the [SE-EDU Git commit subject conventions](https://se-education.org/guides/conventions/git.html):
-   use an imperative, capitalized subject, aim for 50 characters, never exceed 72, and omit a final period.
-   A commit body is optional; when present, separate it with a blank line and wrap paragraphs at 72 characters.
-   Advanced Java rules, the Markdown style guide, and the Google documentation style guide are optional under the
-   [course standards](https://nus-cs2103-ay2627-s1.github.io/website/admin/standardsAndConventions.html).
-
 1. **Set up CI**
 
    This project includes GitHub Actions configuration files in `.github/workflows`. Java CI is configured for pushes and pull requests; MarkBind deployment is configured for pushes to `master`.
@@ -124,4 +110,3 @@ and manually verify that each changed header describes the current behavior.
 Checkstyle enforces only part of the standard. During review, also check comment accuracy, athlete-facing
 vocabulary, American spelling in Java comments, verb-based method names, and wrapped-line indentation
 (8 spaces beyond the original line). Preserve documented storage keys when changing human-readable wording.
-Both Checkstyle tasks fail on warnings as well as errors. Javadoc opening markers must be on their own line.

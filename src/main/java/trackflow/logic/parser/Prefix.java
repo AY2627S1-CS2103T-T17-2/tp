@@ -1,7 +1,5 @@
 package trackflow.logic.parser;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * A prefix that marks the beginning of an argument in an arguments string.
  * For example, {@code n/} in {@code add n/Avery Tan ...}.
@@ -11,11 +9,9 @@ public class Prefix {
 
     /**
      * Constructs a prefix using the supplied text. An empty prefix represents the argument preamble.
-     *
-     * @throws NullPointerException If the prefix text is null.
      */
     public Prefix(String prefix) {
-        this.prefix = requireNonNull(prefix);
+        this.prefix = prefix;
     }
 
     public String getPrefix() {
@@ -29,7 +25,7 @@ public class Prefix {
 
     @Override
     public int hashCode() {
-        return prefix.hashCode();
+        return prefix == null ? 0 : prefix.hashCode();
     }
 
     @Override

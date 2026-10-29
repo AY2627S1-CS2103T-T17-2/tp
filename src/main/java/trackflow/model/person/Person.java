@@ -35,7 +35,7 @@ public class Person {
 
     /**
      * Constructs an athlete in the Open age category with the supplied details.
-     * All fields and tag elements must be non-null; the address and remark may contain empty values.
+     * All fields must be non-null; the address and remark may contain empty values.
      */
     public Person(Name name, Phone phone, Email email, Address address, Remark remark, Set<Tag> tags) {
         this(name, new AgeCategory("Open"), phone, email, address, remark, tags);
@@ -43,12 +43,11 @@ public class Person {
 
     /**
      * Constructs an athlete with an explicit age category and a defensive copy of the supplied tags.
-     * All fields and tag elements must be non-null; the address and remark may contain empty values.
+     * All fields must be non-null; the address and remark may contain empty values.
      */
     public Person(Name name, AgeCategory ageCategory, Phone phone, Email email,
             Address address, Remark remark, Set<Tag> tags) {
         requireAllNonNull(name, ageCategory, phone, email, address, remark, tags);
-        requireAllNonNull(tags);
         this.ageCategory = ageCategory;
         this.name = name;
         this.phone = phone;

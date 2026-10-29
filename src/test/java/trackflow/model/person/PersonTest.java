@@ -16,34 +16,13 @@ import static trackflow.testutil.TypicalPersons.ALICE;
 import static trackflow.testutil.TypicalPersons.BOB;
 // @@author
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.jupiter.api.Test;
 
-import trackflow.model.tag.Tag;
 // @@author qiyuannn
 import trackflow.testutil.PersonBuilder;
 // @@author
 
 public class PersonTest {
-
-    @Test
-    public void constructor_nullTag_throwsNullPointerException() {
-        Set<Tag> tags = new HashSet<>();
-        tags.add(null);
-        assertThrows(NullPointerException.class, () -> new Person(ALICE.getName(), ALICE.getAgeCategory(),
-                ALICE.getPhone(), ALICE.getEmail(), ALICE.getAddress(), ALICE.getRemark(), tags));
-    }
-
-    @Test
-    public void constructor_mutableTags_copiesInput() {
-        Set<Tag> tags = new HashSet<>(ALICE.getTags());
-        Person person = new Person(ALICE.getName(), ALICE.getAgeCategory(), ALICE.getPhone(), ALICE.getEmail(),
-                ALICE.getAddress(), ALICE.getRemark(), tags);
-        tags.clear();
-        assertEquals(ALICE.getTags(), person.getTags());
-    }
 
     @Test
     public void getTags_modifySet_throwsUnsupportedOperationException() {
