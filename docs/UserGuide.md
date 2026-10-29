@@ -179,10 +179,10 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
 * Names must start with a letter or digit and contain only ASCII letters (`A`–`Z`, `a`–`z`), digits, ordinary spaces,
   hyphens, and apostrophes (for example, `Mary-Jane` or `O'Brien`). Accented letters and other writing systems are
   not currently supported.
-* Phone numbers must contain at least three digits outside parenthesized notes. They may also include spaces,
-  `+`, `-`, `(`, `)`, and notes such as `(HP)` (for example, `+65 9123 4567` or `9123 4567 (HP)`). Duplicate comparison
-  currently uses all digits in the stored text, including digits in notes. Keep the number outside parentheses
-  and use notes without digits; see [Known issues](#known-issues).
+* Phone numbers must contain at least three significant digits. They may also include spaces, `+`, `-`, `(`, and
+  `)`. A bracketed country code such as `(+65)` is part of the number, but any other bracketed text is treated as a
+  note and ignored, whether it is letters like `(HP)` or digits like `(5)` (for example, `+65 9123 4567`,
+  `(+65) 9123 4567`, or `9123 4567 (HP)`).
 * Emails must have the form `local-part@domain`. The local part consists of alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case. A different name sharing a phone or email is allowed with a possible-duplicate warning naming the matching athletes. Both checks search the full roster.
 * Use `addr/ADDRESS` to supply the required nonblank address.
@@ -511,8 +511,9 @@ replacing it. Put the JAR in the destination home folder so TrackFlow reads its 
 * **Runtime packaging:** the bundled JavaFX dependencies do not include an Apple Silicon classifier. Use the Zulu
   JDK 25 FX runtime on macOS and verify the packaged JAR on your machine. See the
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
-* **Phone formatting:** numbers wholly inside parentheses can be rejected, and digits inside notes can change
-  duplicate checks and phone sorting. Keep the number outside parentheses and use notes such as `(HP)` without digits.
+* **Phone notes:** a digit inside a bracketed note such as `(5)` is ignored when validating a phone number, but it
+  can still change duplicate checks and phone sorting. Use notes without digits, and keep the number and any
+  `(+65)` country code outside notes.
 * **Long stored event names:** a legacy event label may be clipped in a narrow window. The complete value remains
   in `data/trackflow.json`; close the app and inspect a backup copy when you need the exact name for `untag`.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do

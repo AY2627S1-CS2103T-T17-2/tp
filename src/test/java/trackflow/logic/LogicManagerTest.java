@@ -4,6 +4,7 @@ package trackflow.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 // @@author qiyuannn
 import static trackflow.logic.Messages.MESSAGE_EMPTY_COMMAND;
 import static trackflow.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +38,7 @@ import trackflow.model.ModelManager;
 import trackflow.model.ReadOnlyRoster;
 import trackflow.model.UserPrefs;
 import trackflow.model.person.AgeCategory;
+import trackflow.model.person.Email;
 import trackflow.model.person.Person;
 import trackflow.storage.JsonRosterStorage;
 import trackflow.storage.JsonUserPrefsStorage;
@@ -78,6 +81,32 @@ public class LogicManagerTest {
     @Test
     public void execute_emptyCommand_throwsParseException() {
         assertParseException("", MESSAGE_EMPTY_COMMAND);
+    }
+
+    @Test
+    public void execute_pathologicalEmailInput_throwsParseExceptionQuickly() {
+        Duration timeout = Duration.ofMillis(200);
+        String longEmailCommand = "add n/Avery Tan a/Under 14 p/91234567 e/" + "a".repeat(5000)
+                + " addr/123 Main Street";
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseException(longEmailCommand, Email.MESSAGE_CONSTRAINTS));
+
+        String longDomainCommand = "add n/Avery Tan a/Under 14 p/91234567 e/a@" + "b".repeat(5000)
+                + " addr/123 Main Street";
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseException(longDomainCommand, Email.MESSAGE_CONSTRAINTS));
+
+        String editLongEmailCommand = "edit 1 e/" + "a".repeat(5000);
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseException(editLongEmailCommand, Email.MESSAGE_CONSTRAINTS));
+
+        String editLongDomainCommand = "edit 1 e/a@" + "b".repeat(5000);
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseException(editLongDomainCommand, Email.MESSAGE_CONSTRAINTS));
+
+        String editStackOverflowCommand = "edit 1 e/a@" + "a.".repeat(2500);
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseException(editStackOverflowCommand, Email.MESSAGE_CONSTRAINTS));
     }
 
     @Test

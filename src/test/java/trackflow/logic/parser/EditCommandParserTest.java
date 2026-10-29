@@ -2,7 +2,7 @@
 package trackflow.logic.parser;
 // @@author
 
-// @@author qiyuannn
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 // @@author
 import static trackflow.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
@@ -29,6 +29,7 @@ import static trackflow.logic.parser.CommandParserTestUtil.assertParseSuccess;
 import static trackflow.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 // @@author
 
+import java.time.Duration;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -78,6 +79,17 @@ public class EditCommandParserTest {
         for (String category : List.of("", "Under 15", "123 Main Street")) {
             assertParseFailure(parser, "1 a/" + category, AgeCategory.MESSAGE_CONSTRAINTS);
         }
+    }
+
+    @Test
+    public void parse_pathologicalEmail_throwsParseExceptionQuickly() {
+        Duration timeout = Duration.ofMillis(200);
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseFailure(parser, "1 e/" + "a".repeat(5000), Email.MESSAGE_CONSTRAINTS));
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseFailure(parser, "1 e/a@" + "b".repeat(5000), Email.MESSAGE_CONSTRAINTS));
+        assertTimeoutPreemptively(timeout, () ->
+                assertParseFailure(parser, "1 e/a@" + "a.".repeat(2500), Email.MESSAGE_CONSTRAINTS));
     }
 
     @Test
