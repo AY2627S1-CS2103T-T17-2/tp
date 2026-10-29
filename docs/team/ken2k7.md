@@ -10,14 +10,13 @@ TrackFlow is a desktop application for track and field coaches and sports admini
 
 ### Code contributions
 - **UI Enhancements**: Resolved critical UI runtime bugs including window fitting, layout resizing, keyboard autocomplete behavior, and fixed the locale for athlete indexes. Added logic to show "X of Y" count when filter or find commands hide athletes.
-- **Personal Best Feature**: Designed and implemented the `pb` and `pbdel` commands to record athlete personal bests. Engineered the UI to display these as clearly labeled chips on the athlete card with split event names, values, and units.
 - **Validation Hardening**: Improved phone number validation and parsing by supporting bracketed country codes and rejecting malformed inputs.
 
 ### Testing
 - Wrote and expanded UI integration tests to assert correct graphical component state updates upon command executions. Asserted correct bounds constraints for application window scaling.
 
 ### Documentation
-- **User Guide**: Added comprehensive documentation for the `pb` and `pbdel` commands. Authored UI walkthroughs and refreshed UI screenshots for the current release.
+- **User Guide**: Authored UI walkthroughs and refreshed UI screenshots for the current release.
 - **Developer Guide**: Created the UI class diagram (`UiClassDiagram.puml`) with window placement helpers and wrote the DG window-bounds implementation explanation.
 
 ### Project management and team contributions
