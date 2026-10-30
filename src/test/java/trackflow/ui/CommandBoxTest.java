@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -37,6 +38,11 @@ public class CommandBoxTest {
 
     @BeforeAll
     public static void initJavaFx() {
+        if (GraphicsEnvironment.isHeadless()) {
+            // Without a display (e.g. Linux CI), starting JavaFX fails and can leave it unusable for later UI tests
+            isJavaFxAvailable = false;
+            return;
+        }
         try {
             CountDownLatch latch = new CountDownLatch(1);
             Platform.startup(latch::countDown);
