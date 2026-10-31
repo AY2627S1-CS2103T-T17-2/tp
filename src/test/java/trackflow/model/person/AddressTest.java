@@ -43,6 +43,25 @@ public class AddressTest {
     }
 
     @Test
+    public void isValidAddress_lineBreakAtAnyPosition_returnsFalse() {
+        for (String lineBreak : new String[] {"\n", "\r", "\u000b", "\f", "\u0085", "\u2028", "\u2029"}) {
+            assertFalse(Address.isValidAddress(lineBreak));
+            assertFalse(Address.isValidAddress(lineBreak + "House"));
+            assertFalse(Address.isValidAddress("Block" + lineBreak + "House"));
+            assertFalse(Address.isValidAddress("House" + lineBreak));
+        }
+    }
+
+    @Test
+    public void isValidAddress_unicodeSpaces_rejectsBlankButPreservesInternalSpacing() {
+        for (String space : new String[] {"\u00a0", "\u2003", "\u2007", "\u202f", "\u3000"}) {
+            assertFalse(Address.isValidAddress(space));
+            assertFalse(Address.isValidAddress(space + "House"));
+            assertTrue(Address.isValidAddress("Block" + space + "House"));
+        }
+    }
+
+    @Test
     public void equals() {
         Address address = new Address("Valid Address");
 

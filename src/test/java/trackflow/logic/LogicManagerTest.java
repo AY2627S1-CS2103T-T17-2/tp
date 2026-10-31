@@ -157,6 +157,39 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_clearConfirmationWithUnicodeSpaces_usesCommandWhitespace() throws Exception {
+        for (String space : List.of("\u00a0", "\u2007", "\u202f", "\u2003")) {
+            logic.execute("add n/Avery Tan a/Open p/91234567 e/avery@example.com addr/Home");
+            Path rosterPath = temporaryFolder.resolve("roster.json");
+            String savedRoster = Files.readString(rosterPath);
+
+            logic.execute("clear");
+            CommandResult cancelled = logic.execute(space + "N" + space);
+            assertEquals("Clear cancelled. No athletes were deleted.", cancelled.getFeedbackToUser());
+            assertEquals(savedRoster, Files.readString(rosterPath));
+            assertThrows(ParseException.class, () -> logic.execute("y"));
+
+            logic.execute("clear");
+            assertEquals(true, logic.execute(space + "Y" + space).isDataSaved());
+            assertEquals(0, model.getRoster().getPersonList().size());
+            assertEquals(0, new JsonRosterStorage(rosterPath).readRoster().orElseThrow().getPersonList().size());
+        }
+    }
+
+    @Test
+    public void execute_nullWhileClearPending_rejectsWithoutChangingData() throws Exception {
+        logic.execute("add n/Avery Tan a/Open p/91234567 e/avery@example.com addr/Home");
+        Path rosterPath = temporaryFolder.resolve("roster.json");
+        String savedRoster = Files.readString(rosterPath);
+        logic.execute("clear");
+
+        assertThrows(NullPointerException.class, () -> logic.execute(null));
+        assertEquals(savedRoster, Files.readString(rosterPath));
+        assertEquals(1, model.getRoster().getPersonList().size());
+        assertThrows(ParseException.class, () -> logic.execute("y"));
+    }
+
+    @Test
     public void execute_viewCommandsWithUnavailableStorage_doNotSave() throws Exception {
         JsonRosterStorage unavailableStorage = new JsonRosterStorage(temporaryFolder.resolve("unavailable.json")) {
             @Override

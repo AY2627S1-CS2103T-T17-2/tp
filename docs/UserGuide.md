@@ -103,8 +103,9 @@ For `edit`, `remark`, `tag`, `untag`, and `delete`, always use the index current
 Indexes can change after another command. A successful add, edit, remark, tag, or untag shows the full roster again;
 deleting an athlete keeps the current filter. Check the displayed names before your next indexed command.
 
-When the list area is empty, it explains why: if the roster has no athletes (for example, on first launch or after
+When the list area is empty, it explains why: if the roster has no athletes (for example, after confirming
 `clear`), it shows how to add one; if a `find` or `filter` matched nothing, it says so and reminds you to run `list`.
+A first launch without a saved roster displays sample athletes.
 
 ### Addresses and remarks containing slashes
 
@@ -352,7 +353,7 @@ Format: `untag INDEX t/EVENT [t/EVENT]...`
   This guards against removing the wrong events because of a typo.
 * A successful `tag` or `untag` displays the full roster again.
 
-Examples (run in order on the sample data):
+Examples (run `list` first to reset filtering and sorting, then run these in order on unchanged sample data):
 
 * `tag 2 t/200m t/4x100m` adds `200m` and `4x100m` to the 2nd athlete.<br>
   Output: `Added event(s) 200m, 4x100m to Daniel Lim.`

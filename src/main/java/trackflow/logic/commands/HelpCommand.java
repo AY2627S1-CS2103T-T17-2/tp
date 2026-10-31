@@ -29,7 +29,8 @@ public class HelpCommand extends Command {
                     AddCommand.MESSAGE_USAGE,
                     EditCommand.MESSAGE_USAGE,
                     DeleteCommand.MESSAGE_USAGE,
-                    "list: Shows all athletes and removes any active filter.\nExample: list",
+                    "list: Shows all athletes in saved roster order, removing any active filter and sort.\n"
+                            + "Example: list",
                     FindCommand.MESSAGE_USAGE,
                     FilterCommand.MESSAGE_USAGE,
                     SortCommand.MESSAGE_USAGE,

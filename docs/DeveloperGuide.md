@@ -671,7 +671,7 @@ Use case ends.
 **MSS**
 
 1. The coach requests to list athletes.
-2. TrackFlow displays the roster in the current displayed ordering with current indexes.
+2. TrackFlow displays the complete roster in saved roster order with current indexes.
 3. The coach checks the athlete's details and requests deletion using the athlete's displayed index.
 4. TrackFlow saves the deletion, refreshes and renumbers the roster, and displays the deleted athlete's details.
 

@@ -13,6 +13,7 @@ import trackflow.logic.commands.ClearCommand;
 import trackflow.logic.commands.Command;
 import trackflow.logic.commands.CommandResult;
 import trackflow.logic.commands.exceptions.CommandException;
+import trackflow.logic.parser.CommandWhitespace;
 import trackflow.logic.parser.TrackFlowParser;
 import trackflow.logic.parser.exceptions.ParseException;
 import trackflow.model.Model;
@@ -58,10 +59,11 @@ public class LogicManager implements Logic {
 
         boolean wasClearPending = clearPending;
         clearPending = false;
-        if (wasClearPending && commandText.strip().equalsIgnoreCase("n")) {
+        String confirmation = commandText == null ? "" : CommandWhitespace.strip(commandText);
+        if (wasClearPending && confirmation.equalsIgnoreCase("n")) {
             return new CommandResult("Clear cancelled. No athletes were deleted.");
         }
-        Command command = wasClearPending && commandText.strip().equalsIgnoreCase("y")
+        Command command = wasClearPending && confirmation.equalsIgnoreCase("y")
                 ? new ClearCommand(true) : trackFlowParser.parseCommand(commandText);
         clearPending = command instanceof ClearCommand && !command.changesRoster();
         if (!command.changesRoster()) {

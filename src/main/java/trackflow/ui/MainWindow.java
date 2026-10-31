@@ -110,9 +110,9 @@ public class MainWindow extends UiPart<Stage> {
     private void setWindowDefaultSize(GuiSettings guiSettings) {
         List<Rectangle2D> screens = Screen.getScreens().stream().map(Screen::getVisualBounds).toList();
         Rectangle2D bounds = WindowPlacement.fit(guiSettings, screens, Screen.getPrimary().getVisualBounds());
-        // Keep the design minimum so the layout never collapses, even on a small or heavily scaled display.
-        primaryStage.setMinWidth(WindowPlacement.MIN_WINDOW_WIDTH);
-        primaryStage.setMinHeight(WindowPlacement.MIN_WINDOW_HEIGHT);
+        // A native minimum larger than the fitted bounds would push the window back off a small screen.
+        primaryStage.setMinWidth(Math.min(WindowPlacement.MIN_WINDOW_WIDTH, bounds.getWidth()));
+        primaryStage.setMinHeight(Math.min(WindowPlacement.MIN_WINDOW_HEIGHT, bounds.getHeight()));
         primaryStage.setWidth(bounds.getWidth());
         primaryStage.setHeight(bounds.getHeight());
         primaryStage.setX(bounds.getMinX());
