@@ -131,7 +131,9 @@
         "running-tests": "Running tests",
         "types-of-tests": "Types of tests",
         "reading-and-reviewing-tests": "Reading and reviewing tests",
-        "build-and-focused-tests": "Build and focused tests"
+        "build-and-focused-tests": "Build and focused tests",
+        "adversarial-release-testing": "Adversarial release testing",
+        "beta-audit-30-october-2026": "Beta audit: 30 October 2026"
       },
       "headingKeywords": {}
     },
