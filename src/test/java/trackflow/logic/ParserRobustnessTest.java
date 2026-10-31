@@ -79,6 +79,23 @@ public class ParserRobustnessTest {
     }
 
     @Test
+    public void execute_addressLineBreaks_rejectWithoutChangingRosterViewOrFile() throws Exception {
+        logic.execute("sort name desc");
+        logic.execute("find n/Avery");
+        List<String> commands = new ArrayList<>();
+        for (String lineBreak : List.of("\n", "\r", "\u000b", "\f", "\u0085", "\u2028", "\u2029")) {
+            String address = "Block" + lineBreak + "House";
+            commands.add("edit 1 addr/" + address);
+            commands.add("add n/Ben a/Open p/92345678 e/ben@example.com addr/" + address);
+        }
+        // NEL is not command-boundary whitespace, so it also reaches validation at the start of a value.
+        commands.add("edit 1 addr/\u0085House");
+        commands.add("edit 1 addr/\u0085");
+        commands.add("add n/Ben a/Open p/92345678 e/ben@example.com addr/\u0085House");
+        assertRejectedWithoutChanges(ParseException.class, commands);
+    }
+
+    @Test
     public void execute_escapedSlashText_persistsAndCanBeFound() throws Exception {
         logic.execute("edit 1 addr/Block A//B addr//Annex");
         logic.execute("remark 1 r/Practise r//relay x//y Mon/Tue");

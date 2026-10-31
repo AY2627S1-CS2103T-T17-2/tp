@@ -18,10 +18,12 @@ public class Address {
                     + "except line breaks, including line or paragraph separators.";
 
     /*
-     * The first character of the address must not be a whitespace,
-     * otherwise whitespace-only input becomes a valid address.
+     * The first character must not be whitespace, including Unicode spaces. Every character must be checked for
+     * line breaks: a separate first-character class followed by dot-star would otherwise admit a leading NEL,
+     * line separator, or paragraph separator. Empty values remain supported for older saved athletes.
      */
-    public static final String VALIDATION_REGEX = "[^\\s].*";
+    public static final String VALIDATION_REGEX =
+            "[^\\p{javaWhitespace}\\p{javaSpaceChar}\\u0085][^\\r\\n\\u000B\\f\\u0085\\u2028\\u2029]*";
 
     public final String value;
 

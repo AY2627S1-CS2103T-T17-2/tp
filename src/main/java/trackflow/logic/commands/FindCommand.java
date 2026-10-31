@@ -15,7 +15,8 @@ public class FindCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds athletes by keyword. An unprefixed keyword "
             + "matches any field; prefix a value to restrict it to that field. When several fields are given, an "
-            + "athlete must match all of them. Matching is case-insensitive and partial.\n"
+            + "athlete must match all of them. If unprefixed keywords are also given, matching any one of those "
+            + "or all specified fields is sufficient. Matching is case-insensitive and partial.\n"
             + "Parameters: [KEYWORD]... [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] "
             + "[addr/ADDRESS] [r/REMARK] [t/EVENT]\n"
             + "Example: " + COMMAND_WORD + " n/avery\n"

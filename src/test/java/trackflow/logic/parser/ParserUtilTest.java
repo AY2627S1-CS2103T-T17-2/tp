@@ -216,6 +216,14 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseAddress_nextLineCharacter_throwsParseException() {
+        for (String address : List.of("\u0085", "\u0085House", "House\u0085", "Block\u0085House")) {
+            assertThrows(ParseException.class, Address.MESSAGE_CONSTRAINTS, () ->
+                    ParserUtil.parseAddress(address));
+        }
+    }
+
+    @Test
     public void parseAddress_validValueWithoutWhitespace_returnsAddress() throws Exception {
         Address expectedAddress = new Address(VALID_ADDRESS);
         assertEquals(expectedAddress, ParserUtil.parseAddress(VALID_ADDRESS));

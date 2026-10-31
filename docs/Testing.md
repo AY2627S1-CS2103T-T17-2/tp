@@ -127,3 +127,71 @@ window tests or launch verification of the final release JAR on each supported r
 Automated results are in `build/reports/tests/test/index.html`; Checkstyle reports are in
 `build/reports/checkstyle/`. Verify guide examples and startup behavior using the
 [manual testing procedures](DeveloperGuide.md#appendix-instructions-for-manual-testing).
+
+## Adversarial release testing
+
+Run these checks against a copy of the final release JAR in a disposable home folder. Do not share that folder
+with a running development instance. Reset the fixture between unrelated scenarios so one test's filter, sort,
+deleted records, or pending clear confirmation does not change the next test's prerequisites. The DG's
+[three-athlete fixture](DeveloperGuide.md#before-testing) provides a known starting order.
+
+For every rejected command, check the error, retained command text, full roster, displayed order and indexes,
+filter/sort state, and saved JSON. For a successful change, close and reopen the app and verify the affected record
+and every field that should have been preserved. An error message alone does not prove that no data changed.
+
+| Area | Inputs and sequences to try | Expected result or invariant |
+| --- | --- | --- |
+| Empty and malformed input | Empty input; only spaces; unknown commands; missing fields; unsupported prefixes; duplicate prefixes with different case; leading/trailing spaces | A controlled error for invalid input; no roster or view change. Valid boundary spaces and case variants follow the UG. |
+| Displayed indexes | `0`, `-1`, `+1`, `1.0`, words, mixed digits/text, thousands of digits, `0001`; repeat after a zero-result find, filter, and consecutive sorts with tied values | Only a valid displayed index selects an athlete. `0001` selects index 1. Oversized numbers report an error without overflow or deletion. |
+| Field boundaries | Each required field empty; email lengths 254 and 255 with otherwise valid syntax; event lengths 30 and 31; phone numbers with two and three significant digits; punctuation at the start/end of a name | Each field follows its documented limits. Rejection does not partially apply other fields. |
+| Long input | Long valid and invalid names, phones, addresses, remarks, event lists and indexes; increase size in stages and record actual lengths | The app remains responsive or gives a controlled error. Record hangs/crashes separately from a normal validation error; do not infer a supported size limit from one successful probe. |
+| Unicode and pasting | Non-breaking, figure, narrow non-breaking and em spaces at command boundaries; accented event names in composed/decomposed forms; unsupported name characters; zero-width characters; pasted tabs and line breaks | Boundary-space and event-equivalence behavior matches the UG. Unsupported names fail. Check the text actually retained by the single-line command box before judging parser behavior. |
+| Literal prefixes | `edit 1 addr/Block A//B`; `remark 1 r/Practise r//relay`; `edit 1 addr/ /home/coach`; URLs, network paths, quotes, backslashes and runs of slashes | Literal text is decoded exactly once. Saved text survives restart and unrelated edits. Quotes do not hide a real prefix. |
+| Search and ordering | Broad OR, scoped AND, mixed search, empty results; consecutive `find`/`filter`; `sort`, then a roster change; `list`; restart | Search replaces the previous selection. Active sorting survives changes until `list` or restart. Sorting never reorders the saved roster. |
+| Hidden duplicates | Filter out an existing athlete, then add/edit a normalized-name duplicate with matching phone or email; try different names sharing contacts | Duplicate decisions use the full roster. Allowed contact matches produce accurate warnings without misleading displayed indexes. |
+| Atomic event updates | A `tag` containing existing and new events; an `untag` containing existing and missing events; duplicate case variants in one command | Only new tags are added. If any requested removal is missing, none are removed. Stored event spelling and unrelated fields are preserved. |
+| Clear confirmation | `clear` then `N`; `clear` then a normal command; `clear` then invalid input; `clear` then `Y`; repeated `Y`; restart while confirmation is pending | Only a response to a pending confirmation can clear data. Any intervening submission cancels that pending confirmation. A confirmed clear persists after restart. |
+| Failed saves | Block writes to the disposable data folder, then try each modifying command while a filter and sort are active | Failure leaves the live roster, display and old file unchanged. View-only commands still work. Restore permissions and verify a later update saves and reloads. |
+| Damaged saved files | With the app closed: truncated JSON, extra JSON roots, repeated keys, null lists/entries, invalid values and duplicates | The exact unreadable file is backed up and recovery is visible. If backup creation is blocked, startup stops without overwriting the original. |
+| Launch paths and settings | JAR home containing spaces/non-ASCII text; launch from another folder; missing or corrupt preferences; oversized/off-screen window settings | Data remains beside the actual JAR. Invalid preferences recover; the main and help windows remain reachable. Check behavior on the actual platform. |
+| GUI and keyboard | Minimum window size, long feedback, long unbroken fields, many tags, scrolling, Tab/Shift+Tab, arrows, Escape, Enter, help reopened after minimizing | Essential controls and complete content remain reachable. Enter executes only the typed command; completion and focus follow the UG. |
+| Guide examples | Execute each UG example from its stated starting state and each DG procedure independently; inspect the built website and diagrams | Commands, feedback, screenshots and instructions agree with the packaged app; internal links and images load. |
+
+For performance, separately measure the DG's [NFR10 target](DeveloperGuide.md#non-functional-requirements) with
+1,000 athletes and 100 commands. Record individual timings, including saving and visible updates, plus hardware
+and runtime details. Parser or model timings alone do not verify GUI response time.
+
+Record each run's commit, JAR checksum, Java distribution/version, OS/architecture, display scaling, fixture,
+exact input, expected and actual output, and whether the result survives a restart. Mark checks as passed,
+failed, or not run. In particular, source tests, a successful JAR build, and a documentation build do not establish
+Windows/Linux/macOS launch compatibility, native clipboard behavior, monitor changes, or every display scale.
+Run those checks on the supported environments before release, and repeat affected scenarios after every fix.
+
+### Beta audit: 30 October 2026
+
+This run tested the working tree based on commit `8f4cf3b9`, including the audit fixes, on macOS arm64 with
+Zulu JDK FX 25.0.3. It is evidence for this build, not certification of the future v1.6 release.
+
+* `./gradlew clean check coverage shadowJar`: passed; 614 tests, zero failures, errors or skips; both Checkstyle
+  checks passed. JaCoCo reported 82.5% line and 83.3% branch coverage.
+* A seeded parser probe (seed 2103) exercised 50,000 mutations of 16 command seeds, including control characters,
+  Unicode spaces, isolated surrogates and malformed prefixes: 3,665 accepted, 46,335 controlled parse errors,
+  no unchecked crashes. A separate long-input probe passed 17 validation and 17 parser cases containing up to
+  100,000 repeated name/phone groups. These probes do not establish GUI responsiveness for such inputs.
+* Real filesystem replacement failures covered add, edit, remark, tag, untag, delete and confirmed clear.
+  `StorageAdversarialTest` checks unchanged live state, original bytes, temporary-file cleanup and successful retry.
+  It also verifies byte-exact backup preservation for malformed UTF-8, including after a subsequent successful save.
+* Storage probes rejected malformed JSON shapes and duplicate keys, handled deeply nested unknown fields, and
+  verified packaged startup and persistence through a symlink from another working directory with spaces and
+  `%u` in the actual JAR home. Those startup probes did not open a window.
+* Twenty-two guide assertions checked exact feedback, displayed athletes and reload results. The MarkBind build
+  passed for all 15 pages; 929 generated local link/asset references had no missing files or fragment targets.
+
+Confirmed fixes include Unicode-space handling for clear confirmation, rejection of leading Unicode line breaks
+and Unicode-blank addresses, and applying screen-fitted main-window minima. Guide and built-in help corrections
+clarify initial sample data, saved-order restoration, mixed broad/scoped searches and tag-example prerequisites.
+
+Native end-to-end keyboard/clipboard interaction, actual small-screen and multi-monitor behavior, Windows/Linux
+launches, and the end-to-end 1,000-athlete GUI performance target remain unverified in this run. The desktop
+automation tool could not attach to the standalone Java process. Run the manual matrix above on the final release
+artifact; JavaFX component tests do not substitute for those checks. The current build is still labelled v1.5.
