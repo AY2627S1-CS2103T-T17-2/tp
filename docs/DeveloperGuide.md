@@ -20,6 +20,9 @@
 * Antony (`antonydchakola-hub`) used Claude (Anthropic) extensively to review and refactor code, write tests, find
   and reproduce bugs, and draft User Guide and Developer Guide text. He reviewed and tested all generated output
   before committing it.
+* Kenil (`ken2k7`) used Claude (Anthropic) extensively to review code, find and reproduce bugs, implement fixes for
+  UI and input-validation, write tests, and draft documentation and PR/issue descriptions. He reviewed and tested
+  all generated output before committing it.
 
 --------------------------------------------------------------------------------------------------------------------
 
