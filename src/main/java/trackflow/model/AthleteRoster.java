@@ -11,7 +11,8 @@ import trackflow.model.person.UniquePersonList;
 
 /**
  * Wraps all data at the athlete-roster level.
- * Duplicates are not allowed, as determined by {@link Person#isSamePerson(Person)}.
+ * New duplicates are rejected using {@link Person#isSamePerson(Person)}. Restoring existing records retains
+ * Singapore-format pairs that were distinct under {@link Person#isSameStoredPerson(Person)}.
  */
 public class AthleteRoster implements ReadOnlyRoster {
 
@@ -34,7 +35,7 @@ public class AthleteRoster implements ReadOnlyRoster {
 
     /**
      * Replaces the contents of the person list with {@code persons}.
-     * {@code persons} must not contain duplicate persons.
+     * {@code persons} must not contain duplicates under the stored-record rule.
      */
     public void setPersons(List<Person> persons) {
         this.persons.setPersons(persons);

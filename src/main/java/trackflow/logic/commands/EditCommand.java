@@ -104,13 +104,15 @@ public class EditCommand extends Command {
         // @@author Austin-Chia
         List<Person> otherPersons = model.getRoster().getPersonList().stream()
                 .filter(person -> person != personToEdit).toList();
-        Person duplicate = otherPersons.stream().filter(editedPerson::isSamePerson).findFirst().orElse(null);
+        Person duplicate = otherPersons.stream()
+                .filter(other -> editedPerson.introducesDuplicate(personToEdit, other)).findFirst().orElse(null);
         if (duplicate != null) {
             // @@author
             throw new CommandException(String.format(MESSAGE_DUPLICATE_PERSON, duplicate.getName()));
         }
 
-        String warning = Messages.getPossibleDuplicateWarning(editedPerson, otherPersons);
+        String warning = editedPerson.hasSameIdentityFields(personToEdit) ? ""
+                : Messages.getPossibleDuplicateWarning(editedPerson, otherPersons);
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
         return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS,

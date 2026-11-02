@@ -23,9 +23,9 @@ import trackflow.model.person.exceptions.PersonNotFoundException;
 
 /**
  * A list of persons that enforces uniqueness between its elements and does not allow nulls.
- * A person is considered unique by comparing using {@code Person#isSamePerson(Person)}. As such, adding and updating of
- * persons uses Person#isSamePerson(Person) for equality so as to ensure that the person being added or updated is
- * unique in terms of identity in the UniquePersonList. However, the removal of a person uses Person#equals(Object) so
+ * New records use {@code Person#isSamePerson(Person)} for duplicate prevention. Bulk restoration uses the older
+ * stored-record rule so existing Singapore-format pairs remain readable; updates cannot introduce new pairs.
+ * The removal of a person uses Person#equals(Object) so
  * as to ensure that the person with exactly the same fields will be removed.
  *
  * Supports a minimal set of list operations.
@@ -61,7 +61,7 @@ public class UniquePersonList implements Iterable<Person> {
     /**
      * Replaces the person {@code target} in the list with {@code editedPerson}.
      * {@code target} must exist in the list.
-     * The person identity of {@code editedPerson} must not be the same as another existing person in the list.
+     * The replacement must not introduce a duplicate relationship with another existing person.
      */
     public void setPerson(Person target, Person editedPerson) {
         requireAllNonNull(target, editedPerson);
@@ -71,7 +71,8 @@ public class UniquePersonList implements Iterable<Person> {
             throw new PersonNotFoundException();
         }
 
-        if (internalList.stream().anyMatch(person -> !person.equals(target) && person.isSamePerson(editedPerson))) {
+        if (internalList.stream().anyMatch(person -> !person.equals(target)
+                && editedPerson.introducesDuplicate(target, person))) {
             throw new DuplicatePersonException();
         }
 
@@ -96,7 +97,8 @@ public class UniquePersonList implements Iterable<Person> {
 
     /**
      * Replaces the contents of this list with {@code persons}.
-     * {@code persons} must not contain duplicate persons.
+     * {@code persons} must not contain duplicates under the stored-record rule. Singapore-format pairs from
+     * older rosters are preserved; add and edit still prevent introducing new duplicates.
      */
     public void setPersons(List<Person> persons) {
         requireAllNonNull(persons);
@@ -144,7 +146,7 @@ public class UniquePersonList implements Iterable<Person> {
     }
 
     /**
-     * Returns true if {@code persons} contains only unique persons, using {@code Person#isSamePerson}.
+     * Returns true if {@code persons} contains only unique stored persons, using {@code Person#isSameStoredPerson}.
      * Two persons can only be the same if their names match (ignoring case and repeated spaces), so persons are
      * grouped by that normalized name and only compared within a group. This gives linear behavior for the
      * common case of distinct names while keeping exactly the same notion of duplicates as a full pairwise check.
@@ -155,7 +157,7 @@ public class UniquePersonList implements Iterable<Person> {
             String nameKey = person.getName().fullName.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
             List<Person> sameNamePersons = personsByName.computeIfAbsent(nameKey, key -> new ArrayList<>());
             for (Person other : sameNamePersons) {
-                if (person.isSamePerson(other)) {
+                if (person.isSameStoredPerson(other)) {
                     return false;
                 }
             }

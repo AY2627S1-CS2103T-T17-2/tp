@@ -41,7 +41,7 @@ public class Messages {
      */
     public static String getPossibleDuplicateWarning(Person person, Collection<Person> otherPersons) {
         String matches = otherPersons.stream()
-                .filter(other -> !person.isSamePerson(other))
+                .filter(other -> !person.isSameStoredPerson(other))
                 .map(other -> formatSharedDetails(person, other))
                 .filter(match -> !match.isEmpty())
                 .collect(Collectors.joining("\n"));
@@ -78,7 +78,7 @@ public class Messages {
         Set<String> duplicateFields =
                 Stream.of(duplicatePrefixes).map(Prefix::toString).collect(Collectors.toSet());
 
-        return MESSAGE_DUPLICATE_FIELDS + String.join(" ", duplicateFields);
+        return MESSAGE_DUPLICATE_FIELDS + String.join(" ", duplicateFields) + MESSAGE_LITERAL_PREFIX_HINT;
     }
 
     /**

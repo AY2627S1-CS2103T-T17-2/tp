@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Desktop;
 import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,10 @@ public class CommandBoxTest {
     @BeforeEach
     public void setUp() throws Exception {
         Assumptions.assumeTrue(isJavaFxAvailable, "JavaFX toolkit not available in this environment.");
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.APP_REQUEST_FOREGROUND)) {
+            Desktop.getDesktop().requestForeground(true);
+        }
+        CountDownLatch focused = new CountDownLatch(1);
         runOnFxThread(() -> {
             CommandBox commandBox = new CommandBox(commandText -> {
                 executedCommands.add(commandText);
@@ -69,10 +74,23 @@ public class CommandBoxTest {
             stage = new Stage();
             stage.setScene(new Scene(commandBox.getRoot(), 600, 80));
             stage.show();
+            stage.toFront();
             commandTextField = (TextField) commandBox.getRoot().lookup("#commandTextField");
             commandTextField.requestFocus();
+            stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    focused.countDown();
+                }
+            });
+            stage.requestFocus();
+            if (stage.isFocused()) {
+                focused.countDown();
+            }
             return null;
         });
+        // Popup auto-hide follows native focus events. Do not type while stage activation is still pending.
+        assertTrue(focused.await(5, TimeUnit.SECONDS), "Command window did not receive focus");
+        runOnFxThread(() -> null);
     }
 
     @AfterEach

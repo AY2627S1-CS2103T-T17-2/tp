@@ -158,6 +158,10 @@ This excerpt assumes a valid index and omits list access and result construction
 
 How the `Logic` component works:
 
+1. `LogicManager` first consumes any pending clear confirmation. `Y`/`yes` confirms and `N`/`no` cancels,
+   ignoring case and surrounding command whitespace. Every other submission, including invalid or empty input,
+   cancels that pending confirmation before normal parsing. An unconfirmed `ClearCommand` only returns a warning;
+   a confirmed command follows the staged save path below.
 1. When `Logic` is called upon to execute a command, `LogicManager` passes its text to `TrackFlowParser`.
    Parameterized commands are delegated to a dedicated parser (e.g., `DeleteCommandParser`); `clear`, `help`, and
    `exit` are validated and constructed directly by `TrackFlowParser`.
@@ -236,7 +240,8 @@ The following diagram focuses on stored athlete fields. Each `Tag` is one track 
 see [Event tagging](#event-tagging). `UniqueTagList` is not part of the implementation.
 `AthleteRoster` implements `ReadOnlyRoster`, exposing its athletes through an unmodifiable
 `ObservableList<Person>`. It owns one `UniquePersonList`, which retains athletes in list order and enforces
-uniqueness using `Person.isSamePerson`. The diagram omits the intermediate JavaFX collection classes.
+uniqueness using `Person.isSamePerson` for additions and the stored-record rule for restoration. Updates cannot
+introduce new duplicate relationships. The diagram omits the intermediate JavaFX collection classes.
 
 <puml src="diagrams/BetterModelClassDiagram.puml" width="1000" alt="Read-only roster interface, ordered athlete list, stored athlete fields, and unique event tags" />
 
@@ -284,9 +289,14 @@ age category, phone, email and address. A missing age category defaults to `Open
 case variants, collapse according to `Tag.equals` and `hashCode`.
 
 A missing or null `persons` list, null athlete/tag entries, invalid field values, and duplicate athletes
-(according to `Person.isSamePerson`) cause `IllegalValueException`; `JsonRosterStorage` wraps it in
+(according to `Person.isSameStoredPerson`) cause `IllegalValueException`; `JsonRosterStorage` wraps it in
 `DataLoadingException`. File-reading or JSON-decoding failures, including a JSON null root, also produce
 `DataLoadingException` through `JsonUtil`. An absent file instead returns `Optional.empty()`.
+
+New command phone values use `Phone.getNewPhoneValidationError`: 3–15 significant digits in total, at least
+three subscriber digits after a country code, and a subscriber number that is not entirely zeroes. Formatting
+errors, digit-count errors and all-zero values receive distinct messages. Stored values retain the older grammar
+and length rules. Names remain ASCII-only; broader preferred-name support is recorded in US37.
 
 ### Common classes
 
@@ -417,7 +427,8 @@ The command resolves that index against the displayed list during execution.
 `RemarkCommand` retains the new `Remark` and index, replaces the selected athlete with a copy, and restores the
 full roster view. An empty remark removes the note. If both the existing and replacement remarks are empty,
 the command throws `CommandException` before mutation, so the current view is retained and no save is attempted.
-It declares `changesRoster()` as true, so `LogicManager`
+Submitting an identical nonempty remark also fails without saving; feedback distinguishes additions from
+replacements and removals. It declares `changesRoster()` as true, so `LogicManager`
 uses the staged save-before-publication path. Success messages use the same athlete summary as add, edit, and
 delete, including age category, phone, and email. These diagrams omit helpers, the index field, and result internals.
 
@@ -439,9 +450,12 @@ than 30 characters, are preserved without truncation and remain removable with `
 * `TagCommand` and `UntagCommand` extend `EventTagCommand`, which holds the index and events, looks up the target
   athlete in the displayed list, and replaces that athlete with a copy that has the updated events.
 * New `Tag` names are words of letters or digits separated by exactly one space or one hyphen (e.g. `Long Jump`,
-  `110m-Hurdles`, but not `Long - Jump`), up to 30 characters; `MESSAGE_CONSTRAINTS` states the same rule. `Tag.fromStoredName` also accepts the older unlimited alphanumeric format without truncation.
+  `110m-Hurdles`, but not `Long - Jump`), up to 30 characters. Unicode letters are supported, and words may
+  contain apostrophes or decimal points between digits (`Women's 100m`, `Hammer 7.26kg`). Event names use NFC Unicode
+  composition for comparison. `Tag.fromStoredName` also accepts the older unlimited alphanumeric format
+  without truncation.
   `JsonAdaptedTag` uses it when loading, so a valid legacy event does not trigger recovery of the entire roster.
-  `Tag#equals` and `Tag#hashCode` ignore case, so normal `Set` operations treat `100m` and `100M` as
+  `Tag#equals` and `Tag#hashCode` ignore case and compose equivalent accents, so normal `Set` operations treat `100m` and `100M` as
   the same event while the first-entered spelling is kept for display.
 
 The class diagram below is a partial view of the event tagging classes. It shows how the two commands share
@@ -578,7 +592,7 @@ garbage and truncation cause a loading error; reading never silently accepts jus
 null tag entries, invalid saved field values, and duplicate athletes into `DataLoadingException`. A leading UTF-8
 byte order mark is tolerated, and an athlete whose `address` or `remark` is absent loads with an empty value rather
 than failing the whole file. When loading fails, `MainApp` preserves the original bytes in a sibling file named
-`trackflow.json.unreadable-<UUID>.bak`, logs its path, shows the path in the result display at start-up, and starts
+`trackflow.json.unreadable-<UUID>.bak`, logs its path, shows the complete message in a resizable feedback window at start-up, and starts
 an empty roster. Each failed load creates a separate backup without overwriting earlier backups. Subsequent
 successful roster changes can replace the active file while the backup remains available for manual recovery. If
 backup creation fails, startup stops before commands become available, protecting the original from being
@@ -597,7 +611,7 @@ this product. Priority does not imply implementation status.
 | US03 | `* * *` | Implemented | coach | permanently delete one selected athlete | remove a record I no longer need |
 | US04 | `* * *` | Implemented | returning coach | recover saved roster changes when I reopen TrackFlow | continue work without re-entering athletes |
 | US05 | `* * *` | Implemented | coach | receive clear success messages and actionable errors | know whether a command worked and correct mistakes |
-| US06 | `* * *` | Implemented | coach | have matching-name records with a shared phone or email rejected, and receive warnings for differently named records sharing contacts | avoid redundant entries without excluding different athletes |
+| US06 | `* * *` | Implemented | coach | have matching-name records with a shared phone or email rejected, and receive warnings for shared names alone or differently named records sharing contacts | avoid redundant entries without excluding different athletes |
 | US07 | `* * *` | Implemented | coach | keep my previous roster unchanged when a change cannot be saved | avoid believing an unsaved update is permanent |
 | US08 | `* * *` | Implemented | coach | have unreadable saved data preserved separately when loading fails | retain the possibility of recovering it while starting a new roster |
 | US09 | `* *` | Implemented | coach | edit an athlete's details directly | correct information without deleting and re-entering the record |
@@ -626,18 +640,20 @@ this product. Priority does not imply implementation status.
 | US35 | `* *` | [Future] | coach | correct an inaccurate status log entry | keep the athlete's recorded history reliable |
 | US36 | `*` | [Future] | coach | import and export roster records in bulk | transfer my own records without entering each one manually |
 | US37 | `*` | [Future] | coach | store names with characters beyond v1.6's supported set | preserve athletes' preferred name spellings |
-| US38 | `*` | [Future] | coach | store multiple phone numbers and phone extensions | retain alternative ways of contacting an athlete |
+| US38 | `*` | [Future] | coach | store multiple phone numbers and structured phone extensions | retain alternative ways of contacting an athlete |
 | US39 | `*` | [Future] | coach | check whether an email address can receive mail | distinguish a structurally valid address from a reachable one |
 | US40 | `*` | Implemented | keyboard-oriented coach | close TrackFlow with a text command | finish a session from the command box |
 | US41 | `*` | Excluded | coach using several computers | synchronize my roster through cloud storage | access the same changes on different devices |
 | US42 | `*` | Excluded | coach working with other coaches | share and collaboratively edit a roster | coordinate updates with colleagues |
+| US43 | `* *` | Implemented | coach | add, replace and remove an athlete remark | retain useful notes about the athlete |
+| US44 | `* *` | Implemented | coach | clear the roster after explicit confirmation | start a new roster without accidental bulk deletion |
 
 Email reachability checking (US39) is a future enhancement beyond structural email validation. Its design must preserve offline access to the roster and must not require a TrackFlow-operated remote server.
 
 ### Use cases
 
 For every use case below, the **system** is TrackFlow and the **primary actor** is the coach. **MSS** means main
-success scenario. UC01–UC07 describe implemented workflows. Future requirements remain in the user stories.
+success scenario. UC01–UC08 describe implemented workflows. Future requirements remain in the user stories.
 
 #### UC01: Register an athlete
 
@@ -666,9 +682,9 @@ Use case ends.
 * 4b. The change cannot be saved.
   * 4b1. TrackFlow reports the save failure. No athlete is added, and the previous roster remains visible.
   * Use case ends.
-* 4c. A differently named athlete shares the phone or email.
+* 4c. An athlete shares only the name, or a differently named athlete shares the phone or email.
   * 4c1. TrackFlow saves the new record and includes a possible-duplicate warning listing each matching athlete's
-    name, age category, phone, email, and the matching contact field(s). Hidden athletes are included without using
+    name, age category, phone, email, and the matching name/contact field(s). Hidden athletes are included without using
     displayed indexes.
   * Use case resumes at step 5.
 
@@ -710,7 +726,7 @@ are retained.
 
 1. The coach views the roster, optionally using find, filter, or sort.
 2. TrackFlow displays the matching athletes with current indexes and ordering.
-3. The coach submits `edit INDEX` with at least one supported field to change.
+3. The coach identifies a displayed athlete and supplies at least one supported detail to change.
 4. TrackFlow resolves the displayed index, validates the proposed record, and checks the full roster for duplicates.
 5. TrackFlow saves the change, displays the full roster with the active sort retained, and confirms the edit.
 
@@ -728,6 +744,9 @@ Use case ends.
 * 4a. The edit would duplicate another athlete, including one hidden by the current filter.
   * 4a1. TrackFlow rejects the edit and leaves the roster unchanged.
   * Use case resumes at step 3.
+* 4b. A changed name, phone or email comparison key shares a name or contact with another athlete.
+  * 4b1. TrackFlow saves the edit and lists each possible match and its matching fields.
+  * Use case resumes at step 5.
 * 5a. Saving fails.
   * 5a1. TrackFlow reports the failure and retains the previous roster, filter, and sort order.
   * Use case ends.
@@ -763,41 +782,53 @@ Use case ends.
 
 #### UC05: Filter athletes by age category
 
-**Status**: Implemented in v1.6.<br>
 **Related stories**: US02, US03, US05, US11.<br>
 **Precondition**: TrackFlow is open.<br>
 **Success postcondition**: Only matching athletes are displayed; stored records are unchanged.
 
 **MSS**
 
-1. The coach enters `filter a/AGE_CATEGORY` with one supported category.
-1. TrackFlow searches the full roster and displays matching athletes in the current displayed ordering, including any active sort, with current indexes and the match count.
-1. The coach enters `list` to restore the complete roster, or uses the displayed indexes with existing commands.
+1. The coach requests athletes in one supported age category.
+2. TrackFlow searches the full roster and displays matching athletes in the current ordering, including any
+   active sort, with current indexes and the match count.
+3. The coach reviews the matches.
+
+Use case ends.
 
 **Extensions**
 
-* **1a.** The category is missing, invalid, repeated, or accompanied by extra arguments. TrackFlow reports the error and retains the previous display and roster.
-* **2a.** No athletes match, including when the roster is empty. TrackFlow displays an empty list and an explicit zero-match message. `list` remains available.
+* 1a. The category is missing, invalid, repeated, or accompanied by extra arguments.
+  * 1a1. TrackFlow reports the error and retains the previous display and roster.
+  * Use case resumes at step 1.
+* 2a. No athletes match, including when the roster is empty.
+  * 2a1. TrackFlow displays an empty list and an explicit zero-match message.
+  * Use case ends.
 
 #### UC06: Replace or remove an athlete remark
 
-**Related stories**: US05, US07.<br>
+**Related stories**: US05, US07, US43.<br>
 **Precondition**: TrackFlow displays the athlete to update.<br>
 **Success postcondition**: The replacement remark, or its removal, is saved without changing other stored fields.
 
 **MSS**
 
-1. The coach submits `remark INDEX r/REMARK` using the current displayed index.
-2. TrackFlow replaces the existing remark; an empty value removes it.
+1. The coach selects a displayed athlete and supplies a replacement remark, or requests its removal.
+2. TrackFlow validates the request and prepares the changed record.
 3. TrackFlow saves the change, restores the full roster with the active sort retained, and confirms the update.
+
+Use case ends.
 
 **Extensions**
 
-* **1a.** The index is invalid or the required `r/` prefix is missing or repeated. TrackFlow reports the error and
-  leaves the roster unchanged.
-* **2a.** The coach requests removal when the athlete has no remark. TrackFlow reports that no remark can be
-  removed, retaining the current roster and view without saving.
-* **3a.** Saving fails. TrackFlow reports the failure and leaves the live roster, filter, and sort order unchanged.
+* 1a. The index or supplied parameters are missing, invalid or repeated.
+  * 1a1. TrackFlow reports the error and leaves the roster unchanged.
+  * Use case resumes at step 1.
+* 2a. The replacement is identical, or removal is requested when the athlete has no remark.
+  * 2a1. TrackFlow reports that there is no change to make, retaining the roster and view without saving.
+  * Use case resumes at step 1.
+* 3a. Saving fails.
+  * 3a1. TrackFlow reports the failure and leaves the live roster, filter and sort order unchanged.
+  * Use case ends.
 
 #### UC07: Add or remove an athlete's track events
 
@@ -807,22 +838,55 @@ Use case ends.
 
 **MSS**
 
-1. The coach submits `tag INDEX t/EVENT [t/EVENT]...` using the current displayed index.
-2. TrackFlow adds the events the athlete does not already have.
+1. The coach selects a displayed athlete and requests one or more events to add.
+2. TrackFlow validates the request and prepares the record with the additional events.
 3. TrackFlow saves the change, shows the full roster, and confirms which events were added.
 
 Use case ends.
 
 **Extensions**
 
-* **1a.** The index is invalid, no `t/` is given, or an event is invalid. TrackFlow reports the error and leaves the
-  roster unchanged.
-* **2a.** The athlete already has some of the events. TrackFlow adds the rest and also lists the skipped events.
-* **2b.** The athlete already has all of the events. TrackFlow reports this and leaves the roster unchanged.
-* **3a.** Saving fails. TrackFlow reports the failure and leaves the live roster unchanged.
+* 1a. The index, parameters or events are missing or invalid.
+  * 1a1. TrackFlow reports the error and leaves the roster unchanged.
+  * Use case resumes at step 1.
+* 2a. The athlete already has some of the events.
+  * 2a1. TrackFlow adds the rest and also lists the skipped events.
+  * Use case resumes at step 3.
+* 2b. The athlete already has all of the events.
+  * 2b1. TrackFlow reports this and leaves the roster unchanged.
+  * Use case resumes at step 1.
+* 3a. Saving fails.
+  * 3a1. TrackFlow reports the failure and leaves the live roster unchanged.
+  * Use case ends.
 
-Removing events with `untag INDEX t/EVENT [t/EVENT]...` follows the same steps, except that if any event is not one of
-the athlete's events, TrackFlow reports it and removes nothing.
+Removing events follows the same steps. If any requested event is not assigned to the athlete, TrackFlow reports
+it and removes nothing.
+
+#### UC08: Clear the roster
+
+**Related stories**: US05, US07, US44.<br>
+**Precondition**: TrackFlow is open.<br>
+**Success postcondition**: An empty roster is saved after explicit confirmation.
+
+**MSS**
+
+1. The coach requests removal of all athletes.
+2. TrackFlow warns that the action is permanent and asks for confirmation; the roster remains unchanged.
+3. The coach confirms the action.
+4. TrackFlow saves an empty roster and confirms completion.
+
+Use case ends.
+
+**Extensions**
+
+* 3a. The coach declines, submits other input, or closes the application.
+  * 3a1. TrackFlow discards the pending confirmation. Other input is processed normally; it cannot later
+    confirm the previous request.
+  * Use case ends.
+* 4a. Saving fails.
+  * 4a1. TrackFlow reports the failure and leaves the live roster unchanged. A new clear request is required
+    before confirmation can be attempted again.
+  * Use case ends.
 
 ### Non-Functional Requirements
 
@@ -837,11 +901,11 @@ These are product requirements and acceptance targets, not claims about the curr
 | NFR05 | Roster data shall use locally stored, human-editable text files rather than a database management system. Valid manual edits made while TrackFlow is closed shall be loaded on the next launch. |
 | NFR06 | Adding, listing, and deleting athletes shall be possible entirely by keyboard. Successful commands shall clear and refocus the command box; failed commands shall retain their text for correction. |
 | NFR07 | Success and failure shall be communicated in text, without relying on color alone. Validation failures shall identify the input problem and shall not change the roster. |
-| NFR08 | A change shall be reported as successful only after it has been saved. A save failure shall leave the observable roster unchanged. Successfully saved changes shall survive normal closure and reopening. |
-| NFR09 | A loading failure shall not silently overwrite unrecovered data. That data shall remain separately preserved even if the coach makes changes to the new empty roster. |
+| NFR08 | Roster mutations shall be atomic and durable across normal application closure and reopening. |
+| NFR09 | Recovery shall preserve the original unreadable data without modification or overwrite. |
 | NFR10 | As a performance target, with 1,000 athlete records on a computer with a dual-core processor, 8 GB RAM, and local SSD storage, at least 95 of 100 consecutive add, list, or delete commands shall update the display within two seconds of submission, with persistence included for changes. |
 | NFR11 | At 1920 × 1080 or higher with 100% and 125% display scaling, the interface shall avoid clipping essential controls and feedback. At 1280 × 720 or higher with 150% scaling, all functions shall remain accessible, including through scrolling or resizing where necessary. |
-| NFR12 | For identical input and roster state, validation shall report the same first error. Listing shall use saved roster order. An active sort shall remain applied across find, filter, and roster changes until list or restart; sorting shall not change saved roster order. |
+| NFR12 | Validation shall be deterministic for identical input and roster state; display sorting shall not mutate persisted roster order. |
 
 ### Glossary
 
@@ -853,13 +917,13 @@ These are product requirements and acceptance targets, not claims about the curr
 | Archive / restore | A future capability to remove a record from the active roster while retaining it, and later return it to the active roster. This differs from permanent deletion. |
 | CLI / GUI | Command-line interface / graphical user interface. TrackFlow accepts typed commands in a graphical window and uses that window to display records and feedback. |
 | Displayed index | An athlete's positive, one-based position in the current displayed list. It is not a permanent identifier and may change after roster updates. |
-| Duplicate athlete record | A record with the same normalized name and either the same phone or email as another record, regardless of age category. Differently named records sharing contacts are allowed with a possible-duplicate warning on add or edit. |
+| Duplicate athlete record | A record with the same normalized name and either the same phone or email as another record, regardless of age category. Shared names alone and differently named records sharing contacts are allowed with a possible-duplicate warning on add or identity-field edits. Existing Singapore-format pairs from older rosters are preserved. |
 | Eligibility | Whether an athlete meets the recorded participation conditions for a competition or event. Eligibility logs are a future feature, distinct from assigning an age category. |
 | Event specialization | An athletics discipline, such as sprinting or long jump, associated with an athlete through the `tag` and `untag` commands. |
 | Guardian | A parent or other responsible adult whose future contact record may be linked to one or more athletes. |
 | Local persistence | Automatically saving roster changes on the coach's computer and loading them in a later application session. |
 | Implemented | A feature available in the current v1.6 code. Future features are identified separately. |
-| Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone comparisons use the significant digits, which exclude formatting characters and bracketed notes such as `(HP)` or `(5)` but include a country code such as `+65` or `(+65)`. Display formatting may be retained. |
+| Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone value equality, sorting and digit searches use significant digits (ignoring formatting and notes but retaining country codes). Duplicate detection additionally treats unprefixed eight-digit numbers as Singapore numbers, equivalent to their `+65`, `(+65)` and `65` forms. Display formatting may be retained. |
 | Participation log | A future record of an athlete's involvement in training or competition. |
 | Relay squad / event group | A future grouping of athletes for a relay team or a particular athletics event. |
 | Unrecovered data | Previously saved roster data that TrackFlow could not load, preserved in a separate `.bak` file before starting an empty roster. If preservation fails, startup stops. |
@@ -1204,7 +1268,11 @@ Duplicate checks use normalized name plus matching phone keys or email, regardle
 unprefixed eight-digit phones match their `+65` forms. Duplicate errors identify the stored athlete's spelling.
 Name normalization ignores case and repeated spaces; email matching ignores case. Complete equality applies each
 field's equality rules across every field, including category, address, remark, and events. Phone formatting and
-event-name case do not by themselves make records unequal. These are separate contracts.
+event-name case do not by themselves make records unequal. These are separate contracts. Stored-record uniqueness retains the older significant-digit/email rule so
+Singapore-format pairs already present in a saved roster survive loading, staged copies and subsequent saves.
+New additions use the stricter Singapore-default rule. Edits may retain an existing pair but cannot introduce a
+new duplicate relationship or collapse a pair under the stored-record rule. Address/category/formatting-only
+edits do not repeat possible-duplicate warnings.
 
 1. Start with only Avery: run `clear`, then `Y`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`. Attempt to add `AVERY   TAN` with the same phone and a different
    email and category. Expect a duplicate error, with no saved changes. Repeat with a different phone and matching

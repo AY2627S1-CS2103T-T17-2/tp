@@ -3,6 +3,7 @@ package trackflow.logic.parser;
 import static trackflow.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 
 import trackflow.commons.core.index.Index;
+import trackflow.logic.Messages;
 import trackflow.logic.commands.DeleteCommand;
 import trackflow.logic.parser.exceptions.ParseException;
 
@@ -22,6 +23,9 @@ public class DeleteCommandParser implements Parser<DeleteCommand> {
             Index index = ParserUtil.parseIndex(args);
             return new DeleteCommand(index);
         } catch (ParseException pe) {
+            if (CommandWhitespace.strip(args).matches("0+")) {
+                throw new ParseException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX, pe);
+            }
             throw new ParseException(
                     String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE), pe);
         }

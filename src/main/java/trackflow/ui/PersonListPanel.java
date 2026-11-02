@@ -20,6 +20,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.layout.Region;
 import trackflow.commons.core.LogsCenter;
 import trackflow.model.person.Person;
@@ -141,21 +142,37 @@ public class PersonListPanel extends UiPart<Region> {
     }
 
     /**
-     * Highlights the athlete added by the command that just finished and scrolls to it, if the command added
-     * exactly one athlete. Otherwise, clears any existing highlight.
-     * An athlete that appears while another athlete disappears for good (e.g. after an edit, which replaces the
-     * edited athlete) is an update rather than an addition, so it is not highlighted.
+     * Scrolls to the athlete added or updated by the command, if exactly one new object appeared.
+     * Only additions are highlighted; edits remain visible without the new-athlete highlight.
      */
     public void highlightNewlyAddedPerson() {
         boolean hasReplacedPerson = removedPersons.stream().anyMatch(person -> !isShown(person));
-        Person addedPerson = newPersons.size() == 1 && !hasReplacedPerson ? newPersons.get(0) : null;
+        Person changedPerson = newPersons.size() == 1 ? newPersons.get(0) : null;
         newPersons.clear();
         removedPersons.clear();
 
-        recentlyAddedPerson.set(addedPerson);
-        if (addedPerson != null) {
+        recentlyAddedPerson.set(hasReplacedPerson ? null : changedPerson);
+        if (changedPerson != null) {
             // Scrolls once the list has laid out its rows, so that their actual heights are known.
-            Platform.runLater(() -> personListView.scrollTo(addedPerson));
+            Platform.runLater(() -> {
+                int index = personListView.getItems().indexOf(changedPerson);
+                if (index < 0) {
+                    return; // A later command may already have hidden or removed this athlete.
+                }
+                personListView.scrollTo(index);
+                // Variable-height cells are estimated on the first scroll. Lay out those rows, then resolve
+                // the target again using their measured heights so the last row is not left below the viewport.
+                personListView.applyCss();
+                personListView.layout();
+                Node flow = personListView.lookup(".virtual-flow");
+                if (flow instanceof VirtualFlow<?> virtualFlow) {
+                    if (index == personListView.getItems().size() - 1) {
+                        virtualFlow.setPosition(1);
+                    } else {
+                        virtualFlow.scrollToTop(index);
+                    }
+                }
+            });
         }
     }
 

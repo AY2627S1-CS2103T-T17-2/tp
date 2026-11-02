@@ -54,6 +54,7 @@ displayed list checks the view; it does not by itself establish that the complet
 | Identity and saved records | `PersonTest`, `DuplicatePersistenceTest`, `JsonSerializableRosterTest` | Duplicate identity, complete equality, and decisions after reloading |
 | Save failures and startup | `LogicManagerTest`, `MainAppTest`, `StartupProcessTest` | Publication only after saving, preservation of unreadable data, and application-home paths |
 | Screen placement | `WindowPlacementTest` | Bounds calculations for screens and saved preferences; actual rendering still needs manual checks |
+| Release regressions | `ReleaseRegressionTest`, `ReleaseUiRegressionTest` | Legacy Singapore-format pairs across loading/editing/restart, phone boundaries, clear confirmation, escaping hints, expanded feedback and edited-athlete visibility |
 
 For failure tests, check the expected exception or feedback as well as the unchanged roster, view and saved file.
 For persistence tests, look for a fresh storage read or model reconstruction rather than an assertion against only
@@ -106,6 +107,13 @@ Phone-sort regressions use the shared significant-digit rule: bracketed notes ar
 are retained. They cover both directions, numeric notes, formatting, zero-valued and large numbers, add/edit updates,
 and unchanged phone text after JSON reload.
 
+`ReleaseRegressionTest` drives the real parser and JSON storage. Older saved phone lengths remain readable, while
+new command input is subject to the current digit-count and nonzero-subscriber rules. It also checks that rejected
+changes preserve the saved file and that legacy Singapore-format pairs can be maintained without introducing new
+duplicates. `ReleaseUiRegressionTest` opens real JavaFX windows when a display is available, waits for rendering,
+and writes feedback and scrolling screenshots under `build/reports/release-ui`. Headless environments skip these
+window tests; a desktop run is still required before release.
+
 For startup/preferences, strict JSON roots, application-home paths and unavailable file logging, run:
 
 ```bash
@@ -127,6 +135,44 @@ window tests or launch verification of the final release JAR on each supported r
 Automated results are in `build/reports/tests/test/index.html`; Checkstyle reports are in
 `build/reports/checkstyle/`. Verify guide examples and startup behavior using the
 [manual testing procedures](DeveloperGuide.md#appendix-instructions-for-manual-testing).
+
+## Executable specifications and generated properties
+
+The verification tests complement example-based equivalence partitions and boundary-value tests. They run in
+ordinary `test` / `check` builds and require no additional testing dependencies. Run only this layer with:
+
+```bash
+./gradlew verifyInvariants
+./gradlew verifyInvariants -PverificationSeed=20261103
+```
+
+| Method | Executable specification | Scope per run |
+| --- | --- | --- |
+| Bounded state exploration | `ConfirmationModelTest` compares real command execution with an independent boolean state machine for confirmation, cancellation, saving and injected save failures. | Every one of the 6,561 length-four sequences over nine actions; assertions after each prefix also cover shorter histories. Starts with one athlete and memory storage. |
+| Model-based generated testing | `RosterModelTest` compares live records, displayed ordering/filtering and reloaded JSON with independent plain records after every action. | Eight reproducible seeds, 100 steps each: add, address/remark edits, delete, find, filter, sort, tag/untag, rejection, injected save failure and restart. |
+| Metamorphic properties | `ComparisonPropertyTest` checks the relationship between generated digit strings, display formats, significant digits, equality/hash codes and duplicate keys. | 500 phone fixtures with ten formats each, plus 500 generated name/phone/email bucket pairs. |
+
+The roster oracle does not call production parsers, commands, comparison keys or predicates to derive expected
+state. Sorting fixtures deliberately have different name and phone orders. Rejected operations must preserve
+saved bytes; an injected save failure must preserve records and the active predicate/comparator. Successful
+mutations must agree with a fresh JSON read. A failing generated history reports its seed and command prefix;
+rerun with the same base seed and retain the shortest failing prefix as a focused regression. These generators
+are deterministic and do not perform automatic shrinking.
+
+Duplicate matching is symmetric but is not required to be transitive: sharing a phone with one record and an
+email with another does not imply that those two other records match. Phone value equality is distinct from
+Singapore-default duplicate matching; the properties test both contracts separately.
+
+During introduction, three temporary production faults were checked individually and all were detected:
+retaining pending clear confirmation after unrelated input, publishing a staged model before saving, and omitting
+the Singapore prefix from local-number duplicate keys. Each change was restored afterward. This is a small
+mutation-sensitivity experiment, not a complete mutation score or an automated mutation-testing service.
+
+These checks establish results only for their explicit domains, bounds and generated samples. They are not an
+unbounded formal proof, and passing them does not guarantee a bug-free release. The memory-storage model cannot
+establish filesystem guarantees; the JSON scenarios inject failure before writing, rather than simulating every
+possible mid-write or power-loss event. JavaFX rendering, operating-system behaviour and dependency/runtime
+compatibility still require the desktop tests, platform CI and packaged-JAR smoke tests described below.
 
 ## Adversarial release testing
 

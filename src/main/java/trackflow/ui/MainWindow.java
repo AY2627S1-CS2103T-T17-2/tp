@@ -101,6 +101,7 @@ public class MainWindow extends UiPart<Stage> {
      */
     void showStartupWarning(String message) {
         resultDisplay.showError(message);
+        resultDisplay.showFullFeedback();
     }
 
     /**

@@ -3,6 +3,7 @@ package trackflow.ui;
 import static java.util.Objects.requireNonNull;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -52,6 +53,26 @@ public class ResultDisplay extends UiPart<Region> {
         showFeedback(feedbackToUser, FeedbackType.WARNING);
     }
 
+    /**
+     * Opens the complete feedback in a resizable window, including copyable recovery paths.
+     */
+    @FXML
+    public void showFullFeedback() {
+        Alert details = new Alert(Alert.AlertType.INFORMATION);
+        details.initOwner(getRoot().getScene().getWindow());
+        details.setTitle("TrackFlow feedback");
+        details.setHeaderText("Full message");
+        TextArea text = new TextArea(resultDisplay.getText());
+        text.setEditable(false);
+        text.setWrapText(true);
+        text.setPrefRowCount(10);
+        text.setPrefColumnCount(60);
+        text.positionCaret(0);
+        details.getDialogPane().setContent(text);
+        details.setResizable(true);
+        details.show();
+    }
+
     private void showFeedback(String feedbackToUser, FeedbackType type) {
         requireNonNull(feedbackToUser);
         for (FeedbackType otherType : FeedbackType.values()) {
@@ -62,6 +83,8 @@ public class ResultDisplay extends UiPart<Region> {
         resultIcon.setVisible(true);
         resultIcon.setManaged(true);
         resultDisplay.setText(feedbackToUser);
+        resultDisplay.positionCaret(0);
+        resultDisplay.setScrollTop(0);
     }
 
     /**

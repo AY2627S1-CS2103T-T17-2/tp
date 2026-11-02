@@ -12,12 +12,12 @@ public class ClearCommand extends Command {
 
     public static final String COMMAND_WORD = "clear";
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Shows a warning; type Y to permanently clear the roster or N to cancel.\n"
+            + ": Shows a warning; type Y/yes to permanently clear the roster or N/no to cancel.\n"
             + "Example: " + COMMAND_WORD;
     public static final String MESSAGE_SUCCESS = "Athlete roster has been cleared!";
 
     public static final String MESSAGE_CONFIRMATION =
-            "This permanently deletes all athletes. Type Y to proceed or N to cancel.";
+            "This permanently deletes all athletes. Type Y or yes to proceed; N or no to cancel.";
 
     private final boolean confirmed;
 

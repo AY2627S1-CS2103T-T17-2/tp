@@ -60,10 +60,11 @@ public class LogicManager implements Logic {
         boolean wasClearPending = clearPending;
         clearPending = false;
         String confirmation = commandText == null ? "" : CommandWhitespace.strip(commandText);
-        if (wasClearPending && confirmation.equalsIgnoreCase("n")) {
+        if (wasClearPending && (confirmation.equalsIgnoreCase("n") || confirmation.equalsIgnoreCase("no"))) {
             return new CommandResult("Clear cancelled. No athletes were deleted.");
         }
-        Command command = wasClearPending && confirmation.equalsIgnoreCase("y")
+        boolean confirmed = confirmation.equalsIgnoreCase("y") || confirmation.equalsIgnoreCase("yes");
+        Command command = wasClearPending && confirmed
                 ? new ClearCommand(true) : trackFlowParser.parseCommand(commandText);
         clearPending = command instanceof ClearCommand && !command.changesRoster();
         if (!command.changesRoster()) {
