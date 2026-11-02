@@ -59,6 +59,14 @@ public class PhoneTest {
             assertFalse(Phone.isValidNewPhone(invalid), invalid);
         }
 
+        // EP: more than one country code, or a country code after the number
+        assertFalse(Phone.isValidNewPhone("(+65) (+65) 9123"));
+        assertFalse(Phone.isValidNewPhone("(+65) +65 9123"));
+        assertFalse(Phone.isValidNewPhone("9123 4567 (+65)"));
+
+        // EP: note splitting the digit groups of the number
+        assertFalse(Phone.isValidNewPhone("9123 (HP) 4567"));
+
         // EP: valid minimum length phone number (exactly 3 digits)
         assertTrue(Phone.isValidPhone("911")); // Boundary value
 
@@ -78,6 +86,21 @@ public class PhoneTest {
         assertTrue(Phone.isValidPhone("(+65)91234567"));
         assertTrue(Phone.isValidPhone("91234567(HP)"));
         assertTrue(Phone.isValidPhone("9123-4567"));
+        assertTrue(Phone.isValidPhone("(HP) 9123 4567"));
+        assertTrue(Phone.isValidPhone("(+65) 9123 4567 (HP) (Dad)"));
+    }
+
+    @Test
+    public void isValidNewPhone_currentFormatsAcceptedLegacyFormatsRemainReadable() {
+        for (String phone : List.of("911", "(65) 9123-4567", "(HP) 9123 4567",
+                "(+65)91234567", "+65 9123 4567", "91234567(HP)", "(+65) 9123 4567 (HP) (Dad)")) {
+            assertTrue(Phone.isValidNewPhone(phone), phone);
+        }
+        for (String phone : List.of("9123 (HP) 4567", "(+65) (+65) 9123", "9123 4567 (+65)")) {
+            assertTrue(Phone.isValidPhone(phone), phone);
+            assertEquals(phone, new Phone(phone).value);
+            assertFalse(Phone.isValidNewPhone(phone), phone);
+        }
     }
 
     // EP: long digit sequences and repeated hyphen groups under timeout (performance & robustness)

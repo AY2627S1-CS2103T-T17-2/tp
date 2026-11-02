@@ -20,6 +20,9 @@ import trackflow.commons.util.ToStringBuilder;
  * person must satisfy every field criterion. When both unprefixed keywords and field criteria are given, a person
  * matches if any unprefixed keyword matches or every field criterion matches. Empty keyword collections match no
  * athletes. Name-scoped matching ignores repeated ordinary spaces in both the name and search phrase.
+ * A phone-field keyword (p/) matches by significant digits, so formatting and bracketed notes are ignored in
+ * both the phone and the keyword, using the same significant digits as value equality and sorting. A broad
+ * keyword also matches the phone's displayed text, so a bracketed note such as "(HP)" stays searchable.
  */
 public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     private final List<String> keywords;
@@ -81,7 +84,23 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
             return containsAnyKeyword(text.replaceAll(" +", " "),
                     keywords.stream().map(keyword -> keyword.replaceAll(" +", " ")).toList());
         }
+        if (field == SearchField.PHONE) {
+            return matchesPhoneDigits(person.getPhone().getSignificantDigits(), keywords);
+        }
         return containsAnyKeyword(text, keywords);
+    }
+
+    /**
+     * Matches a phone search by digits: a keyword matches when the significant digits of the keyword appear within
+     * the phone's significant digits. Both sides are reduced with {@link Phone#significantDigitsOf}, so spaces,
+     * hyphens, and bracketed notes are ignored exactly as they are for value equality and sorting. A keyword
+     * with no significant digits matches nothing.
+     */
+    private static boolean matchesPhoneDigits(String phoneDigits, List<String> keywords) {
+        return keywords.stream()
+                .map(Phone::significantDigitsOf)
+                .filter(keywordDigits -> !keywordDigits.isEmpty())
+                .anyMatch(phoneDigits::contains);
     }
 
     private static String getSearchableText(Person person) {
@@ -89,6 +108,7 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
                 person.getName().fullName,
                 person.getAgeCategory().value,
                 person.getPhone().value,
+                person.getPhone().getSignificantDigits(),
                 person.getEmail().value,
                 person.getAddress().value,
                 person.getRemark().value,

@@ -84,6 +84,53 @@ public class PersonContainsKeywordsPredicateTest {
         }
     }
 
+    // EP: phone search ignores formatting (spaces, hyphens, brackets) in the stored number and the keyword
+    @Test
+    public void test_phoneSearchIgnoresFormatting_returnsTrue() {
+        Person formatted = new PersonBuilder(ATHLETE).withPhone("9123 4567").build();
+        Person hyphenated = new PersonBuilder(ATHLETE).withPhone("9123-4567").build();
+        Person countryCode = new PersonBuilder(ATHLETE).withPhone("(+65) 9123 4567").build();
+
+        // unformatted keyword finds a formatted stored number (scoped p/ and broad)
+        assertTrue(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("91234567"))).test(formatted));
+        assertTrue(new PersonContainsKeywordsPredicate(List.of("91234567")).test(formatted));
+        assertTrue(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("91234567"))).test(hyphenated));
+
+        // differently-formatted keyword finds the stored number, and country-code digits are included
+        assertTrue(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("9123 4567"))).test(hyphenated));
+        assertTrue(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("6591234567"))).test(countryCode));
+    }
+
+    // EP: p/ phone search is digit-based (notes ignored); broad find additionally matches the raw note text
+    @Test
+    public void test_phoneNoteSearch_broadByTextScopedByDigits() {
+        Person numericNote = new PersonBuilder(ATHLETE).withPhone("200 (5)").build(); // significant digits: 200
+        Person textNote = new PersonBuilder(ATHLETE).withPhone("9123 4567 (HP)").build();
+
+        // p/ matches the real number only: the note is excluded, so p/5 and p/HP miss while p/200 hits
+        assertFalse(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("5"))).test(numericNote));
+        assertFalse(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("HP"))).test(textNote));
+        assertTrue(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("200"))).test(numericNote));
+
+        // broad find also matches the displayed text, so a note is searchable
+        assertTrue(new PersonContainsKeywordsPredicate(List.of("5")).test(numericNote));
+        assertTrue(new PersonContainsKeywordsPredicate(List.of("HP")).test(textNote));
+    }
+
+    // EP: phone search with a keyword that contains no significant digits matches nothing
+    @Test
+    public void test_phoneSearchWithoutDigits_returnsFalse() {
+        assertFalse(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("abc"))).test(ATHLETE));
+    }
+
     // EP: case-insensitive keyword matching (uppercase, mixed case)
     @Test
     public void test_keywordUsesDifferentCase_returnsTrue() {

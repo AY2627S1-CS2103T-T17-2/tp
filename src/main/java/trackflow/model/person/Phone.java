@@ -110,7 +110,16 @@ public class Phone {
      * equate Singapore local numbers with their international form.
      */
     public String getSignificantDigits() {
-        return value.replaceAll(BRACKETED_NOTE_REGEX, "").replaceAll("\\D", "");
+        return significantDigitsOf(value);
+    }
+
+    /**
+     * Returns the significant digits of {@code text}: its digits, keeping a bracketed country code such as
+     * "(+65)" but excluding the digits of a bracketed note such as "(HP)" or "(5)". Value equality, sorting,
+     * searching, and the duplicate comparison key share this reduction of spaces, hyphens, and bracketed notes.
+     */
+    static String significantDigitsOf(String text) {
+        return text.replaceAll(BRACKETED_NOTE_REGEX, "").replaceAll("\\D", "");
     }
 
     /**
