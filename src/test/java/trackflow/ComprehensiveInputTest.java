@@ -331,6 +331,7 @@ public class ComprehensiveInputTest {
 
         // --- 10. CLEAR COMMAND ---
         runCommand("Clear - Valid", "clear", true);
+        runCommand("Clear - Confirm", "Y", true); // confirm the clear so the roster is actually emptied
         runCommand("Clear - With Arguments", "clear all", false);
         runCommand("System - Empty List", "list", true);
 
@@ -360,6 +361,7 @@ public class ComprehensiveInputTest {
     private void testAdvancedScenarios() throws Exception {
         // Clear roster for clean setup
         logic.execute("clear");
+        logic.execute("Y"); // confirm the clear so the roster is actually emptied
 
         // Test Phone sorting numerical order with notes & country codes
         logic.execute("add n/Aaa Tan a/Open p/200 (5) e/aaa@example.com addr/Home");
@@ -384,6 +386,7 @@ public class ComprehensiveInputTest {
 
         // Test Age Category Sorting progression
         logic.execute("clear");
+        logic.execute("Y"); // confirm the clear so the roster is actually emptied
         logic.execute("add n/AthOpen a/Open p/9100 e/open@test.com addr/Home");
         logic.execute("add n/Ath18 a/Under 18 p/9200 e/u18@test.com addr/Home");
         logic.execute("add n/Ath14 a/Under 14 p/9300 e/u14@test.com addr/Home");
