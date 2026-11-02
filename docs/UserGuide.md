@@ -194,6 +194,8 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   single hyphens (for example, `9123 4567` or `9123-4567`). An unbracketed `+` is allowed only at the start.
   Brackets must be balanced and non-empty. A bracketed country code such as `(+65)` is part of the number, but
   other bracketed text is treated as a note and ignored, whether it is letters like `(HP)` or digits like `(5)`.
+  Only one country code is allowed, at the start, and a note goes before or after the number, not inside it
+  (`9123 (HP) 4567` is rejected).
   Examples: `+65 9123 4567`, `(+65) 9123 4567`, or `9123 4567 (HP)`.
 * Emails must have the form `local-part@domain` and contain at most 254 characters. The local part consists of
   alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by
