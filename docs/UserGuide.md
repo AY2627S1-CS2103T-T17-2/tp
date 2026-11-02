@@ -64,8 +64,8 @@ Interface (GUI).
   For example, `edit INDEX [n/NAME]` can be used as `edit 1 n/John Doe` or as part of an edit with other fields.
 
 * Items followed by `...` can appear zero or more times.<br>
-  For example, in `tag INDEX t/EVENT [t/EVENT]...`, the extra `[t/EVENT]` can be omitted, as in `tag 1 t/100m`,
-  or repeated, as in `tag 1 t/100m t/200m t/Long Jump`.
+  For example, in `tag INDEX t/EVENT [t/EVENT]...`, the extra `[t/EVENT]` can be omitted, as in `tag 1 t/Relay`,
+  or repeated, as in `tag 1 t/Relay t/High Jump t/Long Jump`.
 
 * Field prefixes can be in any order. For `find`, put unprefixed keywords before field prefixes.<br>
   For example, if the command specifies `n/NAME p/PHONE`, `p/PHONE n/NAME` is also acceptable.
@@ -206,6 +206,8 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   Brackets must be balanced and non-empty. A bracketed country code such as `(+65)` is part of the number, but
   other bracketed text is treated as a note and ignored, whether it is letters like `(HP)` or digits like `(5)`.
   Examples: `+65 9123 4567`, `(+65) 9123 4567`, or `9123 4567 (HP)`.
+  Because the country code is part of the number, `+65 9123 4567` and `9123 4567` count as different phone numbers
+  in duplicate checks and sorting. Enter each athlete's number in one consistent form.
 * Emails must have the form `local-part@domain` and contain at most 254 characters. The local part consists of
   alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by
   hyphens; the final label must have at least two characters. Spaces are not allowed.
