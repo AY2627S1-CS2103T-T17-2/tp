@@ -12,6 +12,7 @@ import trackflow.commons.exceptions.IllegalValueException;
 import trackflow.model.AthleteRoster;
 import trackflow.model.ReadOnlyRoster;
 import trackflow.model.person.Person;
+import trackflow.model.person.exceptions.DuplicatePersonException;
 
 /**
  * An Immutable AthleteRoster that is serializable to JSON format.
@@ -49,16 +50,19 @@ class JsonSerializableRoster {
         if (persons == null) {
             throw new IllegalValueException("Athlete list is missing!");
         }
-        AthleteRoster roster = new AthleteRoster();
+        List<Person> loadedPersons = new ArrayList<>();
         for (JsonAdaptedPerson jsonAdaptedPerson : persons) {
             if (jsonAdaptedPerson == null) {
                 throw new IllegalValueException("Athlete list contains a null athlete!");
             }
             Person person = jsonAdaptedPerson.toModelType();
-            if (roster.hasPerson(person)) {
-                throw new IllegalValueException(MESSAGE_DUPLICATE_PERSON);
-            }
-            roster.addPerson(person);
+            loadedPersons.add(person);
+        }
+        AthleteRoster roster = new AthleteRoster();
+        try {
+            roster.setPersons(loadedPersons);
+        } catch (DuplicatePersonException e) {
+            throw new IllegalValueException(MESSAGE_DUPLICATE_PERSON);
         }
         return roster;
     }

@@ -156,7 +156,7 @@ monitor is disconnected, TrackFlow fits the window into a connected screen's usa
 the last normal window bounds. Adding or editing athletes does not automatically enlarge the window.
 
 Resize the window as needed. Athlete details wrap, the roster scrolls, and long command feedback can be scrolled
-within the result area. The command box and status footer remain separate from the scrolling roster.
+within the result area. Select **Expand** to read or copy the full message in a resizable window. The command box and status footer remain separate from the scrolling roster.
 
 ### Command feedback and errors
 
@@ -201,14 +201,17 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   supported either; in a command, `s/` and `d/` are read as parameters and rejected. Write such names without the
   punctuation instead, for example `Tan Ah Kow Jr` or `Ravi s o Kumar`.
   Searching, sorting, and duplicate checking do not rename athletes or rewrite their stored name spacing.
-* Phone numbers must contain at least three significant digits, written as digit groups separated by spaces or
+* New phone numbers must contain 3–15 significant digits in total, with at least three digits after any country
+  code. The subscriber number cannot be all zeroes. Write digit groups separated by spaces or
   single hyphens (for example, `9123 4567` or `9123-4567`). An unbracketed `+` is allowed only at the start.
   Brackets must be balanced and non-empty. A bracketed country code such as `(+65)` is part of the number, but
   other bracketed text is treated as a note and ignored, whether it is letters like `(HP)` or digits like `(5)`.
   Only one country code is allowed, at the start, and a note goes before or after the number, not inside it
   (`9123 (HP) 4567` is rejected).
   Examples: `+65 9123 4567`, `(+65) 9123 4567`, or `9123 4567 (HP)`.
-  Older saved phone formats remain readable.
+  Separate an unbracketed country code from the number with a space or hyphen; the compact Singapore form
+  `+6591234567` is also accepted. Write extensions as bracketed notes, e.g. `9123 4567 (ext 123)`; bare
+  `ext 123` and notes splitting the digits are unsupported. Older saved phone formats and lengths remain readable.
 * Emails must have the form `local-part@domain` and contain at most 254 characters. The local part consists of
   alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by
   hyphens; the final label must have at least two characters. Spaces are not allowed.
@@ -218,15 +221,17 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   `65` forms; other explicit country codes remain distinct. Display text and sorting are unchanged.
   Sharing only a name, or sharing a phone or email with a different name, is allowed with a possible-duplicate
   warning. Each matching athlete is listed separately with their name, age category, phone, email, and matching fields.
-  Both checks search the full roster, including hidden athletes. Warnings identify athletes by their details rather
+  Both checks search the full roster, including hidden athletes. On edit, warnings are shown only when the
+  name, phone or email comparison key changes. Warnings identify athletes by their details rather
   than displayed indexes, which can change after a command.
 * Use `addr/ADDRESS` to supply the required nonblank, single-line address. Addresses can contain any characters except line
-  breaks, including pasted line or paragraph separators.
+  breaks. Line and paragraph separators are also rejected.
 * Add does not accept events or remarks. `edit` updates athlete details and addresses, `tag` and `untag` update track events, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
-  existing address, events, and remarks. Saved rosters are checked using the same duplicate rule on loading.
-  Before upgrading, resolve same-name records whose phones differ only by a Singapore country code; these now
-  count as duplicates and would trigger the unreadable-file backup recovery described below.
+  existing address, events, and remarks. Saved rosters retain the older significant-digit/email duplicate rule for compatibility.
+  Existing same-name records with distinct emails whose phones differ only by a Singapore country code are
+  preserved on loading. You can maintain or delete these records, but cannot add another equivalent record
+  or edit them into a duplicate under the older significant-digit/email rule. No records are silently merged.
 
 Examples:
 
@@ -309,7 +314,8 @@ Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]
 * Repeated field prefixes, empty or invalid values, and `t/` or `r/` parameters are rejected. Use `tag`/`untag` for events and `remark` for remarks.
 * Edits that create a duplicate athlete are rejected (producing `This athlete already exists in the roster: Avery Tan.`) using the same normalized name and contact comparison as `add`.
   The error names the existing matching athlete using their saved spelling, rather than the submitted name.
-* A successful edit displays the full roster again; failed edits leave the roster and displayed list unchanged.
+* A successful edit displays the full roster again and scrolls to the updated athlete; failed edits leave the
+  roster and displayed list unchanged.
 
 Examples:
 
@@ -326,7 +332,8 @@ Format: `remark INDEX r/[REMARK]`
 
 * `INDEX` refers to the index number shown in the displayed athlete list and must be a positive integer.
 * Exactly one `r/` prefix is required. The prefix is case-insensitive.
-* A new remark replaces the existing remark; remarks are not appended.
+* A new remark replaces the existing remark; remarks are not appended. Feedback distinguishes adding, updating
+  and removing a remark. Submitting the same remark reports that it is unchanged, without saving.
 * Use an empty remark, such as `remark 1 r/`, to remove the athlete's existing remark.
   If the athlete already has no remark, TrackFlow reports `Athlete has no remark to remove` followed by their
   details, and leaves the roster and current view unchanged.
@@ -496,7 +503,7 @@ Deletes all athletes from the roster.
 Format: `clear`, then `Y`
 
 `clear` displays a yellow warning without changing or saving the roster. To proceed, type `Y`.
-Type `N` to cancel. Responses are case-insensitive; any other command also cancels the pending clear.
+Type `N` or `no` to cancel; `yes` also confirms. Responses are case-insensitive; any other command also cancels the pending clear.
 
 **Confirmed deletion is permanent:** `Y` saves an empty roster with no undo. Close the app
 and back up `data/trackflow.json` in the JAR's home folder before clearing data you may need later. `delete` also saves
@@ -546,7 +553,7 @@ Close TrackFlow and make a separate backup before editing this file manually.
 
 **Caution:**
 If the saved roster cannot be loaded, TrackFlow preserves the original file in
-`data/trackflow.json.unreadable-<UUID>.bak`, logs the backup path, and starts with an empty roster.
+`data/trackflow.json.unreadable-<UUID>.bak`, logs the backup path, shows the complete recovery message in a resizable window, and starts with an empty roster.
 Later roster changes leave the backup intact. If the backup cannot be created, TrackFlow stops startup to
 protect the original file. Keep the preserved copy if you need to recover its records manually.
 </box>

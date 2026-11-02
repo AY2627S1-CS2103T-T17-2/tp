@@ -136,7 +136,7 @@ public class AddCommandParserTest {
 
         // EP: invalid phone (empty string boundary vs less than 3 digits boundary)
         assertParseFailure(parser, validArgs.replace("91234567", ""), Phone.MESSAGE_CONSTRAINTS); // Boundary value
-        assertParseFailure(parser, validArgs.replace("91234567", "12"), Phone.MESSAGE_CONSTRAINTS); // Boundary value
+        assertParseFailure(parser, validArgs.replace("91234567", "12"), Phone.MESSAGE_LENGTH); // Boundary value
 
         // EP: invalid email (empty string boundary vs missing format components)
         assertParseFailure(parser, validArgs.replace("avery.tan@example.com", ""), // Boundary value

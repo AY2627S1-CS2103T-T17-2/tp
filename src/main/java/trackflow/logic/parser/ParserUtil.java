@@ -136,8 +136,9 @@ public class ParserUtil {
     public static Phone parsePhone(String phone) throws ParseException {
         requireNonNull(phone);
         String trimmedPhone = phone.trim();
-        if (!Phone.isValidNewPhone(trimmedPhone)) {
-            throw new ParseException(Phone.MESSAGE_CONSTRAINTS);
+        String error = Phone.getNewPhoneValidationError(trimmedPhone);
+        if (!error.isEmpty()) {
+            throw new ParseException(error);
         }
         return new Phone(trimmedPhone);
     }

@@ -10,7 +10,7 @@ public interface ReadOnlyRoster {
 
     /**
      * Returns an unmodifiable view of the persons list.
-     * This list will not contain any duplicate persons.
+     * Stored-record duplicates are excluded; legacy Singapore-format pairs may be preserved.
      */
     ObservableList<Person> getPersonList();
 

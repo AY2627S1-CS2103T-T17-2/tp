@@ -113,6 +113,32 @@ public class Person {
     }
 
     /**
+     * Duplicate rule used before Singapore-default phone comparison. Bulk loading retains records that were
+     * distinct under this rule; new additions still use {@link #isSamePerson(Person)}.
+     */
+    public boolean isSameStoredPerson(Person otherPerson) {
+        return hasSameName(otherPerson)
+                && (phone.equals(otherPerson.phone)
+                || email.value.trim().equalsIgnoreCase(otherPerson.email.value.trim()));
+    }
+
+    /**
+     * Returns true if replacing {@code original} would introduce a duplicate of {@code other}.
+     * Existing Singapore-format pairs may be maintained, but cannot be made identical under the older rule.
+     */
+    public boolean introducesDuplicate(Person original, Person other) {
+        return isSamePerson(other) && (!original.isSamePerson(other) || isSameStoredPerson(other));
+    }
+
+    /**
+     * Returns true if the comparison keys for name, phone and email are unchanged.
+     */
+    public boolean hasSameIdentityFields(Person other) {
+        return hasSameName(other) && phone.getComparisonKey().equals(other.phone.getComparisonKey())
+                && email.value.trim().equalsIgnoreCase(other.email.value.trim());
+    }
+
+    /**
      * Returns true if either the phone's comparison key or the email matches those of {@code otherPerson}.
      * Email comparison ignores case and surrounding whitespace. Names are not compared; null returns false.
      */

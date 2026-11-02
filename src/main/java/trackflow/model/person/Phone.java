@@ -3,6 +3,7 @@ package trackflow.model.person;
 import static java.util.Objects.requireNonNull;
 import static trackflow.commons.util.AppUtil.checkArgument;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -12,17 +13,22 @@ import java.util.regex.Pattern;
 public class Phone {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Phone numbers must contain at least 3 digits, written as digit groups separated by single spaces or "
-                    + "hyphens (for example, 9123 4567 or 9123-4567). They may start with a country code such as "
-                    + "+65 or (+65), and may include a bracketed note such as (HP). A bracketed country code counts "
-                    + "as part of the number; any other bracketed text is treated as a note and is ignored. Brackets "
-                    + "must be balanced and non-empty. Use at most one country code at the start. "
-                    + "Notes may precede or follow the number, but must not split its digits.";
+            "Use digits separated by spaces or hyphens, e.g. 9123 4567. "
+                    + "Separate a leading country code with a space (+65 91234567) or brackets ((+65)91234567); "
+                    + "put nonempty bracketed notes before or after the number, e.g. 9123 4567 (ext 123).";
+
+    public static final String MESSAGE_LENGTH =
+            "Phone numbers must have 3–15 digits excluding notes, with at least 3 after a country code. "
+                    + "Example: +65 9123 4567.";
+    public static final String MESSAGE_ZERO = "Phone numbers cannot consist entirely of zeroes.";
 
     /**
      * Minimum number of significant digits a phone number must contain.
      */
     private static final int MINIMUM_DIGITS = 3;
+    private static final int MAXIMUM_DIGITS = 15;
+    private static final Pattern LEADING_COUNTRY_CODE = Pattern.compile(
+            "^(?:\\(\\+\\d++\\) ?|\\+\\d++[ -]|\\+65(?=\\d))");
 
     private static final String SINGAPORE_COUNTRY_CODE = "65";
     private static final int SINGAPORE_LOCAL_LENGTH = 8;
@@ -87,7 +93,33 @@ public class Phone {
      * Validates new command input while keeping older saved phone formats readable.
      */
     public static boolean isValidNewPhone(String test) {
-        return isValidPhone(test) && CURRENT_VALIDATION_PATTERN.matcher(test.trim().replaceAll("\\s+", " ")).matches();
+        return getNewPhoneValidationError(test).isEmpty();
+    }
+
+    /**
+     * Returns an actionable error for new command input, or an empty string if valid.
+     * Saved values retain their original validation rules to avoid making older rosters unreadable.
+     */
+    public static String getNewPhoneValidationError(String test) {
+        requireNonNull(test);
+        String normalised = test.trim().replaceAll("\\s+", " ");
+        if (!CURRENT_VALIDATION_PATTERN.matcher(normalised).matches()) {
+            return MESSAGE_CONSTRAINTS;
+        }
+        String number = normalised.replaceAll(BRACKETED_NOTE_REGEX, "").trim();
+        Matcher countryCode = LEADING_COUNTRY_CODE.matcher(number);
+        if (number.startsWith("+") && !countryCode.find()) {
+            return MESSAGE_CONSTRAINTS;
+        }
+        String subscriber = countryCode.replaceFirst("");
+        String digits = significantDigitsOf(number);
+        if (digits.length() > MAXIMUM_DIGITS || countDigits(subscriber) < MINIMUM_DIGITS) {
+            return MESSAGE_LENGTH;
+        }
+        if (subscriber.replaceAll("\\D", "").chars().allMatch(digit -> digit == '0')) {
+            return MESSAGE_ZERO;
+        }
+        return "";
     }
 
     /**

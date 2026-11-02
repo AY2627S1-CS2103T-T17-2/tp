@@ -54,7 +54,7 @@ public class RemarkCommandTest {
         RemarkCommand remarkCommand = new RemarkCommand(INDEX_FIRST_PERSON, remark); // Boundary value
         Person editedPerson = new PersonBuilder(personToEdit).withRemark(VALID_REMARK_AMY).build();
 
-        String expectedMessage = String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS,
+        String expectedMessage = String.format(RemarkCommand.MESSAGE_UPDATE_REMARK_SUCCESS,
                 Messages.formatAthlete(editedPerson));
 
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());
@@ -101,7 +101,7 @@ public class RemarkCommandTest {
         RemarkCommand remarkCommand = new RemarkCommand(INDEX_FIRST_PERSON, remark); // Boundary value
         Person editedPerson = new PersonBuilder(personToEdit).withRemark(VALID_REMARK_AMY).build();
 
-        String expectedMessage = String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS,
+        String expectedMessage = String.format(RemarkCommand.MESSAGE_UPDATE_REMARK_SUCCESS,
                 Messages.formatAthlete(editedPerson));
 
         Model expectedModel = new ModelManager(new AthleteRoster(model.getRoster()), new UserPrefs());

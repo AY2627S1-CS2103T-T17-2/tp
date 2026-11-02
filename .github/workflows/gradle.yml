@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
@@ -29,7 +30,39 @@ jobs:
           java-package: jdk+fx
 
       - name: Build and check with Gradle
-        run: ./gradlew check coverage
+        run: ./gradlew check coverage --info
+
+      - name: Collect macOS crash diagnostics
+        if: failure() && runner.os == 'macOS'
+        shell: bash
+        run: |
+          mkdir -p build/reports/macos
+          /usr/bin/log show --last 5m --style compact \
+            --predicate 'process == "java" OR process == "ReportCrash"' \
+            > build/reports/macos/system.log 2>&1 || true
+          for crash_dir in "$HOME/Library/Logs/DiagnosticReports" /Library/Logs/DiagnosticReports; do
+            if [ -d "$crash_dir" ]; then
+              find "$crash_dir" -maxdepth 2 -type f -mmin -10 \
+                \( -iname 'java*.ips' -o -iname 'java*.crash' \) \
+                -exec cp {} build/reports/macos/ \; || true
+            fi
+          done
+
+      - name: Upload test and crash reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-${{ matrix.platform }}
+          path: |
+            build/reports/tests/
+            build/reports/macos/
+            build/test-results/
+            build/hs_err_pid*.log
+            hs_err_pid*.log
+            ~/Library/Logs/DiagnosticReports/java*.ips
+            ~/Library/Logs/DiagnosticReports/java*.crash
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload coverage reports to Codecov
         if: runner.os == 'Linux'
