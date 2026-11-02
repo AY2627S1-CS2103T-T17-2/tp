@@ -14,9 +14,9 @@ public class Phone {
     public static final String MESSAGE_CONSTRAINTS =
             "Phone numbers must contain at least 3 digits, written as digit groups separated by single spaces or "
                     + "hyphens (for example, 9123 4567 or 9123-4567). They may start with a country code such as "
-                    + "+65 or (+65), and may include a bracketed note such as (HP). A bracketed country code counts "
-                    + "as part of the number; any other bracketed text is treated as a note and is ignored. Brackets "
-                    + "must be balanced and non-empty.";
+                    + "+65 or (+65), and may include a bracketed note such as (HP) before or after the number, but "
+                    + "not inside it. A bracketed country code counts as part of the number; any other bracketed "
+                    + "text is treated as a note and is ignored. Brackets must be balanced and non-empty.";
 
     /**
      * Minimum number of significant digits a phone number must contain.
@@ -39,14 +39,15 @@ public class Phone {
     private static final String NOTE_REGEX = "\\([^+()]++\\)";
 
     /**
-     * A valid phone number: a sequence of digit groups, country codes and notes, each optionally separated by a
-     * single space, where only the first digit group may carry a leading "+". This rejects dangling or empty
-     * brackets, stray or repeated hyphens, and a "+" placed anywhere other than the start, while still accepting
-     * notes and country codes written directly against the digits (such as "(+65)91234567").
+     * A valid phone number: at most one country code ("(+65)" or a leading "+") at the start, then digit groups
+     * optionally separated by single spaces, with bracketed notes allowed before or after the number but not
+     * between its digit groups. This rejects dangling or empty brackets, stray or repeated hyphens, a second
+     * country code, and a note splitting the number, while still accepting notes and country codes written
+     * directly against the digits (such as "(+65)91234567").
      */
     private static final String VALIDATION_REGEX =
-            "(?:\\+?" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + ")"
-                    + "(?: ?(?:" + DIGIT_GROUP_REGEX + "|" + COUNTRY_CODE_REGEX + "|" + NOTE_REGEX + "))*+";
+            "(?:" + COUNTRY_CODE_REGEX + " ?|(?:" + NOTE_REGEX + " ?)?\\+?)"
+                    + DIGIT_GROUP_REGEX + "(?: ?" + DIGIT_GROUP_REGEX + ")*+(?: ?" + NOTE_REGEX + ")*+";
     private static final Pattern VALIDATION_PATTERN = Pattern.compile(VALIDATION_REGEX);
 
     public final String value;
@@ -96,7 +97,17 @@ public class Phone {
      * equal, and callers (such as the phone sort) should order numbers by this value rather than the raw text.
      */
     public String getSignificantDigits() {
-        return value.replaceAll(BRACKETED_NOTE_REGEX, "").replaceAll("\\D", "");
+        return significantDigitsOf(value);
+    }
+
+    /**
+     * Returns the significant digits of {@code text}: its digits, keeping a bracketed country code such as
+     * "(+65)" but excluding the digits of a bracketed note such as "(HP)" or "(5)". Duplicate detection, sorting,
+     * and searching all reduce a phone (and a phone search keyword) with this method, so they compare numbers the
+     * same way regardless of spaces, hyphens, and brackets.
+     */
+    static String significantDigitsOf(String text) {
+        return text.replaceAll(BRACKETED_NOTE_REGEX, "").replaceAll("\\D", "");
     }
 
     @Override
