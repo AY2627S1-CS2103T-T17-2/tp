@@ -22,6 +22,8 @@
   before committing it.
 * Austin (`Austin-Chia`) used OpenAI Codex extensively to generate and refine project code, assist with testing
   and debugging, and review and improve documentation.
+* Qi Yuan (`qiyuannn`) used OpenAI Codex and Antigravity extensively to implement feature logic, resolve
+  edge-case bugs, expand automated test coverage, and polish project documentation.
 * Kenil (`ken2k7`) used Claude (Anthropic) extensively to review code, find and reproduce bugs, implement fixes for
   UI and input-validation, write tests, and draft documentation and PR/issue descriptions. He reviewed and tested
   all generated output before committing it.
