@@ -114,6 +114,8 @@ double its slash to enter it literally:
 
 * `edit 1 addr/Block A//B` stores `Block A/B`.
 * `remark 1 r/Practise r//relay on Mon/Tue` stores `Practise r/relay on Mon/Tue`.
+* `edit 1 addr/Blk 5 p//o box` stores `Blk 5 p/o box`. Without the extra slash, `p/o box` is read as a phone
+  parameter, so TrackFlow reports an invalid or repeated phone instead.
 * `find addr/Block A//B` searches that address.
 
 This applies only to a token shaped like a single-letter parameter or `addr/`. URLs such as
