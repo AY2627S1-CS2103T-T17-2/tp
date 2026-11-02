@@ -132,6 +132,7 @@
         "types-of-tests": "Types of tests",
         "reading-and-reviewing-tests": "Reading and reviewing tests",
         "build-and-focused-tests": "Build and focused tests",
+        "executable-specifications-and-generated-properties": "Executable specifications and generated properties",
         "adversarial-release-testing": "Adversarial release testing",
         "beta-audit-30-october-2026": "Beta audit: 30 October 2026"
       },
