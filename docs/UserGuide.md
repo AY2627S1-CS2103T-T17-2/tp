@@ -565,6 +565,10 @@ file. A fresh launch only displays sample athletes; it does not create a roster 
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do
   not coordinate edits and a later save can overwrite changes from the other instance.
+* **Terminal warnings at launch:** when started with `java -jar`, Java may print warnings such as
+  `Unsupported JavaFX configuration`, `A restricted method in java.lang.System has been called`, or
+  `sun.misc.Unsafe::allocateMemory will be removed`. They come from running the bundled JavaFX on Java 25, do not
+  affect TrackFlow, and can be safely ignored.
 
 
 --------------------------------------------------------------------------------------------------------------------
