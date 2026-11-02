@@ -79,7 +79,7 @@ public class AutocompleteEngine {
         if (template == null) {
             return "";
         }
-        if (template.contains(" INDEX") && (parts.length < 2 || !parts[1].matches("[0-9]+"))) {
+        if (template.contains(" INDEX") && (parts.length < 2 || !parts[1].matches("0*[1-9][0-9]*"))) {
             return "";
         }
 

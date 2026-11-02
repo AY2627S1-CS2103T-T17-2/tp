@@ -109,7 +109,7 @@ public class CommandBoxTest {
         assertEquals("add ", getCommandText());
         assertFalse(isSuggestionsPopupShowing());
 
-        // EP: tab key cycling / auto-inserting next parameter prefix
+        // EP: tab key inserting the next missing parameter prefix
         press(KeyCode.TAB);
         assertEquals("add n/ ", getCommandText());
     }
