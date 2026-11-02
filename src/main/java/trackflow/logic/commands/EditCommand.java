@@ -104,9 +104,10 @@ public class EditCommand extends Command {
         // @@author Austin-Chia
         List<Person> otherPersons = model.getRoster().getPersonList().stream()
                 .filter(person -> person != personToEdit).toList();
-        if (otherPersons.stream().anyMatch(editedPerson::isSamePerson)) {
+        Person duplicate = otherPersons.stream().filter(editedPerson::isSamePerson).findFirst().orElse(null);
+        if (duplicate != null) {
             // @@author
-            throw new CommandException(String.format(MESSAGE_DUPLICATE_PERSON, editedPerson.getName()));
+            throw new CommandException(String.format(MESSAGE_DUPLICATE_PERSON, duplicate.getName()));
         }
 
         String warning = Messages.getPossibleDuplicateWarning(editedPerson, otherPersons);

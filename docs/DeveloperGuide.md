@@ -512,8 +512,8 @@ Text fields are compared without considering letter case. Name comparison also c
 in the comparison key without rewriting the displayed or saved name. Phone sorting converts
 `Phone.getSignificantDigits()` to an arbitrary-precision numeric value. The shared key includes a bracketed country
 code such as `(+65)` and excludes other bracketed notes, including digits in `(5)` or `(Office 9)`. Displayed and
-saved text is unchanged, and large numeric values do not overflow. Duplicate identity uses the same significant
-digits key, so note digits are ignored there too.
+saved text is unchanged, and large numeric values do not overflow. Duplicate identity uses `Phone.getComparisonKey()`
+to additionally treat unprefixed eight-digit numbers as Singapore numbers; value equality retains significant digits.
 Age categories use the competition order
 `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
 
@@ -1200,8 +1200,8 @@ tag 1 t/100m
 
 ### Duplicate identity and complete equality
 
-Duplicate checks use normalized name plus **either** matching significant phone digits or matching email, regardless
-of age category. Bracketed notes are ignored; a country code such as `(+65)` counts as part of the phone number.
+Duplicate checks use normalized name plus matching phone keys or email, regardless of age category. Notes are ignored;
+unprefixed eight-digit phones match their `+65` forms. Duplicate errors identify the stored athlete's spelling.
 Name normalization ignores case and repeated spaces; email matching ignores case. Complete equality applies each
 field's equality rules across every field, including category, address, remark, and events. Phone formatting and
 event-name case do not by themselves make records unequal. These are separate contracts.
@@ -1209,7 +1209,7 @@ event-name case do not by themselves make records unequal. These are separate co
 1. Start with only Avery: run `clear`, then `Y`, then `add n/Avery Tan a/Under 14 p/91234567 e/avery@example.com addr/Home`. Attempt to add `AVERY   TAN` with the same phone and a different
    email and category. Expect a duplicate error, with no saved changes. Repeat with a different phone and matching
    email (including different email case); expect rejection again.
-1. Add a record with the same name but both a different phone and a different email. Expect success.
+1. Add the same name with different phone and email. Expect success with a `Matches: name` warning.
 1. Add `Jordan Lee` with Avery's phone and a different email. Expect success with a possible-duplicate warning listing
    Avery's name, category, phone and email, with `Matches: phone`. Edit Jordan to a different phone and Avery's email
    in different case; expect `Matches: email`. Match both contacts and expect one Avery entry with

@@ -33,28 +33,31 @@ public class Messages {
             + "If a value starts with '/', put a space after its prefix (e.g. addr/ //server/share).";
 
     public static final String MESSAGE_POSSIBLE_DUPLICATE =
-            "\nWarning: possible duplicate. Shared contact details:\n%1$s\nPlease review the records.";
+            "\nWarning: possible duplicate. Shared name or contact details:\n%1$s\nPlease review the records.";
 
     /**
-     * Warns about shared contacts without blocking the change. Each matching record is identified by its details
-     * and the shared contact fields, rather than a displayed index that may refer to another filtered view.
+     * Warns about shared names or contacts without blocking the change. Each matching record is identified by
+     * its details and matching fields, rather than a displayed index that may refer to another filtered view.
      */
     public static String getPossibleDuplicateWarning(Person person, Collection<Person> otherPersons) {
         String matches = otherPersons.stream()
                 .filter(other -> !person.isSamePerson(other))
-                .map(other -> formatSharedContact(person, other))
+                .map(other -> formatSharedDetails(person, other))
                 .filter(match -> !match.isEmpty())
                 .collect(Collectors.joining("\n"));
         return matches.isEmpty() ? "" : String.format(MESSAGE_POSSIBLE_DUPLICATE, matches);
     }
 
     /**
-     * Describes an existing record and its matching contact fields, or returns an empty string if neither matches.
-     * Phone comparison uses the shared significant-digit rule; email comparison ignores case and surrounding spaces.
+     * Describes an existing record and its matching fields, or returns an empty string if none match.
+     * Phone comparison uses the Singapore-default key; email comparison ignores case and surrounding spaces.
      */
-    private static String formatSharedContact(Person person, Person other) {
+    private static String formatSharedDetails(Person person, Person other) {
         List<String> matchingFields = new ArrayList<>();
-        if (person.getPhone().getSignificantDigits().equals(other.getPhone().getSignificantDigits())) {
+        if (person.hasSameName(other)) {
+            matchingFields.add("name");
+        }
+        if (person.getPhone().getComparisonKey().equals(other.getPhone().getComparisonKey())) {
             matchingFields.add("phone");
         }
         if (person.getEmail().value.trim().equalsIgnoreCase(other.getEmail().value.trim())) {

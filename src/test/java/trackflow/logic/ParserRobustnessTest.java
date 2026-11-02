@@ -409,6 +409,9 @@ public class ParserRobustnessTest {
         assertRejectedWithoutChanges(ParseException.class, List.of(
                 "", " \t\r\n", "unknown", "list extra", "help extra",
                 "exit extra", "clear\nexit", "sort name asc extra",
+                "add n/Bad Phone a/Open p/(+65) (+65) 9123 e/bad@example.com addr/Home",
+                "add n/Bad Phone a/Open p/9123 (HP) 4567 e/bad@example.com addr/Home",
+                "edit 1 p/+65 (+65) 9123", "edit 1 p/9123 (HP) 4567",
                 "find n/Avery N/Ben", "edit 1 p/999 P/888", "remark 1 r/first R/second",
                 "edit 1 x/value", "remark 1 r/Note\u2003x/value",
                 "edit 1 addr/Block\nAnnex", "edit 1 addr/Block\rAnnex", "edit 1 addr/Block\u2028Annex"));

@@ -252,7 +252,7 @@ public class EditCommandTest {
         EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
                 new EditPersonDescriptorBuilder().withEmail(first.getEmail().value.toUpperCase()).build());
         assertCommandFailure(command, model,
-                String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, second.getName()));
+                String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, first.getName()));
         assertEquals(second.getRemark(), model.getFilteredPersonList().get(0).getRemark());
     }
 

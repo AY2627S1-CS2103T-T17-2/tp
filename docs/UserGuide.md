@@ -208,16 +208,16 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   Only one country code is allowed, at the start, and a note goes before or after the number, not inside it
   (`9123 (HP) 4567` is rejected).
   Examples: `+65 9123 4567`, `(+65) 9123 4567`, or `9123 4567 (HP)`.
-  Because the country code is part of the number, `+65 9123 4567` and `9123 4567` count as different phone numbers
-  in duplicate checks and sorting. Enter each athlete's number in one consistent form.
+  Older saved phone formats remain readable.
 * Emails must have the form `local-part@domain` and contain at most 254 characters. The local part consists of
   alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by
   hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless
   of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case.
-  Phone comparisons ignore bracketed notes (including digits), but retain country codes such as `(+65)`.
-  A different name sharing a phone or email is allowed with a possible-duplicate warning. Each matching athlete is
-  listed separately with their name, age category, phone, email, and whether the phone, email, or both matched.
+  Phone comparisons ignore formatting and notes. Unprefixed eight-digit numbers match their `+65`, `(+65)` and
+  `65` forms; other explicit country codes remain distinct. Display text and sorting are unchanged.
+  Sharing only a name, or sharing a phone or email with a different name, is allowed with a possible-duplicate
+  warning. Each matching athlete is listed separately with their name, age category, phone, email, and matching fields.
   Both checks search the full roster, including hidden athletes. Warnings identify athletes by their details rather
   than displayed indexes, which can change after a command.
 * Use `addr/ADDRESS` to supply the required nonblank, single-line address. Addresses can contain any characters except line
@@ -225,6 +225,8 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
 * Add does not accept events or remarks. `edit` updates athlete details and addresses, `tag` and `untag` update track events, and `remark` updates remarks. **`a/` means age category for `add`, `edit`, and `filter`.** Use `addr/` with `edit` to update addresses.
 * Athletes are saved automatically. Older saved entries without an age category load as `Open`, retaining their
   existing address, events, and remarks. Saved rosters are checked using the same duplicate rule on loading.
+  Before upgrading, resolve same-name records whose phones differ only by a Singapore country code; these now
+  count as duplicates and would trigger the unreadable-file backup recovery described below.
 
 Examples:
 
@@ -306,6 +308,7 @@ Format: `edit INDEX [n/NAME] [a/AGE_CATEGORY] [p/PHONE] [e/EMAIL] [addr/ADDRESS]
 * Use `addr/ADDRESS` to edit the address. An empty or whitespace-only address is rejected.
 * Repeated field prefixes, empty or invalid values, and `t/` or `r/` parameters are rejected. Use `tag`/`untag` for events and `remark` for remarks.
 * Edits that create a duplicate athlete are rejected (producing `This athlete already exists in the roster: Avery Tan.`) using the same normalized name and contact comparison as `add`.
+  The error names the existing matching athlete using their saved spelling, rather than the submitted name.
 * A successful edit displays the full roster again; failed edits leave the roster and displayed list unchanged.
 
 Examples:

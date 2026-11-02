@@ -21,7 +21,7 @@ import trackflow.commons.util.ToStringBuilder;
  * matches if any unprefixed keyword matches or every field criterion matches. Empty keyword collections match no
  * athletes. Name-scoped matching ignores repeated ordinary spaces in both the name and search phrase.
  * A phone-field keyword (p/) matches by significant digits, so formatting and bracketed notes are ignored in
- * both the phone and the keyword, keeping p/ find consistent with duplicate detection and sorting. A broad
+ * both the phone and the keyword, using the same significant digits as value equality and sorting. A broad
  * keyword also matches the phone's displayed text, so a bracketed note such as "(HP)" stays searchable.
  */
 public class PersonContainsKeywordsPredicate implements Predicate<Person> {
@@ -93,7 +93,7 @@ public class PersonContainsKeywordsPredicate implements Predicate<Person> {
     /**
      * Matches a phone search by digits: a keyword matches when the significant digits of the keyword appear within
      * the phone's significant digits. Both sides are reduced with {@link Phone#significantDigitsOf}, so spaces,
-     * hyphens, and bracketed notes are ignored exactly as they are for duplicate detection and sorting. A keyword
+     * hyphens, and bracketed notes are ignored exactly as they are for value equality and sorting. A keyword
      * with no significant digits matches nothing.
      */
     private static boolean matchesPhoneDigits(String phoneDigits, List<String> keywords) {

@@ -90,7 +90,7 @@ public class PersonTest {
         Person withCountryCode = new PersonBuilder(local).withPhone("(+65) 81234567")
                 .withEmail("country@example.com").build();
         assertTrue(local.isSamePerson(withNote));
-        assertFalse(local.isSamePerson(withCountryCode));
+        assertTrue(local.isSamePerson(withCountryCode));
         assertTrue(withCountryCode.isSamePerson(new PersonBuilder(withCountryCode)
                 .withPhone("6581234567 (Office 2)").withEmail("other@example.com").build()));
 

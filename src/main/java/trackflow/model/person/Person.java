@@ -100,18 +100,25 @@ public class Person {
             return true;
         }
 
-        return otherPerson != null
-                && normalizeName(name).equalsIgnoreCase(normalizeName(otherPerson.name))
+        return hasSameName(otherPerson)
                 && hasSameContactDetails(otherPerson);
     }
 
     /**
-     * Returns true if either the phone's significant digits or the email matches those of {@code otherPerson}.
+     * Returns true if the names match ignoring case and repeated whitespace; null returns false.
+     */
+    public boolean hasSameName(Person otherPerson) {
+        return otherPerson != null
+                && normalizeName(name).equalsIgnoreCase(normalizeName(otherPerson.name));
+    }
+
+    /**
+     * Returns true if either the phone's comparison key or the email matches those of {@code otherPerson}.
      * Email comparison ignores case and surrounding whitespace. Names are not compared; null returns false.
      */
     public boolean hasSameContactDetails(Person otherPerson) {
         return otherPerson != null
-                && (phone.getSignificantDigits().equals(otherPerson.phone.getSignificantDigits())
+                && (phone.getComparisonKey().equals(otherPerson.phone.getComparisonKey())
                 || email.value.trim().equalsIgnoreCase(otherPerson.email.value.trim()));
     }
 
