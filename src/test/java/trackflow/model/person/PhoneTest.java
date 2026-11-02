@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static trackflow.testutil.Assert.assertThrows;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -53,6 +54,10 @@ public class PhoneTest {
         // EP: invalid hyphen placement and misplaced plus signs
         assertFalse(Phone.isValidPhone("---123---"));
         assertFalse(Phone.isValidPhone("91+23+45"));
+        for (String invalid : List.of("(+65) (+65) 9123", "+65 (+65) 9123", "9123 (+65) 4567",
+                "9123 (HP) 4567", "9123(5)4567", "(+65)", "(+65) (HP)")) {
+            assertFalse(Phone.isValidNewPhone(invalid), invalid);
+        }
 
         // EP: valid minimum length phone number (exactly 3 digits)
         assertTrue(Phone.isValidPhone("911")); // Boundary value
@@ -88,7 +93,7 @@ public class PhoneTest {
     }
 
     @Test
-    public void getSignificantDigits() {
+    public void getPhoneKeys() {
         // EP: standard phone number (spaces ignored)
         assertEquals("91234567", new Phone("9123 4567").getSignificantDigits());
 
@@ -100,6 +105,14 @@ public class PhoneTest {
 
         // EP: country code counted in significant digits
         assertEquals("6591234567", new Phone("(+65) 9123 4567").getSignificantDigits());
+        for (String phone : List.of("91234567", "9123-4567 (HP)", "+65 9123 4567",
+                "(+65)91234567", "65 9123 4567")) {
+            assertEquals("6591234567", new Phone(phone).getComparisonKey());
+        }
+        assertEquals("4491234567", new Phone("+44 91234567").getComparisonKey());
+        assertEquals("12345678", new Phone("+12345678").getComparisonKey());
+        assertEquals("65200", new Phone("(+65) 200").getComparisonKey());
+        assertEquals("200", new Phone("200 (5)").getComparisonKey());
     }
 
     // EP: phone constructor collapses multiple and leading/trailing whitespace

@@ -48,9 +48,16 @@ public class JsonAdaptedPersonTest {
 
     // EP: valid person details with all fields present
     @Test
-    public void toModelType_validPersonDetails_returnsPerson() throws Exception {
+    public void toModelType_currentAndLegacyPhoneDetails_returnsPerson() throws Exception {
         JsonAdaptedPerson person = new JsonAdaptedPerson(BENSON);
         assertEquals(BENSON, person.toModelType());
+        for (String phone : List.of("9123 (HP) 4567", "(+65) (+65) 9123")) {
+            JsonAdaptedPerson stored = new JsonAdaptedPerson(VALID_NAME, phone, VALID_EMAIL,
+                    VALID_ADDRESS, VALID_REMARK, VALID_TAGS);
+            Person restored = stored.toModelType();
+            assertEquals(phone, restored.getPhone().value);
+            assertEquals(restored, new JsonAdaptedPerson(restored).toModelType());
+        }
     }
 
     // EP: legacy JSON record omitting category field (defaults to Open)

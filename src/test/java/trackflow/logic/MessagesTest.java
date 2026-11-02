@@ -39,7 +39,7 @@ public class MessagesTest {
         Person added = new PersonBuilder().withName("Blake Tan")
                 .withPhone("91111111").withEmail("alex2@example.com").build();
 
-        String expected = "\nWarning: possible duplicate. Shared contact details:\n"
+        String expected = "\nWarning: possible duplicate. Shared name or contact details:\n"
                 + "- Alex Tan; Age category: Open; Phone: 91111111; Email: alex1@example.com; Matches: phone\n"
                 + "- Alex Tan; Age category: Open; Phone: 92222222; Email: alex2@example.com; Matches: email\n"
                 + "Please review the records.";
@@ -88,10 +88,10 @@ public class MessagesTest {
     }
 
     @Test
-    public void getPossibleDuplicateWarning_differentCountryCode_doesNotMatchPhone() {
+    public void getPossibleDuplicateWarning_foreignCountryCode_doesNotMatchPhone() {
         // EP: phone numbers with different country codes treated as non-matching
         Person added = new PersonBuilder().withName("Blake Tan")
-                .withPhone("(+65) 91234567").withEmail("blake@example.com").build();
+                .withPhone("(+44) 91234567").withEmail("blake@example.com").build();
         Person other = new PersonBuilder().withName("Alex Tan")
                 .withPhone("91234567").withEmail("alex@example.com").build();
 

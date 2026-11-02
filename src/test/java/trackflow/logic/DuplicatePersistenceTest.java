@@ -51,13 +51,17 @@ public class DuplicatePersistenceTest {
         Map<String, String> duplicateCommands = Map.of(
                 "add n/AVERY   TAN a/Under 16 p/91234567 e/other@example.com addr/Elsewhere",
                 String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"),
+                "add n/AVERY TAN a/Open p/(+65) 91234567 e/country@example.com addr/Home",
+                String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"),
                 "add n/Avery Tan a/Open p/91234567 (Office 2) e/other@example.com addr/Elsewhere",
                 String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"),
                 "add n/avery tan a/Open p/93456789 e/AVERY@example.com addr/Elsewhere",
                 String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"),
                 "edit 1 n/AVERY   TAN e/AVERY@example.com",
-                String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, "AVERY   TAN"),
+                String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"),
                 "edit 1 n/Avery Tan p/91234567 (Office 2)",
+                String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"),
+                "edit 1 n/AVERY TAN p/+65 91234567",
                 String.format(EditCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"),
                 "add n/Jordan Lee a/Open p/6592345678 (Office 2) e/other@example.com addr/Elsewhere",
                 String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Jordan Lee"));
@@ -82,8 +86,8 @@ public class DuplicatePersistenceTest {
         logic.execute("find n/Nobody");
         // EP: adding athlete with shared phone detail produces warning
         String addFeedback = logic.execute(
-                "add n/Jordan Lee a/Open p/91234567 e/jordan@example.com addr/School").getFeedbackToUser();
-        assertEquals("New athlete added: Jordan Lee; Age category: Open; Phone: 91234567; Email: jordan@example.com"
+                "add n/Jordan Lee a/Open p/+65 91234567 e/jordan@example.com addr/School").getFeedbackToUser();
+        assertEquals("New athlete added: Jordan Lee; Age category: Open; Phone: +65 91234567; Email: jordan@example.com"
                 + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE,
                         "- Avery Tan; Age category: Under 14; Phone: 91234567; "
                         + "Email: avery@example.com; Matches: phone"), addFeedback);
@@ -137,6 +141,11 @@ public class DuplicatePersistenceTest {
                         "- Alex Tan; Age category: Open; Phone: 91111111; Email: alex1@example.com; Matches: email\n"
                         + "- Alex Tan; Age category: Open; Phone: 92222222; Email: alex2@example.com; Matches: phone"),
                 editFeedback);
+        logic.execute("find n/Blake");
+        String nameFeedback = logic.execute("edit 1 n/ALEX   TAN p/93334444 e/new@example.com")
+                .getFeedbackToUser();
+        assertTrue(nameFeedback.contains("Matches: name"));
+        assertFalse(nameFeedback.contains("new@example.com; Matches:"));
         assertEquals(3, reloaded.getRoster().getPersonList().size());
         assertEquals(reloaded.getRoster(), rosterStorage.readRoster().orElseThrow());
     }

@@ -53,14 +53,16 @@ public class AddCommandIntegrationTest {
 
     // EP: person with same name but distinct phone and email contacts
     @Test
-    public void execute_sameNameDifferentContacts_succeedsWithoutWarning() {
+    public void execute_sameNameDifferentContacts_succeedsWithNameWarning() {
         Person existing = model.getRoster().getPersonList().get(0); // Boundary value
         Person candidate = new PersonBuilder(existing).withPhone("81112222").withEmail("new@example.com").build();
         Model expectedModel = new ModelManager(model.getRoster(), new UserPrefs());
         // @@author
         expectedModel.addPerson(candidate);
         assertCommandSuccess(new AddCommand(candidate), model,
-                String.format(AddCommand.MESSAGE_SUCCESS, Messages.formatAthlete(candidate)), expectedModel);
+                String.format(AddCommand.MESSAGE_SUCCESS, Messages.formatAthlete(candidate))
+                        + String.format(Messages.MESSAGE_POSSIBLE_DUPLICATE,
+                                "- " + Messages.formatAthlete(existing) + "; Matches: name"), expectedModel);
     }
 
     // EP: valid new person added to populated roster
