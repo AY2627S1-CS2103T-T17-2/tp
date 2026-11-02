@@ -189,6 +189,9 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   apostrophe may join two words (for example, `Mary-Jane` or `O'Brien`), but a name cannot start or end with one,
   repeat one (`Mary--Jane`), or put spaces around one (`Mary - Jane`). Accented letters and other writing systems are
   not currently supported.
+  Other punctuation, such as full stops (`Tan Ah Kow Jr.`) and slashes (`Ravi s/o Kumar`, `Siti d/o Ahmad`), is not
+  supported either; in a command, `s/` and `d/` are read as parameters and rejected. Write such names without the
+  punctuation instead, for example `Tan Ah Kow Jr` or `Ravi s o Kumar`.
   Searching, sorting, and duplicate checking do not rename athletes or rewrite their stored name spacing.
 * Phone numbers must contain at least three significant digits, written as digit groups separated by spaces or
   single hyphens (for example, `9123 4567` or `9123-4567`). An unbracketed `+` is allowed only at the start.
