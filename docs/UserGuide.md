@@ -64,8 +64,8 @@ Interface (GUI).
   For example, `edit INDEX [n/NAME]` can be used as `edit 1 n/John Doe` or as part of an edit with other fields.
 
 * Items followed by `...` can appear zero or more times.<br>
-  For example, in `tag INDEX t/EVENT [t/EVENT]...`, the extra `[t/EVENT]` can be omitted, as in `tag 1 t/100m`,
-  or repeated, as in `tag 1 t/100m t/200m t/Long Jump`.
+  For example, in `tag INDEX t/EVENT [t/EVENT]...`, the extra `[t/EVENT]` can be omitted, as in `tag 1 t/Relay`,
+  or repeated, as in `tag 1 t/Relay t/High Jump t/Long Jump`.
 
 * Field prefixes can be in any order. For `find`, put unprefixed keywords before field prefixes.<br>
   For example, if the command specifies `n/NAME p/PHONE`, `p/PHONE n/NAME` is also acceptable.
@@ -208,6 +208,8 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   Only one country code is allowed, at the start, and a note goes before or after the number, not inside it
   (`9123 (HP) 4567` is rejected).
   Examples: `+65 9123 4567`, `(+65) 9123 4567`, or `9123 4567 (HP)`.
+  Because the country code is part of the number, `+65 9123 4567` and `9123 4567` count as different phone numbers
+  in duplicate checks and sorting. Enter each athlete's number in one consistent form.
 * Emails must have the form `local-part@domain` and contain at most 254 characters. The local part consists of
   alphanumeric groups separated by `+`, `_`, `.`, or `-`. Domain labels consist of alphanumeric groups separated by
   hyphens; the final label must have at least two characters. Spaces are not allowed.
@@ -565,6 +567,10 @@ file. A fresh launch only displays sample athletes; it does not create a roster 
   [setup guide](SettingUp.md#runtime-and-build-requirements) for runtime requirements.
 * **One app instance per roster:** close the existing instance before opening the same JAR again. Two instances do
   not coordinate edits and a later save can overwrite changes from the other instance.
+* **Terminal warnings at launch:** when started with `java -jar`, Java may print warnings such as
+  `Unsupported JavaFX configuration`, `A restricted method in java.lang.System has been called`, or
+  `sun.misc.Unsafe::allocateMemory will be removed`. They come from running the bundled JavaFX on Java 25, do not
+  affect TrackFlow, and can be safely ignored.
 
 
 --------------------------------------------------------------------------------------------------------------------
