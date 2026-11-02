@@ -34,6 +34,13 @@ test {
 
 tasks.withType(Test).configureEach {
     systemProperty 'verification.seed', providers.gradleProperty('verificationSeed').getOrElse('2103')
+    jvmArgs "-XX:ErrorFile=${layout.buildDirectory.file('hs_err_pid%p.log').get().asFile}"
+    if (System.getenv('CI') == 'true') {
+        testLogging {
+            events 'started', 'failed', 'skipped'
+            exceptionFormat = 'full'
+        }
+    }
 }
 
 tasks.register('verifyInvariants', Test) {

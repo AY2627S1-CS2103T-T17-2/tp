@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.awt.Desktop;
 import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,9 +61,6 @@ public class CommandBoxTest {
     @BeforeEach
     public void setUp() throws Exception {
         Assumptions.assumeTrue(isJavaFxAvailable, "JavaFX toolkit not available in this environment.");
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.APP_REQUEST_FOREGROUND)) {
-            Desktop.getDesktop().requestForeground(true);
-        }
         CountDownLatch focused = new CountDownLatch(1);
         runOnFxThread(() -> {
             CommandBox commandBox = new CommandBox(commandText -> {
@@ -72,6 +68,7 @@ public class CommandBoxTest {
                 return new CommandResult("");
             });
             stage = new Stage();
+            stage.setAlwaysOnTop(true);
             stage.setScene(new Scene(commandBox.getRoot(), 600, 80));
             stage.show();
             stage.toFront();

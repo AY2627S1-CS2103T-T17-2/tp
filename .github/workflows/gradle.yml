@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         platform: [ubuntu-latest, macos-15-intel, windows-latest]
     runs-on: ${{ matrix.platform }}
@@ -30,6 +31,21 @@ jobs:
 
       - name: Build and check with Gradle
         run: ./gradlew check coverage
+
+      - name: Upload test and crash reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-${{ matrix.platform }}
+          path: |
+            build/reports/tests/
+            build/test-results/
+            build/hs_err_pid*.log
+            hs_err_pid*.log
+            ~/Library/Logs/DiagnosticReports/java*.ips
+            ~/Library/Logs/DiagnosticReports/java*.crash
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload coverage reports to Codecov
         if: runner.os == 'Linux'
