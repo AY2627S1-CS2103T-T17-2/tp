@@ -400,7 +400,7 @@ Examples:
 * `find n/und` searches only names, so an athlete named `Underwood` can be found without matching age categories.
 * `find a/under 16` searches only age categories.
 * `find 9123` searches partial phone numbers.
-* `find p/9123` searches only phone numbers.
+* `find p/9123` searches only phone numbers, matched by digits — so formatting and bracketed notes are ignored (`find p/91234567` finds `9123 4567`). A broad `find` also matches the displayed phone text, so `find HP` finds a phone noted `(HP)`.
 * `find tan@exam` searches partial email addresses.
 * `find r/injured` searches only remarks.
 * `find t/hurdles` searches only events, returning athletes with an event such as `Hurdles` or `110m-Hurdles`.

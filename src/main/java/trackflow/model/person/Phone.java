@@ -96,7 +96,17 @@ public class Phone {
      * equal, and callers (such as the phone sort) should order numbers by this value rather than the raw text.
      */
     public String getSignificantDigits() {
-        return value.replaceAll(BRACKETED_NOTE_REGEX, "").replaceAll("\\D", "");
+        return significantDigitsOf(value);
+    }
+
+    /**
+     * Returns the significant digits of {@code text}: its digits, keeping a bracketed country code such as
+     * "(+65)" but excluding the digits of a bracketed note such as "(HP)" or "(5)". Duplicate detection, sorting,
+     * and searching all reduce a phone (and a phone search keyword) with this method, so they compare numbers the
+     * same way regardless of spaces, hyphens, and brackets.
+     */
+    static String significantDigitsOf(String text) {
+        return text.replaceAll(BRACKETED_NOTE_REGEX, "").replaceAll("\\D", "");
     }
 
     @Override
