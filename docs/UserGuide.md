@@ -64,7 +64,8 @@ Interface (GUI).
   For example, `edit INDEX [n/NAME]` can be used as `edit 1 n/John Doe` or as part of an edit with other fields.
 
 * Items followed by `...` can appear zero or more times.<br>
-  For example, `find KEYWORD [MORE_KEYWORDS]...` can include `Avery` or `Avery Tan`.
+  For example, in `tag INDEX t/EVENT [t/EVENT]...`, the extra `[t/EVENT]` can be omitted, as in `tag 1 t/100m`,
+  or repeated, as in `tag 1 t/100m t/200m t/Long Jump`.
 
 * Field prefixes can be in any order. For `find`, put unprefixed keywords before field prefixes.<br>
   For example, if the command specifies `n/NAME p/PHONE`, `p/PHONE n/NAME` is also acceptable.
@@ -72,7 +73,7 @@ Interface (GUI).
 * Command words and parameter prefixes are case-insensitive. For example, `LIST`, `List`, and `list` invoke the same
   command, while `n/Avery` and `N/Avery` supply the same name parameter.
 
-* The `list`, `help`, and `exit` commands do not accept parameters.
+* The `list`, `help`, `clear`, and `exit` commands do not accept parameters.
 
 * Leading and trailing spaces around a command or parameter value are ignored. Pasted Unicode spaces, including
   non-breaking and em spaces, are accepted between the command word and parameters, before prefixes, and between
@@ -138,6 +139,10 @@ TrackFlow provides an autocomplete feature to speed up typing and ensure correct
 * After you enter the command word (or select it with **Tab**), press **Tab** again to insert the next missing prefix.
   For `edit`, `remark`, `tag`, and `untag`, type the athlete index first; autocomplete does not insert it for you.
   After typing a parameter value, press **Tab** to insert the next missing prefix.
+* For `edit`, **Tab** inserts every field prefix in turn even though the fields are optional. Delete any prefix you
+  leave empty before pressing **Enter**, as an empty field is rejected.
+* **Tab** only inserts a command's listed prefixes. It does not insert `find` field prefixes or extra `t/` prefixes
+  for `tag` and `untag`; type those yourself.
 * Prefixes already entered in the command box (even in uppercase or in a different order) are recognized and skipped automatically.
   Autocomplete uses the same Unicode-space separators as command parsing, including pasted non-breaking spaces.
 * Press **Escape** to dismiss suggestions. **Shift+Tab** moves focus backward. When no suggestion or prefix is
@@ -191,7 +196,8 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   apostrophe may join two words (for example, `Mary-Jane` or `O'Brien`), but a name cannot start or end with one,
   repeat one (`Mary--Jane`), or put spaces around one (`Mary - Jane`). Accented letters and other writing systems are
   not currently supported.
-  Other punctuation, such as full stops (`Tan Ah Kow Jr.`) and slashes (`Ravi s/o Kumar`, `Siti d/o Ahmad`), is not
+  Use a straight apostrophe (`'`); the curly apostrophe (`’`) that some phones and word processors insert is not
+  accepted. Other punctuation, such as full stops (`Tan Ah Kow Jr.`) and slashes (`Ravi s/o Kumar`, `Siti d/o Ahmad`), is not
   supported either; in a command, `s/` and `d/` are read as parameters and rejected. Write such names without the
   punctuation instead, for example `Tan Ah Kow Jr` or `Ravi s o Kumar`.
   Searching, sorting, and duplicate checking do not rename athletes or rewrite their stored name spacing.

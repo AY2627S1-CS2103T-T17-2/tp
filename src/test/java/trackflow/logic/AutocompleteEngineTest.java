@@ -293,6 +293,9 @@ public class AutocompleteEngineTest {
             assertEquals("", autocompleteEngine.getNextPrefix(command + " "));
             assertEquals("", autocompleteEngine.getNextPrefix(command + " INDEX"));
             assertEquals("", autocompleteEngine.getNextPrefix(command + " n/Avery"));
+            // EP: zero index, which every indexed command rejects
+            assertEquals("", autocompleteEngine.getNextPrefix(command + " 0"));
+            assertEquals("", autocompleteEngine.getNextPrefix(command + " 000"));
         }
         // EP: command with numeric index containing leading zeros
         assertEquals(" n/", autocompleteEngine.getNextPrefix("EDIT 0001"));

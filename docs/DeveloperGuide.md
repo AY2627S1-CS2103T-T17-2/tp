@@ -400,8 +400,11 @@ It provides real-time dropdown suggestions for commands based on the user's inpu
     * Pros: Shows the user all required fields immediately.
     * Cons: If the user accidentally executes the command before filling all fields, the parser fails with an invalid format error. It also requires manual navigation between the placeholders.
   * **Alternative 2 (Current Choice):** Incrementally insert prefixes using `Tab`.
-    * Pros: Creates a guided, IDE-like snippet experience. Prevents trailing empty prefixes from causing parsing errors.
+    * Pros: Creates a guided, IDE-like snippet experience. For commands whose fields are all required, such as `add`,
+      the user fills each prefix before the next is inserted, avoiding a template of empty prefixes.
     * Cons: Requires slightly more complex logic to parse the current text and determine the next missing prefix.
+      For `edit`, whose fields are optional, `Tab` still inserts each missing prefix in turn, so a prefix the user
+      leaves empty is rejected as an invalid value and must be deleted before pressing `Enter`.
 
 ### Athlete remarks
 
