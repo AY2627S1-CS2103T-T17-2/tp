@@ -124,6 +124,22 @@ public class PersonContainsKeywordsPredicateTest {
         assertTrue(new PersonContainsKeywordsPredicate(List.of("HP")).test(textNote));
     }
 
+    // EP: a bracketed area code before the number is searchable by p/, so similar numbers stay distinct
+    @Test
+    public void test_phoneLeadingCodeSearch_matchesCodeDigits() {
+        Person newYork = new PersonBuilder(ATHLETE).withPhone("(212) 123-4567").build();
+        Person other = new PersonBuilder(ATHLETE).withPhone("(555) 123-4567").build();
+
+        assertTrue(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("212"))).test(newYork));
+        assertTrue(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("(212) 1234567"))).test(newYork));
+        assertTrue(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("(555)"))).test(other));
+        assertFalse(new PersonContainsKeywordsPredicate(List.of(),
+                Map.of(SearchField.PHONE, List.of("212"))).test(other));
+    }
+
     // EP: phone search with a keyword that contains no significant digits matches nothing
     @Test
     public void test_phoneSearchWithoutDigits_returnsFalse() {
