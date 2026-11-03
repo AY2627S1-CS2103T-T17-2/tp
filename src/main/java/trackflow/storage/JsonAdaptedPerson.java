@@ -101,10 +101,12 @@ class JsonAdaptedPerson {
             throw new IllegalValueException(Name.MESSAGE_CONSTRAINTS);
         }
         final Name modelName = new Name(name);
-        if (ageCategory != null && !AgeCategory.isValidAgeCategory(ageCategory)) {
+        // A missing or blank category (for example, from an older or hand-edited file) loads as Open.
+        final boolean hasAgeCategory = ageCategory != null && !ageCategory.isBlank();
+        if (hasAgeCategory && !AgeCategory.isValidAgeCategory(ageCategory)) {
             throw new IllegalValueException(AgeCategory.MESSAGE_CONSTRAINTS);
         }
-        final AgeCategory modelAgeCategory = new AgeCategory(ageCategory == null ? "Open" : ageCategory);
+        final AgeCategory modelAgeCategory = new AgeCategory(hasAgeCategory ? ageCategory : "Open");
 
         if (phone == null) {
             throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Phone.class.getSimpleName()));
@@ -123,8 +125,9 @@ class JsonAdaptedPerson {
         final Email modelEmail = new Email(email);
 
         // Address and remark are optional data: a saved athlete that is missing either (for example, from an
-        // older file) loads with an empty value rather than making the whole file unreadable.
-        final String addressValue = address == null ? "" : address;
+        // older file) loads with an empty value rather than making the whole file unreadable. Surrounding
+        // whitespace, which the commands trim on input, is removed so that a hand-edited file still loads.
+        final String addressValue = address == null ? "" : address.strip();
         if (!Address.isValidAddress(addressValue)) {
             throw new IllegalValueException(Address.MESSAGE_CONSTRAINTS);
         }

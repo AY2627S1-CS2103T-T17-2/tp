@@ -6,6 +6,7 @@ package trackflow.storage;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -13,7 +14,9 @@ import java.util.logging.Logger;
 import trackflow.commons.core.LogsCenter;
 import trackflow.commons.exceptions.DataLoadingException;
 import trackflow.commons.exceptions.IllegalValueException;
+import trackflow.commons.util.FileUtil;
 import trackflow.commons.util.JsonUtil;
+import trackflow.model.AthleteRoster;
 import trackflow.model.ReadOnlyRoster;
 
 /**
@@ -63,6 +66,13 @@ public class JsonRosterStorage {
     public Optional<ReadOnlyRoster> readRoster(Path filePath) throws DataLoadingException {
         requireNonNull(filePath);
 
+        if (isBlankFile(filePath)) {
+            // A file that exists but was never written to (or was emptied by hand) holds no athletes; treating
+            // it as unreadable would back it up and alarm the user for nothing.
+            logger.info("Data file " + filePath + " is blank. Starting with an empty athlete roster.");
+            return Optional.of(new AthleteRoster());
+        }
+
         Optional<JsonSerializableRoster> jsonRoster = JsonUtil.readJsonFile(
                 filePath, JsonSerializableRoster.class);
         if (!jsonRoster.isPresent()) {
@@ -74,6 +84,19 @@ public class JsonRosterStorage {
         } catch (IllegalValueException ive) {
             logger.info("Illegal values found in " + filePath + ": " + ive.getMessage());
             throw new DataLoadingException(ive);
+        }
+    }
+
+    /**
+     * Returns true if the file exists and contains only whitespace.
+     *
+     * @throws DataLoadingException If the file exists but cannot be read.
+     */
+    private static boolean isBlankFile(Path filePath) throws DataLoadingException {
+        try {
+            return Files.exists(filePath) && FileUtil.readFromFile(filePath).isBlank();
+        } catch (IOException e) {
+            throw new DataLoadingException(e);
         }
     }
 

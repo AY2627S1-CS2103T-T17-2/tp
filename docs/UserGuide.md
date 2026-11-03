@@ -507,9 +507,10 @@ Deletes all athletes from the roster.
 Format: `clear`, then `Y`
 
 `clear` displays a yellow warning without changing or saving the roster. To proceed, type `Y`.
-Type `N` or `no` to cancel; `yes` also confirms. Responses are case-insensitive; any other command also cancels the pending clear.
-An empty or invalid submission also cancels it, so a later `Y` is not treated as a confirmation; run `clear` again
-if you still want to clear the roster.
+Type `N` or `no` to cancel; `yes` also confirms. Responses are case-insensitive; any other command, including one
+that fails, cancels the pending clear. Pressing Enter on an empty command box keeps the confirmation open and shows
+the warning again. If you type `Y` or `N` when no clear is pending, TrackFlow reports
+`No clear is waiting for confirmation. Type clear first, then Y to confirm.` instead of an unknown command.
 
 **Confirmed deletion is permanent:** `Y` saves an empty roster with no undo. Close the app
 and back up `data/trackflow.json` in the JAR's home folder before clearing data you may need later. `delete` also saves
@@ -544,7 +545,10 @@ and temporary save files stay beside the roster. When running unpacked classes f
 working directory instead.
 
 If no roster file exists there, TrackFlow starts with sample athletes and creates the file after the first
-successful command that changes roster data. An intentionally saved empty roster remains empty on restart.
+successful command that changes roster data. An intentionally saved empty roster remains empty on restart, and a
+file that exists but is empty (or contains only whitespace) also loads as an empty roster rather than being treated
+as unreadable. When editing the file by hand, a blank age category loads as `Open`, and spaces around an address
+are removed on loading.
 
 If an older version saved your roster in another launch folder, close TrackFlow and back up both locations before
 copying that folder's `data/trackflow.json` into the JAR's `data` folder. Copy `preferences.json` too if you want to

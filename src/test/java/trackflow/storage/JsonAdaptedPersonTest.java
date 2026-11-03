@@ -33,7 +33,7 @@ import trackflow.testutil.PersonBuilder;
 public class JsonAdaptedPersonTest {
     private static final String INVALID_NAME = "R@chel";
     private static final String INVALID_PHONE = "911a";
-    private static final String INVALID_ADDRESS = " ";
+    private static final String INVALID_ADDRESS = "123 Main\nStreet"; // line breaks are never allowed
     private static final String INVALID_EMAIL = "example.com";
     private static final String INVALID_TAG = "#friend";
 
@@ -76,16 +76,24 @@ public class JsonAdaptedPersonTest {
         assertEquals(athlete, new JsonAdaptedPerson(athlete).toModelType());
     }
 
-    // EP: invalid age category (empty string and unsupported category)
+    // EP: blank age category in a hand-edited file (empty and whitespace-only) defaults to Open like a missing one
     @Test
-    public void toModelType_invalidCategory_throwsIllegalValueException() {
+    public void toModelType_blankCategory_defaultsToOpen() throws Exception {
         for (String category : new String[] {
             "", // Boundary value
-            "Under 15"}) {
+            "   "}) {
             JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL,
                     VALID_ADDRESS, VALID_REMARK, VALID_TAGS, category);
-            assertThrows(IllegalValueException.class, AgeCategory.MESSAGE_CONSTRAINTS, person::toModelType);
+            assertEquals(BENSON, person.toModelType());
         }
+    }
+
+    // EP: unsupported age category
+    @Test
+    public void toModelType_invalidCategory_throwsIllegalValueException() {
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                VALID_ADDRESS, VALID_REMARK, VALID_TAGS, "Under 15");
+        assertThrows(IllegalValueException.class, AgeCategory.MESSAGE_CONSTRAINTS, person::toModelType);
     }
 
     // EP: invalid name containing invalid characters
@@ -172,7 +180,7 @@ public class JsonAdaptedPersonTest {
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
 
-    // EP: invalid address containing whitespace only
+    // EP: invalid address containing a line break
     @Test
     public void toModelType_invalidAddress_throwsIllegalValueException() {
         JsonAdaptedPerson person =
@@ -180,6 +188,20 @@ public class JsonAdaptedPersonTest {
                         VALID_REMARK, VALID_TAGS);
         String expectedMessage = Address.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
+    }
+
+    // EP: surrounding whitespace in a hand-edited address is trimmed on loading instead of rejecting the file
+    @Test
+    public void toModelType_paddedAddress_trimmedOnLoad() throws Exception {
+        JsonAdaptedPerson person =
+                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, " \t" + VALID_ADDRESS + " ",
+                        VALID_REMARK, VALID_TAGS);
+        assertEquals(VALID_ADDRESS, person.toModelType().getAddress().value);
+
+        // a whitespace-only address loads as no address, like a missing one
+        JsonAdaptedPerson blank = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, " ", // Boundary value
+                VALID_REMARK, VALID_TAGS);
+        assertEquals("", blank.toModelType().getAddress().value);
     }
 
     // EP: null address field defaults to empty address

@@ -29,6 +29,9 @@ import trackflow.storage.Storage;
 public class LogicManager implements Logic {
     public static final String FILE_OPS_ERROR_FORMAT = "Could not save data due to the following error: %s";
 
+    public static final String MESSAGE_CLEAR_NOT_PENDING =
+            "No clear is waiting for confirmation. Type clear first, then Y to confirm.";
+
     public static final String FILE_OPS_PERMISSION_ERROR_FORMAT =
             "Could not save data to file %s due to insufficient permissions to write to the file or the folder.";
 
@@ -60,10 +63,19 @@ public class LogicManager implements Logic {
         boolean wasClearPending = clearPending;
         clearPending = false;
         String confirmation = commandText == null ? "" : CommandWhitespace.strip(commandText);
-        if (wasClearPending && (confirmation.equalsIgnoreCase("n") || confirmation.equalsIgnoreCase("no"))) {
+        boolean declined = confirmation.equalsIgnoreCase("n") || confirmation.equalsIgnoreCase("no");
+        boolean confirmed = confirmation.equalsIgnoreCase("y") || confirmation.equalsIgnoreCase("yes");
+        if (wasClearPending && declined) {
             return new CommandResult("Clear cancelled. No athletes were deleted.");
         }
-        boolean confirmed = confirmation.equalsIgnoreCase("y") || confirmation.equalsIgnoreCase("yes");
+        if (wasClearPending && commandText != null && confirmation.isEmpty()) {
+            // An accidental empty Enter keeps the confirmation open instead of silently dropping it.
+            clearPending = true;
+            return CommandResult.warning(ClearCommand.MESSAGE_CONFIRMATION);
+        }
+        if (!wasClearPending && (confirmed || declined)) {
+            throw new ParseException(MESSAGE_CLEAR_NOT_PENDING);
+        }
         Command command = wasClearPending && confirmed
                 ? new ClearCommand(true) : trackFlowParser.parseCommand(commandText);
         clearPending = command instanceof ClearCommand && !command.changesRoster();

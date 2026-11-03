@@ -97,7 +97,7 @@ public class ReleaseRegressionTest {
     }
 
     @Test
-    public void clear_acceptsWords_butEmptyOrInvalidSubmissionsCannotLeaveConfirmationArmed() throws Exception {
+    public void clear_acceptsWords_blankSubmissionsKeepConfirmationArmedButFailuresCancelIt() throws Exception {
         JsonRosterStorage storage = new JsonRosterStorage(folder.resolve("roster.json"));
         Model model = new ModelManager();
         LogicManager logic = createLogic(model, storage);
@@ -105,9 +105,10 @@ public class ReleaseRegressionTest {
         logic.execute("clear");
         logic.execute(" NO ");
         assertEquals(1, model.getRoster().getPersonList().size());
-        for (String input : List.of("", " ", "invalid")) {
+        for (String input : List.of("", " ")) {
             logic.execute("clear");
-            assertThrows(ParseException.class, () -> logic.execute(input));
+            assertTrue(logic.execute(input).isWarning()); // the warning is shown again and the clear stays armed
+            assertThrows(ParseException.class, () -> logic.execute("invalid")); // a failing command disarms it
             assertThrows(ParseException.class, () -> logic.execute("yes"));
             assertEquals(1, storage.readRoster().orElseThrow().getPersonList().size());
         }
