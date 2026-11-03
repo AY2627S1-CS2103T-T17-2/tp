@@ -5,6 +5,9 @@ import static java.util.Objects.requireNonNull;
 import static trackflow.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.Comparator;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -135,6 +138,21 @@ public class ModelManager implements Model {
     public void updateSortedPersonList(Comparator<Person> comparator) {
         personListComparator = comparator;
         sortedPersons.setComparator(comparator);
+    }
+
+    @Override
+    public void keepTiesInDisplayedOrder(List<Person> displayedOrder) {
+        requireNonNull(displayedOrder);
+        if (personListComparator == null) {
+            return;
+        }
+        Map<Person, Integer> displayedPositions = new IdentityHashMap<>();
+        for (int index = 0; index < displayedOrder.size(); index++) {
+            displayedPositions.put(displayedOrder.get(index), index);
+        }
+        // Only the displayed list uses this tie breaker; the chosen comparator is still reported unchanged
+        sortedPersons.setComparator(personListComparator.thenComparingInt(
+                person -> displayedPositions.getOrDefault(person, Integer.MAX_VALUE)));
     }
 
     @Override

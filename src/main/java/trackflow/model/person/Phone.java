@@ -48,6 +48,9 @@ public class Phone {
     /** A non-empty bracketed note with balanced brackets, such as "(HP)" or "(65)". */
     private static final String NOTE_REGEX = "\\([^+()]++\\)";
 
+    /** A note for new values, which must also contain a non-space character: "(HP)" but not "( )". */
+    private static final String NONBLANK_NOTE_REGEX = "\\((?=[^+()]*[^+()\\s])[^+()]++\\)";
+
     /**
      * Retains the original grammar for saved numbers; new values use CURRENT_VALIDATION_PATTERN.
      * Possessive repetitions avoid excessive backtracking on long pasted values.
@@ -58,9 +61,9 @@ public class Phone {
     private static final Pattern VALIDATION_PATTERN = Pattern.compile(VALIDATION_REGEX);
 
     private static final Pattern CURRENT_VALIDATION_PATTERN = Pattern.compile(
-            "(?:" + NOTE_REGEX + " ?)*+(?:\\+?" + DIGIT_GROUP_REGEX
+            "(?:" + NONBLANK_NOTE_REGEX + " ?)*+(?:\\+?" + DIGIT_GROUP_REGEX
                     + "|" + COUNTRY_CODE_REGEX + " ?" + DIGIT_GROUP_REGEX + ")"
-                    + "(?: " + DIGIT_GROUP_REGEX + ")*+(?: ?" + NOTE_REGEX + ")*+");
+                    + "(?: " + DIGIT_GROUP_REGEX + ")*+(?: ?" + NONBLANK_NOTE_REGEX + ")*+");
 
     public final String value;
 

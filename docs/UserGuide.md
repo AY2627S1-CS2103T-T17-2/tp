@@ -420,7 +420,8 @@ Feedback:
 
 Examples:
 
-* `find ave` searches partial names and can return `Avery Tan`.
+* `find ave` searches every field for partial matches, so it returns `Avery Tan` and also athletes whose address
+  contains `Avenue`. Use `find n/ave` to search names only.
 * `find under` searches age categories such as `Under 14` and `Under 16`.
 * `find n/und` searches only names, so an athlete named `Underwood` can be found without matching age categories.
 * `find a/under 16` searches only age categories.
@@ -504,6 +505,8 @@ Format: `clear`, then `Y`
 
 `clear` displays a yellow warning without changing or saving the roster. To proceed, type `Y`.
 Type `N` or `no` to cancel; `yes` also confirms. Responses are case-insensitive; any other command also cancels the pending clear.
+An empty or invalid submission also cancels it, so a later `Y` is not treated as a confirmation; run `clear` again
+if you still want to clear the roster.
 
 **Confirmed deletion is permanent:** `Y` saves an empty roster with no undo. Close the app
 and back up `data/trackflow.json` in the JAR's home folder before clearing data you may need later. `delete` also saves

@@ -96,7 +96,8 @@ public class PhoneTest {
                 "(+65)91234567", "+65 9123 4567", "91234567(HP)", "(+65) 9123 4567 (HP) (Dad)")) {
             assertTrue(Phone.isValidNewPhone(phone), phone);
         }
-        for (String phone : List.of("9123 (HP) 4567", "(+65) (+65) 9123", "9123 4567 (+65)")) {
+        for (String phone : List.of("9123 (HP) 4567", "(+65) (+65) 9123", "9123 4567 (+65)",
+                "( ) 9123 4567", "9123 4567 ( )")) {
             assertTrue(Phone.isValidPhone(phone), phone);
             assertEquals(phone, new Phone(phone).value);
             assertFalse(Phone.isValidNewPhone(phone), phone);
