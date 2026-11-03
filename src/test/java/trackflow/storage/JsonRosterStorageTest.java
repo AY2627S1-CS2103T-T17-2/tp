@@ -69,6 +69,20 @@ public class JsonRosterStorageTest {
         // @@author -
     }
 
+    // EP: a file that exists but is empty or whitespace-only loads as an empty roster, not as unreadable data
+    @Test
+    public void readRoster_blankFile_returnsEmptyRoster() throws Exception {
+        Path filePath = testFolder.resolve("blank.json");
+        for (String content : List.of(
+                "", // Boundary value
+                " \n\t\n")) {
+            Files.writeString(filePath, content);
+            ReadOnlyRoster roster = new JsonRosterStorage(filePath).readRoster().orElseThrow();
+            assertEquals(0, roster.getPersonList().size()); // Boundary value
+            assertEquals(content, Files.readString(filePath));
+        }
+    }
+
     // EP: invalid file format (non-JSON content)
     @Test
     public void read_notJsonFormat_exceptionThrown() {
@@ -91,7 +105,6 @@ public class JsonRosterStorageTest {
     public void readRoster_malformedStructure_throwsDataLoadingException() throws Exception {
         Path filePath = testFolder.resolve("malformed.json");
         List<String> malformedRosters = List.of(
-                "", // Boundary value
                 "null",
                 "{}", // Boundary value
                 "{\"persons\":null}",

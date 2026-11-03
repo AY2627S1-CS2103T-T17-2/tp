@@ -162,6 +162,33 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_clearConfirmationSlips_keepsOrExplainsPendingClear() throws Exception {
+        logic.execute("add n/Avery Tan a/Open p/91234567 e/avery@example.com addr/Home");
+        Path rosterPath = temporaryFolder.resolve("roster.json");
+        String savedRoster = Files.readString(rosterPath);
+
+        // EP: an empty submission while a clear is pending re-shows the warning and keeps the clear pending
+        logic.execute("clear");
+        for (String blank : List.of("", "   ", " ")) { // Boundary value
+            CommandResult repeated = logic.execute(blank);
+            assertEquals(ClearCommand.MESSAGE_CONFIRMATION, repeated.getFeedbackToUser());
+            assertEquals(true, repeated.isWarning());
+            assertEquals(savedRoster, Files.readString(rosterPath));
+        }
+        assertEquals(true, logic.execute("y").isDataSaved());
+        assertEquals(0, model.getRoster().getPersonList().size()); // Boundary value
+
+        // EP: a failing command cancels the pending clear, and a later Y/N explains that nothing is pending
+        logic.execute("add n/Avery Tan a/Open p/91234567 e/avery@example.com addr/Home");
+        logic.execute("clear");
+        assertThrows(CommandException.class, () -> logic.execute("delete 99"));
+        for (String reply : List.of("y", "YES", "n", "No")) {
+            assertThrows(ParseException.class, LogicManager.MESSAGE_CLEAR_NOT_PENDING, () -> logic.execute(reply));
+        }
+        assertEquals(1, model.getRoster().getPersonList().size());
+    }
+
+    @Test
     public void execute_rosterChangingCommand_reportsDataSaved() throws Exception {
         // EP: roster-mutating command sets isDataSaved flag to true
         CommandResult result = logic.execute(

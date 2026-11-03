@@ -118,6 +118,9 @@ public class ConfirmationModelTest {
                 case "list":
                     pending = false;
                     return false;
+                case "":
+                    // An empty submission re-shows a pending warning; otherwise it is an empty-command error
+                    return !pending;
                 default:
                     pending = false;
                     return true;
