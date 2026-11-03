@@ -21,6 +21,7 @@ import trackflow.model.ModelManager;
 import trackflow.model.UserPrefs;
 import trackflow.model.person.Person;
 import trackflow.model.person.Phone;
+import trackflow.model.util.SampleDataUtil;
 import trackflow.storage.JsonRosterStorage;
 import trackflow.storage.JsonUserPrefsStorage;
 import trackflow.storage.StorageManager;
@@ -150,5 +151,30 @@ public class ReleaseRegressionTest {
         assertEquals("w/ Coach", saved.getRemark().value);
         assertEquals(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX,
                 assertThrows(ParseException.class, () -> logic.execute("delete 0")).getMessage());
+    }
+
+    @Test
+    public void rosterChange_afterTwoSorts_keepsTiedAthletesInDisplayedOrder() throws Exception {
+        JsonRosterStorage storage = new JsonRosterStorage(folder.resolve("roster.json"));
+        LogicManager logic = createLogic(new ModelManager(SampleDataUtil.getSampleRoster(), new UserPrefs()),
+                storage);
+        logic.execute("sort name desc");
+        logic.execute("sort age");
+        List<String> shownBefore = getDisplayedNames(logic);
+        assertEquals(List.of("Daniel Lim", "Avery Tan"), shownBefore.subList(0, 2));
+
+        // Changing an untied athlete must not reorder the tied Under 14 athletes above it
+        logic.execute("remark 9 r/note");
+        logic.execute("tag 9 t/Relay");
+        logic.execute("add n/Zed Ong a/Open p/81110000 e/zed@example.com addr/Home");
+        assertEquals(shownBefore.subList(0, 2), getDisplayedNames(logic).subList(0, 2));
+
+        logic.execute("delete 1");
+        assertFalse(storage.readRoster().orElseThrow().getPersonList().stream()
+                .anyMatch(person -> person.getName().fullName.equals("Daniel Lim")));
+    }
+
+    private static List<String> getDisplayedNames(LogicManager logic) {
+        return logic.getFilteredPersonList().stream().map(person -> person.getName().fullName).toList();
     }
 }

@@ -85,6 +85,8 @@ public class LogicManager implements Logic {
 
         model.setRoster(stagedModel.getRoster());
         model.updateFilteredPersonList(stagedModel.getPersonListPredicate());
+        // Re-sorting the published roster would otherwise break ties by saved order and move untouched athletes
+        model.keepTiesInDisplayedOrder(stagedModel.getFilteredPersonList());
         return commandResult.withDataSaved();
     }
 

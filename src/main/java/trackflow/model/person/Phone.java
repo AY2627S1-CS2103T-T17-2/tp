@@ -50,6 +50,13 @@ public class Phone {
     /** A note written before the number: any bracket group that is not a bracketed code. */
     private static final String LEADING_NOTE_REGEX = "\\((?!\\+?\\d++\\))[^+()]++\\)";
 
+    /** A note for new values, which must also contain a non-space character: "(HP)" but not "( )". */
+    private static final String NONBLANK_NOTE_REGEX = "\\((?=[^+()]*[^+()\\s])[^+()]++\\)";
+
+    /** A note before the number in new values: non-blank and not a bracketed code. */
+    private static final String LEADING_NONBLANK_NOTE_REGEX =
+            "\\((?!\\+?\\d++\\))(?=[^+()]*[^+()\\s])[^+()]++\\)";
+
     /**
      * Notes before the number, which contribute no digits.
      */
@@ -92,9 +99,9 @@ public class Phone {
      * No bracketed text may split the digit groups.
      */
     private static final Pattern CURRENT_VALIDATION_PATTERN = Pattern.compile(
-            "(?:" + LEADING_NOTE_REGEX + " ?)*+(?:\\+?" + DIGIT_GROUP_REGEX
+            "(?:" + LEADING_NONBLANK_NOTE_REGEX + " ?)*+(?:\\+?" + DIGIT_GROUP_REGEX
                     + "|" + CODE_REGEX + " ?" + DIGIT_GROUP_REGEX + ")"
-                    + "(?: " + DIGIT_GROUP_REGEX + ")*+(?: ?" + NOTE_REGEX + ")*+");
+                    + "(?: " + DIGIT_GROUP_REGEX + ")*+(?: ?" + NONBLANK_NOTE_REGEX + ")*+");
 
     public final String value;
 

@@ -100,7 +100,8 @@ public class PhoneTest {
         assertEquals(Phone.MESSAGE_CONSTRAINTS, Phone.getNewPhoneValidationError("(91234567)"));
         assertEquals(Phone.MESSAGE_LENGTH, Phone.getNewPhoneValidationError("(212) 1"));
         assertEquals(Phone.MESSAGE_CONSTRAINTS, Phone.getNewPhoneValidationError("(212) (HP) 1234"));
-        for (String phone : List.of("9123 (HP) 4567", "(+65) (+65) 9123", "9123 4567 (+65)")) {
+        for (String phone : List.of("9123 (HP) 4567", "(+65) (+65) 9123", "9123 4567 (+65)",
+                "( ) 9123 4567", "9123 4567 ( )")) {
             assertTrue(Phone.isValidPhone(phone), phone);
             assertEquals(phone, new Phone(phone).value);
             assertFalse(Phone.isValidNewPhone(phone), phone);

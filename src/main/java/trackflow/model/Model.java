@@ -2,6 +2,7 @@
 package trackflow.model;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
@@ -102,4 +103,11 @@ public interface Model {
      * Does not reorder the stored roster. A {@code null} comparator restores saved roster order.
      */
     void updateSortedPersonList(Comparator<Person> comparator);
+
+    /**
+     * Keeps athletes that the current comparator ranks equally in the order of {@code displayedOrder}, without
+     * changing the comparator reported by {@link #getPersonListComparator()} or the stored roster order.
+     */
+    default void keepTiesInDisplayedOrder(List<Person> displayedOrder) {
+    }
 }
