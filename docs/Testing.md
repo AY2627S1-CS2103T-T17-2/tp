@@ -103,8 +103,8 @@ Name-sort regressions in `SortCommandTest` and `LogicManagerTest` cover repeated
 keys, ascending and descending order, and subsequent adds/edits. A fresh JSON read verifies that comparison-key
 normalization does not rewrite name text or saved roster order.
 
-Phone-sort regressions use the shared significant-digit rule: bracketed notes are ignored and `(+65)` country codes
-are retained. They cover both directions, numeric notes, formatting, zero-valued and large numbers, add/edit updates,
+Phone-sort regressions use the shared significant-digit rule: bracketed notes after the number are ignored and
+bracketed codes before it, such as `(+65)` or `(212)`, are retained. They cover both directions, numeric notes, formatting, zero-valued and large numbers, add/edit updates,
 and unchanged phone text after JSON reload.
 
 `ReleaseRegressionTest` drives the real parser and JSON storage. Older saved phone lengths remain readable, while

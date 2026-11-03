@@ -92,10 +92,14 @@ public class PhoneTest {
 
     @Test
     public void isValidNewPhone_currentFormatsAcceptedLegacyFormatsRemainReadable() {
-        for (String phone : List.of("911", "(65) 9123-4567", "(HP) 9123 4567",
+        for (String phone : List.of("911", "(65) 9123-4567", "(HP) 9123 4567", "(212) 555 0199",
                 "(+65)91234567", "+65 9123 4567", "91234567(HP)", "(+65) 9123 4567 (HP) (Dad)")) {
             assertTrue(Phone.isValidNewPhone(phone), phone);
         }
+        // EP: a bracketed code before the number needs a subscriber number after it, and counts as a code
+        assertEquals(Phone.MESSAGE_CONSTRAINTS, Phone.getNewPhoneValidationError("(91234567)"));
+        assertEquals(Phone.MESSAGE_LENGTH, Phone.getNewPhoneValidationError("(212) 1"));
+        assertEquals(Phone.MESSAGE_CONSTRAINTS, Phone.getNewPhoneValidationError("(212) (HP) 1234"));
         for (String phone : List.of("9123 (HP) 4567", "(+65) (+65) 9123", "9123 4567 (+65)",
                 "( ) 9123 4567", "9123 4567 ( )")) {
             assertTrue(Phone.isValidPhone(phone), phone);
@@ -129,6 +133,17 @@ public class PhoneTest {
 
         // EP: country code counted in significant digits
         assertEquals("6591234567", new Phone("(+65) 9123 4567").getSignificantDigits());
+
+        // EP: bracketed digits before the number are a code; the same bracket after the number is a note
+        assertEquals("2121234", new Phone("(212) 1234").getSignificantDigits());
+        assertEquals("1234", new Phone("1234 (212)").getSignificantDigits());
+        assertEquals("6591234567", new Phone("(65) 9123 4567").getSignificantDigits());
+        assertEquals("6591234567", new Phone("(65) 9123 4567").getComparisonKey());
+        assertEquals("2121234567", new Phone("(212) 123-4567").getComparisonKey());
+
+        // EP: a bracketed note without a plain digit sequence before the number contributes no digits
+        assertEquals("91234567", new Phone("(HP) 9123 4567").getSignificantDigits());
+        assertEquals("91234567", new Phone("(Mum 2) 9123 4567").getSignificantDigits());
         for (String phone : List.of("91234567", "9123-4567 (HP)", "+65 9123 4567",
                 "(+65)91234567", "65 9123 4567")) {
             assertEquals("6591234567", new Phone(phone).getComparisonKey());
@@ -177,6 +192,11 @@ public class PhoneTest {
 
         // EP: bracketed country code included in significant digits comparison
         assertTrue(new Phone("(+65) 9123 4567").equals(new Phone("6591234567")));
+        assertTrue(new Phone("(65) 9123 4567").equals(new Phone("6591234567")));
+
+        // EP: different bracketed area codes before the same subscriber number are different numbers
+        assertFalse(new Phone("(555) 123-4567").equals(new Phone("(212) 123-4567")));
+        assertFalse(new Phone("(212) 123-4567").equals(new Phone("123-4567")));
 
         // EP: different digits once country code is included
         assertFalse(new Phone("+65 9123 4567").equals(new Phone("9123 4567")));

@@ -173,15 +173,16 @@ public class SortCommandTest {
         }
     }
 
-    // EP: sort phone with numeric note and zero digits distinguishes note from country code
+    // EP: a bracketed code before the number counts towards its digits, while the same digits after it are a note
     @Test
-    public void execute_numericNoteWithZeroNumber_doesNotTreatNoteAsCountryCode() {
-        Person zeroNumber = new PersonBuilder(AMY).withPhone("(1) 000").build();
+    public void execute_bracketedDigits_countsLeadingCodeIgnoresTrailingNote() {
+        Person leadingCode = new PersonBuilder(AMY).withPhone("(1) 000").build(); // sorts as 1000
+        Person trailingNote = new PersonBuilder(MIA).withPhone("000 (1)").build(); // sorts as 0
         model = new ModelManager(new AthleteRosterBuilder().withPerson(ZOE)
-                .withPerson(zeroNumber).build(), new UserPrefs());
+                .withPerson(leadingCode).withPerson(trailingNote).build(), new UserPrefs());
 
-        assertSortSuccess(PHONE, ASCENDING, List.of(zeroNumber, ZOE));
-        assertSortSuccess(PHONE, DESCENDING, List.of(ZOE, zeroNumber));
+        assertSortSuccess(PHONE, ASCENDING, List.of(trailingNote, ZOE, leadingCode));
+        assertSortSuccess(PHONE, DESCENDING, List.of(leadingCode, ZOE, trailingNote));
     }
 
     // EP: sort by email in ascending and descending order (case-insensitive)

@@ -204,11 +204,12 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
 * New phone numbers must contain 3–15 significant digits in total, with at least three digits after any country
   code. The subscriber number cannot be all zeroes. Write digit groups separated by spaces or
   single hyphens (for example, `9123 4567` or `9123-4567`). An unbracketed `+` is allowed only at the start.
-  Brackets must be balanced and non-empty. A bracketed country code such as `(+65)` is part of the number, but
-  other bracketed text is treated as a note and ignored, whether it is letters like `(HP)` or digits like `(5)`.
-  Only one country code is allowed, at the start, and a note goes before or after the number, not inside it
-  (`9123 (HP) 4567` is rejected).
-  Examples: `+65 9123 4567`, `(+65) 9123 4567`, or `9123 4567 (HP)`.
+  Brackets must be balanced and non-empty. Bracketed text is read by position: a bracketed code written before
+  the number, such as `(+65)` or `(212)`, is part of the number (`(212) 1234` has the digits `2121234`), while
+  bracketed text written after the number, such as `(HP)` or `(ext 5)`, is a note and is ignored. A bracket that
+  is not just digits, such as `(HP)`, may also go before the number and is ignored there too. Only one country or
+  area code is allowed, at the start, and no bracketed text may split the digits (`9123 (HP) 4567` is rejected).
+  Examples: `+65 9123 4567`, `(+65) 9123 4567`, `(212) 555 0199`, or `9123 4567 (HP)`.
   Separate an unbracketed country code from the number with a space or hyphen; the compact Singapore form
   `+6591234567` is also accepted. Write extensions as bracketed notes, e.g. `9123 4567 (ext 123)`; bare
   `ext 123` and notes splitting the digits are unsupported. Older saved phone formats and lengths remain readable.
@@ -217,8 +218,9 @@ Format: `add n/NAME a/AGE_CATEGORY p/PHONE e/EMAIL addr/ADDRESS`
   hyphens; the final label must have at least two characters. Spaces are not allowed.
 * Add and edit reject a duplicate when the normalized name matches and either the phone or email matches, regardless
   of age category. Name comparisons ignore case and repeated spaces; email comparisons ignore case.
-  Phone comparisons ignore formatting and notes. Unprefixed eight-digit numbers match their `+65`, `(+65)` and
-  `65` forms; other explicit country codes remain distinct. Display text and sorting are unchanged.
+  Phone comparisons ignore formatting and notes but keep a bracketed code written before the number, so
+  `(212) 123-4567` and `(555) 123-4567` are different numbers. Unprefixed eight-digit numbers match their `+65`,
+  `(+65)`, `(65)` and `65` forms; other explicit country codes remain distinct. Display text and sorting are unchanged.
   Sharing only a name, or sharing a phone or email with a different name, is allowed with a possible-duplicate
   warning. Each matching athlete is listed separately with their name, age category, phone, email, and matching fields.
   Both checks search the full roster, including hidden athletes. On edit, warnings are shown only when the
@@ -426,7 +428,7 @@ Examples:
 * `find n/und` searches only names, so an athlete named `Underwood` can be found without matching age categories.
 * `find a/under 16` searches only age categories.
 * `find 9123` searches partial phone numbers.
-* `find p/9123` searches only phone numbers, matched by digits — so formatting and bracketed notes are ignored (`find p/91234567` finds `9123 4567`). A broad `find` also matches the displayed phone text, so `find HP` finds a phone noted `(HP)`.
+* `find p/9123` searches only phone numbers, matched by digits — so formatting and bracketed notes are ignored (`find p/91234567` finds `9123 4567`). A bracketed code before the number counts, so `find p/212` finds `(212) 123-4567`. A broad `find` also matches the displayed phone text, so `find HP` finds a phone noted `(HP)`.
 * `find tan@exam` searches partial email addresses.
 * `find r/injured` searches only remarks.
 * `find t/hurdles` searches only events, returning athletes with an event such as `Hurdles` or `110m-Hurdles`.
@@ -445,8 +447,9 @@ Available fields:
   `Lee Ann` sorts before `Lee  Bob` (two spaces). Displayed and saved name text is unchanged; names differing only
   in case or repeated spaces compare equally for sorting.
 * `age` sorts competition categories in this order: `Under 14`, `Under 16`, `Under 18`, `Under 20`, `Open`.
-* `phone` sorts phone numbers numerically by their significant digits. Formatting and bracketed notes such as
-  `(HP)` or `(5)` are ignored, while a bracketed country code such as `(+65)` counts as part of the number.
+* `phone` sorts phone numbers numerically by their significant digits. Formatting and bracketed notes after the
+  number, such as `(HP)` or `(5)`, are ignored, while a bracketed code before the number, such as `(+65)` or
+  `(212)`, counts as part of it.
   For example, `200 (5)` sorts before `300`, and `(+65) 200` sorts after both. Displayed and saved phone text is unchanged.
 * `email` sorts email addresses alphabetically without considering letter case.
 * `address` sorts addresses alphabetically without considering letter case. Empty addresses appear first in ascending

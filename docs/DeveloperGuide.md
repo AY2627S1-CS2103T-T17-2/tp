@@ -294,7 +294,8 @@ A missing or null `persons` list, null athlete/tag entries, invalid field values
 `DataLoadingException` through `JsonUtil`. An absent file instead returns `Optional.empty()`.
 
 New command phone values use `Phone.getNewPhoneValidationError`: 3–15 significant digits in total, at least
-three subscriber digits after a country code, and a subscriber number that is not entirely zeroes. Formatting
+three subscriber digits after a leading country or area code such as `+65`, `(+65)` or `(212)`, and a subscriber
+number that is not entirely zeroes. Formatting
 errors, digit-count errors and all-zero values receive distinct messages. Stored values retain the older grammar
 and length rules. Names remain ASCII-only; broader preferred-name support is recorded in US37.
 
@@ -524,8 +525,9 @@ saved order. Sorting and filtering are session-only view changes and are not per
 
 Text fields are compared without considering letter case. Name comparison also collapses repeated ordinary spaces
 in the comparison key without rewriting the displayed or saved name. Phone sorting converts
-`Phone.getSignificantDigits()` to an arbitrary-precision numeric value. The shared key includes a bracketed country
-code such as `(+65)` and excludes other bracketed notes, including digits in `(5)` or `(Office 9)`. Displayed and
+`Phone.getSignificantDigits()` to an arbitrary-precision numeric value. The shared key includes a bracketed code
+written before the number, such as `(+65)` or `(212)`, and excludes bracketed notes written after it, including
+digits in `(5)` or `(Office 9)`. Displayed and
 saved text is unchanged, and large numeric values do not overflow. Duplicate identity uses `Phone.getComparisonKey()`
 to additionally treat unprefixed eight-digit numbers as Singapore numbers; value equality retains significant digits.
 Age categories use the competition order
@@ -923,7 +925,7 @@ These are product requirements and acceptance targets, not claims about the curr
 | Guardian | A parent or other responsible adult whose future contact record may be linked to one or more athletes. |
 | Local persistence | Automatically saving roster changes on the coach's computer and loading them in a later application session. |
 | Implemented | A feature available in the current v1.6 code. Future features are identified separately. |
-| Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone value equality, sorting and digit searches use significant digits (ignoring formatting and notes but retaining country codes). Duplicate detection additionally treats unprefixed eight-digit numbers as Singapore numbers, equivalent to their `+65`, `(+65)` and `65` forms. Display formatting may be retained. |
+| Normalized field | A value prepared for comparison: surrounding whitespace is removed; name and age-category internal spaces are collapsed; name, category, and email comparisons ignore letter case; phone value equality, sorting and digit searches use significant digits (ignoring formatting and notes after the number but retaining a bracketed code before it, such as `(+65)` or `(212)`). Duplicate detection additionally treats unprefixed eight-digit numbers as Singapore numbers, equivalent to their `+65`, `(+65)` and `65` forms. Display formatting may be retained. |
 | Participation log | A future record of an athlete's involvement in training or competition. |
 | Relay squad / event group | A future grouping of athletes for a relay team or a particular athletics event. |
 | Unrecovered data | Previously saved roster data that TrackFlow could not load, preserved in a separate `.bak` file before starting an empty roster. If preservation fails, startup stops. |
