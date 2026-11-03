@@ -16,10 +16,12 @@ import trackflow.logic.commands.exceptions.CommandException;
 import trackflow.logic.parser.CommandWhitespace;
 import trackflow.logic.parser.TrackFlowParser;
 import trackflow.logic.parser.exceptions.ParseException;
+import trackflow.model.AthleteRoster;
 import trackflow.model.Model;
 import trackflow.model.ModelManager;
 import trackflow.model.ReadOnlyRoster;
 import trackflow.model.person.Person;
+import trackflow.model.person.exceptions.DuplicatePersonException;
 import trackflow.storage.Storage;
 
 /**
@@ -28,6 +30,9 @@ import trackflow.storage.Storage;
  */
 public class LogicManager implements Logic {
     public static final String FILE_OPS_ERROR_FORMAT = "Could not save data due to the following error: %s";
+
+    public static final String MESSAGE_UNSAVEABLE_DUPLICATE =
+            "This change was not saved: it would store two athletes with the same name and phone digits.";
 
     public static final String MESSAGE_CLEAR_NOT_PENDING =
             "No clear is waiting for confirmation. Type clear first, then Y to confirm.";
@@ -85,6 +90,13 @@ public class LogicManager implements Logic {
 
         Model stagedModel = createStagedModel();
         CommandResult commandResult = command.execute(stagedModel);
+
+        try {
+            // Copying re-checks the stored-roster duplicate rule, so nothing that would fail to load is saved.
+            new AthleteRoster(stagedModel.getRoster());
+        } catch (DuplicatePersonException e) {
+            throw new CommandException(MESSAGE_UNSAVEABLE_DUPLICATE, e);
+        }
 
         try {
             storage.saveRoster(stagedModel.getRoster());

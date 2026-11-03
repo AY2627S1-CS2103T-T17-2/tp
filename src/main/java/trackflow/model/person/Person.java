@@ -139,12 +139,16 @@ public class Person {
     }
 
     /**
-     * Returns true if either the phone's comparison key or the email matches those of {@code otherPerson}.
-     * Email comparison ignores case and surrounding whitespace. Names are not compared; null returns false.
+     * Returns true if the phone's comparison key, the phone's significant digits, or the email matches those of
+     * {@code otherPerson}. Email comparison ignores case and surrounding whitespace. Names are not compared;
+     * null returns false.
      */
     public boolean hasSameContactDetails(Person otherPerson) {
+        // Phones match by comparison key or by significant digits. The second check keeps this rule a superset of
+        // isSameStoredPerson, so a record that is accepted here can never make the saved roster unreadable.
         return otherPerson != null
                 && (phone.getComparisonKey().equals(otherPerson.phone.getComparisonKey())
+                || phone.equals(otherPerson.phone)
                 || email.value.trim().equalsIgnoreCase(otherPerson.email.value.trim()));
     }
 

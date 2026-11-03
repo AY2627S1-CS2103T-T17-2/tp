@@ -189,6 +189,25 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_addSameNameAndDigitsWithBracketedCode_rejectedAndRosterStillLoads() throws Exception {
+        // EP: a pair the stored-roster rule treats as duplicates (same name, same significant digits) must be
+        // rejected on entry as well; otherwise the pair is saved and the file no longer loads on the next launch
+        logic.execute("add n/Avery Tan a/Open p/9123 4567 e/avery@example.com addr/Home");
+        Path rosterPath = temporaryFolder.resolve("roster.json");
+        String savedRoster = Files.readString(rosterPath);
+
+        for (String phone : List.of("(9123) 4567", "+9123 4567", "(+9123) 4567", "91234567")) { // Boundary value
+            assertThrows(CommandException.class, String.format(AddCommand.MESSAGE_DUPLICATE_PERSON, "Avery Tan"), ()
+                    -> logic.execute("add n/Avery Tan a/Open p/" + phone + " e/other@example.com addr/Home"));
+            assertEquals(1, model.getRoster().getPersonList().size());
+            assertEquals(savedRoster, Files.readString(rosterPath));
+        }
+        assertEquals(1, new JsonRosterStorage(rosterPath).readRoster().orElseThrow().getPersonList().size());
+        assertEquals(1, new ModelManager(new JsonRosterStorage(rosterPath).readRoster().orElseThrow(),
+                new UserPrefs()).getRoster().getPersonList().size());
+    }
+
+    @Test
     public void execute_rosterChangingCommand_reportsDataSaved() throws Exception {
         // EP: roster-mutating command sets isDataSaved flag to true
         CommandResult result = logic.execute(
